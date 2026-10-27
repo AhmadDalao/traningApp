@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateScheduleEntryStatusRequest;
 use App\Http\Requests\UpdateWorkoutWeightsRequest;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
+use App\Services\WorkoutCalorieEstimator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -87,18 +88,35 @@ class ScheduleEntryController extends Controller
         return Inertia::render('ScheduleEntries/Form', ['entry' => $scheduleEntry, 'plans' => $this->plans($request)]);
     }
 
-    public function update(UpdateScheduleEntryRequest $request, ScheduleEntry $scheduleEntry)
+    public function update(UpdateScheduleEntryRequest $request, ScheduleEntry $scheduleEntry, WorkoutCalorieEstimator $estimator)
     {
-        DB::transaction(function () use ($request, $scheduleEntry) {
+        DB::transaction(function () use ($request, $scheduleEntry, $estimator) {
             $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
             if ($request->boolean('details_only')) {
                 if ($entry->status !== 'completed' || $entry->entry_type !== 'training') {
                     throw ValidationException::withMessages(['details' => 'Workout details can only be recorded for a completed training session.']);
                 }
                 $data = $request->validated();
-                $entry->update(['duration_minutes' => $data['duration_minutes'] ?? null, 'calories_burned' => $data['calories_burned'] ?? null, 'calories_source' => isset($data['calories_burned']) ? 'manual' : null]);
+                $reported = array_key_exists('calories_burned', $data) ? $data['calories_burned'] : $entry->calories_burned;
+                $entry->fill([
+                    'duration_minutes' => array_key_exists('duration_minutes', $data) ? $data['duration_minutes'] : $entry->duration_minutes,
+                    'intensity' => $data['intensity'] ?? $entry->intensity ?? 'moderate',
+                    'calories_burned' => $reported,
+                    'calories_source' => $reported !== null ? ($data['calories_source'] ?? $entry->calories_source ?? 'manual') : null,
+                ]);
+                if ($entry->estimated_calories === null || $entry->isDirty(['duration_minutes', 'intensity'])) {
+                    $entry->estimated_calories = $estimator->forSession($entry);
+                }
+                $entry->save();
             } else {
-                $entry->update($this->entryData($request, $entry));
+                $entry->fill($this->entryData($request, $entry));
+                if ($entry->isDirty(['entry_type', 'focus_area', 'scheduled_date'])) {
+                    $entry->estimated_calories = $estimator->forSession($entry);
+                    if ($entry->estimated_calories !== null) {
+                        $entry->intensity ??= 'moderate';
+                    }
+                }
+                $entry->save();
             }
         });
 
@@ -109,12 +127,12 @@ class ScheduleEntryController extends Controller
         return to_route('schedule-entries.show', $scheduleEntry)->with('success', 'Session updated.');
     }
 
-    public function status(UpdateScheduleEntryStatusRequest $request, ScheduleEntry $scheduleEntry)
+    public function status(UpdateScheduleEntryStatusRequest $request, ScheduleEntry $scheduleEntry, WorkoutCalorieEstimator $estimator)
     {
         $paths = [];
         $status = $request->validated('status');
         try {
-            DB::transaction(function () use ($request, $scheduleEntry, $status, &$paths) {
+            DB::transaction(function () use ($request, $scheduleEntry, $status, $estimator, &$paths) {
                 $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
                 if ($status === 'completed') {
                     if ($entry->workout_snapshot === null) {
@@ -127,6 +145,12 @@ class ScheduleEntryController extends Controller
                     $entry->completed_at = null;
                 }
                 $entry->status = $status;
+                if ($status !== 'completed' || $entry->entry_type !== 'training' || $entry->estimated_calories === null) {
+                    $entry->estimated_calories = $estimator->forSession($entry);
+                    if ($entry->estimated_calories !== null) {
+                        $entry->intensity ??= 'moderate';
+                    }
+                }
                 $entry->save();
             });
         } catch (\Throwable $error) {

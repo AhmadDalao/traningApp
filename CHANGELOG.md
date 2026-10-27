@@ -1,5 +1,45 @@
 # Changelog
 
+## v1.1.1 — 2026-10-27
+
+### Added
+
+- Up to two ordered training goals, labelled Primary and Secondary, with a simple priority swap and an inline selection limit.
+- Combined-goal recommendations and explicit reasons based on selected goals, experience, equipment, available days, and session duration.
+- A four-day bodyweight strength/conditioning variation of the existing Full Body preset; the recommendation library remains six presets.
+- Automatic session-level calorie estimates for completed training workouts with an actual duration and usable body weight.
+- Light, Moderate, and Vigorous intensity; historical weight selection on or before the session date.
+- Separate estimated and reported calorie display, plus Wearable, Exercise machine, and Manual entry sources.
+
+### Changed
+
+- `training_goals` is the preferred ordered JSON field. Legacy `training_goal` is retained and synchronized with Primary on profile/onboarding saves.
+- The manual calorie field is labelled **Reported Calories**; the existing `calories_burned` column remains intact.
+- Reported values, including zero, take display priority. Session details also show the app estimate; History shows only the preferred number.
+- Duration/intensity changes recalculate the estimate without changing reported calories. Explicit session date/category/type changes also update eligibility/estimation. Notes-only edits and weight-history/profile changes preserve stored estimates.
+- Details PATCH requests preserve omitted values; sending null explicitly clears optional duration or reported calories.
+
+### Preserved
+
+- Authentication, layout, navigation, all existing planner modules, private custom exercises, supersets, completion timestamps, actual weights, and version-1 workout snapshots.
+- Legacy single-goal profiles, manual calorie values, onboarding completion, History filters/default 10 rows, Progress, and weekly check-ins.
+- One-click completion without any required duration, intensity, calorie, or actual-weight input.
+- No automatic plan copying, scheduling, profile backfill, estimate backfill, or snapshot rewriting.
+
+### Verification and release
+
+- Baseline: 84 PHP tests / 1,796 assertions, 13 JavaScript tests, and production build passed before changes.
+- Patch: 118 PHP tests / 2,830 assertions passed on isolated SQLite and MySQL; 17 JavaScript tests and production build passed. PHP Pint and changed-frontend Prettier checks passed.
+- Browser checks cover onboarding, maximum-two selection, priority swapping/promotion, profile editing, bodyweight recommendations/copying, scheduling/completion, estimate/report/clear/intensity flows, History, and 320px/390px layouts.
+- One additive migration adds `user_profiles.training_goals`, `schedule_entries.estimated_calories`, and `schedule_entries.intensity`; applied locally and on Hostinger.
+- Deployed and tagged v1.1.1 after 23 live workflow checks and verification of 56 deployed file hashes. Existing production records were preserved, a private backup was taken, and temporary QA/deployment files were removed. The v1.1.0 tag remains unchanged.
+
+### Not included
+
+AI, wearable integrations, nutrition, daily calorie targets, BMR/TDEE, per-exercise estimates, per-set logging, or new Progress dashboards.
+
+See [v1.1.1 implementation report](docs/V1.1.1-GOALS-CALORIES-REPORT.html) for the exact formula, MET assumptions, compatibility rules, file inventory, and release procedure.
+
 ## v1.1.0 — 2026-10-27
 
 - Optional three-step onboarding and an editable Profile accessed from the avatar menu.

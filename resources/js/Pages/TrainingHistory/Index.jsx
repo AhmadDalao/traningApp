@@ -1,3 +1,4 @@
+import { calorieDisplay } from "../../Features/calories";
 import { useEffect, useState } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import {
@@ -352,9 +353,7 @@ export default function Index({ entries, summary, filters, plans }) {
                                                 : "—"}
                                         </td>
                                         <td data-label="Calories">
-                                            {entry.calories_burned != null
-                                                ? `${entry.calories_source === "estimated" ? "≈ " : ""}${entry.calories_burned} kcal`
-                                                : "—"}
+                                            {calorieDisplay(entry).value}
                                         </td>
                                         <td data-label="Weight Summary">
                                             {entry.weights_logged

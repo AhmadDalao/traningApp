@@ -103,11 +103,23 @@ export default function Show({ profile, options }) {
                             </ButtonLink>
                         </div>
                         <dl className="profile-details">
-                            <div>
-                                <dt>Training goal</dt>
+                            <div className="wide-detail">
+                                <dt>Training Goals</dt>
                                 <dd>
-                                    {options.goals[profile.training_goal] ||
-                                        "Not set"}
+                                    {profile.training_goals?.length
+                                        ? profile.training_goals.map(
+                                              (goal, index) => (
+                                                  <div key={goal}>
+                                                      {index === 0
+                                                          ? "Primary"
+                                                          : "Secondary"}
+                                                      : {options.goals[goal]}
+                                                  </div>
+                                              ),
+                                          )
+                                        : profile.training_goal
+                                          ? `Primary: ${options.goals[profile.training_goal]}`
+                                          : "Not set"}
                                 </dd>
                             </div>
                             <div>

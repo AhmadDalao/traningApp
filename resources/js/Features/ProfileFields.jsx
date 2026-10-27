@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Field } from "../Components/UI";
 
 export const bmiNote =
@@ -27,7 +28,11 @@ export function profileDefaults(profile = {}, name) {
         date_of_birth: profile.date_of_birth || "",
         height_cm: profile.height_cm ?? "",
         current_weight_kg: profile.current_weight_kg ?? "",
-        training_goal: profile.training_goal || "",
+        training_goals: profile.training_goals?.length
+            ? profile.training_goals
+            : profile.training_goal
+              ? [profile.training_goal]
+              : [],
         body_weight_goal: profile.body_weight_goal || "not_tracking",
         target_body_weight_kg: profile.target_body_weight_kg ?? "",
         experience_level: profile.experience_level || "",
@@ -39,6 +44,7 @@ export function profileDefaults(profile = {}, name) {
 
 export default function ProfileFields({ form, options, section, today }) {
     const { data, errors, setData } = form;
+    const [goalMessage, setGoalMessage] = useState("");
     const input = (key) => ({
         value: data[key],
         onChange: (event) => setData(key, event.target.value),
@@ -114,34 +120,89 @@ export default function ProfileFields({ form, options, section, today }) {
     if (section === "goal")
         return (
             <fieldset className="profile-choices">
-                <legend>Primary training goal (optional)</legend>
-                {Object.entries(options.goals).map(([key, label]) => (
-                    <label
-                        className={`choice-card ${data.training_goal === key ? "selected" : ""}`}
-                        key={key}
-                    >
-                        <input
-                            type="radio"
-                            name="training_goal"
-                            value={key}
-                            checked={data.training_goal === key}
-                            onChange={() => setData("training_goal", key)}
-                        />
-                        <span>{label}</span>
-                    </label>
-                ))}
+                <legend>
+                    Training goals (optional) · Choose up to 2 goals
+                </legend>
+                {Object.entries(options.goals).map(([key, label]) => {
+                    const index = data.training_goals.indexOf(key);
+                    return (
+                        <div
+                            className={`choice-card goal-choice ${index >= 0 ? "selected" : ""}`}
+                            key={key}
+                        >
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    name="training_goals"
+                                    value={key}
+                                    checked={index >= 0}
+                                    onChange={() => {
+                                        if (
+                                            index < 0 &&
+                                            data.training_goals.length === 2
+                                        ) {
+                                            setGoalMessage(
+                                                "You can choose up to 2 training goals.",
+                                            );
+                                            return;
+                                        }
+                                        setGoalMessage("");
+                                        setData(
+                                            "training_goals",
+                                            index >= 0
+                                                ? data.training_goals.filter(
+                                                      (goal) => goal !== key,
+                                                  )
+                                                : [...data.training_goals, key],
+                                        );
+                                    }}
+                                />
+                                <span>{label}</span>
+                            </label>
+                            {index >= 0 && (
+                                <span className="goal-priority">
+                                    {index === 0 ? "Primary" : "Secondary"}
+                                </span>
+                            )}
+                            {index === 1 && (
+                                <button
+                                    type="button"
+                                    className="text-button"
+                                    aria-label={`Make ${label} primary`}
+                                    onClick={() => {
+                                        setData(
+                                            "training_goals",
+                                            [...data.training_goals].reverse(),
+                                        );
+                                        setGoalMessage("");
+                                    }}
+                                >
+                                    Make primary
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
+                <p className="field-hint" role="status" aria-live="polite">
+                    {goalMessage}
+                </p>
                 <button
                     className="text-button"
                     type="button"
-                    onClick={() => setData("training_goal", "")}
+                    onClick={() => {
+                        setData("training_goals", []);
+                        setGoalMessage("");
+                    }}
                 >
-                    Clear goal
+                    Clear goals
                 </button>
-                {errors.training_goal && (
-                    <p className="field-error" role="alert">
-                        {errors.training_goal}
-                    </p>
-                )}
+                {Object.entries(errors)
+                    .filter(([key]) => key.startsWith("training_goal"))
+                    .map(([key, error]) => (
+                        <p key={key} className="field-error" role="alert">
+                            {error}
+                        </p>
+                    ))}
             </fieldset>
         );
     return (
@@ -267,7 +328,7 @@ export default function ProfileFields({ form, options, section, today }) {
                 )}
             </div>
             <p className="field-hint">
-                Your body weight goal is separate from your training goal.
+                Your body weight goal is separate from your training goals.
                 Weight check-ins are optional.
             </p>
         </>

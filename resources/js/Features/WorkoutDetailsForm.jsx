@@ -1,12 +1,21 @@
 import { useForm } from "@inertiajs/react";
 import { Button, Field } from "../Components/UI";
+import { calorieSources } from "./calories";
 
 export default function WorkoutDetailsForm({ entry }) {
     const form = useForm({
         details_only: true,
         duration_minutes: entry.duration_minutes ?? "",
+        intensity: entry.intensity ?? "moderate",
         calories_burned: entry.calories_burned ?? "",
+        calories_source:
+            entry.calories_source ||
+            (entry.calories_burned != null ? "manual" : "wearable"),
     });
+    const estimateInputsChanged =
+        String(form.data.duration_minutes) !==
+            String(entry.duration_minutes ?? "") ||
+        form.data.intensity !== (entry.intensity ?? "moderate");
     return (
         <section className="panel profile-panel">
             <h2>Workout details</h2>
@@ -52,7 +61,22 @@ export default function WorkoutDetailsForm({ entry }) {
                         </div>
                     </Field>
                     <Field
-                        label="Calories burned (optional)"
+                        label="Workout intensity"
+                        error={form.errors.intensity}
+                    >
+                        <select
+                            value={form.data.intensity}
+                            onChange={(event) =>
+                                form.setData("intensity", event.target.value)
+                            }
+                        >
+                            <option value="light">Light</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="vigorous">Vigorous</option>
+                        </select>
+                    </Field>
+                    <Field
+                        label="Reported Calories (Optional)"
                         error={form.errors.calories_burned}
                     >
                         <div className="input-with-unit">
@@ -73,11 +97,47 @@ export default function WorkoutDetailsForm({ entry }) {
                             <span>kcal</span>
                         </div>
                     </Field>
+                    <Field label="Source" error={form.errors.calories_source}>
+                        <select
+                            value={form.data.calories_source}
+                            onChange={(event) =>
+                                form.setData(
+                                    "calories_source",
+                                    event.target.value,
+                                )
+                            }
+                        >
+                            {Object.entries(calorieSources).map(
+                                ([key, label]) => (
+                                    <option key={key} value={key}>
+                                        {label}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+                    </Field>
                 </div>
-                <p className="field-hint">
-                    Source: Manual / wearable. The app does not calculate
-                    calories.
-                </p>
+                <div className="calorie-estimate" aria-live="polite">
+                    <h3>Training Planner estimate</h3>
+                    <strong>
+                        {estimateInputsChanged
+                            ? "Save details to update the estimate."
+                            : entry.estimated_calories != null
+                              ? `≈ ${entry.estimated_calories} kcal`
+                              : "—"}
+                    </strong>
+                    <p className="field-hint">
+                        Based on your body weight, workout duration, and
+                        intensity. An estimate, not a measurement.
+                    </p>
+                    {!estimateInputsChanged &&
+                        entry.estimated_calories == null && (
+                            <p className="field-hint">
+                                Add an actual duration and a body weight in
+                                Profile or Progress, then save details.
+                            </p>
+                        )}
+                </div>
                 <div className="form-actions">
                     <Button disabled={form.processing}>
                         {form.processing ? "Saving…" : "Save details"}

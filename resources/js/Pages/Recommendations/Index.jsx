@@ -61,21 +61,14 @@ export default function Index({ recommendations }) {
                                         </span>
                                     </div>
                                     <p>{plan.description}</p>
+                                    <h3>Why this fits you</h3>
                                     <ul>
-                                        <li>
-                                            <Check size={15} />
-                                            {plan.days.length} training days per
-                                            week
-                                        </li>
-                                        <li>
-                                            <Check size={15} />
-                                            Adapted for {plan.duration}-minute
-                                            sessions
-                                        </li>
-                                        <li>
-                                            <Check size={15} />
-                                            Optional planned weights
-                                        </li>
+                                        {plan.reasons.map((reason) => (
+                                            <li key={reason}>
+                                                <Check size={15} />
+                                                {reason}
+                                            </li>
+                                        ))}
                                     </ul>
                                     <p className="field-hint">{plan.reason}</p>
                                     <button
@@ -87,7 +80,7 @@ export default function Index({ recommendations }) {
                                     </button>
                                     <Button
                                         disabled={form.processing}
-                                    onClick={() => addPlan(plan.key)}
+                                        onClick={() => addPlan(plan.key)}
                                     >
                                         {form.processing
                                             ? "Adding…"
@@ -100,11 +93,11 @@ export default function Index({ recommendations }) {
                     <div className="recommendation-note">
                         <h3>Why these plans?</h3>
                         <p>
-                            We use your selected goal, experience, available
-                            days, equipment, and typical session duration. BMI
-                            does not choose your goal. Nothing is added until
-                            you select Use this plan. You can always create your
-                            own plan.
+                            We use your primary and secondary goals, experience,
+                            available days, equipment, and typical session
+                            duration. BMI does not choose your goal. Nothing is
+                            added until you select Use this plan. You can always
+                            create your own plan.
                         </p>
                     </div>
                 </>
@@ -128,6 +121,15 @@ export default function Index({ recommendations }) {
                     wide
                 >
                     <div className="recommendation-details">
+                        <h3>Why this fits you</h3>
+                        <p className="progress-explanation">
+                            {selected.reason}
+                        </p>
+                        <ul>
+                            {selected.reasons.map((reason) => (
+                                <li key={reason}>{reason}</li>
+                            ))}
+                        </ul>
                         {selected.days.map((day) => (
                             <section key={day.title}>
                                 <h3>{day.title}</h3>

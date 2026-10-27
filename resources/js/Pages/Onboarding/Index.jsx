@@ -51,7 +51,7 @@ export default function Index({ profile, options }) {
                     {step === 0
                         ? "A few optional details help personalize your planner. You can skip this and come back anytime."
                         : step === 1
-                          ? "Choose the goal that matters most to you."
+                          ? "Choose up to 2 goals. Your first choice is primary."
                           : "Tell us about your experience, availability, and equipment."}
                 </p>
                 <form
@@ -72,7 +72,9 @@ export default function Index({ profile, options }) {
                                         ].includes(key),
                                     )
                                         ? 0
-                                        : errors.training_goal
+                                        : Object.keys(errors).some((key) =>
+                                                key.startsWith("training_goal"),
+                                            )
                                           ? 1
                                           : 2,
                                 ),

@@ -73,6 +73,7 @@ class TrainingHistoryController extends Controller
                 'duration_minutes' => $entry->status === 'completed' && $entry->entry_type === 'training' ? $entry->duration_minutes : null,
                 'calories_burned' => $entry->status === 'completed' && $entry->entry_type === 'training' ? $entry->calories_burned : null,
                 'calories_source' => $entry->calories_source,
+                'estimated_calories' => $entry->status === 'completed' && $entry->entry_type === 'training' ? $entry->estimated_calories : null,
             ]);
 
         return Inertia::render('TrainingHistory/Index', [

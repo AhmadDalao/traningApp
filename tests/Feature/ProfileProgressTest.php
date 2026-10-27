@@ -310,7 +310,7 @@ class ProfileProgressTest extends TestCase
         $this->assertNull($entry->duration_minutes);
         $this->assertNull($entry->calories_burned);
         $this->assertEquals(80, $snapshot['exercises'][0]['target_weight']);
-        $this->from('/training-history/'.$entry->id)->patch('/schedule-entries/'.$entry->id, ['details_only' => true, 'duration_minutes' => 58, 'calories_burned' => 410, 'calories_source' => 'estimated'])->assertSessionHasNoErrors()->assertRedirect('/training-history/'.$entry->id);
+        $this->from('/training-history/'.$entry->id)->patch('/schedule-entries/'.$entry->id, ['details_only' => true, 'duration_minutes' => 58, 'calories_burned' => 410, 'calories_source' => 'manual'])->assertSessionHasNoErrors()->assertRedirect('/training-history/'.$entry->id);
         $entry->refresh();
         $this->assertSame($snapshot, $entry->workout_snapshot);
         $this->assertSame($completedAt, $entry->completed_at->toISOString());
@@ -319,7 +319,7 @@ class ProfileProgressTest extends TestCase
         $this->get('/training-history/'.$entry->id)->assertInertia(fn (Assert $page) => $page->where('entry.duration_minutes', 58)->where('entry.calories_source', 'manual')->where('workout.version', 1));
         $this->patch('/schedule-entries/'.$entry->id, ['details_only' => true, 'duration_minutes' => null, 'calories_burned' => 0])->assertSessionHasNoErrors();
         $this->assertEquals(0, $entry->fresh()->calories_burned);
-        $this->patch('/schedule-entries/'.$entry->id, ['details_only' => true])->assertSessionHasNoErrors();
+        $this->patch('/schedule-entries/'.$entry->id, ['details_only' => true, 'calories_burned' => null])->assertSessionHasNoErrors();
         $this->assertNull($entry->fresh()->calories_source);
     }
 

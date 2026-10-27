@@ -4,9 +4,23 @@ A personal training planner built as **one Laravel monolith**. Laravel owns auth
 
 ## Current release
 
-**v1.1.0 — 27 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds optional profiles/onboarding, training goals, recommended plans, body-weight progress, and session duration/calories to the existing planner. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp); release tag: [v1.1.0](https://github.com/AhmadDalao/traningApp/tree/v1.1.0). See [CHANGELOG.md](CHANGELOG.md) and the [implementation notes](docs/PROFILE-PROGRESS-UPDATE-2026-10-27.html). The previous [v1.0.0 baseline](https://github.com/AhmadDalao/traningApp/tree/v1.0.0) and its [architecture report](docs/PROJECT-REPORT-2026-10-27.html) remain available.
+**v1.1.1 — 27 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds optional profiles/onboarding, training goals, recommended plans, body-weight progress, and session duration/calories to the existing planner. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp); release tag: [v1.1.1](https://github.com/AhmadDalao/traningApp/tree/v1.1.1). See [CHANGELOG.md](CHANGELOG.md) and the [implementation notes](docs/PROFILE-PROGRESS-UPDATE-2026-10-27.html). The previous [v1.0.0 baseline](https://github.com/AhmadDalao/traningApp/tree/v1.0.0) and its [architecture report](docs/PROJECT-REPORT-2026-10-27.html) remain available.
 
-Release verification on 27 October: **84 PHP tests / 1,796 assertions on SQLite and MySQL**, **13 JavaScript tests**, and the production build passed. The repository includes source, dependency lockfiles, tests, documentation, and bundled library images. Environment credentials, user uploads, database backups, deployment helpers, installed dependencies, and generated build assets are excluded.
+Release verification on 27 October: **118 PHP tests / 2,830 assertions on SQLite and MySQL**, **17 JavaScript tests**, and the production build passed. The repository includes source, dependency lockfiles, tests, documentation, and bundled library images. Environment credentials, user uploads, database backups, deployment helpers, installed dependencies, and generated build assets are excluded.
+
+## Released patch: v1.1.1
+
+The verified **v1.1.1** patch is deployed on Hostinger and tagged in GitHub. See the [patch report](docs/V1.1.1-GOALS-CALORIES-REPORT.html) and [changelog](CHANGELOG.md).
+
+- Select zero, one, or two optional training goals. Ordered `training_goals` JSON is preferred; index 0 is Primary and index 1 Secondary. Legacy `training_goal` is the read fallback and is synchronized to Primary on new saves. Existing users do not redo onboarding.
+- Recommendations reuse six presets. Primary drives the structure; Secondary affects ranking and supporting work. The existing Full Body preset can offer four bodyweight strength/conditioning days. BMI, body-weight goals, and equipment remain separate inputs/concepts.
+- Completed training sessions can get a server-calculated estimate after actual duration is saved. The formula is `round(MET × 3.5 × weight_kg / 200 × duration_minutes)`. Strength METs: 3.0 / 3.5 / 6.0; Cardio: 4.0 / 6.0 / 8.0; Mobility: 2.0 / 2.5 / 3.0 (Light / Moderate / Vigorous). Cardio/Mobility use matching saved session focus; other focus areas use strength. These are approximate session assumptions, not measured expenditure.
+- Weight comes from the latest owned body-weight entry dated on/before the session, with latest ID breaking same-day ties, then falls back to profile current weight. Missing weight/duration or a rest/planned/skipped session means no estimate.
+- `calories_burned` remains reported calories; `calories_source` accepts `wearable`, `exercise_machine`, or `manual`. `estimated_calories` is independent and never accepted from the client. Reported values take priority; estimates always use ≈ and an Estimated label in details. History uses one compact number.
+- Profile/weight changes and reads do not rewrite stored estimates. Explicit duration/intensity changes recalculate; explicit date/focus/type changes also update estimation. Reversing completion clears the estimate; completing again estimates from retained duration/intensity. Reported values and snapshots are preserved.
+- One additive migration (`2026_10_27_000006_add_multiple_goals_and_calorie_estimates.php`) is applied locally. No bulk backfill, snapshot format change, new dependency, new API route, or Progress calorie dashboard.
+
+Patch verification: **118 PHP tests / 2,830 assertions on SQLite and MySQL**, **17 JavaScript tests**, production build, Pint, frontend formatting, and mobile workflow checks. The existing Vite notice about `/images/gym.jpg` is unchanged; the public asset exists and loads normally. All 23 live workflow checks passed, and all 56 deployed files match the release hashes. The database, uploads, environment, and existing records were preserved. Previous tags remain unchanged.
 
 ## What is included
 
@@ -287,3 +301,5 @@ Completion is tracked at the session level. Weights are optional per exercise, n
 ## Credits and framework references
 
 The bundled gym photograph is from [Unsplash](https://images.unsplash.com/photo-1534438327276-14e5300c3a48). DM Sans and Manrope load from Google Fonts with system-font fallbacks. App operation does not depend on the font service. Framework setup follows [Laravel's installation guidance](https://laravel.com/docs/12.x/installation); production should follow the installed Laravel version's [deployment guidance](https://laravel.com/docs/12.x/deployment).
+
+The 27 October **v1.1.1** release (`goals-v1.1.1-20261027-e313840c`) adds multiple goals and calorie estimates. Its additive migration completed with matching existing-record fingerprints for 1 user, 3 plans, 8 days, 20 exercises, 45 sessions, 1 library item, 1 profile, and 2 body-weight entries. A fresh private database/files/uploads/environment backup was taken. Temporary QA data, updater and archive were removed after verification.

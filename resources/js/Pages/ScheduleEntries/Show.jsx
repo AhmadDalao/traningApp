@@ -24,11 +24,13 @@ import ExerciseList from "../../Features/ExerciseList";
 import SessionStatusActions from "../../Features/SessionStatusActions";
 import ActualWeightsForm from "../../Features/ActualWeightsForm";
 import WorkoutDetailsForm from "../../Features/WorkoutDetailsForm";
+import { calorieDisplay } from "../../Features/calories";
 export default function Show({ entry, workout, history = false }) {
     const [deleting, setDeleting] = useState(false);
     const [editingWeights, setEditingWeights] = useState(false);
     const { timezone } = usePage().props;
     const day = entry.training_day;
+    const calories = calorieDisplay(entry);
     const exercises = workout?.exercises || [];
     const saved = Boolean(entry.workout_snapshot);
     const canRecordWeights =
@@ -156,33 +158,31 @@ export default function Show({ entry, workout, history = false }) {
                                         ? `${entry.duration_minutes} min`
                                         : "—"}
                                 </strong>
+                                {entry.intensity && (
+                                    <small>
+                                        Intensity:{" "}
+                                        {entry.intensity[0].toUpperCase() +
+                                            entry.intensity.slice(1)}
+                                    </small>
+                                )}
                             </div>
                             <div>
-                                <span>
-                                    {entry.calories_source === "estimated"
-                                        ? "Estimated Calories"
-                                        : "Calories Burned"}
-                                </span>
-                                <strong>
-                                    {entry.calories_burned !== null &&
-                                    entry.calories_burned !== undefined
-                                        ? `${entry.calories_source === "estimated" ? "≈ " : ""}${entry.calories_burned} kcal`
-                                        : "—"}
-                                </strong>
-                                {entry.calories_burned !== null &&
-                                    entry.calories_burned !== undefined && (
+                                <span>Calories</span>
+                                <strong>{calories.value}</strong>
+                                {calories.label && (
+                                    <small>{calories.label}</small>
+                                )}
+                                {entry.calories_burned != null &&
+                                    entry.estimated_calories != null && (
                                         <small>
-                                            Source:{" "}
-                                            {entry.calories_source ===
-                                            "estimated"
-                                                ? "Estimated"
-                                                : "Manual / wearable"}
+                                            App estimate ≈{" "}
+                                            {entry.estimated_calories} kcal
                                         </small>
                                     )}
                             </div>
                         </div>
                         <WorkoutDetailsForm
-                            key={`${entry.id}-${entry.duration_minutes}-${entry.calories_burned}`}
+                            key={`${entry.id}-${entry.duration_minutes}-${entry.intensity}-${entry.calories_burned}-${entry.calories_source}-${entry.estimated_calories}`}
                             entry={entry}
                         />
                     </>

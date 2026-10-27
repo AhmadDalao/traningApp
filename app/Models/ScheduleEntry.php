@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class ScheduleEntry extends Model
 {
-    protected $fillable = ['icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'duration_minutes', 'calories_burned', 'calories_source'];
+    protected $fillable = ['icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity'];
 
     protected function casts(): array
     {

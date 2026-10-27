@@ -54,6 +54,12 @@ class ProfileController extends Controller
         DB::transaction(function () use ($request, $history, $complete) {
             $user = User::lockForUpdate()->findOrFail($request->user()->id);
             $data = $request->validated();
+            if (array_key_exists('training_goals', $data)) {
+                $data['training_goals'] ??= [];
+                $data['training_goal'] = $data['training_goals'][0] ?? null;
+            } elseif (array_key_exists('training_goal', $data)) {
+                $data['training_goals'] = $data['training_goal'] ? [$data['training_goal']] : [];
+            }
             if (isset($data['name'])) {
                 $user->update(['name' => $data['name']]);
             }
