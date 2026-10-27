@@ -22,12 +22,18 @@ import {
 import TrainingIcon from "../../Components/TrainingIcon";
 import ExerciseList from "../../Features/ExerciseList";
 import SessionStatusActions from "../../Features/SessionStatusActions";
+import { WorkoutRecords } from "../../Features/ExerciseRecords";
 import ActualWeightsForm from "../../Features/ActualWeightsForm";
 import WorkoutDetailsForm from "../../Features/WorkoutDetailsForm";
 import ActiveWorkoutExercise from "../../Features/ActiveWorkoutExercise";
 import { workoutProgress } from "../../Features/workout";
 import { calorieDisplay } from "../../Features/calories";
-export default function Show({ entry, workout, history = false }) {
+export default function Show({
+    entry,
+    workout,
+    history = false,
+    progressSummary = null,
+}) {
     const [deleting, setDeleting] = useState(false);
     const [editingWeights, setEditingWeights] = useState(false);
     const { timezone } = usePage().props;
@@ -198,6 +204,7 @@ export default function Show({ entry, workout, history = false }) {
                         />
                     </>
                 )}
+            <WorkoutRecords summary={progressSummary} />
             {entry.notes && (
                 <section className="panel notes-panel">
                     <h3>Session notes</h3>
@@ -269,6 +276,9 @@ export default function Show({ entry, workout, history = false }) {
                                 <ActiveWorkoutExercise
                                     key={exercise.id}
                                     exercise={exercise}
+                                    progressUrl={
+                                        progressSummary?.links?.[exercise.id]
+                                    }
                                     readOnly
                                 />
                             ))}

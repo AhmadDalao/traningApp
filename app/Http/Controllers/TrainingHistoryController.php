@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ScheduleEntry;
+use App\Services\ExerciseProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -93,12 +94,12 @@ class TrainingHistoryController extends Controller
         ]);
     }
 
-    public function show(Request $request, ScheduleEntry $scheduleEntry)
+    public function show(Request $request, ScheduleEntry $scheduleEntry, ExerciseProgress $progress)
     {
         Gate::authorize('view', $scheduleEntry);
         abort_unless($request->user()->scheduleEntries()->past()->whereKey($scheduleEntry->id)->exists(), 404);
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true, 'progressSummary' => $progress->forSession($request->user(), $scheduleEntry)]);
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateScheduleEntryStatusRequest;
 use App\Http\Requests\UpdateWorkoutWeightsRequest;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
+use App\Services\ExerciseProgress;
 use App\Services\WorkoutCalorieEstimator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -72,13 +73,13 @@ class ScheduleEntryController extends Controller
         ];
     }
 
-    public function show(ScheduleEntry $scheduleEntry)
+    public function show(ScheduleEntry $scheduleEntry, ExerciseProgress $progress)
     {
         Gate::authorize('view', $scheduleEntry);
 
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails()]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession(auth()->user(), $scheduleEntry)]);
     }
 
     public function edit(Request $request, ScheduleEntry $scheduleEntry)

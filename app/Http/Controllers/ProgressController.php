@@ -17,6 +17,7 @@ class ProgressController extends Controller
         $total = (clone $month)->count();
 
         return Inertia::render('Progress/Index', [
+            'initialTab' => $request->query('tab') === 'training' ? 'training' : 'body',
             'summary' => $history->summary($user),
             'trend' => $user->bodyWeightEntries()->orderBy('recorded_date')->orderBy('id')->get(['id', 'weight_kg', 'recorded_date']),
             'entries' => $user->bodyWeightEntries()->orderByDesc('recorded_date')->orderByDesc('id')->paginate(10),

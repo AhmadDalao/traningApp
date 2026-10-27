@@ -4,6 +4,7 @@ use App\Http\Controllers\ActiveWorkoutController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExerciseProgressController;
 use App\Http\Controllers\PlanScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressController;
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding', [ProfileController::class, 'complete'])->name('onboarding.complete');
     Route::post('/onboarding/skip', [ProfileController::class, 'skip'])->name('onboarding.skip');
     Route::get('/progress', ProgressController::class)->name('progress');
+    Route::get('/progress/exercises', ExerciseProgressController::class)->name('progress.exercises');
     Route::post('/body-weight', [BodyWeightController::class, 'store'])->name('body-weight.store');
     Route::put('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'update'])->name('body-weight.update');
     Route::delete('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'destroy'])->name('body-weight.destroy');

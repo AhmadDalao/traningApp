@@ -1,0 +1,384 @@
+.progress-tabs {
+    flex-wrap: wrap;
+}
+.exercise-progress-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 28px 0 18px;
+}
+.exercise-progress-heading h2,
+.exercise-chart-panel h2,
+.exercise-pr-callout h2 {
+    font-size: 18px;
+}
+.exercise-progress-heading p,
+.exercise-progress-intro p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+}
+.exercise-progress-search {
+    display: flex;
+    gap: 8px;
+    max-width: 440px;
+    min-width: 0;
+}
+.exercise-progress-search input {
+    min-width: 0;
+}
+.exercise-progress-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+.exercise-progress-card {
+    padding: 22px;
+    min-width: 0;
+}
+.exercise-progress-identity,
+.exercise-progress-intro {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+.exercise-progress-identity > div:not(.exercise-thumb),
+.exercise-progress-intro > div:not(.exercise-thumb) {
+    min-width: 0;
+}
+.exercise-progress-identity h3 {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+.exercise-progress-identity p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px;
+}
+.exercise-progress-identity .exercise-thumb,
+.exercise-progress-intro .exercise-thumb {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+}
+.exercise-progress-card dl {
+    margin: 20px 0;
+    display: grid;
+    gap: 14px;
+}
+.exercise-progress-card dt {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 5px;
+}
+.exercise-progress-card dd {
+    font-size: 15px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.exercise-progress-intro {
+    margin: 24px 0;
+}
+.exercise-record-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+.exercise-record-card {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    min-width: 0;
+}
+.exercise-record-card > span {
+    font-size: 12px;
+    color: var(--muted);
+}
+.exercise-record-card > strong {
+    font-size: 23px;
+    overflow-wrap: anywhere;
+}
+.exercise-record-card small {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+}
+.exercise-record-card .inline-link {
+    font-size: 12px;
+}
+.exercise-pr-callout {
+    padding: 22px;
+    margin: 22px 0;
+}
+.exercise-pr-callout h2 {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.exercise-pr-callout h2 svg,
+.exercise-record-list > li > svg {
+    color: #a17b24;
+    flex-shrink: 0;
+}
+.exercise-pr-callout > p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 12px;
+    overflow-wrap: anywhere;
+}
+.workout-record-list,
+.workout-record-list ul {
+    list-style: none;
+    padding: 0;
+}
+.workout-record-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+.workout-record-list ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 6px;
+    color: var(--muted);
+}
+.exercise-record-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 0;
+}
+.exercise-record-list > li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid #e8edf4;
+}
+.exercise-record-list > li > div {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.exercise-record-list p {
+    font-size: 13px;
+    margin: 5px 0;
+}
+.exercise-record-list small {
+    font-size: 12px;
+    color: var(--muted);
+}
+.exercise-record-list > li > a {
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.exercise-charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+.exercise-charts > :only-child {
+    grid-column: 1 / -1;
+}
+.exercise-chart-panel {
+    padding: 22px;
+    min-width: 0;
+}
+.exercise-chart-panel .progress-explanation {
+    margin: 10px 0;
+}
+.exercise-chart {
+    margin: 0;
+    min-width: 0;
+}
+.exercise-chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+.exercise-chart svg text {
+    fill: #718096;
+    font-size: 12px;
+}
+.exercise-chart circle {
+    cursor: pointer;
+}
+.exercise-chart circle:focus {
+    outline: 2px solid #173b80;
+    outline-offset: 3px;
+}
+.exercise-chart figcaption {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 12px;
+}
+.exercise-chart-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 4px 0 16px;
+    font-size: 13px;
+}
+.exercise-chart-selection span {
+    color: var(--muted);
+}
+.exercise-chart figcaption label {
+    flex: 1;
+    min-width: 0;
+}
+.exercise-chart select {
+    width: 100%;
+    min-width: 0;
+    margin-top: 7px;
+    font-size: 12px;
+}
+.exercise-chart-empty {
+    min-height: 190px;
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+.exercise-range {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 160px;
+}
+.exercise-range select {
+    min-height: 44px;
+}
+.exercise-history-list {
+    display: grid;
+    gap: 16px;
+}
+.exercise-history-card {
+    padding: 22px;
+    min-width: 0;
+}
+.exercise-history-card header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+}
+.exercise-history-card header > div {
+    min-width: 0;
+}
+.exercise-history-card h3 {
+    font-size: 15px;
+}
+.exercise-history-card header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    overflow-wrap: anywhere;
+}
+.exercise-result-sets {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    list-style: none;
+    gap: 10px;
+    padding: 0;
+    margin: 18px 0;
+}
+.exercise-result-sets li {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f5f7fb;
+    min-width: 0;
+}
+.exercise-result-sets span {
+    color: var(--muted);
+    font-size: 11px;
+}
+.exercise-result-sets strong {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+.exercise-history-total {
+    font-size: 13px;
+    color: var(--muted);
+}
+.exercise-progress-link {
+    margin: 0 22px 16px;
+    display: block;
+    font-size: 12px;
+}
+@media (max-width: 1100px) {
+    .exercise-progress-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .exercise-charts {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 600px) {
+    .exercise-progress-heading {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .exercise-progress-search {
+        max-width: none;
+        width: 100%;
+    }
+    .exercise-progress-search .btn {
+        min-height: 44px;
+    }
+    .exercise-progress-grid {
+        grid-template-columns: 1fr;
+    }
+    .exercise-record-grid {
+        grid-template-columns: 1fr;
+    }
+    .exercise-progress-card,
+    .exercise-chart-panel,
+    .exercise-history-card,
+    .exercise-pr-callout {
+        padding: 16px;
+    }
+    .exercise-history-card header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .exercise-result-sets {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .exercise-record-list > li {
+        flex-wrap: wrap;
+    }
+    .exercise-record-list > li > a {
+        margin-left: 30px;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+    }
+    .exercise-record-list > li > div {
+        flex-basis: calc(100% - 32px);
+    }
+    .exercise-chart figcaption {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .exercise-chart svg text {
+        font-size: 24px;
+    }
+    .exercise-progress-link {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+}

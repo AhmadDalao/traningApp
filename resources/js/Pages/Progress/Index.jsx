@@ -14,8 +14,14 @@ import {
 import BodyWeightForm from "../../Features/BodyWeightForm";
 import BodyWeightChart from "../../Features/BodyWeightChart";
 
-export default function Index({ summary, trend, entries, training }) {
-    const [tab, setTab] = useState("body"),
+export default function Index({
+    summary,
+    trend,
+    entries,
+    training,
+    initialTab = "body",
+}) {
+    const [tab, setTab] = useState(initialTab),
         [editing, setEditing] = useState(null),
         [deleting, setDeleting] = useState(null);
     const cards =
@@ -74,6 +80,9 @@ export default function Index({ summary, trend, entries, training }) {
                 >
                     Body weight
                 </Button>
+                <ButtonLink href="/progress/exercises" variant="secondary">
+                    Exercise Progress
+                </ButtonLink>
                 <Button
                     variant={tab === "training" ? "primary" : "secondary"}
                     aria-pressed={tab === "training"}

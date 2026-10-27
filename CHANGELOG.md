@@ -1,5 +1,37 @@
 # Changelog
 
+## v1.3.0 — 27 October 2026
+
+Deployed to Hostinger and tagged **v1.3.0**. The accepted v1.2.0 baseline and previous tags remain unchanged.
+
+### Added
+
+- Exercise Progress within the existing Progress section, with searchable performed exercises, pagination, recent Personal Records and links from completed structured workouts.
+- Weight, weighted-volume, rep and duration charts using the existing SVG approach. One point per exercise/mode/workout; 90-day default with 30-day, 6-month, 1-year and All filters.
+- Exercise-specific actual-set history, 10 workouts per page, linking to existing completed session details.
+- Weighted PRs: Heaviest Weight, Best Set, Max Reps and Best Session Volume. Reps-only: Max Reps and Most Workout Reps. Duration: Longest Set and Longest Workout Duration.
+- Compact completion summary. First recorded performance establishes a baseline; only strict improvements against prior workouts are announced. Weight increases do not produce a duplicate Best Set announcement.
+- One inspected and measured, additive `source_exercise_key` index; existing session/position and set/number indexes are reused.
+
+### Data rules and compatibility
+
+- Uses actual results in completed sets from currently completed training sessions, excluding skipped exercises. Planned targets and old snapshots never fabricate structured history.
+- Positive actual weight only for weighted metrics. Null/zero weights retain their actual reps/durations/history without weight PRs or zero-volume charts.
+- Stable identity and ownership govern aggregation, never matching exercise names. Reps and Duration are separate for the same identity. Preserved records/media survive template/library deletion.
+- Status reversals remove results immediately; recompletion restores the final saved data. PRs are derived, with no new historical-status system or records table.
+- Existing Body weight, Training stats, Training History, Active Workout, quick completion, snapshots, profile, recommendations and calorie behavior remain intact.
+- No new dependencies, 1RM estimates, suggested next weights, overload automation, plan adaptation, muscle analytics or AI.
+
+### Verification
+
+- 196 PHP tests / 3,569 assertions pass on SQLite and MySQL (38 new progress cases).
+- 24 JavaScript tests pass (3 new formatting cases). Vite production build, Pint, relevant frontend formatting and whitespace checks pass.
+- Desktop plus 320px and 390px browser checks cover real local weighted/bodyweight/timed workouts, search/pagination, date ranges, baseline/empty states, finish summaries, history links and completion reversal/recompletion. No console errors or warnings observed.
+- Temporary local QA fixtures and the separate live QA account were removed; original content fingerprints match. The existing `gym.jpg` runtime asset notice remains, with the public asset present.
+- All 39 live workflow checks passed on PHP 8.3 / MariaDB 11.8, with 62 deployed-file checksum matches. The single additive index migration is applied. A private database/uploads/environment/source backup was retained; deployment endpoints/archives were removed, returning 404. Login and health return 200. Credentials and existing accounts are unchanged.
+- Full report: [v1.3 Exercise Progress](docs/V1.3.0-EXERCISE-PROGRESS-REPORT.html).
+
+
 ## v1.2.0 — 2026-10-27
 
 ### Added

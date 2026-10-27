@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { router } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { Plus } from "lucide-react";
 import { Button, ConfirmDialog, formatWeight } from "../Components/UI";
 import { Thumbnail } from "./ExerciseEditor";
@@ -10,6 +10,7 @@ export default function ActiveWorkoutExercise({
     exercise,
     readOnly = false,
     onDirty,
+    progressUrl,
 }) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
@@ -63,6 +64,20 @@ export default function ActiveWorkoutExercise({
                             : "Active"}
                 </span>
             </header>
+            {readOnly && progressUrl && (
+                <Link
+                    href={progressUrl}
+                    className="inline-link exercise-progress-link"
+                >
+                    View Exercise Progress
+                </Link>
+            )}
+            {readOnly && !exercise.source_exercise_key && (
+                <p className="workout-exercise-note">
+                    This record has no saved exercise identity, so long-term
+                    progress is unavailable.
+                </p>
+            )}
             {exercise.superset_group && (
                 <div className="workout-superset">
                     <span className="superset-badge">
