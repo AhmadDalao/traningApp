@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PlanScheduleController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ScheduleEntryController;
 use App\Http\Controllers\TrainingDayController;
 use App\Http\Controllers\TrainingHistoryController;
 use App\Http\Controllers\TrainingPlanController;
-use App\Http\Controllers\PlanScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect(auth()->check() ? '/dashboard' : '/login'));
@@ -17,6 +21,19 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'store'])->middleware('throttle:10,1');
 });
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/onboarding', [ProfileController::class, 'onboarding'])->name('onboarding');
+    Route::post('/onboarding', [ProfileController::class, 'complete'])->name('onboarding.complete');
+    Route::post('/onboarding/skip', [ProfileController::class, 'skip'])->name('onboarding.skip');
+    Route::get('/progress', ProgressController::class)->name('progress');
+    Route::post('/body-weight', [BodyWeightController::class, 'store'])->name('body-weight.store');
+    Route::put('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'update'])->name('body-weight.update');
+    Route::delete('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'destroy'])->name('body-weight.destroy');
+    Route::post('/body-weight-check-in/dismiss', [BodyWeightController::class, 'dismiss'])->name('body-weight.dismiss');
+    Route::get('/recommendations', [RecommendationController::class, 'index'])->name('recommendations.index');
+    Route::post('/recommendations', [RecommendationController::class, 'store'])->name('recommendations.store');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::redirect('/overview', '/dashboard');

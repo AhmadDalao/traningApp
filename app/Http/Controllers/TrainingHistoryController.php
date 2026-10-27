@@ -70,6 +70,9 @@ class TrainingHistoryController extends Controller
                 'exercises_count' => $entry->workoutExerciseCount(),
                 'weights_logged' => $entry->status === 'completed' ? collect($entry->workout_snapshot['exercises'] ?? [])->whereNotNull('actual_weight')->count() : 0,
                 'snapshot_available' => $entry->workout_snapshot !== null,
+                'duration_minutes' => $entry->status === 'completed' && $entry->entry_type === 'training' ? $entry->duration_minutes : null,
+                'calories_burned' => $entry->status === 'completed' && $entry->entry_type === 'training' ? $entry->calories_burned : null,
+                'calories_source' => $entry->calories_source,
             ]);
 
         return Inertia::render('TrainingHistory/Index', [

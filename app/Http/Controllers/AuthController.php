@@ -30,6 +30,8 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
+        $request->session()->put('show_onboarding', true);
+
         return to_route('dashboard');
     }
 
@@ -46,6 +48,12 @@ class AuthController extends Controller
         }
         RateLimiter::clear($key);
         $request->session()->regenerate();
+
+        if (! $request->user()->profile || $request->user()->profile->needsOnboarding()) {
+            $request->session()->put('show_onboarding', true);
+
+            return to_route('dashboard');
+        }
 
         return redirect()->intended(route('dashboard'));
     }

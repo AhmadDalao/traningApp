@@ -23,6 +23,16 @@ class User extends Authenticatable
         return $this->hasMany(ScheduleEntry::class);
     }
 
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function bodyWeightEntries()
+    {
+        return $this->hasMany(BodyWeightEntry::class);
+    }
+
     /**
      * The attributes that are mass assignable.
      *

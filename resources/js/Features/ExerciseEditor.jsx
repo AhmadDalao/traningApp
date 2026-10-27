@@ -167,7 +167,7 @@ export default function ExerciseEditor({
                             </Field>
                         </div>
                         <Field
-                            label="Target Weight (Optional)"
+                            label="Planned Weight (Optional)"
                             hint="Leave empty for exercises without a weight."
                         >
                             <div className="input-with-unit">

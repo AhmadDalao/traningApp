@@ -23,6 +23,7 @@ import TrainingIcon from "../../Components/TrainingIcon";
 import ExerciseList from "../../Features/ExerciseList";
 import SessionStatusActions from "../../Features/SessionStatusActions";
 import ActualWeightsForm from "../../Features/ActualWeightsForm";
+import WorkoutDetailsForm from "../../Features/WorkoutDetailsForm";
 export default function Show({ entry, workout, history = false }) {
     const [deleting, setDeleting] = useState(false);
     const [editingWeights, setEditingWeights] = useState(false);
@@ -143,6 +144,49 @@ export default function Show({ entry, workout, history = false }) {
                     </strong>
                 </div>
             </div>
+            {entry.status === "completed" &&
+                entry.entry_type === "training" && (
+                    <>
+                        <div className="session-metrics">
+                            <div>
+                                <span>Actual duration</span>
+                                <strong>
+                                    {entry.duration_minutes !== null &&
+                                    entry.duration_minutes !== undefined
+                                        ? `${entry.duration_minutes} min`
+                                        : "—"}
+                                </strong>
+                            </div>
+                            <div>
+                                <span>
+                                    {entry.calories_source === "estimated"
+                                        ? "Estimated Calories"
+                                        : "Calories Burned"}
+                                </span>
+                                <strong>
+                                    {entry.calories_burned !== null &&
+                                    entry.calories_burned !== undefined
+                                        ? `${entry.calories_source === "estimated" ? "≈ " : ""}${entry.calories_burned} kcal`
+                                        : "—"}
+                                </strong>
+                                {entry.calories_burned !== null &&
+                                    entry.calories_burned !== undefined && (
+                                        <small>
+                                            Source:{" "}
+                                            {entry.calories_source ===
+                                            "estimated"
+                                                ? "Estimated"
+                                                : "Manual / wearable"}
+                                        </small>
+                                    )}
+                            </div>
+                        </div>
+                        <WorkoutDetailsForm
+                            key={`${entry.id}-${entry.duration_minutes}-${entry.calories_burned}`}
+                            entry={entry}
+                        />
+                    </>
+                )}
             {entry.notes && (
                 <section className="panel notes-panel">
                     <h3>Session notes</h3>

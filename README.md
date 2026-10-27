@@ -2,13 +2,23 @@
 
 A personal training planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
-## Release baseline
+## Current release
 
-**v1.0.0 — 27 October 2026** captures the application deployed to Hostinger on 26 October, including exercise-library supersets, weekday scheduling, and training history. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp); release tag: [v1.0.0](https://github.com/AhmadDalao/traningApp/tree/v1.0.0). See [CHANGELOG.md](CHANGELOG.md) and the [project report](docs/PROJECT-REPORT-2026-10-27.html) for the feature baseline and future update plan.
+**v1.1.0 — 27 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds optional profiles/onboarding, training goals, recommended plans, body-weight progress, and session duration/calories to the existing planner. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp); release tag: [v1.1.0](https://github.com/AhmadDalao/traningApp/tree/v1.1.0). See [CHANGELOG.md](CHANGELOG.md) and the [implementation notes](docs/PROFILE-PROGRESS-UPDATE-2026-10-27.html). The previous [v1.0.0 baseline](https://github.com/AhmadDalao/traningApp/tree/v1.0.0) and its [architecture report](docs/PROJECT-REPORT-2026-10-27.html) remain available.
 
-Release verification on 27 October: **64 PHP tests / 1,049 assertions**, **13 JavaScript tests**, and the production build passed. The repository includes source, dependency lockfiles, tests, documentation, and bundled library images. Environment credentials, user uploads, database backups, deployment helpers, installed dependencies, and generated build assets are excluded.
+Release verification on 27 October: **84 PHP tests / 1,796 assertions on SQLite and MySQL**, **13 JavaScript tests**, and the production build passed. The repository includes source, dependency lockfiles, tests, documentation, and bundled library images. Environment credentials, user uploads, database backups, deployment helpers, installed dependencies, and generated build assets are excluded.
 
 ## What is included
+
+### Profile, Goals, Progress & Calories
+
+The v1.1.0 release extends the `v1.0.0` baseline with optional onboarding, Profile via the avatar menu, deterministic plan suggestions, dated body-weight history, Progress, weekly weight check-ins, and optional completed-session duration/manual calories. Exercise prescription labels now read **Planned Weight**; the database still uses `target_weight`. Existing authentication, planner, calendar, supersets, actual weights, and frozen history remain in place.
+
+One additive migration, `2026_10_27_000005_add_profiles_progress_and_session_details.php`, creates `user_profiles` and `body_weight_entries` and adds nullable `duration_minutes`, `calories_burned`, and `calories_source` to `schedule_entries`. It is applied locally and on Hostinger. The release preserves the production environment, uploads, and existing records. Use the existing Hostinger update procedure for future releases; do not seed or replace production data.
+
+Verification: **84 PHP tests / 1,796 assertions** pass on isolated SQLite and MySQL, **13 JavaScript tests** pass, and the Vite production build passes. The [implementation notes](docs/PROFILE-PROGRESS-UPDATE-2026-10-27.html) include all new and changed files, profile fields, recommendation rules, progress calculations, manual checks, and follow-ups.
+
+### Existing planner features
 
 - Registration, immediate login, login with remember-me, and logout. No email verification.
 - Private training plans, reusable training/rest days, and ordered exercises.
@@ -175,6 +185,8 @@ Live verification passed for registration, login/logout, plan/workout creation, 
 The 26 October history update is live. Its additive migration, production caches, optional target/actual weights, saved thumbnails, timestamps, history month/plan filters, and 390px session layout were verified on Hostinger. A database dump, uploads archive, previous source files, and environment backup are kept privately under `storage/app/private/deploy-backups/history-20261026-103603-r2`. Existing-data fingerprints matched before and after the update. The temporary QA account, updater endpoint, and upload archive were removed. The hosting database requires `REPEATABLE READ` for a consistent-snapshot backup transaction.
 
 The later 26 October release, `planner-20261026-7487adec`, deployed the complete library/scheduling update and **Weekdays** (Sunday–Thursday), **Weekends** (Friday–Saturday), **Every day**, and **Clear** shortcuts. Before deployment, 64 PHP tests / 1,049 assertions, 13 JavaScript tests, and the production build passed. Live checks verified login, 876 library entries, library partner creation and saving, independent superset prescriptions, preserved completed-workout snapshots, schedule preview without duplicates, all four shortcuts, history's default 10 items, and Today showing only 26 October records. Both dashboard lists have a 520px scroll region. The deployed frontend bundles and origin exercise photos match the local release. A fresh database dump, uploads archive, previous files, and environment backup are private under `storage/app/private/deploy-backups/planner-20261026-7487adec`; existing-data fingerprints matched across deployment before adding the requested preview account. The temporary updater and upload archive were removed and return 404; the login and health routes return 200. The local deployment connection file was removed after verification.
+
+The 27 October **v1.1.0** release, `profile-v1.1.0-20261027-ed592f83`, deploys the profile/progress/calories update. The additive migration completed and all original record fingerprints matched: 1 user, 2 plans, 4 days, 8 exercises, 45 sessions, and 1 custom-library item. Eighteen live workflow checks passed, covering onboarding, profile/BMI, recommendations, body-weight history, plan copying without automatic scheduling, one-click completion, optional duration/calories, actual weights, history filters, and ownership. Mobile Profile, Progress, and existing history were checked at 390px. All 76 deployed files match the local release hashes, including the public build manifest and application bundles. A database dump, uploads archive, previous files, and environment backup are private under `storage/app/private/deploy-backups/profile-v1.1.0-20261027-ed592f83`. The temporary QA account/data, updater endpoint, and upload archive were removed; login and health return 200, and the updater/archive return 404. Existing login credentials remain unchanged.
 
 ### Preferred: point the domain to Laravel's `public` directory
 

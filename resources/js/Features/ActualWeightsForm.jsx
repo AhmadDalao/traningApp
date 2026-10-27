@@ -34,7 +34,7 @@ export default function ActualWeightsForm({ entry, exercises, onClose }) {
                             <div>
                                 <strong>{exercise.name}</strong>
                                 <p>
-                                    {exercise.sets} × {exercise.reps} · Target:{" "}
+                                    {exercise.sets} × {exercise.reps} · Planned:{" "}
                                     {formatWeight(exercise.target_weight)}
                                 </p>
                             </div>

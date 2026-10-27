@@ -258,7 +258,7 @@ export default function Form({ plan, day, customExercises = [] }) {
                                             <th>Exercise</th>
                                             <th>Sets</th>
                                             <th>Reps / duration</th>
-                                            <th>Target Weight</th>
+                                            <th>Planned Weight</th>
                                             <th>Superset</th>
                                             <th className="align-right">
                                                 Actions

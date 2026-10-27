@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.1.0 — 2026-10-27
+
+- Optional three-step onboarding and an editable Profile accessed from the avatar menu.
+- Training preferences, separate body-weight goals, calculated age/BMI, and six simple recommendation presets; plans are copied only after explicit selection.
+- Private dated body-weight records, a trend chart, target progress, monthly training statistics, and a dismissible weekly Overview check-in.
+- Optional duration and manual/wearable calories on completed sessions, also displayed in the existing Training History.
+- Exercise UI now says **Planned Weight**; the existing `target_weight` field and completed-workout snapshots are preserved.
+- Additive profile/body-weight tables and nullable session-detail columns, applied locally and on Hostinger.
+- 84 PHP tests / 1,796 assertions pass on isolated SQLite and MySQL, 13 JavaScript tests pass, and the production build passes.
+
+See [implementation notes](docs/PROFILE-PROGRESS-UPDATE-2026-10-27.html) for rules, schema, changed files, verification, and deployment preparation. Deployed at https://training.ahmaddalao.com with a fresh backup and preserved production records. All 18 live workflow checks passed; temporary QA data and deployment files were removed. The previous `v1.0.0` tag remains available.
+
 ## v1.0.0 — 2026-10-27
 
 First tagged release of the Training Planner application deployed on Hostinger on 26 October 2026.

@@ -133,7 +133,10 @@ export default function Index({ entries, summary, filters, plans }) {
                             value={draft.period}
                             disabled={busy}
                             onChange={(event) => {
-                                const next = { ...draft, period: event.target.value };
+                                const next = {
+                                    ...draft,
+                                    period: event.target.value,
+                                };
                                 setDraft(next);
                                 if (next.period !== "custom") apply(next);
                             }}
@@ -232,10 +235,14 @@ export default function Index({ entries, summary, filters, plans }) {
                                 aria-pressed={filters.status === value}
                                 disabled={busy}
                                 key={value}
-                                onClick={() => apply({ ...filters, status: value })}
+                                onClick={() =>
+                                    apply({ ...filters, status: value })
+                                }
                             >
                                 {value !== "all" && (
-                                    <span className={`filter-dot dot-${value}`} />
+                                    <span
+                                        className={`filter-dot dot-${value}`}
+                                    />
                                 )}
                                 {label}
                             </button>
@@ -246,7 +253,10 @@ export default function Index({ entries, summary, filters, plans }) {
                             value={filters.per_page}
                             disabled={busy}
                             onChange={(event) =>
-                                apply({ ...filters, per_page: event.target.value })
+                                apply({
+                                    ...filters,
+                                    per_page: event.target.value,
+                                })
                             }
                         >
                             {["10", "25", "50", "100", "all"].map((value) => (
@@ -267,6 +277,8 @@ export default function Index({ entries, summary, filters, plans }) {
                                     <th>Type</th>
                                     <th>Exercises</th>
                                     <th>Status</th>
+                                    <th>Duration</th>
+                                    <th>Calories</th>
                                     <th>Weight Summary</th>
                                     <th>
                                         <span className="sr-only">Details</span>
@@ -333,6 +345,16 @@ export default function Index({ entries, summary, filters, plans }) {
                                                     status={entry.status}
                                                 />
                                             )}
+                                        </td>
+                                        <td data-label="Duration">
+                                            {entry.duration_minutes != null
+                                                ? `${entry.duration_minutes} min`
+                                                : "—"}
+                                        </td>
+                                        <td data-label="Calories">
+                                            {entry.calories_burned != null
+                                                ? `${entry.calories_source === "estimated" ? "≈ " : ""}${entry.calories_burned} kcal`
+                                                : "—"}
                                         </td>
                                         <td data-label="Weight Summary">
                                             {entry.weights_logged

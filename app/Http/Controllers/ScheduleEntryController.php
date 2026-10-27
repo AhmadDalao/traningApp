@@ -91,8 +91,20 @@ class ScheduleEntryController extends Controller
     {
         DB::transaction(function () use ($request, $scheduleEntry) {
             $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
-            $entry->update($this->entryData($request, $entry));
+            if ($request->boolean('details_only')) {
+                if ($entry->status !== 'completed' || $entry->entry_type !== 'training') {
+                    throw ValidationException::withMessages(['details' => 'Workout details can only be recorded for a completed training session.']);
+                }
+                $data = $request->validated();
+                $entry->update(['duration_minutes' => $data['duration_minutes'] ?? null, 'calories_burned' => $data['calories_burned'] ?? null, 'calories_source' => isset($data['calories_burned']) ? 'manual' : null]);
+            } else {
+                $entry->update($this->entryData($request, $entry));
+            }
         });
+
+        if ($request->boolean('details_only')) {
+            return back()->with('success', 'Workout details saved.');
+        }
 
         return to_route('schedule-entries.show', $scheduleEntry)->with('success', 'Session updated.');
     }

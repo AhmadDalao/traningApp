@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
     Dumbbell,
@@ -10,11 +10,19 @@ import {
     X,
     CheckCircle2,
     History,
+    TrendingUp,
+    UserRound,
+    ChevronDown,
 } from "lucide-react";
 export default function AppLayout({ children }) {
     const { auth, flash } = usePage().props;
     const { url } = usePage();
     const [open, setOpen] = useState(false);
+    const [userOpen, setUserOpen] = useState(false);
+    useEffect(() => {
+        setUserOpen(false);
+        setOpen(false);
+    }, [url]);
     const nav = [
         {
             href: "/dashboard",
@@ -41,6 +49,12 @@ export default function AppLayout({ children }) {
             label: "Training History",
             icon: History,
             active: url.startsWith("/training-history"),
+        },
+        {
+            href: "/progress",
+            label: "Progress",
+            icon: TrendingUp,
+            active: url.startsWith("/progress"),
         },
     ];
     return (
@@ -98,7 +112,13 @@ export default function AppLayout({ children }) {
                             Every single day.
                         </p>
                     </div>
-                    <div className="user-block">
+                    <button
+                        type="button"
+                        className="user-block user-menu-toggle"
+                        aria-expanded={userOpen}
+                        aria-controls="user-menu"
+                        onClick={() => setUserOpen(!userOpen)}
+                    >
                         <div className="avatar">
                             {auth.user.name.slice(0, 1).toUpperCase()}
                         </div>
@@ -106,7 +126,25 @@ export default function AppLayout({ children }) {
                             <strong>{auth.user.name}</strong>
                             <span>Personal workspace</span>
                         </div>
-                    </div>
+                        <ChevronDown size={15} />
+                    </button>
+                    {userOpen && (
+                        <div id="user-menu" className="user-menu">
+                            <Link href="/profile" className="nav-item">
+                                <UserRound size={17} />
+                                Profile
+                            </Link>
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                className="nav-item"
+                            >
+                                <LogOut size={17} />
+                                Log out
+                            </Link>
+                        </div>
+                    )}
                     <Link
                         href="/logout"
                         method="post"
@@ -124,9 +162,13 @@ export default function AppLayout({ children }) {
                     <div className="topbar-right">
                         <span className="live-dot" />
                         Make time for yourself
-                        <div className="avatar small">
+                        <Link
+                            href="/profile"
+                            className="avatar small"
+                            aria-label="Open profile"
+                        >
                             {auth.user.name.slice(0, 1).toUpperCase()}
-                        </div>
+                        </Link>
                     </div>
                 </div>
                 <main id="main">

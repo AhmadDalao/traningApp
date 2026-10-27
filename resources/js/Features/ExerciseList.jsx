@@ -55,7 +55,7 @@ export default function ExerciseList({
                     </div>
                     <div className="exercise-weights">
                         <div>
-                            <span>Target Weight</span>
+                            <span>Planned Weight</span>
                             <strong>
                                 {formatWeight(exercise.target_weight)}
                             </strong>

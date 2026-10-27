@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, usePage, router } from "@inertiajs/react";
 import {
     Plus,
     CalendarDays,
@@ -24,11 +24,14 @@ import {
 import TrainingPlanForm from "../Features/TrainingPlanForm";
 import ScheduleEntryForm from "../Features/ScheduleEntryForm";
 import SessionStatusActions from "../Features/SessionStatusActions";
+import BodyWeightForm from "../Features/BodyWeightForm";
 export default function Dashboard({
     stats,
     todayEntries,
     upcomingEntries,
     plans,
+    checkIn,
+    profileIncomplete,
 }) {
     const { auth, today } = usePage().props;
     const [modal, setModal] = useState(null);
@@ -79,6 +82,57 @@ export default function Dashboard({
                     Schedule session
                 </Button>
             </PageHeader>
+            {profileIncomplete && (
+                <div className="profile-reminder">
+                    <span>
+                        Personalize your planner with optional goals and
+                        training preferences.
+                    </span>
+                    <ButtonLink
+                        href="/onboarding"
+                        variant="secondary"
+                        className="small"
+                    >
+                        Complete profile
+                    </ButtonLink>
+                </div>
+            )}
+            {checkIn && (
+                <section className="panel weekly-check-in">
+                    <div>
+                        <h2>Weekly check-in</h2>
+                        <p>How are you progressing?</p>
+                        <small>
+                            {checkIn.last_weight
+                                ? `Last recorded weight: ${Number(checkIn.last_weight)} kg`
+                                : "Record your first body weight when you’re ready."}
+                            {checkIn.last_date && (
+                                <>
+                                    {" "}
+                                    · <DateLabel date={checkIn.last_date} />
+                                </>
+                            )}
+                        </small>
+                    </div>
+                    <div className="check-in-actions">
+                        <Button onClick={() => setModal("weight")}>
+                            Record today's weight
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() =>
+                                router.post(
+                                    "/body-weight-check-in/dismiss",
+                                    {},
+                                    { preserveScroll: true },
+                                )
+                            }
+                        >
+                            Not now
+                        </Button>
+                    </div>
+                </section>
+            )}
             <div className="stats-grid">
                 {cards.map(({ label, value, note, icon: Icon, color }) => (
                     <div className="stat-card" key={label}>
@@ -93,6 +147,9 @@ export default function Dashboard({
                     </div>
                 ))}
             </div>
+            {modal === "weight" && (
+                <BodyWeightForm onClose={() => setModal(null)} />
+            )}
             <div className="dashboard-columns">
                 <section className="panel today-panel">
                     <div className="panel-heading">
@@ -211,7 +268,10 @@ export default function Dashboard({
                                                 })}
                                             </span>
                                             <strong>
-                                                {entry.scheduled_date.slice(8, 10)}
+                                                {entry.scheduled_date.slice(
+                                                    8,
+                                                    10,
+                                                )}
                                             </strong>
                                         </div>
                                         <div className="upcoming-info">
