@@ -16,8 +16,17 @@ import {
     Button,
     ButtonLink,
     EmptyState,
+    formatWeight,
 } from "../../Components/UI";
 import ExerciseEditor, { Thumbnail } from "../../Features/ExerciseEditor";
+import IconPicker from "../../Components/IconPicker";
+import WeekdayPicker from "../../Components/WeekdayPicker";
+import {
+    clearSingleExerciseGroups,
+    saveExerciseWithPartner,
+    supersetPartners,
+} from "../../Features/supersets";
+
 const focusAreas = [
     "Chest",
     "Back",
@@ -30,27 +39,30 @@ const focusAreas = [
     "Mobility",
     "Other",
 ];
-export default function Form({ plan, day }) {
+export default function Form({ plan, day, customExercises = [] }) {
     const [exercises, setExercises] = useState(
         (day?.exercises || []).map((e) => ({
             ...e,
             thumbnail: null,
             remove_thumbnail: false,
+            custom_icon: null,
+            remove_custom_icon: false,
             localKey: e.id,
         })),
     );
     const [editor, setEditor] = useState(null);
     const form = useForm({
+        icon: day?.icon || "",
         title: day?.title || "",
         type: day?.type || "training",
         focus_area: day?.focus_area || "",
         notes: day?.notes || "",
+        weekdays: day?.weekdays || [],
+        default_time: day?.default_time?.slice(0, 5) || "",
     });
-    const updateExercise = (draft) => {
+    const updateExercise = (draft, partnerKey, libraryPartner) => {
         setExercises((items) =>
-            editor.index == null
-                ? [...items, { ...draft, localKey: crypto.randomUUID() }]
-                : items.map((e, i) => (i === editor.index ? draft : e)),
+            saveExerciseWithPartner(items, draft, partnerKey, libraryPartner),
         );
         setEditor(null);
     };
@@ -73,22 +85,34 @@ export default function Form({ plan, day }) {
                     ? exercises.map(
                           ({
                               id,
+                              icon,
                               name,
                               sets,
                               reps,
+                              target_weight,
                               superset_group,
                               notes,
                               thumbnail,
                               remove_thumbnail,
+                              library_key,
+                              save_to_library,
+                              custom_icon,
+                              remove_custom_icon,
                           }) => ({
                               id,
+                              icon,
                               name,
                               sets,
                               reps,
+                              target_weight,
                               superset_group,
                               notes,
                               thumbnail,
                               remove_thumbnail,
+                              library_key,
+                              save_to_library,
+                              custom_icon,
+                              remove_custom_icon,
                           }),
                       )
                     : [],
@@ -165,6 +189,14 @@ export default function Form({ plan, day }) {
                             </select>
                         </Field>
                     </div>
+                    <IconPicker
+                        label="Training day icon"
+                        value={form.data.icon}
+                        type={form.data.type}
+                        focus={form.data.focus_area}
+                        onChange={(value) => form.setData("icon", value)}
+                        error={form.errors.icon}
+                    />
                     <Field label="Notes" error={form.errors.notes}>
                         <textarea
                             rows={2}
@@ -176,6 +208,14 @@ export default function Form({ plan, day }) {
                             placeholder="Focus, goals, and reminders for this day"
                         />
                     </Field>
+                    <div className="workout-schedule-settings">
+                        <WeekdayPicker value={form.data.weekdays} onChange={(value) => form.setData("weekdays", value)}
+                            error={form.errors.weekdays || Object.entries(form.errors).find(([key]) => key.startsWith("weekdays."))?.[1]} />
+                        <Field label="Usual time (optional)" error={form.errors.default_time}>
+                            <input type="time" value={form.data.default_time} onInput={(event) => form.setData("default_time", event.target.value)} />
+                        </Field>
+                        <p className="field-hint">{plan.start_date && plan.end_date ? `Plan period: ${plan.start_date} to ${plan.end_date}.` : "Set plan start/end dates from Edit plan to use weekday scheduling."}</p>
+                    </div>
                 </section>
                 {form.data.type === "training" ? (
                     <section className="panel builder-exercises">
@@ -218,6 +258,7 @@ export default function Form({ plan, day }) {
                                             <th>Exercise</th>
                                             <th>Sets</th>
                                             <th>Reps / duration</th>
+                                            <th>Target Weight</th>
                                             <th>Superset</th>
                                             <th className="align-right">
                                                 Actions
@@ -251,17 +292,31 @@ export default function Form({ plan, day }) {
                                                 </td>
                                                 <td>{exercise.sets}</td>
                                                 <td>{exercise.reps}</td>
+                                                <td className="weight-value">
+                                                    {formatWeight(
+                                                        exercise.target_weight,
+                                                    )}
+                                                </td>
                                                 <td>
-                                                    {exercise.superset_group ? (
-                                                        <span className="superset-badge">
-                                                            Superset{" "}
-                                                            {
-                                                                exercise.superset_group
-                                                            }
+                                                    {supersetPartners(
+                                                        exercise,
+                                                        exercises,
+                                                    ).length ? (
+                                                        <span className="superset-badge superset-partners">
+                                                            With{" "}
+                                                            {supersetPartners(
+                                                                exercise,
+                                                                exercises,
+                                                            )
+                                                                .map(
+                                                                    (item) =>
+                                                                        item.name,
+                                                                )
+                                                                .join(" + ")}
                                                         </span>
                                                     ) : (
                                                         <span className="muted">
-                                                            —
+                                                            On its own
                                                         </span>
                                                     )}
                                                 </td>
@@ -317,13 +372,15 @@ export default function Form({ plan, day }) {
                                                             onClick={() =>
                                                                 setExercises(
                                                                     (items) =>
-                                                                        items.filter(
-                                                                            (
-                                                                                _,
-                                                                                j,
-                                                                            ) =>
-                                                                                i !==
-                                                                                j,
+                                                                        clearSingleExerciseGroups(
+                                                                            items.filter(
+                                                                                (
+                                                                                    _,
+                                                                                    j,
+                                                                                ) =>
+                                                                                    i !==
+                                                                                    j,
+                                                                            ),
                                                                         ),
                                                                 )
                                                             }
@@ -341,7 +398,7 @@ export default function Form({ plan, day }) {
                             <EmptyState
                                 compact
                                 title="Start with your first movement"
-                                description="Add your exercises, sets, reps, and optional supersets."
+                                description="Choose exercises from the library or create your own, then add sets, reps, and optional supersets."
                             >
                                 <Button
                                     type="button"
@@ -354,8 +411,9 @@ export default function Form({ plan, day }) {
                             </EmptyState>
                         )}
                         <div className="builder-note">
-                            Exercises sharing a superset letter belong together.
-                            Changes are saved with your training day.
+                            To create a superset, choose a partner from this
+                            workout or directly from the library. Changes are
+                            saved with your training day.
                         </div>
                     </section>
                 ) : (
@@ -393,7 +451,9 @@ export default function Form({ plan, day }) {
             </form>
             {editor && (
                 <ExerciseEditor
+                    customExercises={customExercises}
                     exercise={editor.exercise}
+                    exercises={exercises}
                     onSave={updateExercise}
                     onClose={() => setEditor(null)}
                 />

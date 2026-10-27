@@ -56,7 +56,7 @@ class TrainingPlanController extends Controller
     public function destroy(TrainingPlan $trainingPlan)
     {
         Gate::authorize('delete', $trainingPlan);
-        $paths = $trainingPlan->trainingDays()->with('exercises')->get()->flatMap(fn ($day) => $day->exercises->pluck('thumbnail_path'))->filter()->all();
+        $paths = $trainingPlan->trainingDays()->with('exercises')->get()->flatMap(fn ($day) => $day->exercises->flatMap(fn ($exercise) => [$exercise->thumbnail_path, $exercise->custom_icon_path]))->filter()->all();
         $trainingPlan->delete();
         Storage::disk('public')->delete($paths);
 

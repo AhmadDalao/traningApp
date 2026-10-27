@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
-import { Pencil, CalendarPlus, Coffee, Trash2, Dumbbell } from "lucide-react";
+import { Pencil, CalendarPlus, Trash2 } from "lucide-react";
 import {
     PageHeader,
     Breadcrumbs,
@@ -10,6 +10,8 @@ import {
     Modal,
     ConfirmDialog,
 } from "../../Components/UI";
+import TrainingIcon from "../../Components/TrainingIcon";
+import { weekdaySummary } from "../../Components/WeekdayPicker";
 import ExerciseList from "../../Features/ExerciseList";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 export default function Show({ day }) {
@@ -49,13 +51,19 @@ export default function Show({ day }) {
             </PageHeader>
             <div className="detail-meta">
                 <TypeBadge type={day.type} />
-                {day.focus_area && (
-                    <span>
-                        <Dumbbell size={16} />
-                        {day.focus_area}
-                    </span>
-                )}
+                <span>
+                    <TrainingIcon
+                        icon={day.icon}
+                        type={day.type}
+                        focus={day.focus_area}
+                        size={18}
+                    />
+                    {day.type === "rest"
+                        ? "Recovery"
+                        : day.focus_area || "General training"}
+                </span>
                 <span>From {plan.name}</span>
+                <span>{weekdaySummary(day.weekdays || [])}{day.default_time ? ` · ${day.default_time.slice(0, 5)}` : ""}</span>
             </div>
             {day.notes && (
                 <section className="panel notes-panel">
@@ -65,7 +73,7 @@ export default function Show({ day }) {
             )}
             {day.type === "rest" ? (
                 <section className="rest-callout">
-                    <Coffee size={32} />
+                    <TrainingIcon icon={day.icon} type={day.type} size={32} />
                     <div>
                         <h2>Recharge for what’s next.</h2>
                         <p>This is a rest day. No exercises required.</p>
@@ -82,8 +90,8 @@ export default function Show({ day }) {
                                 </span>
                             </h2>
                             <p>
-                                Follow the order below. Matching superset
-                                letters go together.
+                                Exercises linked in a superset are performed
+                                together.
                             </p>
                         </div>
                     </div>

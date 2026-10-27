@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import {
     Pencil,
     Trash2,
     CalendarDays,
-    Dumbbell,
     Layers,
-    Coffee,
     CheckCircle2,
     MinusCircle,
 } from "lucide-react";
@@ -18,29 +16,58 @@ import {
     StatusBadge,
     TypeBadge,
     ConfirmDialog,
+    Button,
+    TimeLabel,
 } from "../../Components/UI";
+import TrainingIcon from "../../Components/TrainingIcon";
 import ExerciseList from "../../Features/ExerciseList";
 import SessionStatusActions from "../../Features/SessionStatusActions";
-export default function Show({ entry }) {
+import ActualWeightsForm from "../../Features/ActualWeightsForm";
+export default function Show({ entry, workout, history = false }) {
     const [deleting, setDeleting] = useState(false);
+    const [editingWeights, setEditingWeights] = useState(false);
+    const { timezone } = usePage().props;
     const day = entry.training_day;
-    const exercises = day?.exercises || [];
+    const exercises = workout?.exercises || [];
+    const saved = Boolean(entry.workout_snapshot);
+    const canRecordWeights =
+        entry.status === "completed" &&
+        entry.entry_type === "training" &&
+        saved &&
+        exercises.length > 0;
+    const backUrl = history
+        ? "/training-history"
+        : `/calendar?date=${entry.scheduled_date}`;
     return (
         <>
             <Head title={entry.title} />
             <Breadcrumbs
                 items={[
                     {
-                        label: "Calendar",
-                        href: `/calendar?date=${entry.scheduled_date}`,
+                        label: history ? "Training History" : "Calendar",
+                        href: backUrl,
                     },
                     { label: entry.title },
                 ]}
             />
             <PageHeader
-                eyebrow="YOUR SCHEDULED SESSION"
+                eyebrow={
+                    history
+                        ? "TRAINING HISTORY SESSION DETAILS"
+                        : "YOUR SCHEDULED SESSION"
+                }
                 title={entry.title}
-                description={<DateLabel date={entry.scheduled_date} long />}
+                description={
+                    <>
+                        <DateLabel date={entry.scheduled_date} long />
+                        {entry.scheduled_time && (
+                            <>
+                                {" "}
+                                · <TimeLabel time={entry.scheduled_time} />
+                            </>
+                        )}
+                    </>
+                }
             >
                 <SessionStatusActions entry={entry} />
                 <ButtonLink
@@ -64,7 +91,22 @@ export default function Show({ entry }) {
                                 ? "Session completed. Keep showing up."
                                 : "Session skipped. There’s always a next one."}
                         </strong>
-                        <p>You can change the status anytime.</p>
+                        <p>
+                            {entry.completed_at && (
+                                <>
+                                    Completed on{" "}
+                                    {new Date(
+                                        entry.completed_at,
+                                    ).toLocaleString("en-GB", {
+                                        timeZone: timezone,
+                                        dateStyle: "medium",
+                                        timeStyle: "short",
+                                    })}
+                                    .{" "}
+                                </>
+                            )}
+                            You can change the status anytime.
+                        </p>
                     </div>
                 </div>
             )}
@@ -80,7 +122,12 @@ export default function Show({ entry }) {
                 <div>
                     <span className="meta-label">FOCUS AREA</span>
                     <strong>
-                        <Dumbbell size={17} />
+                        <TrainingIcon
+                            icon={entry.icon}
+                            type={entry.entry_type}
+                            focus={entry.focus_area}
+                            size={18}
+                        />
                         {entry.entry_type === "rest"
                             ? "Recovery"
                             : entry.focus_area || "General training"}
@@ -104,7 +151,11 @@ export default function Show({ entry }) {
             )}
             {entry.entry_type === "rest" ? (
                 <section className="rest-callout">
-                    <Coffee size={32} />
+                    <TrainingIcon
+                        icon={entry.icon}
+                        type={entry.entry_type}
+                        size={32}
+                    />
                     <div>
                         <h2>Take a breath. Recharge.</h2>
                         <p>
@@ -117,8 +168,17 @@ export default function Show({ entry }) {
                 <section className="panel">
                     <div className="panel-heading">
                         <div>
-                            <h2>Your workout</h2>
-                            {day ? (
+                            <h2>{saved ? "Saved workout" : "Your workout"}</h2>
+                            {saved ? (
+                                <p>
+                                    {workout?.training_day_title || entry.title}
+                                    {workout?.training_plan_name
+                                        ? ` · ${workout.training_plan_name}`
+                                        : ""}
+                                    . Changes to your training plan won’t change
+                                    this workout.
+                                </p>
+                            ) : day && entry.status !== "completed" ? (
                                 <p>
                                     From{" "}
                                     <Link
@@ -130,30 +190,44 @@ export default function Show({ entry }) {
                                     · {day.training_plan.name}
                                 </p>
                             ) : (
-                                <p>
-                                    The original training day was deleted. Your
-                                    session history is preserved.
-                                </p>
+                                <p>Your session details are preserved.</p>
                             )}
                         </div>
+                        {canRecordWeights && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => setEditingWeights(true)}
+                            >
+                                <Pencil size={15} />
+                                Edit actual weights
+                            </Button>
+                        )}
                     </div>
-                    {day ? (
-                        <ExerciseList exercises={exercises} />
+                    {workout ? (
+                        <ExerciseList
+                            exercises={exercises}
+                            showActualWeights={
+                                entry.status === "completed" && saved
+                            }
+                            emptyDescription={
+                                saved
+                                    ? "No exercises were available when this workout was saved."
+                                    : undefined
+                            }
+                        />
                     ) : (
                         <div className="historical-note">
-                            Exercise details are no longer available for this
-                            session.
+                            {entry.status === "completed"
+                                ? "This session was completed before workout records were saved. Its original exercises and completion time aren’t available."
+                                : "The original training day was deleted. Exercise details are no longer available for this session."}
                         </div>
                     )}
                 </section>
             )}
             <div className="session-footer">
-                <ButtonLink
-                    variant="secondary"
-                    href={`/calendar?date=${entry.scheduled_date}`}
-                >
+                <ButtonLink variant="secondary" href={backUrl}>
                     <CalendarDays size={16} />
-                    Back to calendar
+                    {history ? "Back to Training History" : "Back to calendar"}
                 </ButtonLink>
                 <button
                     className="text-button danger-text"
@@ -163,6 +237,13 @@ export default function Show({ entry }) {
                     Delete session
                 </button>
             </div>
+            {editingWeights && (
+                <ActualWeightsForm
+                    entry={entry}
+                    exercises={exercises}
+                    onClose={() => setEditingWeights(false)}
+                />
+            )}
             {deleting && (
                 <ConfirmDialog
                     title="Delete training session?"

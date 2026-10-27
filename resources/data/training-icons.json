@@ -1,0 +1,21 @@
+[
+    { "id": "dumbbell", "label": "Strength" },
+    { "id": "biceps", "label": "Arms" },
+    { "id": "weight", "label": "Weights" },
+    { "id": "activity", "label": "Cardio" },
+    { "id": "heart", "label": "Conditioning" },
+    { "id": "bike", "label": "Cycling" },
+    { "id": "footprints", "label": "Legs & walking" },
+    { "id": "bodyweight", "label": "Bodyweight" },
+    { "id": "stretch", "label": "Mobility" },
+    { "id": "flame", "label": "Intensity" },
+    { "id": "target", "label": "Focus" },
+    { "id": "mountain", "label": "Hiking" },
+    { "id": "waves", "label": "Swimming" },
+    { "id": "timer", "label": "Intervals" },
+    { "id": "wind", "label": "Recovery" },
+    { "id": "coffee", "label": "Rest" },
+    { "id": "moon", "label": "Sleep" },
+    { "id": "zap", "label": "Power" },
+    { "id": "trophy", "label": "Goal" }
+]

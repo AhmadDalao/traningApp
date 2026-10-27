@@ -28,13 +28,17 @@ class DemoSeeder extends Seeder
         foreach ($definitions as $position => [$title, $focus, $exercises]) {
             $day = $plan->trainingDays()->create(['title' => $title, 'type' => $focus ? 'training' : 'rest', 'focus_area' => $focus, 'notes' => $focus ? 'Keep your movements controlled. Focus on form and steady progress.' : 'Take it easy and give yourself time to recover.', 'position' => $position]);
             foreach ($exercises as $i => [$name, $sets, $reps, $group]) {
-                $day->exercises()->create(['name' => $name, 'sets' => $sets, 'reps' => $reps, 'superset_group' => $group, 'position' => $i]);
+                $day->exercises()->create(['name' => $name, 'sets' => $sets, 'reps' => $reps, 'superset_group' => $group, 'target_weight' => ['Back Squat' => 80, 'Leg Press' => 100, 'Lat Pulldown' => 45][$name] ?? null, 'position' => $i]);
             }
             $days[$title] = $day;
         }
         foreach ([['Leg Day', 0, 'planned'], ['Cardio', 0, 'completed'], ['Back Day', -1, 'completed'], ['Cardio', -2, 'skipped'], ['Rest Day', 1, 'planned'], ['Shoulder Day', 2, 'planned'], ['Cardio', 3, 'planned'], ['Back Day', 4, 'planned'], ['Leg Day', 6, 'planned']] as [$title, $offset, $status]) {
             $day = $days[$title];
-            $user->scheduleEntries()->create(['training_day_id' => $day->id, 'title' => $title, 'entry_type' => $day->type, 'focus_area' => $day->focus_area, 'scheduled_date' => today()->addDays($offset), 'status' => $status, 'notes' => $title === 'Leg Day' ? 'Evening session. Start with a gentle warm-up.' : null]);
+            $entry = $user->scheduleEntries()->create(['training_day_id' => $day->id, 'title' => $title, 'entry_type' => $day->type, 'focus_area' => $day->focus_area, 'scheduled_date' => today()->addDays($offset), 'scheduled_time' => $title === 'Leg Day' ? '19:00' : null, 'status' => $status, 'notes' => $title === 'Leg Day' ? 'Evening session. Start with a gentle warm-up.' : null]);
+            if ($status === 'completed') {
+                $paths = [];
+                $entry->update(['completed_at' => today()->addDays($offset)->addHours(8), 'workout_snapshot' => $entry->captureWorkoutSnapshot($paths)]);
+            }
         }
     }
 }

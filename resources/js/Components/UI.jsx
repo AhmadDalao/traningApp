@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Link, router } from "@inertiajs/react";
 import {
     X,
-    Dumbbell,
     CalendarDays,
     Check,
     Circle,
     Minus,
     Trash2,
     ArrowRight,
-    Coffee,
 } from "lucide-react";
+import TrainingIcon from "./TrainingIcon";
+
 export function Button({
     children,
     className = "",
@@ -85,13 +85,17 @@ export function TypeBadge({ type }) {
         </span>
     );
 }
-export function DayIcon({ type, focus, large = false }) {
-    const Icon = type === "rest" ? Coffee : Dumbbell;
+export function DayIcon({ icon, type, focus, large = false }) {
     return (
         <div
             className={`day-icon ${type === "rest" ? "rest-icon" : ""} ${large ? "large" : ""}`}
         >
-            <Icon size={large ? 28 : 21} />
+            <TrainingIcon
+                icon={icon}
+                type={type}
+                focus={focus}
+                size={large ? 28 : 21}
+            />
         </div>
     );
 }
@@ -212,6 +216,14 @@ export function ConfirmDialog({ title, description, url, onClose }) {
 }
 export function DateLabel({ date, long = false }) {
     return formatDate(date, long);
+}
+export function formatWeight(value) {
+    return value === null || value === undefined || value === ""
+        ? "—"
+        : `${Number(value).toLocaleString("en-GB", { maximumFractionDigits: 2 })} kg`;
+}
+export function TimeLabel({ time }) {
+    return time ? time.slice(0, 5) : null;
 }
 export function formatDate(date, long = false) {
     return new Date(`${date.slice(0, 10)}T12:00:00`).toLocaleDateString(

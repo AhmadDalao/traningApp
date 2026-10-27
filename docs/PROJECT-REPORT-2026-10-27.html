@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Planner — Project report · 27 October 2026</title>
+<style>
+:root{--ink:#17263b;--muted:#56677d;--line:#dce4ee;--blue:#155de0;--soft:#edf4ff;--green:#167751}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f4f6fa;color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--blue)}main{max-width:1120px;margin:auto;padding:48px 32px 72px}header{padding:44px;background:#14253e;color:white;border-radius:20px}header p{max-width:780px;color:#c8d5e8}h1{font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-1.8px;margin:14px 0 20px}h2{font-size:26px;line-height:1.25;letter-spacing:-.5px;margin:0 0 18px}h3{font-size:18px;margin:22px 0 8px}p{margin:10px 0 16px}.eyebrow{font-size:12px;letter-spacing:2px;font-weight:700;text-transform:uppercase}.pill{display:inline-block;border:1px solid #516580;border-radius:99px;padding:5px 12px;font-size:13px;margin:6px 8px 0 0}.pill a{color:white}nav{display:flex;gap:9px;flex-wrap:wrap;padding:22px 0}nav a{border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:white;text-decoration:none;font-size:14px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:20px}.stat b{display:block;font-size:30px;line-height:1.2}.stat span{font-size:13px;color:var(--muted)}section{background:white;border:1px solid var(--line);border-radius:14px;padding:30px;margin:22px 0;scroll-margin-top:20px}.note{background:var(--soft);border-left:4px solid var(--blue);padding:15px 18px;border-radius:0 8px 8px 0}.small{font-size:13px;color:var(--muted)}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;background:#f2f5fa;color:#41546d;font-size:12px;text-transform:uppercase;letter-spacing:.7px}th,td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}td:first-child{font-weight:650;min-width:140px}tr:last-child td{border-bottom:0}code{font:13px ui-monospace,SFMono-Regular,Consolas,monospace;background:#f0f3f8;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}pre{white-space:pre;overflow-x:auto;background:#f3f6fa;border:1px solid var(--line);padding:22px;border-radius:10px;font:13px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}.flow>div{border:1px solid #bacff0;background:var(--soft);border-radius:10px;padding:20px}.flow b{display:block;margin-bottom:7px}.flow p{font-size:14px;margin:0;color:var(--muted)}ul,ol{padding-left:22px}li{margin:7px 0}.phase{border-top:1px solid var(--line);padding-top:16px;margin-top:18px}.phase:first-of-type{border-top:0;padding-top:0}footer{color:var(--muted);font-size:13px;padding:12px 2px}.tag{color:var(--green);font-weight:700}.screen-only{font-size:13px}
+@media(max-width:680px){main{padding:18px 14px 40px}header{padding:26px 22px;border-radius:12px}section{padding:22px 18px}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:15px}.flow{grid-template-columns:1fr}h2{font-size:23px}td,th{padding:10px}table{min-width:520px}pre{padding:15px;font-size:12px}}
+@media print{body{background:white;font-size:10pt}main{max-width:none;padding:0}header{background:white;color:var(--ink);padding:0 0 20px;border-radius:0;border-bottom:3px solid var(--blue)}header p{color:var(--muted)}h1{font-size:30pt}.pill,.pill a{color:var(--ink);border-color:var(--line)}nav,.screen-only{display:none}.stats{margin-top:20px}.stat b{font-size:20pt}section{padding:18px 0;border:0;border-radius:0;margin:10px 0}h2,h3{break-after:avoid}tr,.stat,.flow>div,.note{break-inside:avoid}th,td{font-size:9pt;padding:8px}pre{font-size:9pt}.table-wrap{overflow:visible}a{text-decoration:none;color:inherit}footer{font-size:8pt}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">Product &amp; technical baseline · 27 October 2026</div>
+<h1>Training Planner<br>What we have built.</h1>
+<p>A deployed personal workout planner covering reusable plans, exercise selection, calendar scheduling, session completion, and preserved training history. This report maps the current system and proposes the next development stages.</p>
+<span class="pill">Latest deployment: 26 Oct 2026</span><span class="pill">Source release: v1.0.0 · 27 Oct 2026</span><span class="pill"><a href="https://training.ahmaddalao.com">training.ahmaddalao.com</a></span>
+</header>
+<nav aria-label="Report sections"><a href="#features">Features</a><a href="#architecture">Architecture</a><a href="#data">Data model</a><a href="#code">Code map</a><a href="#rules">Product rules</a><a href="#readiness">Delivery status</a><a href="#roadmap">Future updates</a></nav>
+<div class="stats">
+<div class="stat"><b>876</b><span>Built-in exercises</span></div><div class="stat"><b>873</b><span>Bundled exercise photos</span></div><div class="stat"><b>19</b><span>Built-in icon choices</span></div><div class="stat"><b>77</b><span>Tests in last verified run: 64 PHP + 13 JS</span></div>
+</div>
+
+<section id="features">
+<h2>Implemented features</h2>
+<p>These modules are included in the deployed release. The application supports independent user accounts, each with its own plans and records.</p>
+<div class="table-wrap"><table><thead><tr><th>Module</th><th>What works today</th></tr></thead><tbody>
+<tr><td>Accounts</td><td>Registration with immediate sign-in, login, remember-me, logout, password hashing, login throttling, and ownership checks on planner data.</td></tr>
+<tr><td>Overview</td><td>This week's planned/completed workout counts, today's sessions, and the next seven days. Today's sessions and Up next use equal 520px scroll areas with fixed headings. Sessions can be completed directly from Overview.</td></tr>
+<tr><td>Training plans</td><td>Create, view, edit, delete, and paginate plans. Each plan has a name, description, optional start/end dates, and ordered training or rest days.</td></tr>
+<tr><td>Workout builder</td><td>Title, type, focus area, icon, notes, weekdays, usual time, and ordered exercises. Exercises have sets, reps/duration, optional target weight, notes, thumbnails, and supersets.</td></tr>
+<tr><td>Exercise library</td><td>Search 876 built-in exercises; filter by focus and equipment. Selecting an exercise fills its name, suggested icon, and photo. Three entries use an icon fallback. Custom exercises are saved to the user's reusable library.</td></tr>
+<tr><td>Icons and photos</td><td>19 searchable icon choices; optional custom exercise icons and photos. Custom icons are square, 64–512px, at most 512 KB; 128 × 128px is recommended. Photos accept JPG, PNG, or WebP up to 2 MB.</td></tr>
+<tr><td>Supersets</td><td>Choose another exercise already in the workout or select a partner directly from the library. The partner has its own prescription and media. Both exercises are linked when added; cancelling does not leave a stray exercise.</td></tr>
+<tr><td>Plan scheduling</td><td>Combine plan dates with each workout's weekdays and optional time. Preview matching sessions before adding them to Calendar. Shortcuts: Weekdays (Sun–Thu), Weekends (Fri–Sat), Every day, and Clear. Repeated submissions avoid duplicates.</td></tr>
+<tr><td>Calendar and sessions</td><td>Month, week, and list views; status/type filtering; manual scheduling; multiple sessions on one date; standalone rest days; session editing, deletion, and Planned/Completed/Skipped status changes.</td></tr>
+<tr><td>Completion and weights</td><td>One-click session completion captures a timestamp and saved workout. Record optional actual weight for each completed exercise, separately from its planned target. Both use kilograms.</td></tr>
+<tr><td>Training History</td><td>Past sessions and shared session details, summary counts, status/type/plan filters, and date periods: All time, Today, Yesterday, Last 7 days, Last 30 days, This month, and Custom. Page sizes: <strong>10 by default</strong>, 25, 50, 100, or All.</td></tr>
+<tr><td>Responsive interface</td><td>Shared mobile navigation, reusable modals/forms, validation and loading states, empty states, contained table scrolling, and layouts previously checked at phone, tablet, and desktop widths.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="architecture">
+<h2>Architecture</h2>
+<p><strong>One Laravel application with a React interface.</strong> Inertia connects Laravel routes and controllers to React pages. Authentication, database access, validation, and permissions stay in Laravel. This structure is suitable for the next planned feature stages.</p>
+<div class="flow" aria-label="Application request flow">
+<div><b>1 · React interface</b><p>Pages, forms, modals, exercise pickers, and FullCalendar. Inertia handles navigation and submissions.</p></div>
+<div><b>2 · Laravel application</b><p>Routes → validation and ownership checks → controllers/services → Eloquent models.</p></div>
+<div><b>3 · Persistent storage</b><p>MariaDB stores accounts and training data. Filesystem storage holds uploads and preserved workout media.</p></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Layer</th><th>Current technology</th></tr></thead><tbody>
+<tr><td>Backend</td><td>Laravel 12 / PHP; PHP 8.3.36 recorded on Hostinger at deployment.</td></tr>
+<tr><td>Frontend</td><td>React 19, Inertia 2, Vite 6, FullCalendar 6, Lucide icons, and application CSS.</td></tr>
+<tr><td>Database</td><td>MySQL-compatible schema; production uses MariaDB. SQLite and MySQL were used for test verification.</td></tr>
+<tr><td>Authentication</td><td>Laravel session authentication. No separate public API or token-based mobile authentication.</td></tr>
+<tr><td>Hosting</td><td>Hostinger PHP hosting. Frontend assets are compiled locally; no Node server, queue worker, or ongoing recurrence scheduler is required for current features.</td></tr>
+</tbody></table></div>
+<p class="note"><strong>Keep this architecture for the next phase.</strong> Add focused modules to the existing app. A separate API becomes useful if native mobile apps or external integrations become actual requirements.</p>
+</section>
+
+<section id="data">
+<h2>Data model and relationships</h2>
+<pre aria-label="Data relationships">User
+├── Training plans
+│   └── Training / rest day templates
+│       └── Ordered exercise prescriptions
+├── Scheduled sessions ── optional link to a day template
+│   └── Saved workout snapshot after first completion
+│       └── Exercise details, images, target and actual weights
+└── Private custom exercise library
+
+Shared built-in library: bundled JSON + static exercise photos
+Training History: a filtered view of scheduled sessions</pre>
+<div class="table-wrap"><table><thead><tr><th>Table</th><th>Main responsibility</th></tr></thead><tbody>
+<tr><td><code>users</code></td><td>Account identity, hashed password, and remember token.</td></tr>
+<tr><td><code>training_plans</code></td><td>User ownership, name, description, and optional plan dates.</td></tr>
+<tr><td><code>training_days</code></td><td>Plan ownership, training/rest type, focus, icon, notes, ordering, weekdays, and usual time.</td></tr>
+<tr><td><code>training_exercises</code></td><td>Day ownership, name, sets, text reps/duration, target weight, superset group, media paths, library key, and ordering.</td></tr>
+<tr><td><code>exercise_library_items</code></td><td>User-owned custom exercises and their independent media. Built-in exercises are not rows in this table.</td></tr>
+<tr><td><code>schedule_entries</code></td><td>User ownership, optional template link, scheduled date/time, status, notes, completion timestamp, saved workout JSON, and a unique generated-occurrence key.</td></tr>
+</tbody></table></div>
+<p><strong>There is no separate history table.</strong> Calendar, Overview, and Training History read the same session records. Completion adds a versioned <code>workout_snapshot</code> to that session. Actual weights live inside this snapshot; the template retains its target weights.</p>
+<p>Deleting a plan or day removes its exercise templates. Scheduled sessions remain with their basic details, and completed sessions retain their saved workout and copied images. An uncompleted session whose template was deleted cannot reconstruct those exercises.</p>
+</section>
+
+<section id="code">
+<h2>Repository structure and extension points</h2>
+<pre>PersonalTraining/
+├── app/
+│   ├── Http/Controllers/   Auth, Overview, plans, days, sessions, history
+│   ├── Http/Requests/      Input validation and request authorization
+│   ├── Http/Middleware/   Shared Inertia data: user, timezone, today
+│   ├── Models/            Database relationships and saved workouts
+│   ├── Policies/          Plan, day, and session ownership checks
+│   └── Services/          ExerciseLibrary and PlanSchedule
+├── database/
+│   ├── migrations/        Base schema and additive feature updates
+│   └── seeders/           Local demo and crowded-layout sample data
+├── resources/
+│   ├── js/Pages/          Auth, Dashboard, plans, days, Calendar,
+│   │                      sessions, and Training History
+│   ├── js/Features/       Domain forms, pickers, lists, superset logic
+│   ├── js/Components/     Layouts, shared UI, icons, weekday picker
+│   ├── css/app.css        Shared styling and responsive rules
+│   └── data/              Built-in exercise and icon catalogs
+├── routes/web.php         App routes and authentication middleware
+├── public/                Compiled assets and bundled exercise photos
+├── storage/app/public/    Uploaded and preserved exercise media
+├── tests/Feature/         Laravel behavior and authorization tests
+├── tests/js/              Superset logic tests
+├── scripts/               Reproducible exercise-library import
+└── docs/                  This planning report</pre>
+<div class="table-wrap"><table><thead><tr><th>Change area</th><th>Start here</th></tr></thead><tbody>
+<tr><td>Navigation and look</td><td><code>Components/AppLayout.jsx</code>, <code>Components/AuthLayout.jsx</code>, <code>Components/UI.jsx</code>, <code>resources/css/app.css</code>.</td></tr>
+<tr><td>Workout building</td><td><code>Pages/TrainingDays/Form.jsx</code>, <code>Features/ExerciseEditor.jsx</code>, <code>Features/ExerciseLibraryPicker.jsx</code>, <code>Features/supersets.js</code>, and <code>TrainingDayController.php</code>.</td></tr>
+<tr><td>Scheduling</td><td><code>Components/WeekdayPicker.jsx</code>, <code>Pages/TrainingPlans/Schedule.jsx</code>, <code>PlanScheduleController.php</code>, and <code>Services/PlanSchedule.php</code>.</td></tr>
+<tr><td>Session tracking</td><td><code>ScheduleEntryController.php</code>, <code>Models/ScheduleEntry.php</code>, <code>Pages/ScheduleEntries/Show.jsx</code>, and <code>Features/ActualWeightsForm.jsx</code>.</td></tr>
+<tr><td>History and reporting</td><td><code>TrainingHistoryController.php</code>, <code>Pages/TrainingHistory/Index.jsx</code>, and saved session snapshots.</td></tr>
+</tbody></table></div>
+<p class="small">React paths above are relative to <code>resources/js/</code>; controllers are under <code>app/Http/Controllers/</code>. Forms, modals, badges, icon pickers, exercise lists, and pagination already exist and should be reused.</p>
+</section>
+
+<section id="rules">
+<h2>Rules future updates must respect</h2>
+<ol>
+<li><strong>A workout template and a completed workout are separate records.</strong> Editing a plan must not rewrite completed history. First completion freezes the prescription and copies its media; optional actual weights remain editable.</li>
+<li><strong>History filters use the scheduled date.</strong> Completion time is stored separately. History includes previous dates and today's sessions once their optional time has passed; date-only entries for today are included. Future sessions are excluded.</li>
+<li><strong>Calendar and History share data, but not filter state.</strong> Selecting Today in History does not navigate Calendar. Changing a session status is reflected wherever that record is shown.</li>
+<li><strong>Scheduling is explicit and finite.</strong> Saving plan dates or weekday choices alone does not add sessions. Preview and confirm to generate today/future occurrences. Preview limits are one year and 1,000 sessions. Later edits do not automatically move or delete existing sessions.</li>
+<li><strong>Rest is a session type.</strong> Planned, Completed, and Skipped are statuses. Rest days do not count as completed training workouts.</li>
+<li><strong>Supersets belong within one workout.</strong> They are stored as shared group strings on exercises. Choosing from the library creates a workout exercise before linking it; a superset does not link two calendar sessions.</li>
+<li><strong>Time and units are shared settings today.</strong> The app uses Asia/Riyadh and kilograms. Dashboard weeks run Monday–Sunday, while the requested Weekdays shortcut is Sunday–Thursday.</li>
+<li><strong>Plans are not per-set logs.</strong> Sets are a count; reps or duration are text. Actual weight is one optional value per exercise. Exact completed reps, durations, and weights for each individual set are not captured.</li>
+</ol>
+</section>
+
+<section id="readiness">
+<h2>Deployment and verification status</h2>
+<p><span class="tag">Deployed</span> · Release <code>planner-20261026-7487adec</code> was published on 26 October 2026. The public files are in <code>public_html/training</code>; the Laravel application and environment are in the private sibling <code>training-planner</code> directory. Uploads are linked into the public web root.</p>
+<ul>
+<li><strong>Release verification, 27 October:</strong> 64 PHP tests / 1,049 assertions on isolated SQLite, 13 JavaScript tests, and the production build passed. The earlier MySQL verification is recorded in the 26 October release notes.</li>
+<li><strong>Live workflow checks, 26 October:</strong> account login, library superset saving, retained history after template edits, schedule preview and duplicate prevention, weekday shortcuts, default history page size, and Today filtering were verified.</li>
+<li><strong>Report-day check, 27 October:</strong> the live login and health endpoints returned HTTP 200. Automated tests were rerun for the source release; the full live browser workflow checks remain dated 26 October.</li>
+<li><strong>Preview account at creation:</strong> 2 sample plans, 4 workout/rest templates, 45 scheduled sessions, and 17 history records. History counts change as scheduled dates and times pass. These figures are the deployment fixture, not a current usage report.</li>
+<li><strong>Release backup:</strong> database, uploads, earlier source, and environment were backed up privately. Deployment preserved existing records and settings; temporary deployment endpoints and archives were removed.</li>
+<li><strong>Version control:</strong> release <code>v1.0.0</code> consolidates the deployed application, tests, and documentation in <a href="https://github.com/AhmadDalao/traningApp">AhmadDalao/traningApp</a>, preserving the initial MVP commit. The release verification on 27 October passed 64 PHP tests / 1,049 assertions, 13 JavaScript tests, and the production build. Use this tag as the baseline for future updates.</li>
+</ul>
+<p>Current code includes ownership policies, server validation, CSRF/session handling, and login throttling. Deployment records confirm HTTPS-only session cookies and production debug disabled. This is an implementation report, not a security audit.</p>
+</section>
+
+<section id="roadmap">
+<h2>Recommended next development stages</h2>
+<p>The items below are proposals, not implemented features. Prioritize reliable daily use before adding advanced training analysis.</p>
+<div class="phase"><h3>1 · Build on the release baseline and add account essentials</h3><p>Build future changes from the <code>v1.0.0</code> baseline, document a repeatable deployment/rollback process, and establish scheduled backups with a restore check. Add password reset, profile/password editing, and an account settings page. Current login/register/logout is complete, but account recovery is missing.</p><p class="small">Touches: authentication routes/controllers, account pages, mail configuration, deployment documentation. A simple automated browser smoke test would complement the existing PHP and JavaScript tests.</p></div>
+<div class="phase"><h3>2 · Make everyday planning faster</h3><p>Add duplicate plan/day, a dedicated page to manage custom exercises, favorites/recent exercises, and clear controls to update or remove future generated sessions. Define whether each schedule change affects one occurrence, future occurrences, or the entire remaining plan before implementing it.</p><p class="small">Touches: plan/day controllers, ExerciseLibrary service and picker, PlanSchedule, Calendar. Preserve completed records and manually moved sessions.</p></div>
+<div class="phase"><h3>3 · Add structured workout logging</h3><p>Introduce an active-workout view with actual reps, duration, weight, and completion per set; then add a rest timer and optional effort rating. Use explicit session-exercise and session-set records if set-level reporting becomes a requirement. Keep existing version-1 snapshots readable.</p><p class="small">Decision first: what should a user record during a workout? The present free-text reps/duration and exercise-level weights are insufficient for exact set-volume calculations.</p></div>
+<div class="phase"><h3>4 · Add progress and exports</h3><p>Build exercise progress, personal records, consistency charts, and CSV/PDF exports. Establish a stable exercise identity across library, templates, and saved workouts; completed snapshots currently preserve exercise details but not the library key. Start with completion and exercise-weight trends; exact volume needs the structured logs from stage 3.</p><p class="small">Touches: history queries, snapshot versioning or session-log tables, reporting pages. Historical records cannot supply measurements that were never recorded.</p></div>
+<div class="phase"><h3>5 · Choose the product direction</h3><p>For personal use, consider reminders, an installable mobile experience, and calendar integration. For a coaching product, add coach/client roles, explicit assignments and sharing permissions, then messaging and billing if needed. Decide the audience before designing shared ownership.</p><p class="small">Not currently built: coach/admin dashboard, plan sharing, notifications, payments, AI programming, native mobile apps, offline sync, or an external API. Per-user timezones, preferred weight units, and private media delivery would also be new capabilities; uploaded images currently use public storage URLs.</p></div>
+<p class="note"><strong>Next release recommendation:</strong> account recovery and settings, duplicate plan/day, and custom exercise management—alongside a committed release baseline and repeatable backups. These improve everyday use without changing the existing application structure.</p>
+</section>
+
+<footer>
+<p><strong>Basis:</strong> reviewed the current routes, controllers, requests, models, migrations, services, React pages/components, dependency manifests, README, Git state, and saved deployment verification. Source review, HTTP checks, and release test/build verification: 27 October 2026. Live workflow and MySQL results: 26 October 2026. No application behavior or live user data was changed to prepare this report or tag the source release.</p>
+<p class="screen-only">This report is self-contained and can be printed or saved as PDF using your browser. It contains no account passwords or hosting credentials.</p>
+</footer>
+</main>
+</body>
+</html>

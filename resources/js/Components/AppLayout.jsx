@@ -9,6 +9,7 @@ import {
     Menu,
     X,
     CheckCircle2,
+    History,
 } from "lucide-react";
 export default function AppLayout({ children }) {
     const { auth, flash } = usePage().props;
@@ -25,13 +26,21 @@ export default function AppLayout({ children }) {
             href: "/training-plans",
             label: "Training plans",
             icon: Layers,
-            active: url.startsWith("/training-"),
+            active:
+                url.startsWith("/training-plans") ||
+                url.startsWith("/training-days"),
         },
         {
             href: "/calendar",
             label: "Calendar",
             icon: CalendarDays,
             active: url.startsWith("/calendar") || url.startsWith("/schedule-"),
+        },
+        {
+            href: "/training-history",
+            label: "Training History",
+            icon: History,
+            active: url.startsWith("/training-history"),
         },
     ];
     return (

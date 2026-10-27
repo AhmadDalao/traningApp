@@ -6,6 +6,7 @@ use App\Http\Requests\StoreTrainingDayRequest;
 use App\Http\Requests\UpdateTrainingDayRequest;
 use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
+use App\Services\ExerciseLibrary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -19,7 +20,7 @@ class TrainingDayController extends Controller
     {
         Gate::authorize('update', $trainingPlan);
 
-        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan]);
+        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($trainingPlan->user_id)]);
     }
 
     public function store(StoreTrainingDayRequest $request, TrainingPlan $trainingPlan)
@@ -40,7 +41,7 @@ class TrainingDayController extends Controller
     {
         Gate::authorize('update', $trainingDay);
 
-        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan]);
+        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($trainingDay->trainingPlan->user_id)]);
     }
 
     public function update(UpdateTrainingDayRequest $request, TrainingDay $trainingDay)
@@ -57,7 +58,7 @@ class TrainingDayController extends Controller
         $oldPaths = [];
         try {
             $day = DB::transaction(function () use ($data, $plan, $day, &$newPaths, &$oldPaths) {
-                $fields = collect($data)->only('title', 'type', 'focus_area', 'notes')->all();
+                $fields = collect($data)->only('title', 'type', 'focus_area', 'notes', 'icon', 'weekdays', 'default_time')->all();
                 if ($fields['type'] === 'rest') {
                     $fields['focus_area'] = null;
                 }
@@ -67,28 +68,43 @@ class TrainingDayController extends Controller
                     $day = $plan->trainingDays()->create([...$fields, 'position' => ($plan->trainingDays()->max('position') ?? -1) + 1]);
                 }
                 $existing = $day->exercises()->get()->keyBy('id');
+                $library = app(ExerciseLibrary::class);
                 $kept = [];
                 foreach ($data['type'] === 'training' ? ($data['exercises'] ?? []) : [] as $position => $row) {
                     $exercise = ! empty($row['id']) ? $existing->get($row['id']) : $day->exercises()->make();
-                    $fields = collect($row)->only('name', 'sets', 'reps', 'notes')->all();
+                    $fields = collect($row)->only('name', 'sets', 'reps', 'notes', 'icon', 'target_weight', 'library_key')->all();
                     $fields['position'] = $position;
                     $fields['superset_group'] = empty($row['superset_group']) ? null : strtoupper($row['superset_group']);
-                    if (! empty($row['thumbnail']) || ! empty($row['remove_thumbnail'])) {
-                        if ($exercise->thumbnail_path) {
-                            $oldPaths[] = $exercise->thumbnail_path;
-                        }
-                        $fields['thumbnail_path'] = ! empty($row['thumbnail']) ? $row['thumbnail']->store('exercise-thumbnails', 'public') : null;
-                        if ($fields['thumbnail_path']) {
-                            $newPaths[] = $fields['thumbnail_path'];
+                    $sourceChanged = array_key_exists('library_key', $row) && ($row['library_key'] ?? null) !== $exercise->library_key;
+                    $source = $sourceChanged ? $library->find($row['library_key'] ?? null, $plan->user_id) : null;
+                    foreach (['thumbnail' => 'exercise-thumbnails', 'custom_icon' => 'exercise-icons'] as $media => $directory) {
+                        $column = $media.'_path';
+                        if ($sourceChanged || ! empty($row[$media]) || ! empty($row['remove_'.$media])) {
+                            if ($exercise->$column) {
+                                $oldPaths[] = $exercise->$column;
+                            }
+                            if (! empty($row[$media])) {
+                                $fields[$column] = $row[$media]->store($directory, 'public');
+                                $newPaths[] = $fields[$column];
+                            } else {
+                                $fields[$column] = ! empty($row['remove_'.$media]) ? null : $library->copyMedia($source, $column, $directory, $newPaths);
+                            }
                         }
                     }
                     $exercise->fill($fields)->save();
+                    if (! empty($row['save_to_library']) && ! $exercise->library_key) {
+                        $custom = $library->saveCustom($exercise, $plan->user_id, $day->focus_area, $newPaths);
+                        $exercise->update(['library_key' => 'custom:'.$custom->id]);
+                    }
                     $kept[] = $exercise->id;
                 }
                 foreach ($existing as $exercise) {
                     if (! in_array($exercise->id, $kept)) {
                         if ($exercise->thumbnail_path) {
                             $oldPaths[] = $exercise->thumbnail_path;
+                        }
+                        if ($exercise->custom_icon_path) {
+                            $oldPaths[] = $exercise->custom_icon_path;
                         }
                         $exercise->delete();
                     }
@@ -109,7 +125,7 @@ class TrainingDayController extends Controller
     {
         Gate::authorize('delete', $trainingDay);
         $plan = $trainingDay->training_plan_id;
-        $paths = $trainingDay->exercises()->pluck('thumbnail_path')->filter()->all();
+        $paths = $trainingDay->exercises()->get()->flatMap(fn ($exercise) => [$exercise->thumbnail_path, $exercise->custom_icon_path])->filter()->all();
         $trainingDay->delete();
         Storage::disk('public')->delete($paths);
 

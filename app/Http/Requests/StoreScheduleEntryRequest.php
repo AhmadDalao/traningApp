@@ -26,6 +26,7 @@ class StoreScheduleEntryRequest extends FormRequest
                     }
                 }],
             'title' => 'nullable|string|max:150', 'scheduled_date' => 'required|date_format:Y-m-d', 'notes' => 'nullable|string|max:5000',
+            'scheduled_time' => 'nullable|date_format:H:i',
         ];
     }
 }

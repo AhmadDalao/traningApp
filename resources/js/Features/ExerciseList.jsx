@@ -1,11 +1,18 @@
-import { Dumbbell, Link2 } from "lucide-react";
-import { EmptyState } from "../Components/UI";
-export default function ExerciseList({ exercises = [] }) {
+import { Link2 } from "lucide-react";
+import { EmptyState, formatWeight } from "../Components/UI";
+import ExerciseIcon from "../Components/ExerciseIcon";
+import { supersetPartners } from "./supersets";
+
+export default function ExerciseList({
+    exercises = [],
+    showActualWeights = false,
+    emptyDescription = "Edit this training day to add your exercises.",
+}) {
     return exercises.length ? (
         <div className="exercise-list">
             {exercises.map((exercise, i) => (
                 <article
-                    className={`exercise-item ${exercise.superset_group ? "superset-item" : ""}`}
+                    className={`exercise-item ${supersetPartners(exercise, exercises).length ? "superset-item" : ""}`}
                     key={exercise.id || i}
                 >
                     <span className="row-number">
@@ -19,16 +26,19 @@ export default function ExerciseList({ exercises = [] }) {
                         />
                     ) : (
                         <div className="exercise-thumb placeholder">
-                            <Dumbbell size={23} />
+                            <ExerciseIcon exercise={exercise} size={23} />
                         </div>
                     )}
                     <div className="exercise-info">
-                        <h3>{exercise.name}</h3>
+                        <h3 className="exercise-name-with-icon"><ExerciseIcon exercise={exercise} size={17} />{exercise.name}</h3>
                         {exercise.notes && <p>{exercise.notes}</p>}
-                        {exercise.superset_group && (
-                            <span className="superset-badge">
+                        {supersetPartners(exercise, exercises).length > 0 && (
+                            <span className="superset-badge superset-partners">
                                 <Link2 size={12} />
-                                Superset {exercise.superset_group}
+                                Superset with{" "}
+                                {supersetPartners(exercise, exercises)
+                                    .map((item) => item.name)
+                                    .join(" + ")}
                             </span>
                         )}
                     </div>
@@ -43,6 +53,22 @@ export default function ExerciseList({ exercises = [] }) {
                             <span>reps / duration</span>
                         </strong>
                     </div>
+                    <div className="exercise-weights">
+                        <div>
+                            <span>Target Weight</span>
+                            <strong>
+                                {formatWeight(exercise.target_weight)}
+                            </strong>
+                        </div>
+                        {showActualWeights && (
+                            <div>
+                                <span>Actual Weight Used</span>
+                                <strong>
+                                    {formatWeight(exercise.actual_weight)}
+                                </strong>
+                            </div>
+                        )}
+                    </div>
                 </article>
             ))}
         </div>
@@ -50,7 +76,7 @@ export default function ExerciseList({ exercises = [] }) {
         <EmptyState
             compact
             title="No exercises yet"
-            description="Edit this training day to add your exercises."
+            description={emptyDescription}
         />
     );
 }

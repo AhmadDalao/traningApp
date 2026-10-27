@@ -380,4 +380,59 @@ class TrainingPlannerTest extends TestCase
             $this->get($url)->assertOk();
         }
     }
+
+    public function test_day_and_exercise_icons_save_and_can_be_reset_to_automatic(): void
+    {
+        $plan = $this->plan();
+        $payload = [...$this->dayPayload([$this->exercisePayload(['icon' => 'biceps'])]), 'icon' => 'footprints'];
+        $this->actingAs($plan->user)->post("/training-plans/{$plan->id}/days", $payload)->assertSessionHasNoErrors();
+        $day = $plan->trainingDays()->firstOrFail();
+        $exercise = $day->exercises()->firstOrFail();
+        $this->assertSame('footprints', $day->icon);
+        $this->assertSame('biceps', $exercise->icon);
+        $this->get("/training-days/{$day->id}")->assertInertia(fn (Assert $page) => $page->where('day.icon', 'footprints')->where('day.exercises.0.icon', 'biceps'));
+        $this->put("/training-days/{$day->id}", [...$this->dayPayload([$this->exercisePayload(['id' => $exercise->id, 'icon' => null])]), 'icon' => null])->assertSessionHasNoErrors();
+        $this->assertNull($day->fresh()->icon);
+        $this->assertNull($exercise->fresh()->icon);
+    }
+
+    public function test_unknown_icons_are_rejected_without_saving_partial_data(): void
+    {
+        $plan = $this->plan();
+        $this->actingAs($plan->user)->post("/training-plans/{$plan->id}/days", [...$this->dayPayload([$this->exercisePayload(['icon' => '<svg>'])]), 'icon' => 'missing'])->assertSessionHasErrors(['icon', 'exercises.0.icon']);
+        $this->assertDatabaseCount('training_days', 0);
+    }
+
+    public function test_schedule_snapshots_the_icon_and_keeps_it_after_template_changes_and_deletion(): void
+    {
+        $day = $this->day(null, ['icon' => 'bike']);
+        $this->actingAs($day->trainingPlan->user)->post('/schedule-entries', ['training_day_id' => $day->id, 'entry_type' => 'training', 'scheduled_date' => '2026-10-21'])->assertSessionHasNoErrors();
+        $entry = ScheduleEntry::firstOrFail();
+        $this->assertSame('bike', $entry->icon);
+        $this->get('/calendar?date=2026-10-21')->assertInertia(fn (Assert $page) => $page->where('entries.0.icon', 'bike'));
+        $this->put("/training-days/{$day->id}", [...$this->dayPayload(), 'icon' => 'mountain'])->assertSessionHasNoErrors();
+        $this->assertSame('bike', $entry->fresh()->icon);
+        $this->delete("/training-days/{$day->id}")->assertRedirect();
+        $this->put("/schedule-entries/{$entry->id}", ['entry_type' => 'training', 'scheduled_date' => '2026-10-22'])->assertSessionHasNoErrors();
+        $this->assertSame('bike', $entry->fresh()->icon);
+    }
+
+    public function test_dropdown_pairing_persists_on_both_exercises_and_can_be_unlinked(): void
+    {
+        $day = $this->day();
+        $a = $this->exercise($day);
+        $b = $this->exercise($day, ['name' => 'Lunge']);
+        $this->actingAs($day->trainingPlan->user)->put("/training-days/{$day->id}", $this->dayPayload([
+            $this->exercisePayload(['id' => $a->id, 'name' => 'Squat', 'superset_group' => 'A']),
+            $this->exercisePayload(['id' => $b->id, 'name' => 'Lunge', 'superset_group' => 'A']),
+        ]))->assertSessionHasNoErrors();
+        $this->assertSame('A', $a->fresh()->superset_group);
+        $this->assertSame('A', $b->fresh()->superset_group);
+        $this->put("/training-days/{$day->id}", $this->dayPayload([
+            $this->exercisePayload(['id' => $a->id, 'superset_group' => null]),
+            $this->exercisePayload(['id' => $b->id, 'superset_group' => null]),
+        ]))->assertSessionHasNoErrors();
+        $this->assertNull($a->fresh()->superset_group);
+        $this->assertNull($b->fresh()->superset_group);
+    }
 }

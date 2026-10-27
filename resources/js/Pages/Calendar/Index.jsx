@@ -4,15 +4,9 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
-import {
-    Plus,
-    ChevronLeft,
-    ChevronRight,
-    Check,
-    Minus,
-    Coffee,
-} from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Check, Minus } from "lucide-react";
 import { PageHeader, Button, Modal } from "../../Components/UI";
+import TrainingIcon from "../../Components/TrainingIcon";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 export default function Index({ entries, plans, calendarDate, calendarView }) {
     const { today } = usePage().props;
@@ -51,10 +45,18 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
         id: String(e.id),
         title: e.title,
         url: `/schedule-entries/${e.id}`,
-        start: e.scheduled_date,
-        allDay: true,
+        start: e.scheduled_time
+            ? `${e.scheduled_date}T${e.scheduled_time}`
+            : e.scheduled_date,
+        allDay: !e.scheduled_time,
         classNames: [`event-${e.entry_type}`, `event-${e.status}`],
-        extendedProps: { status: e.status, type: e.entry_type },
+        extendedProps: {
+            status: e.status,
+            type: e.entry_type,
+            icon: e.icon,
+            focus: e.focus_area,
+            time: e.scheduled_time?.slice(0, 5),
+        },
     }));
     return (
         <>
@@ -177,18 +179,28 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                         eventContent={({ event }) => (
                             <div
                                 className="calendar-event-content"
-                                title={`${event.title} · ${event.extendedProps.status}`}
+                                title={`${event.title}${event.extendedProps.time ? ` · ${event.extendedProps.time}` : ""} · ${event.extendedProps.status}`}
                             >
                                 {event.extendedProps.status === "completed" ? (
                                     <Check size={12} />
                                 ) : event.extendedProps.status === "skipped" ? (
                                     <Minus size={12} />
-                                ) : event.extendedProps.type === "rest" ? (
-                                    <Coffee size={12} />
                                 ) : (
-                                    <span className="event-dot" />
+                                    <TrainingIcon
+                                        icon={event.extendedProps.icon}
+                                        type={event.extendedProps.type}
+                                        focus={event.extendedProps.focus}
+                                        size={12}
+                                    />
                                 )}
-                                <span>{event.title}</span>
+                                <span>
+                                    {event.extendedProps.time && (
+                                        <small className="calendar-event-time">
+                                            {event.extendedProps.time}{" "}
+                                        </small>
+                                    )}
+                                    {event.title}
+                                </span>
                             </div>
                         )}
                         noEventsContent="No sessions for this period. Click a date to make a plan."

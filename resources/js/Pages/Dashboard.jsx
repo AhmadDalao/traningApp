@@ -109,66 +109,76 @@ export default function Dashboard({
                             Calendar
                         </TextLink>
                     </div>
-                    {todayEntries.length ? (
-                        <div className="today-list">
-                            {todayEntries.map((entry) => (
-                                <article
-                                    className={`session-card ${entry.status}`}
-                                    key={entry.id}
-                                >
-                                    <div className="session-main">
-                                        <DayIcon
-                                            type={entry.entry_type}
-                                            focus={entry.focus_area}
-                                            large
-                                        />
-                                        <div>
-                                            <div className="session-title">
-                                                <Link
-                                                    href={`/schedule-entries/${entry.id}`}
-                                                >
-                                                    <h3>{entry.title}</h3>
-                                                </Link>
-                                                <StatusBadge
-                                                    status={entry.status}
-                                                />
+                    <div
+                        className="dashboard-scroll"
+                        role="region"
+                        aria-label="Today's sessions"
+                        tabIndex={0}
+                    >
+                        {todayEntries.length ? (
+                            <div className="today-list">
+                                {todayEntries.map((entry) => (
+                                    <article
+                                        className={`session-card ${entry.status}`}
+                                        key={entry.id}
+                                    >
+                                        <div className="session-main">
+                                            <DayIcon
+                                                icon={entry.icon}
+                                                type={entry.entry_type}
+                                                focus={entry.focus_area}
+                                                large
+                                            />
+                                            <div>
+                                                <div className="session-title">
+                                                    <Link
+                                                        href={`/schedule-entries/${entry.id}`}
+                                                    >
+                                                        <h3>{entry.title}</h3>
+                                                    </Link>
+                                                    <StatusBadge
+                                                        status={entry.status}
+                                                    />
+                                                </div>
+                                                <p>
+                                                    {entry.entry_type === "rest"
+                                                        ? "Recovery is part of the plan."
+                                                        : `${entry.focus_area || "Training"} · ${entry.exercises_count || 0} exercises`}
+                                                    {entry.scheduled_time &&
+                                                        ` · ${entry.scheduled_time.slice(0, 5)}`}
+                                                </p>
                                             </div>
-                                            <p>
-                                                {entry.entry_type === "rest"
-                                                    ? "Recovery is part of the plan."
-                                                    : `${entry.focus_area || "Training"} · ${entry.training_day?.exercises_count || 0} exercises`}
-                                            </p>
                                         </div>
-                                    </div>
-                                    <div className="session-bottom">
-                                        <ButtonLink
-                                            href={`/schedule-entries/${entry.id}`}
-                                            variant="secondary"
-                                            className="small"
-                                        >
-                                            View details
-                                            <ArrowRight size={14} />
-                                        </ButtonLink>
-                                        <SessionStatusActions
-                                            entry={entry}
-                                            compact
-                                        />
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    ) : (
-                        <EmptyState
-                            compact
-                            title="A little space in your day"
-                            description="Schedule a workout, or give yourself a well-earned rest."
-                        >
-                            <Button onClick={() => setModal("schedule")}>
-                                <Plus size={16} />
-                                Schedule session
-                            </Button>
-                        </EmptyState>
-                    )}
+                                        <div className="session-bottom">
+                                            <ButtonLink
+                                                href={`/schedule-entries/${entry.id}`}
+                                                variant="secondary"
+                                                className="small"
+                                            >
+                                                View details
+                                                <ArrowRight size={14} />
+                                            </ButtonLink>
+                                            <SessionStatusActions
+                                                entry={entry}
+                                                compact
+                                            />
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyState
+                                compact
+                                title="A little space in your day"
+                                description="Schedule a workout, or give yourself a well-earned rest."
+                            >
+                                <Button onClick={() => setModal("schedule")}>
+                                    <Plus size={16} />
+                                    Schedule session
+                                </Button>
+                            </EmptyState>
+                        )}
+                    </div>
                 </section>
                 <section className="panel upcoming-panel">
                     <div className="panel-heading">
@@ -178,46 +188,53 @@ export default function Dashboard({
                         </div>
                         <TextLink href="/calendar">View all</TextLink>
                     </div>
-                    {upcomingEntries.length ? (
-                        <div className="upcoming-list">
-                            {upcomingEntries.map((entry) => (
-                                <Link
-                                    href={`/schedule-entries/${entry.id}`}
-                                    key={entry.id}
-                                    className="upcoming-row"
-                                >
-                                    <div className="date-tile">
-                                        <span>
-                                            {new Date(
-                                                `${entry.scheduled_date}T12:00:00`,
-                                            ).toLocaleDateString("en", {
-                                                weekday: "short",
-                                            })}
-                                        </span>
-                                        <strong>
-                                            {entry.scheduled_date.slice(8, 10)}
-                                        </strong>
-                                    </div>
-                                    <div className="upcoming-info">
-                                        <h3>{entry.title}</h3>
-                                        <p>
-                                            {entry.entry_type === "rest"
-                                                ? "Rest & recovery"
-                                                : entry.focus_area ||
-                                                  "Training"}
-                                        </p>
-                                    </div>
-                                    <StatusBadge status={entry.status} />
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                        <EmptyState
-                            compact
-                            title="Your week is a blank slate"
-                            description="Add a few sessions and give your week a little structure."
-                        />
-                    )}
+                    <div
+                        className="dashboard-scroll"
+                        role="region"
+                        aria-label="Upcoming sessions"
+                        tabIndex={0}
+                    >
+                        {upcomingEntries.length ? (
+                            <div className="upcoming-list">
+                                {upcomingEntries.map((entry) => (
+                                    <Link
+                                        href={`/schedule-entries/${entry.id}`}
+                                        key={entry.id}
+                                        className="upcoming-row"
+                                    >
+                                        <div className="date-tile">
+                                            <span>
+                                                {new Date(
+                                                    `${entry.scheduled_date}T12:00:00`,
+                                                ).toLocaleDateString("en", {
+                                                    weekday: "short",
+                                                })}
+                                            </span>
+                                            <strong>
+                                                {entry.scheduled_date.slice(8, 10)}
+                                            </strong>
+                                        </div>
+                                        <div className="upcoming-info">
+                                            <h3>{entry.title}</h3>
+                                            <p>
+                                                {entry.entry_type === "rest"
+                                                    ? "Rest & recovery"
+                                                    : entry.focus_area ||
+                                                      "Training"}
+                                            </p>
+                                        </div>
+                                        <StatusBadge status={entry.status} />
+                                    </Link>
+                                ))}
+                            </div>
+                        ) : (
+                            <EmptyState
+                                compact
+                                title="Your week is a blank slate"
+                                description="Add a few sessions and give your week a little structure."
+                            />
+                        )}
+                    </div>
                 </section>
             </div>
             <section className="dashboard-bottom">

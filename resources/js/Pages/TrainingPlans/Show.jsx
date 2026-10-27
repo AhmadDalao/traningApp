@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import {
     Plus,
     Pencil,
@@ -22,7 +22,9 @@ import {
 } from "../../Components/UI";
 import TrainingPlanForm from "../../Features/TrainingPlanForm";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
+import { weekdaySummary } from "../../Components/WeekdayPicker";
 export default function Show({ plan }) {
+    const { errors } = usePage().props;
     const [edit, setEdit] = useState(false);
     const [deleting, setDeleting] = useState(null);
     const [schedule, setSchedule] = useState(null);
@@ -66,6 +68,15 @@ export default function Show({ plan }) {
                     Add training day
                 </ButtonLink>
             </PageHeader>
+            <section className="panel plan-period-panel">
+                <div>
+                    <h2>Plan schedule</h2>
+                    <p>{plan.start_date && plan.end_date ? `${plan.start_date} to ${plan.end_date}` : "Add a start and end date to schedule your plan."}</p>
+                    <p>Pick weekdays in each training day, then preview the dates before adding them to Calendar.</p>
+                    {errors.schedule && <p className="field-error" role="alert">{errors.schedule}</p>}
+                </div>
+                {plan.start_date && plan.end_date ? <ButtonLink href={`/training-plans/${plan.id}/schedule-preview`}><CalendarPlus size={16} />Preview schedule</ButtonLink> : <Button variant="secondary" onClick={() => setEdit(true)}>Set plan dates</Button>}
+            </section>
             <section className="panel">
                 <div className="panel-heading">
                     <div>
@@ -76,8 +87,8 @@ export default function Show({ plan }) {
                             </span>
                         </h2>
                         <p>
-                            Reusable workouts and rest days. Schedule them
-                            whenever you need.
+                            Reusable workouts and rest days, with the weekdays
+                            you choose for each one.
                         </p>
                     </div>
                 </div>
@@ -91,7 +102,11 @@ export default function Show({ plan }) {
                                 <span className="row-number">
                                     {String(i + 1).padStart(2, "0")}
                                 </span>
-                                <DayIcon type={day.type} />
+                                <DayIcon
+                                    icon={day.icon}
+                                    type={day.type}
+                                    focus={day.focus_area}
+                                />
                                 <div className="day-info">
                                     <Link href={`/training-days/${day.id}`}>
                                         <h3>{day.title}</h3>
@@ -101,6 +116,7 @@ export default function Show({ plan }) {
                                             ? "Rest & recovery"
                                             : `${day.focus_area || "Training"} · ${day.exercises_count} exercises`}
                                     </p>
+                                    <p>{weekdaySummary(day.weekdays || [])}{day.default_time ? ` · ${day.default_time.slice(0, 5)}` : ""}</p>
                                 </div>
                                 <TypeBadge type={day.type} />
                                 <div className="day-actions">

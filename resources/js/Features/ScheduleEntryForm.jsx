@@ -22,12 +22,14 @@ export default function ScheduleEntryForm({
         title: entry?.title || initialDay?.title || "",
         entry_type: entry?.entry_type || initialDay?.type || "training",
         scheduled_date: entry?.scheduled_date || selectedDate || today,
+        scheduled_time: entry?.scheduled_time?.slice(0, 5) || "",
         notes: entry?.notes || "",
     });
     const days =
         plans.find((p) => p.id === Number(planId))?.training_days || [];
     const historical =
         entry && !entry.training_day_id && entry.entry_type === "training";
+    const recorded = Boolean(entry?.workout_snapshot);
     function selectDay(id) {
         const day = days.find((d) => d.id === Number(id));
         form.setData({
@@ -66,6 +68,7 @@ export default function ScheduleEntryForm({
                 <button
                     type="button"
                     className={!directRest ? "active" : ""}
+                    disabled={recorded}
                     onClick={() => changeMode(false)}
                 >
                     From a training plan
@@ -73,6 +76,7 @@ export default function ScheduleEntryForm({
                 <button
                     type="button"
                     className={directRest ? "active" : ""}
+                    disabled={recorded}
                     onClick={() => changeMode(true)}
                 >
                     Rest day
@@ -84,6 +88,7 @@ export default function ScheduleEntryForm({
                         <Field label="Training plan">
                             <select
                                 value={planId}
+                                disabled={recorded}
                                 onChange={(e) => {
                                     setPlanId(e.target.value);
                                     form.setData({
@@ -93,7 +98,7 @@ export default function ScheduleEntryForm({
                                         entry_type: "training",
                                     });
                                 }}
-                                required={!historical}
+                                required={!historical && !recorded}
                             >
                                 <option value="">Select a plan</option>
                                 {plans.map((p) => (
@@ -109,9 +114,9 @@ export default function ScheduleEntryForm({
                         >
                             <select
                                 value={form.data.training_day_id}
-                                required={!historical}
+                                required={!historical && !recorded}
                                 onChange={(e) => selectDay(e.target.value)}
-                                disabled={!planId}
+                                disabled={!planId || recorded}
                             >
                                 <option value="">Select a day</option>
                                 {days.map((d) => (
@@ -151,26 +156,44 @@ export default function ScheduleEntryForm({
                     )}
                 </>
             )}
+            {recorded && (
+                <p className="info-note">
+                    This session has a saved workout. You can still edit its
+                    date, time, title, and notes.
+                </p>
+            )}
             <div className="form-grid">
                 <Field label="Date" required error={form.errors.scheduled_date}>
                     <input
                         type="date"
                         required
                         value={form.data.scheduled_date}
-                        onChange={(e) =>
+                        onInput={(e) =>
                             form.setData("scheduled_date", e.target.value)
                         }
                     />
                 </Field>
-                <Field label="Session title" error={form.errors.title}>
+                <Field
+                    label="Time (Optional)"
+                    error={form.errors.scheduled_time}
+                >
                     <input
-                        maxLength={150}
-                        value={form.data.title}
-                        onChange={(e) => form.setData("title", e.target.value)}
-                        placeholder="e.g. Morning Leg Day"
+                        type="time"
+                        value={form.data.scheduled_time}
+                        onInput={(event) =>
+                            form.setData("scheduled_time", event.target.value)
+                        }
                     />
                 </Field>
             </div>
+            <Field label="Session title" error={form.errors.title}>
+                <input
+                    maxLength={150}
+                    value={form.data.title}
+                    onChange={(e) => form.setData("title", e.target.value)}
+                    placeholder="e.g. Morning Leg Day"
+                />
+            </Field>
             <Field label="Notes" error={form.errors.notes}>
                 <textarea
                     rows={3}
