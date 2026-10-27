@@ -64,7 +64,9 @@ export function Field({
         </label>
     );
 }
-export function StatusBadge({ status, type }) {
+export function StatusBadge({ status, type, active = false }) {
+    if (active)
+        return <span className="badge workout-active">In progress</span>;
     const Icon =
         status === "completed" ? Check : status === "skipped" ? Minus : Circle;
     return (
@@ -179,36 +181,57 @@ export function Modal({ title, description, children, onClose, wide = false }) {
         </dialog>
     );
 }
-export function ConfirmDialog({ title, description, url, onClose }) {
+export function ConfirmDialog({
+    title,
+    description,
+    url,
+    onClose,
+    method = "delete",
+    data = {},
+    confirmLabel = "Delete",
+    cancelLabel = "Cancel",
+    variant = "danger",
+}) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     return (
         <Modal title={title} onClose={() => !busy && onClose()}>
-            <div className="delete-icon">
-                <Trash2 size={25} />
+            <div
+                className={`delete-icon ${variant === "primary" ? "confirm-primary" : ""}`}
+            >
+                {variant === "danger" ? (
+                    <Trash2 size={25} />
+                ) : (
+                    <Check size={25} />
+                )}
             </div>
             <p className="confirm-copy">{description}</p>
             {error && <p className="field-error">{error}</p>}
-            <div className="form-actions">
+            <div className="form-actions confirm-actions">
                 <Button variant="secondary" onClick={onClose} disabled={busy}>
-                    Cancel
+                    {cancelLabel}
                 </Button>
                 <Button
-                    variant="danger"
+                    variant={variant}
                     disabled={busy}
                     onClick={() => {
                         setBusy(true);
-                        router.delete(url, {
+                        router.visit(url, {
+                            method,
+                            data,
+                            preserveState: true,
+                            preserveScroll: true,
                             onSuccess: onClose,
-                            onError: () =>
+                            onError: (errors) =>
                                 setError(
-                                    "Could not delete this item. Please try again.",
+                                    Object.values(errors)[0] ||
+                                        "Could not save this change. Please try again.",
                                 ),
                             onFinish: () => setBusy(false),
                         });
                     }}
                 >
-                    {busy ? "Deleting…" : "Delete"}
+                    {busy ? "Saving…" : confirmLabel}
                 </Button>
             </div>
         </Modal>

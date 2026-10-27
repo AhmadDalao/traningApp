@@ -72,7 +72,8 @@ class TrainingDayController extends Controller
                 $kept = [];
                 foreach ($data['type'] === 'training' ? ($data['exercises'] ?? []) : [] as $position => $row) {
                     $exercise = ! empty($row['id']) ? $existing->get($row['id']) : $day->exercises()->make();
-                    $fields = collect($row)->only('name', 'sets', 'reps', 'notes', 'icon', 'target_weight', 'library_key')->all();
+                    $fields = collect($row)->only('name', 'sets', 'reps', 'notes', 'icon', 'target_weight', 'library_key', 'tracking_mode')->all();
+                    $fields['tracking_mode'] = $fields['tracking_mode'] ?? $exercise->tracking_mode ?? 'reps';
                     $fields['position'] = $position;
                     $fields['superset_group'] = empty($row['superset_group']) ? null : strtoupper($row['superset_group']);
                     $sourceChanged = array_key_exists('library_key', $row) && ($row['library_key'] ?? null) !== $exercise->library_key;

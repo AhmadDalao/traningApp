@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActiveWorkoutController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\DashboardController;
@@ -8,6 +9,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ScheduleEntryController;
+use App\Http\Controllers\SessionExerciseController;
+use App\Http\Controllers\SessionSetController;
 use App\Http\Controllers\TrainingDayController;
 use App\Http\Controllers\TrainingHistoryController;
 use App\Http\Controllers\TrainingPlanController;
@@ -47,6 +50,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/training-plans/{trainingPlan}/days/reorder', [TrainingDayController::class, 'reorderDays'])->name('training-days.reorder');
     Route::resource('training-days', TrainingDayController::class)->only(['show', 'edit', 'update', 'destroy'])->parameters(['training-days' => 'trainingDay']);
     Route::patch('/training-days/{trainingDay}/exercises/reorder', [TrainingDayController::class, 'reorderExercises'])->name('exercises.reorder');
+    Route::post('/schedule-entries/{scheduleEntry}/workout/start', [ActiveWorkoutController::class, 'start'])->name('workout.start');
+    Route::get('/schedule-entries/{scheduleEntry}/workout', [ActiveWorkoutController::class, 'show'])->name('workout.show');
+    Route::post('/schedule-entries/{scheduleEntry}/workout/finish', [ActiveWorkoutController::class, 'finish'])->name('workout.finish');
+    Route::post('/schedule-entries/{scheduleEntry}/workout/discard', [ActiveWorkoutController::class, 'discard'])->name('workout.discard');
+    Route::patch('/session-exercises/{sessionExercise}/status', [SessionExerciseController::class, 'status'])->name('session-exercises.status');
+    Route::post('/session-exercises/{sessionExercise}/sets', [SessionExerciseController::class, 'storeSet'])->name('session-exercises.sets.store');
+    Route::patch('/session-sets/{sessionSet}', [SessionSetController::class, 'update'])->name('session-sets.update');
+    Route::delete('/session-sets/{sessionSet}', [SessionSetController::class, 'destroy'])->name('session-sets.destroy');
     Route::get('/calendar', [ScheduleEntryController::class, 'calendar'])->name('calendar');
     Route::resource('schedule-entries', ScheduleEntryController::class)->except('index')->parameters(['schedule-entries' => 'scheduleEntry']);
     Route::patch('/schedule-entries/{scheduleEntry}/status', [ScheduleEntryController::class, 'status'])->name('schedule-entries.status');

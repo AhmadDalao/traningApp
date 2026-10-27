@@ -20,9 +20,9 @@ export default function WorkoutDetailsForm({ entry }) {
         <section className="panel profile-panel">
             <h2>Workout details</h2>
             <p className="progress-explanation">
-                Optional. Record your session duration and calories now or
-                later. Calories can come from a wearable, exercise machine, or
-                your own estimate.
+                {entry.started_at
+                    ? "Duration was calculated from your workout. Adjust it if needed, or add reported calories."
+                    : "Optional. Record your session duration and calories now or later. Calories can come from a wearable, exercise machine, or your own estimate."}
             </p>
             <form
                 onSubmit={(event) => {

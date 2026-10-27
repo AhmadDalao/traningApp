@@ -9,11 +9,26 @@ use Illuminate\Support\Str;
 
 class ScheduleEntry extends Model
 {
-    protected $fillable = ['icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity'];
+    protected $fillable = ['icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity', 'started_at'];
 
     protected function casts(): array
     {
-        return ['scheduled_date' => 'date:Y-m-d', 'completed_at' => 'datetime', 'workout_snapshot' => 'array'];
+        return ['scheduled_date' => 'date:Y-m-d', 'completed_at' => 'datetime', 'workout_snapshot' => 'array', 'started_at' => 'datetime'];
+    }
+
+    public function scopeActiveWorkout(Builder $query): void
+    {
+        $query->where('entry_type', 'training')->where('status', 'planned')->whereNotNull('started_at');
+    }
+
+    public function isActiveWorkout(): bool
+    {
+        return $this->entry_type === 'training' && $this->status === 'planned' && $this->started_at !== null;
+    }
+
+    public function sessionExercises()
+    {
+        return $this->hasMany(SessionExercise::class)->orderBy('position');
     }
 
     public function scopePast(Builder $query): void
@@ -45,6 +60,7 @@ class ScheduleEntry extends Model
             }
             $exercises[] = [
                 ...$exercise->only('id', 'name', 'sets', 'reps', 'target_weight', 'superset_group', 'notes', 'position', 'icon'),
+                'source_exercise_key' => $exercise->library_key, 'tracking_mode' => $exercise->tracking_mode ?? 'reps',
                 'actual_weight' => null, ...$media,
             ];
         }

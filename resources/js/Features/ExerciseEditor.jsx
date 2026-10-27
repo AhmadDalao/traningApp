@@ -47,6 +47,7 @@ export default function ExerciseEditor({
             name: "",
             sets: 3,
             reps: "",
+            tracking_mode: "reps",
             target_weight: "",
             superset_group: "",
             notes: "",
@@ -166,6 +167,12 @@ export default function ExerciseEditor({
                                 />
                             </Field>
                         </div>
+                        <Field label="Track by" hint="Choose how you’ll record each set during a workout.">
+                            <select value={draft.tracking_mode || "reps"} onChange={(event) => update("tracking_mode", event.target.value)}>
+                                <option value="reps">Reps</option>
+                                <option value="duration">Duration</option>
+                            </select>
+                        </Field>
                         <Field
                             label="Planned Weight (Optional)"
                             hint="Leave empty for exercises without a weight."

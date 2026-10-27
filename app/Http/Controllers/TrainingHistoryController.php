@@ -61,13 +61,19 @@ class TrainingHistoryController extends Controller
             $query->where('entry_type', 'training')->where('status', $status);
         }
         $pageSize = $perPage === 'all' ? max((clone $query)->count(), 1) : (int) $perPage;
-        $entries = $query->with(['trainingDay' => fn ($day) => $day->withCount('exercises')])
+        $entries = $query->with([
+            'sessionExercises' => fn ($exercises) => $exercises->withCount(['sets', 'sets as completed_sets_count' => fn ($sets) => $sets->whereNotNull('completed_at')]),
+            'trainingDay' => fn ($day) => $day->withCount('exercises'),
+        ])
             ->orderByDesc('scheduled_date')->orderByDesc('scheduled_time')->orderByDesc('id')
             ->paginate($pageSize, ['*'], 'page', $perPage === 'all' ? 1 : null)->withQueryString()
             ->through(fn (ScheduleEntry $entry) => [
                 ...$entry->only('id', 'title', 'entry_type', 'status', 'focus_area', 'icon', 'scheduled_date', 'scheduled_time'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
                 'exercises_count' => $entry->workoutExerciseCount(),
+                'detailed_workout' => $entry->sessionExercises->isNotEmpty(),
+                'sets_count' => $entry->sessionExercises->sum('sets_count'),
+                'completed_sets_count' => $entry->sessionExercises->sum('completed_sets_count'),
                 'weights_logged' => $entry->status === 'completed' ? collect($entry->workout_snapshot['exercises'] ?? [])->whereNotNull('actual_weight')->count() : 0,
                 'snapshot_available' => $entry->workout_snapshot !== null,
                 'duration_minutes' => $entry->status === 'completed' && $entry->entry_type === 'training' ? $entry->duration_minutes : null,
@@ -91,7 +97,7 @@ class TrainingHistoryController extends Controller
     {
         Gate::authorize('view', $scheduleEntry);
         abort_unless($request->user()->scheduleEntries()->past()->whereKey($scheduleEntry->id)->exists(), 404);
-        $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan');
+        $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
         return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true]);
     }

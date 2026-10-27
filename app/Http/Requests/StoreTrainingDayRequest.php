@@ -27,6 +27,7 @@ class StoreTrainingDayRequest extends FormRequest
             'exercises.*.id' => ['nullable', 'integer', 'distinct', Rule::exists('training_exercises', 'id')->where('training_day_id', $this->route('trainingDay')?->id ?? 0)],
             'exercises.*.name' => 'required|string|max:150', 'exercises.*.sets' => 'required|integer|min:1|max:99',
             'exercises.*.reps' => 'required|string|max:100', 'exercises.*.superset_group' => ['nullable', 'string', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],
+            'exercises.*.tracking_mode' => 'nullable|in:reps,duration',
             'exercises.*.notes' => 'nullable|string|max:2000',
             'exercises.*.target_weight' => 'nullable|numeric|decimal:0,2|min:0|max:9999.99',
             'exercises.*.thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',

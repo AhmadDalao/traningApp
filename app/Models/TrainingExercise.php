@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 class TrainingExercise extends Model
 {
-    protected $fillable = ['icon', 'name', 'sets', 'reps', 'target_weight', 'superset_group', 'thumbnail_path', 'notes', 'position', 'library_key', 'custom_icon_path'];
+    protected $fillable = ['icon', 'name', 'sets', 'reps', 'target_weight', 'superset_group', 'thumbnail_path', 'notes', 'position', 'library_key', 'custom_icon_path', 'tracking_mode'];
 
     protected $appends = ['thumbnail_url', 'custom_icon_url'];
 

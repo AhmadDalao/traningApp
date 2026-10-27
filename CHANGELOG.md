@@ -1,5 +1,36 @@
 # Changelog
 
+## v1.2.0 — 2026-10-27
+
+### Added
+
+- Optional Start / Resume / Finish Workout, with only one active workout per account and saved progress after refresh/navigation.
+- Separate session exercise and set records: actual reps, optional decimal weight, and actual duration in seconds.
+- Reps / Duration selection in the existing exercise editor; mm:ss input for actual timed sets.
+- Complete, edit, mark incomplete, add and remove sets; skip / undo skip for exercises.
+- Confirmation before deleting completed sets, skipping partially completed exercises, discarding progress, or finishing with incomplete sets.
+- Automatic elapsed workout duration and integration with the existing calorie estimator.
+- Independent 60/90/120-second rest timer, with start, pause and reset.
+- Structured set history, a compact sets-completed summary, and stable built-in/custom exercise identity for future reporting.
+
+### Preserved
+
+- Quick Mark Completed for unstarted sessions; legacy per-exercise actual weights remain available when no detailed logs exist.
+- Frozen workout snapshots, saved media, supersets, existing history filters/default pagination, Calendar, Profile, recommendations, Progress and all v1.1.1 calorie behavior.
+- Existing templates and historical records are never rewritten by workout logging. No old sessions are converted into invented set history.
+- Existing planned/completed/skipped statuses; active state uses nullable `started_at`.
+
+### Implementation and verification
+
+- One additive migration, applied locally and on Hostinger, adds nullable start time/tracking mode and two tables with normal foreign keys. Existing records were preserved.
+- Snapshot/media are frozen on start; records are reused on resume. Parent row locks serialize logging/finish/discard, and a user row lock serializes workout starts.
+- Planned weights are shown as editable suggestions; actual set rows begin empty in the database and completion is explicit. Unsaved row inputs survive adding/removing/renumbering other sets.
+- 158 PHP tests / 3,327 assertions pass on isolated SQLite and MySQL; 21 JavaScript tests and the production build pass. Forty PHP cases and four JavaScript tests were added.
+- Mobile workflow checks at 320px and 390px, desktop at 1280px, refresh/resume, both completion flows, editor mode, and draft-preservation checks passed. Temporary QA data/media removed; original data fingerprints match.
+- Deployed and tagged v1.2.0 after 37 live workflow checks and 72 deployed-file hash checks. A mobile session-action overflow was fixed and verified at 320px and 390px. Private backups are retained; temporary QA data, updater endpoints and archives were removed. Existing login credentials and earlier tags are unchanged. No personal-record analytics, exercise charts, overload engine, AI or wearable integrations were added.
+
+See [v1.2.0 implementation report](docs/V1.2.0-ACTIVE-WORKOUT-REPORT.html) for structure, behavior, file inventory, validation and deployment notes.
+
 ## v1.1.1 — 2026-10-27
 
 ### Added

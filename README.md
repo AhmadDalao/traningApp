@@ -4,9 +4,9 @@ A personal training planner built as **one Laravel monolith**. Laravel owns auth
 
 ## Current release
 
-**v1.1.1 — 27 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds optional profiles/onboarding, training goals, recommended plans, body-weight progress, and session duration/calories to the existing planner. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp); release tag: [v1.1.1](https://github.com/AhmadDalao/traningApp/tree/v1.1.1). See [CHANGELOG.md](CHANGELOG.md) and the [implementation notes](docs/PROFILE-PROGRESS-UPDATE-2026-10-27.html). The previous [v1.0.0 baseline](https://github.com/AhmadDalao/traningApp/tree/v1.0.0) and its [architecture report](docs/PROJECT-REPORT-2026-10-27.html) remain available.
+**v1.2.0 — 27 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds optional active workouts, structured set logging, a rest timer, automatic elapsed duration and detailed workout history to the existing planner, profiles, goals and progress features. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.2.0](https://github.com/AhmadDalao/traningApp/tree/v1.2.0). See [CHANGELOG.md](CHANGELOG.md) and the [v1.2 implementation report](docs/V1.2.0-ACTIVE-WORKOUT-REPORT.html). Earlier tags and their reports remain available.
 
-Release verification on 27 October: **118 PHP tests / 2,830 assertions on SQLite and MySQL**, **17 JavaScript tests**, and the production build passed. The repository includes source, dependency lockfiles, tests, documentation, and bundled library images. Environment credentials, user uploads, database backups, deployment helpers, installed dependencies, and generated build assets are excluded.
+Release verification: **158 PHP tests / 3,327 assertions on both SQLite and MySQL**, **21 JavaScript tests**, production build, **37 live workflow checks**, and **72 deployed-file checksum checks** passed. Mobile session controls were verified at 320px and 390px. The repository contains source, lockfiles, tests, documentation and bundled library images. Credentials, user uploads, database backups, deployment helpers, installed dependencies and generated build assets are excluded.
 
 ## Released patch: v1.1.1
 
@@ -18,9 +18,22 @@ The verified **v1.1.1** patch is deployed on Hostinger and tagged in GitHub. See
 - Weight comes from the latest owned body-weight entry dated on/before the session, with latest ID breaking same-day ties, then falls back to profile current weight. Missing weight/duration or a rest/planned/skipped session means no estimate.
 - `calories_burned` remains reported calories; `calories_source` accepts `wearable`, `exercise_machine`, or `manual`. `estimated_calories` is independent and never accepted from the client. Reported values take priority; estimates always use ≈ and an Estimated label in details. History uses one compact number.
 - Profile/weight changes and reads do not rewrite stored estimates. Explicit duration/intensity changes recalculate; explicit date/focus/type changes also update estimation. Reversing completion clears the estimate; completing again estimates from retained duration/intensity. Reported values and snapshots are preserved.
-- One additive migration (`2026_10_27_000006_add_multiple_goals_and_calorie_estimates.php`) is applied locally. No bulk backfill, snapshot format change, new dependency, new API route, or Progress calorie dashboard.
+- One additive migration (`2026_10_27_000006_add_multiple_goals_and_calorie_estimates.php`) is applied locally and on Hostinger. No bulk backfill, snapshot format change, new dependency, new API route, or Progress calorie dashboard.
 
 Patch verification: **118 PHP tests / 2,830 assertions on SQLite and MySQL**, **17 JavaScript tests**, production build, Pint, frontend formatting, and mobile workflow checks. The existing Vite notice about `/images/gym.jpg` is unchanged; the public asset exists and loads normally. All 23 live workflow checks passed, and all 56 deployed files match the release hashes. The database, uploads, environment, and existing records were preserved. Previous tags remain unchanged.
+
+## Released update: v1.2.0 Active Workout
+
+**Deployed and tagged v1.2.0.** The previous **v1.1.1** tag (`a976e65`) remains unchanged. See the [v1.2 report](docs/V1.2.0-ACTIVE-WORKOUT-REPORT.html) for the full implementation, schema, file inventory and checks.
+
+- Planned training sessions offer **Start workout** alongside the existing **Mark completed**. Started sessions offer **Resume workout** and must finish/discard through the detailed flow.
+- Workout progress saves on explicit set actions. Each set records reps or seconds, optional kg, and its completion time. Add/remove sets, skip/undo exercises, and a separate rest timer work on mobile.
+- Starting freezes the prescription and media. Logging never changes the reusable plan. Finishing computes actual duration and reuses the existing calorie estimator; reported calories remain separate.
+- Detailed History shows actual sets. Old/quick-completed sessions retain their original snapshot and per-exercise actual-weight form.
+- The additive `2026_10_27_000007_add_active_workouts.php` migration is applied locally and on Hostinger. It adds `schedule_entries.started_at`, `training_exercises.tracking_mode`, `session_exercises` and `session_sets`. No historical backfill occurs.
+- Verification: **158 PHP tests / 3,327 assertions on SQLite and MySQL**, **21 JavaScript tests**, production build, Pint, frontend formatting, 320px/390px mobile workflows, and a 1280px desktop check.
+
+The Hostinger release preserved `.env`, `APP_KEY`, uploads and existing records, with a fresh private backup. Temporary QA data and deployment endpoints/archives were removed. Login credentials are unchanged. v1.2 introduces no dependencies, services, queues, or background workers.
 
 ## What is included
 
@@ -44,7 +57,7 @@ Verification: **84 PHP tests / 1,796 assertions** pass on isolated SQLite and My
 - Optional JPG, PNG, or WebP thumbnails, up to 2 MB each, with preview, replacement, removal, and cleanup.
 - FullCalendar month, week, and list views; date clicks; session details; local status/type filters.
 - Multiple sessions on the same date and standalone rest days.
-- Planned, completed, and skipped statuses, including undoing completion. Only deletion asks for confirmation.
+- Planned, completed, and skipped statuses, including undoing completion. Quick status changes are immediate; detailed workouts confirm destructive actions and incomplete completion.
 - Optional target weight per exercise and actual weight per completed session exercise, in kilograms. Blank weights never block saving or completion.
 - One-click completion saves its timestamp and a frozen workout, including exercise images. Later template edits/deletion do not change that record.
 - Training History with past sessions, summary counts, date-period/status/type/plan filters, selectable page sizes, and shared session details.
@@ -119,9 +132,13 @@ The populated preview exposed and fixed clipped exercise names, overwide weight/
 | `users` | Standard session-authenticated users. |
 | `training_plans` | Belongs to a user; name, optional description and start/end dates. |
 | `training_days` | Belongs to a plan; title, training/rest type, focus, icon, notes, position, optional weekdays and usual time. |
-| `training_exercises` | Belongs to a day; name, icon, sets, text reps, optional decimal target weight, superset group, thumbnail/custom-icon paths, library key, notes, position. |
+| `training_exercises` | Belongs to a day; name, icon, sets, text reps, optional decimal target weight, superset group, thumbnail/custom-icon paths, library key, optional reps/duration tracking mode, notes, position. |
 | `exercise_library_items` | Private custom exercises belonging to a user, with name, focus, icon, and independent media copies. Built-in exercises use bundled JSON instead. |
-| `schedule_entries` | Belongs to a user; nullable day link, title/type/focus/icon, date, optional time, status, notes, nullable completion timestamp and JSON workout snapshot. Indexed on user/date, **not unique**. Nullable unique plan-occurrence key prevents duplicate generated sessions. |
+| `schedule_entries` | Belongs to a user; nullable day link, title/type/focus/icon, date, optional time, status, notes, nullable start/completion timestamps, elapsed duration, reported/estimated calories and JSON workout snapshot. Indexed on user/date, **not unique**. Nullable unique plan-occurrence key prevents duplicate generated sessions. |
+| `session_exercises` | Frozen exercise identity, prescription, media and status for one scheduled workout; source template FK is nullable. |
+| `session_sets` | Ordered planned targets and actual reps/seconds, optional kg and completion timestamp for each session exercise. |
+| `user_profiles` | Optional personal measurements, ordered goals and training preferences. |
+| `body_weight_entries` | Dated owned body-weight records for progress and calorie estimation. |
 
 Laravel's standard authentication migration also contains session and password-reset-token tables; no password-reset flow is exposed in this MVP. The configured session driver is `file`.
 
@@ -141,7 +158,7 @@ Built-in metadata/photos come from [Free Exercise DB](https://github.com/yuhonas
 
 `2026_10_26_000003_add_workout_history.php` is an additive migration. Run `php artisan migrate` on an existing installation; it preserves accounts, plans, sessions, and uploads. No backfill invents snapshots or completion timestamps for older completed sessions. Those records remain visible with an explicit message that their original exercise record is unavailable.
 
-The first completion copies the exercise names, ordering, sets, reps, target weights, supersets, notes, icons, and thumbnails into a versioned JSON record. Actual weights start blank. **Edit actual weights** updates only the completed session's saved exercises, never the training template. Target and actual weights accept 0–9999.99 kg with up to two decimal places; every field may be blank.
+For quick completion, the first completion copies the exercise names, ordering, sets, reps, target weights, supersets, notes, icons, and thumbnails into a versioned JSON record. Actual weights start blank. Quick/legacy sessions use **Edit actual weights**, which updates only the completed session's saved exercises, never the training template. Target and actual weights accept 0–9999.99 kg with up to two decimal places; every field may be blank. Detailed workouts instead freeze the prescription at Start and store results per set. Their saved set rows appear in History; the legacy per-exercise weight editor is not used for them.
 
 Changing back to Planned or Skipped clears `completed_at` and retains the saved workout and actual weights. Completing again sets a new completion timestamp while keeping that original record. Repeated completion requests do not replace an existing record or timestamp. A session with a saved workout can still change its title, date, time, notes, or status, but choosing another training day requires a new session. Snapshot thumbnails live under `storage/app/public/workout-thumbnails` and are removed when their session is deleted.
 
@@ -296,10 +313,12 @@ Back up the database and uploaded files. Upload changed source and rebuilt asset
 
 ## MVP boundaries
 
-Completion is tracked at the session level. Weights are optional per exercise, never per set, and use kilograms only. Weekday scheduling creates a finite set of calendar entries within plan dates; it is not an ongoing background recurrence service. There are no timers, per-set completion, weight progression analytics, coach/admin roles, social features, notifications, payments, AI, or separate API/frontend. Account recovery/password reset is outside the requested login/register/logout scope. Calendar loading is bounded to the visible month plus one week on either side; plans and history are paginated.
+Sessions retain Planned/Completed/Skipped status. Optional Active Workout adds per-set completion, reps or duration, optional kilogram weights and a browser-only rest timer; quick completion still works without set logging. Weekday scheduling creates a finite set of calendar entries within plan dates; it is not an ongoing background recurrence service. There are no weight progression analytics, coach/admin roles, social features, notifications, payments, AI, or separate API/frontend. Account recovery/password reset is outside the requested login/register/logout scope. Calendar loading is bounded to the visible month plus one week on either side; plans and history are paginated.
 
 ## Credits and framework references
 
 The bundled gym photograph is from [Unsplash](https://images.unsplash.com/photo-1534438327276-14e5300c3a48). DM Sans and Manrope load from Google Fonts with system-font fallbacks. App operation does not depend on the font service. Framework setup follows [Laravel's installation guidance](https://laravel.com/docs/12.x/installation); production should follow the installed Laravel version's [deployment guidance](https://laravel.com/docs/12.x/deployment).
 
 The 27 October **v1.1.1** release (`goals-v1.1.1-20261027-e313840c`) adds multiple goals and calorie estimates. Its additive migration completed with matching existing-record fingerprints for 1 user, 3 plans, 8 days, 20 exercises, 45 sessions, 1 library item, 1 profile, and 2 body-weight entries. A fresh private database/files/uploads/environment backup was taken. Temporary QA data, updater and archive were removed after verification.
+
+The 27 October **v1.2.0** release adds Active Workout and structured set history. All 37 live workflow checks passed; the final 72-file deployment (`active-v1.2.0-20261027-5c48cd41`) includes the mobile action-wrapping correction. Private backups are under `storage/app/private/deploy-backups/`: `active-v1.2.0-20261027-3e0917b3` preserves the pre-v1.2 application/database/uploads/environment, and `active-v1.2.0-20261027-5c48cd41` precedes the final CSS correction. Existing-record fingerprints matched on both deployments. Temporary QA data and both updater/archive sets were removed, login/health return 200, and removed updater/archive URLs return 404.

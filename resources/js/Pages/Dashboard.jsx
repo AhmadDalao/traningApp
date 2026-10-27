@@ -32,6 +32,7 @@ export default function Dashboard({
     plans,
     checkIn,
     profileIncomplete,
+    activeWorkout,
 }) {
     const { auth, today } = usePage().props;
     const [modal, setModal] = useState(null);
@@ -82,6 +83,19 @@ export default function Dashboard({
                     Schedule session
                 </Button>
             </PageHeader>
+            {activeWorkout && (
+                <div className="profile-reminder workout-resume-banner">
+                    <span>
+                        <strong>{activeWorkout.title}</strong> · In progress
+                    </span>
+                    <ButtonLink
+                        href={`/schedule-entries/${activeWorkout.id}/workout`}
+                        className="small"
+                    >
+                        Resume workout
+                    </ButtonLink>
+                </div>
+            )}
             {profileIncomplete && (
                 <div className="profile-reminder">
                     <span>
@@ -195,6 +209,13 @@ export default function Dashboard({
                                                     </Link>
                                                     <StatusBadge
                                                         status={entry.status}
+                                                        active={
+                                                            entry.status ===
+                                                                "planned" &&
+                                                            Boolean(
+                                                                entry.started_at,
+                                                            )
+                                                        }
                                                     />
                                                 </div>
                                                 <p>
@@ -283,7 +304,13 @@ export default function Dashboard({
                                                       "Training"}
                                             </p>
                                         </div>
-                                        <StatusBadge status={entry.status} />
+                                        <StatusBadge
+                                            status={entry.status}
+                                            active={
+                                                entry.status === "planned" &&
+                                                Boolean(entry.started_at)
+                                            }
+                                        />
                                     </Link>
                                 ))}
                             </div>

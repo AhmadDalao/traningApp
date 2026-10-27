@@ -24,6 +24,8 @@ import ExerciseList from "../../Features/ExerciseList";
 import SessionStatusActions from "../../Features/SessionStatusActions";
 import ActualWeightsForm from "../../Features/ActualWeightsForm";
 import WorkoutDetailsForm from "../../Features/WorkoutDetailsForm";
+import ActiveWorkoutExercise from "../../Features/ActiveWorkoutExercise";
+import { workoutProgress } from "../../Features/workout";
 import { calorieDisplay } from "../../Features/calories";
 export default function Show({ entry, workout, history = false }) {
     const [deleting, setDeleting] = useState(false);
@@ -32,11 +34,14 @@ export default function Show({ entry, workout, history = false }) {
     const day = entry.training_day;
     const calories = calorieDisplay(entry);
     const exercises = workout?.exercises || [];
+    const detailed = entry.session_exercises?.length > 0;
+    const progress = workoutProgress(entry.session_exercises || []);
     const saved = Boolean(entry.workout_snapshot);
     const canRecordWeights =
         entry.status === "completed" &&
         entry.entry_type === "training" &&
         saved &&
+        !detailed &&
         exercises.length > 0;
     const backUrl = history
         ? "/training-history"
@@ -116,7 +121,13 @@ export default function Show({ entry, workout, history = false }) {
             <div className="session-summary panel">
                 <div>
                     <span className="meta-label">SESSION STATUS</span>
-                    <StatusBadge status={entry.status} />
+                    {entry.started_at && entry.status === "planned" ? (
+                        <span className="badge workout-active">
+                            In progress
+                        </span>
+                    ) : (
+                        <StatusBadge status={entry.status} />
+                    )}
                 </div>
                 <div>
                     <span className="meta-label">SESSION TYPE</span>
@@ -247,7 +258,22 @@ export default function Show({ entry, workout, history = false }) {
                             </Button>
                         )}
                     </div>
-                    {workout ? (
+                    {detailed ? (
+                        <div className="structured-workout">
+                            <p className="workout-notice">
+                                {progress.completedSets} / {progress.sets} sets
+                                completed · {progress.completedExercises} /{" "}
+                                {progress.exercises} exercises completed
+                            </p>
+                            {entry.session_exercises.map((exercise) => (
+                                <ActiveWorkoutExercise
+                                    key={exercise.id}
+                                    exercise={exercise}
+                                    readOnly
+                                />
+                            ))}
+                        </div>
+                    ) : workout ? (
                         <ExerciseList
                             exercises={exercises}
                             showActualWeights={

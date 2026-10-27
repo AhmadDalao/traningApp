@@ -280,7 +280,7 @@ export default function Index({ entries, summary, filters, plans }) {
                                     <th>Status</th>
                                     <th>Duration</th>
                                     <th>Calories</th>
-                                    <th>Weight Summary</th>
+                                    <th>Workout summary</th>
                                     <th>
                                         <span className="sr-only">Details</span>
                                     </th>
@@ -355,10 +355,12 @@ export default function Index({ entries, summary, filters, plans }) {
                                         <td data-label="Calories">
                                             {calorieDisplay(entry).value}
                                         </td>
-                                        <td data-label="Weight Summary">
-                                            {entry.weights_logged
-                                                ? `${entry.weights_logged}/${entry.exercises_count} weights logged`
-                                                : "—"}
+                                        <td data-label="Workout summary">
+                                            {entry.detailed_workout
+                                                ? `${entry.completed_sets_count}/${entry.sets_count} sets completed`
+                                                : entry.weights_logged
+                                                  ? `${entry.weights_logged}/${entry.exercises_count} weights logged`
+                                                  : "—"}
                                         </td>
                                         <td className="history-link-cell">
                                             <Link

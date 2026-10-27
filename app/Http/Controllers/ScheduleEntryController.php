@@ -76,7 +76,7 @@ class ScheduleEntryController extends Controller
     {
         Gate::authorize('view', $scheduleEntry);
 
-        $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan');
+        $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
         return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails()]);
     }
@@ -134,6 +134,12 @@ class ScheduleEntryController extends Controller
         try {
             DB::transaction(function () use ($request, $scheduleEntry, $status, $estimator, &$paths) {
                 $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
+                if ($entry->isActiveWorkout() && $status !== 'planned') {
+                    throw ValidationException::withMessages(['status' => 'This workout is in progress. Finish or discard it from Active Workout.']);
+                }
+                if (! $entry->isActiveWorkout() && $status !== 'completed') {
+                    $entry->started_at = null;
+                }
                 if ($status === 'completed') {
                     if ($entry->workout_snapshot === null) {
                         $entry->workout_snapshot = $entry->captureWorkoutSnapshot($paths);
@@ -167,6 +173,9 @@ class ScheduleEntryController extends Controller
             $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
             if ($entry->status !== 'completed' || $entry->entry_type !== 'training' || $entry->workout_snapshot === null) {
                 throw ValidationException::withMessages(['weights' => 'Actual weights can only be recorded for a completed training session with a saved workout.']);
+            }
+            if ($entry->sessionExercises()->exists()) {
+                throw ValidationException::withMessages(['weights' => 'This workout has detailed per-set weights. Use its structured set logs.']);
             }
             $snapshot = $entry->workout_snapshot;
             foreach ($request->validated('weights') as $row => $weight) {
