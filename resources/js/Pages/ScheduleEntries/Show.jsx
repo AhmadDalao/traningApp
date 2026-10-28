@@ -1,3 +1,4 @@
+import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
@@ -36,8 +37,11 @@ export default function Show({
     progressSummary = null,
     canManageSession = true,
     scheduledBy = null,
+    canMove = false,
+    canMoveSeries = false,
 }) {
     const { url, canManage, coaching, templates } = useTraining();
+    const [moving, setMoving] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [editingWeights, setEditingWeights] = useState(false);
     const { timezone } = usePage().props;
@@ -60,6 +64,12 @@ export default function Show({
     return (
         <>
             <Head title={entry.title} />
+            {moving && (
+                <ScheduleChangeModal
+                    entry={{ ...entry, can_move_series: canMoveSeries }}
+                    onClose={() => setMoving(false)}
+                />
+            )}
             <Breadcrumbs
                 items={[
                     {
@@ -89,6 +99,12 @@ export default function Show({
                 }
             >
                 {!coaching && <SessionStatusActions entry={entry} />}
+                {canMove && (
+                    <Button variant="secondary" onClick={() => setMoving(true)}>
+                        <CalendarDays size={16} />
+                        Change date
+                    </Button>
+                )}
                 {canManageSession && (
                     <ButtonLink
                         href={url(`/schedule-entries/${entry.id}/edit`)}
@@ -133,6 +149,14 @@ export default function Show({
                     </div>
                 </div>
             )}
+            <p className="field-hint">
+                {entry.plan_occurrence_key
+                    ? "Generated occurrence"
+                    : "Manual session"}
+                {entry.plan_occurrence_key && !entry.schedule_managed
+                    ? " · Individual exception"
+                    : ""}
+            </p>
             {scheduledBy && (
                 <p className="field-hint">Scheduled by {scheduledBy}</p>
             )}

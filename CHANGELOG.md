@@ -1,6 +1,28 @@
 # Changelog
 
-## Post-v1.6 stabilization — 2026-10-28
+## v1.7.0 — 28 October 2026
+
+GitHub source release; Hostinger deployment is unchanged. Earlier v1.6.0 and v1.6.1 tags remain intact.
+
+### Added
+- Explicit ongoing schedules with null end dates, confirmed activation, a centralized 90-day rolling horizon, and no background worker requirement.
+- Calendar date click lists existing sessions before adding another; plan choices identify coach-assigned sources.
+- Eligible desktop drag/drop and mobile Change date, with signed previews for this occurrence or this and future.
+- Effective-date weekday phases preserve earlier dates and unrelated weekdays. Existing moved occurrence keys remain intact.
+- Cancellation markers prevent deleted generated occurrences from reappearing. Stop Schedule previews eligible future removals and preserves protected sessions.
+- Ongoing coach assignments and rolling generation retain trainee ownership, actor attribution, consent and service-date limits.
+
+### Preserved and verified
+- Existing fixed schedules, personal navigation, manual extras, active/saved/history data, Progress/PRs and progression prescriptions.
+- Existing broad coaching read consent is retained following the implementation go-ahead; other-coach and personal-session mutations remain denied.
+- 409 PHP tests / 5,160 assertions on SQLite and MySQL; 32 new cases. 24 JS tests and 21 concurrency checks (17 coaching + 4 recurring) pass.
+- 42 responsive page checks at 320/390/1280px plus date-click, drag, cancellation, mobile reschedule, Stop Schedule and coach permission flows. No observed page overflow, broken images or final console errors.
+- Production build, Pint, changed-file Prettier and whitespace checks pass. Original local rows/media match pre-QA fingerprints; temporary accounts are removed.
+- One additive migration; no dependency upgrade, duplicate Calendar, generic recurrence engine, cron, queue or v1.8 work.
+- Full report: [v1.7 Smart Calendar](docs/V1.7.0-SMART-CALENDAR-REPORT.html).
+
+
+## v1.6.1 — Post-v1.6 stabilization — 2026-10-28
 
 - Exclude completed/skipped sessions from upcoming summaries and elapsed timed sessions from coach Next-session cards; Last workout now excludes rest days.
 - Eager-load bounded trainee session summaries: 26 → 6 data queries on the same QA fixture.
@@ -8,7 +30,7 @@
 - Prevent automatic transaction retries from replaying filesystem side effects; retain existing failure cleanup.
 - Fix the library/schedule migration's SQLite rollback by dropping its unique index before its column. No production schema migration or rollback was run.
 - Add 15 regression cases. Final verification: 377 PHP tests / 4,853 assertions on SQLite and MySQL, 24 JS tests, 17 concurrency checks, 84 live checks and 102 responsive checks. Build/style checks pass; original data/media fingerprints match after cleanup.
-- Runtime fixes deployed; v1.6.0 tag unchanged. The [full QA report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.html) keeps the next-release gate open pending clarification of QA section 51 versus the accepted cross-coach read consent. Cross-coach edits remain denied; no new feature release started.
+- Runtime fixes deployed and separately tagged v1.6.1; v1.6.0 remains unchanged. The [full QA report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.html) records the original policy hold and its later resolution before v1.7. Existing cross-coach read consent is retained; cross-coach edits remain denied.
 
 ## v1.6.0 — 28 October 2026
 

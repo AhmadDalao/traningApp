@@ -3,14 +3,19 @@
 namespace App\Services;
 
 use App\Models\ScheduleEntry;
+use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class PlanSchedule
 {
-    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null): array
+    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null, array $change = []): array
     {
         $plan->loadMissing('trainingDays');
         $assignment = $coach ? app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true, $lock) : null;
@@ -22,6 +27,12 @@ class PlanSchedule
             ->selectRaw('workout_snapshot IS NOT NULL AS has_snapshot')->withExists('sessionExercises')
             ->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')
             ->when($lock, fn ($q) => $q->lockForUpdate())->get();
+        $originalEntries = $entries->map->getAttributes()->all();
+        $cancelled = DB::table('schedule_occurrence_cancellations')->where('training_plan_id', $plan->id)->orderBy('occurrence_key')->when($lock, fn ($q) => $q->lockForUpdate())->pluck('occurrence_key')->all();
+        if (isset($change['entry'])) {
+            $moved = $entries->firstWhere('id', $change['entry']);
+            $moved?->forceFill(['scheduled_date' => $change['date'], 'scheduled_time' => $change['time'], 'schedule_managed' => false]);
+        }
         $eligible = [];
         $protected = [];
         foreach ($entries as $entry) {
@@ -47,6 +58,9 @@ class PlanSchedule
         $add = [];
         $keep = [];
         foreach ($this->desired($plan) as $session) {
+            if (in_array($session['key'], $cancelled, true)) {
+                continue;
+            }
             if ($subscription && ($session['scheduled_date'] < $subscription->starts_on->toDateString() || ($subscription->ends_on && $session['scheduled_date'] > $subscription->ends_on->toDateString()))) {
                 $excluded[] = [...$session, 'reason' => 'Outside the active subscription dates'];
 
@@ -66,6 +80,16 @@ class PlanSchedule
             }
             $sessions[] = $session;
         }
+        foreach ($eligible as $id => $row) {
+            $entry = $entries->firstWhere('id', $id);
+            if (($plan->schedule_mode === 'ongoing' && $row['scheduled_date'] > $this->horizon()) ||
+                (isset($change['day']) && ($entry->training_day_id !== $change['day'] || $row['scheduled_date'] < $change['from']))) {
+                $keep[$id] = $row;
+            }
+        }
+        if (isset($change['day'])) {
+            $add = array_values(array_filter($add, fn ($row) => $row['training_day_id'] === $change['day'] && $row['scheduled_date'] >= $change['from']));
+        }
         $remove = array_values(array_diff_key($eligible, $keep));
         $result = [
             'excluded' => $excluded,
@@ -74,12 +98,13 @@ class PlanSchedule
             'new_count' => count(array_filter($add, fn ($row) => ! $row['replaces_id'])),
             'existing_count' => count(array_filter($sessions, fn ($row) => $row['existing'])),
             'replacement_count' => count(array_filter($add, fn ($row) => $row['replaces_id'])),
-            'message' => ! $plan->start_date || ! $plan->end_date ? 'Add a start and end date to this plan to generate sessions.' : (count($sessions) ? null : 'No future dates match this plan. Check the period, weekdays and usual times.'),
+            'horizon' => $plan->schedule_mode === 'ongoing' ? $this->horizon() : null,
+            'message' => ! $plan->start_date || ($plan->schedule_mode !== 'ongoing' && ! $plan->end_date) ? 'Add a start and end date to this plan to generate sessions.' : (count($sessions) ? null : 'No future dates match this plan. Check the period, weekdays and usual times.'),
         ];
         $result['signature'] = hash_hmac('sha256', json_encode([
             $coach?->id, $assignment?->getAttributes(), $assignment?->relationship->getAttributes(), $subscription?->getAttributes(),
-            $plan->id, $plan->user_id, $plan->only('start_date', 'end_date'),
-            $plan->trainingDays->map->getAttributes()->all(), $entries->map->getAttributes()->all(), $result,
+            $plan->getAttributes(), $cancelled, $change,
+            $plan->trainingDays->map->getAttributes()->all(), $originalEntries, $result,
         ], JSON_THROW_ON_ERROR), config('app.key'));
 
         return $result;
@@ -87,18 +112,19 @@ class PlanSchedule
 
     private function desired(TrainingPlan $plan): array
     {
-        if (! $plan->start_date || ! $plan->end_date) {
+        if (! $plan->start_date || ($plan->schedule_mode !== 'ongoing' && ! $plan->end_date)) {
             return [];
         }
-        if ($plan->start_date->diffInDays($plan->end_date) > 365) {
+        if ($plan->schedule_mode !== 'ongoing' && $plan->start_date->diffInDays($plan->end_date) > 365) {
             throw ValidationException::withMessages(['schedule' => 'Preview a plan period of up to one year. Shorten the plan dates to continue.']);
         }
         $start = $plan->start_date->copy()->max(today());
+        $end = $plan->schedule_mode === 'ongoing' ? Carbon::parse($this->horizon())->min($plan->end_date ?? Carbon::parse($this->horizon())) : $plan->end_date;
         $sessions = [];
-        if ($start->lte($plan->end_date)) {
-            foreach (CarbonPeriod::create($start, $plan->end_date) as $date) {
+        if ($start->lte($end)) {
+            foreach (CarbonPeriod::create($start, $end) as $date) {
                 foreach ($plan->trainingDays as $day) {
-                    if (! in_array($date->dayOfWeek, $day->weekdays ?? [], false) || ! $this->future($date->toDateString(), $day->default_time)) {
+                    if (! in_array($date->dayOfWeek, $day->weekdaysOn($date->toDateString()), false) || ! $this->future($date->toDateString(), $day->default_time)) {
                         continue;
                     }
                     $sessions[] = [
@@ -181,6 +207,113 @@ class PlanSchedule
             }
         }
 
+        $plan->forceFill(['schedule_enabled' => $action !== 'remove' && $plan->schedule_mode === 'ongoing', 'schedule_actor_id' => $coach?->id ?? $plan->user_id])->save();
+
         return ['added' => $added, 'removed' => count($ids)];
+    }
+
+    public function horizon(): string
+    {
+        return today()->addDays(config('training.schedule_horizon_days'))->toDateString();
+    }
+
+    public function canMove(ScheduleEntry $entry, User $owner, ?User $coach = null): bool
+    {
+        if ($entry->user_id !== $owner->id || $entry->status !== 'planned' || $entry->started_at || $entry->workout_snapshot !== null ||
+            ($entry->session_exercises_exists ?? $entry->sessionExercises()->exists()) || ! $this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time)) {
+            return false;
+        }
+
+        return ! $coach || app(CoachAccess::class)->canManageSession($coach, $owner, $entry);
+    }
+
+    public function canMoveSeries(ScheduleEntry $entry): bool
+    {
+        $day = $entry->trainingDay;
+        $plan = $day?->trainingPlan;
+
+        return $plan && $plan->start_date && ($plan->schedule_mode === 'ongoing' || $plan->end_date) && $entry->schedule_managed &&
+            $entry->plan_occurrence_key === 'plan:'.$plan->id.':'.$day->id.':'.$entry->scheduled_date->toDateString() &&
+            in_array($entry->scheduled_date->dayOfWeek, $day->weekdaysOn($entry->scheduled_date->toDateString()));
+    }
+
+    /** Explicit weekday phases, only for this-and-future changes. No history is rewritten. */
+    public function moveWeekday(TrainingDay $day, string $from, string $to): void
+    {
+        $source = Carbon::parse($from)->dayOfWeek;
+        $target = Carbon::parse($to)->dayOfWeek;
+        $this->changeWeekdaysFrom($day, $from, fn ($days) => array_values(array_filter($days, fn ($weekday) => $weekday !== $source)));
+        $this->changeWeekdaysFrom($day, max($from, $to), function ($days) use ($target) {
+            $days[] = $target;
+            $days = array_values(array_unique($days));
+            sort($days);
+
+            return $days;
+        });
+    }
+
+    private function changeWeekdaysFrom(TrainingDay $day, string $from, callable $change): void
+    {
+        $rules = $day->schedule_rules ?? [['from' => null, 'weekdays' => $day->weekdays ?? []]];
+        $current = $day->weekdaysOn($from);
+        $next = [];
+        foreach ($rules as $rule) {
+            if ($rule['from'] !== $from) {
+                $next[] = ['from' => $rule['from'], 'weekdays' => $rule['from'] !== null && $rule['from'] > $from ? $change($rule['weekdays']) : $rule['weekdays']];
+            }
+        }
+        $next[] = ['from' => $from, 'weekdays' => $change($current)];
+        usort($next, fn ($a, $b) => ($a['from'] ?? '') <=> ($b['from'] ?? ''));
+        $day->schedule_rules = $next;
+        $day->weekdays = end($next)['weekdays'];
+    }
+
+    public function rememberCancellation(ScheduleEntry $entry): void
+    {
+        if (preg_match('/^plan:([1-9][0-9]*):[1-9][0-9]*:\d{4}-\d{2}-\d{2}$/D', $entry->plan_occurrence_key ?? '', $match) &&
+            TrainingPlan::whereKey($match[1])->where('user_id', $entry->user_id)->exists()) {
+            DB::table('schedule_occurrence_cancellations')->insertOrIgnore(['training_plan_id' => $match[1], 'occurrence_key' => $entry->plan_occurrence_key, 'created_at' => now()]);
+        }
+    }
+
+    /** Only explicitly enabled schedules roll forward; reads never activate a plan. */
+    public function ensureWindow(User $owner, ?User $viewer = null, ?int $planId = null): void
+    {
+        $plans = $owner->trainingPlans()->where('schedule_mode', 'ongoing')->where('schedule_enabled', true)->whereNotNull('schedule_actor_id')
+            ->when($planId, fn ($q) => $q->whereKey($planId))->orderBy('id')->get(['id', 'schedule_actor_id']);
+        foreach ($plans as $candidate) {
+            $actor = User::find($candidate->schedule_actor_id);
+            if (! $actor || ($viewer && $viewer->id !== $actor->id)) {
+                continue;
+            }
+            $coach = $actor->id !== $owner->id ? $actor : null;
+            try {
+                $work = function () use ($owner, $candidate, $coach) {
+                    User::whereKey($owner->id)->lockForUpdate()->firstOrFail();
+                    $plan = TrainingPlan::where('user_id', $owner->id)->lockForUpdate()->findOrFail($candidate->id);
+                    if (! $plan->schedule_enabled || $plan->schedule_mode !== 'ongoing' || $plan->schedule_actor_id !== $candidate->schedule_actor_id) {
+                        return;
+                    }
+                    $plan->setRelation('trainingDays', $plan->trainingDays()->lockForUpdate()->get());
+                    $preview = $this->preview($plan, lock: true, coach: $coach);
+                    // Rolling refresh is additive only. Removal always requires a reviewed diff.
+                    foreach ($preview['add'] as $session) {
+                        if ($session['replaces_id']) {
+                            continue;
+                        }
+                        $owner->scheduleEntries()->firstOrCreate(['plan_occurrence_key' => $session['key']], [
+                            ...collect($session)->except('key', 'existing', 'existing_date', 'replaces_id')->all(),
+                            'status' => 'planned', 'schedule_managed' => true, 'scheduled_by_user_id' => $coach?->id ?? $owner->id,
+                        ]);
+                    }
+                };
+                $coach ? app(CoachAccess::class)->transaction($coach, $owner, $work) : DB::transaction($work);
+            } catch (HttpExceptionInterface|ModelNotFoundException $error) {
+                // A paused/ended service, deleted coach or disconnected relationship stops generation.
+                if (! $error instanceof ModelNotFoundException && ! in_array($error->getStatusCode(), [403, 404])) {
+                    throw $error;
+                }
+            }
+        }
     }
 }

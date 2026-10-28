@@ -1,3 +1,4 @@
+import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
@@ -67,6 +68,7 @@ function Sessions({ rows, label }) {
 }
 export default function Schedule({ plan, preview }) {
     const { url } = useTraining();
+    const [stopping, setStopping] = useState(false);
     const [group, setGroup] = useState("add");
     const [action, setAction] = useState(null);
     const [removeObsolete, setRemoveObsolete] = useState(false);
@@ -124,7 +126,20 @@ export default function Schedule({ plan, preview }) {
             <section className="panel schedule-settings panel-padding">
                 <h2>Plan period</h2>
                 <p>
-                    {plan.start_date && plan.end_date ? (
+                    {plan.schedule_mode === "ongoing" ? (
+                        <>
+                            Ongoing from <DateLabel date={plan.start_date} />
+                            {plan.end_date ? (
+                                <>
+                                    {" "}
+                                    · Stops after{" "}
+                                    <DateLabel date={plan.end_date} />
+                                </>
+                            ) : (
+                                " · Repeats until stopped"
+                            )}
+                        </>
+                    ) : plan.start_date && plan.end_date ? (
                         <>
                             <DateLabel date={plan.start_date} long /> –{" "}
                             <DateLabel date={plan.end_date} long />
@@ -133,6 +148,24 @@ export default function Schedule({ plan, preview }) {
                         "No plan period set"
                     )}
                 </p>
+                {plan.schedule_mode === "ongoing" && (
+                    <>
+                        <p className="field-hint">
+                            {plan.schedule_enabled
+                                ? "Rolling generation is active."
+                                : "Confirm Add missing sessions to activate rolling generation."}{" "}
+                            Future window through{" "}
+                            <DateLabel date={preview.horizon} />. Only missing
+                            sessions are added when Calendar opens.
+                        </p>
+                        <Button
+                            variant="secondary"
+                            onClick={() => setStopping(true)}
+                        >
+                            Stop schedule
+                        </Button>
+                    </>
+                )}
                 <div className="schedule-days">
                     {plan.training_days.map((day) => (
                         <div key={day.id}>
@@ -150,7 +183,8 @@ export default function Schedule({ plan, preview }) {
                     ))}
                 </div>
                 <p className="field-hint">
-                    Calendar changes happen only after you review and confirm.
+                    Schedule changes require review and confirmation. Active
+                    ongoing schedules add missing future sessions automatically.
                     Today’s timed sessions qualify only while their time is
                     still ahead; today’s untimed sessions are kept.
                 </p>
@@ -223,7 +257,13 @@ export default function Schedule({ plan, preview }) {
                 />
                 <div className="schedule-manager-actions">
                     <Button
-                        disabled={!preview.new_count}
+                        disabled={
+                            !preview.new_count &&
+                            !(
+                                plan.schedule_mode === "ongoing" &&
+                                !plan.schedule_enabled
+                            )
+                        }
                         onClick={() => setAction("add")}
                     >
                         <CalendarPlus size={16} />
@@ -250,6 +290,12 @@ export default function Schedule({ plan, preview }) {
                     </Button>
                 </div>
             </section>
+            {stopping && (
+                <ScheduleChangeModal
+                    plan={plan}
+                    onClose={() => setStopping(false)}
+                />
+            )}
             {action && (
                 <Modal
                     title={actionTitle}
@@ -340,7 +386,13 @@ export default function Schedule({ plan, preview }) {
                                 variant={removing.length ? "danger" : "primary"}
                                 disabled={
                                     form.processing ||
-                                    (!adding.length && !removing.length)
+                                    (!adding.length &&
+                                        !removing.length &&
+                                        !(
+                                            action === "add" &&
+                                            plan.schedule_mode === "ongoing" &&
+                                            !plan.schedule_enabled
+                                        ))
                                 }
                             >
                                 {form.processing

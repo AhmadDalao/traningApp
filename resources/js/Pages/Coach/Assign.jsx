@@ -1,3 +1,4 @@
+import PlanPeriodFields from "../../Features/PlanPeriodFields";
 import { Head, useForm } from "@inertiajs/react";
 import {
     PageHeader,
@@ -14,6 +15,7 @@ export default function Assign({ templates, subscription }) {
         start_date: subscription?.starts_on || "",
         end_date: subscription?.ends_on || "",
         confirmed: true,
+        schedule_mode: "fixed",
     });
     return (
         <>
@@ -68,29 +70,7 @@ export default function Assign({ templates, subscription }) {
                             for this trainee.
                         </p>
                     )}
-                    <div className="form-grid">
-                        <Field label="Plan starts" required>
-                            <input
-                                type="date"
-                                required
-                                value={form.data.start_date}
-                                onChange={(e) =>
-                                    form.setData("start_date", e.target.value)
-                                }
-                            />
-                        </Field>
-                        <Field label="Plan ends" required>
-                            <input
-                                type="date"
-                                required
-                                min={form.data.start_date}
-                                value={form.data.end_date}
-                                onChange={(e) =>
-                                    form.setData("end_date", e.target.value)
-                                }
-                            />
-                        </Field>
-                    </div>
+                    <PlanPeriodFields form={form} required />
                     <p>
                         Days, exercises, icons and prescriptions are copied.
                         Workouts and results are not. After assigning, review

@@ -21,7 +21,7 @@ class TrainingPlanDuplicator
         return $this->copy($user, function (&$paths) use ($user, $source) {
             $source = TrainingPlan::where('user_id', $user->id)->lockForUpdate()->findOrFail($source->id);
             $copy = $user->trainingPlans()->create([
-                ...$source->only('description', 'start_date', 'end_date'),
+                ...$source->only('description', 'start_date', 'end_date', 'schedule_mode'),
                 'name' => $this->name($source->name, $user->trainingPlans(), 'name'),
             ]);
             if ($source->workspace_type === 'coach_template') {
@@ -75,6 +75,8 @@ class TrainingPlanDuplicator
             $source = TrainingDay::lockForUpdate()->findOrFail($source->id);
             $authorize();
             $destination = TrainingPlan::where('user_id', $user->id)->findOrFail($destination->id);
+
+            $destination->forceFill(['schedule_enabled' => false])->save();
 
             return $this->dayCopy($source, $destination, $this->name($source->title, $destination->trainingDays(), 'title'), ($destination->trainingDays()->max('position') ?? -1) + 1, $paths);
         });

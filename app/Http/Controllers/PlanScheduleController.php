@@ -18,6 +18,7 @@ class PlanScheduleController extends Controller
     {
         $this->context->plan($trainingPlan, 'update');
         abort_if($this->context->templates(), 403);
+        $schedule->ensureWindow($this->context->owner(), $this->context->coaching() ? $this->context->actor() : null, $trainingPlan->id);
         $preview = $schedule->preview($trainingPlan, coach: $this->context->coaching() ? $this->context->actor() : null);
 
         return Inertia::render('TrainingPlans/Schedule', ['plan' => $trainingPlan, 'preview' => $preview]);

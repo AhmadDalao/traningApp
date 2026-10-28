@@ -2,13 +2,29 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v1.7.0 Smart Calendar & Recurring Schedules
+
+Source release **v1.7.0** adds ongoing plans, confirmed rolling generation through today + 90 days, date-first scheduling, desktop drag/drop, mobile Change date, this-occurrence / this-and-future previews, persistent cancellation markers and Stop Schedule. Existing fixed schedules, manual sessions, saved workouts and coaching ownership remain protected.
+
+Verification: **409 PHP tests / 5,160 assertions** on SQLite and isolated MySQL, **24 JS tests**, **21 two-connection checks**, and **42 responsive page checks** at 320/390/1280px. Build, Pint, changed-file Prettier and whitespace checks pass. Temporary local QA accounts are removed; all original rows and media match their fingerprints.
+
+[Full v1.7 report](docs/V1.7.0-SMART-CALENDAR-REPORT.html). This is a **GitHub source release**; Hostinger remains on the deployed v1.6 stabilization code. Deploying v1.7 requires its additive migration and frontend build. No queue or cron is required.
+
+The v1.6 policy hold is resolved by retaining the accepted consent: connected coaches may read a trainee’s full workout history, including other-coach sessions, while mutations remain restricted to their own eligible assigned sessions. Earlier tags are preserved.
+
+Additional recurring-schedule concurrency checks (isolated test database only):
+
+```sh
+DB_CONNECTION=mysql DB_DATABASE=training_planner_test php tests/Concurrency/RecurringScheduleConcurrency.php
+```
+
 ## Post-v1.6 stabilization — 28 October 2026
 
-Seven reproduced bugs are fixed and deployed: upcoming summaries, next/last workout selection, trainee-list repeated queries, subscription date serialization, media cleanup on transaction failure, and SQLite migration rollback. No new feature, schema migration or version tag was added.
+Seven reproduced bugs are fixed and deployed: upcoming summaries, next/last workout selection, trainee-list repeated queries, subscription date serialization, media cleanup on transaction failure, and SQLite migration rollback. No new feature or production schema migration was added. These fixes are separately tagged as v1.6.1; v1.6.0 is unchanged.
 
 Verification: **377 PHP tests / 4,853 assertions** on SQLite and isolated MySQL, **24 JS tests**, **17 concurrency checks**, **84 live checks**, and **102 responsive checks**. Original local/live rows and media match their pre-QA fingerprints; all temporary accounts were removed.
 
-The [full QA and stabilization report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.html) records **NOT READY FOR NEXT RELEASE** pending one authorization-policy clarification: the accepted v1.6 consent allows reading a connected trainee’s other-coach workouts, while QA section 51 says those reads must fail. Cross-coach edits remain blocked. Existing consent behavior is preserved until that conflict is resolved.
+The [full QA and stabilization report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.html) preserves its original results and includes a dated addendum resolving the prior next-release policy hold. Existing cross-coach read consent is retained; cross-coach edits remain blocked.
 
 ## v1.6.0 Coaching Workspace
 

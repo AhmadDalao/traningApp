@@ -6,6 +6,7 @@ use App\Http\Requests\StoreScheduleEntryRequest;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
 use App\Services\CoachAccess;
+use App\Services\PlanSchedule;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -77,6 +78,7 @@ class CoachScheduleController extends Controller
         $this->context->write(function () use ($scheduleEntry) {
             $entry = ScheduleEntry::lockForUpdate()->findOrFail($scheduleEntry->id);
             $this->access->futureSession($this->context->actor(), $this->context->owner(), $entry);
+            app(PlanSchedule::class)->rememberCancellation($entry);
             $entry->delete();
         });
 

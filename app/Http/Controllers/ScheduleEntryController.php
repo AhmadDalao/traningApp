@@ -11,6 +11,7 @@ use App\Models\TrainingDay;
 use App\Models\User;
 use App\Services\CoachAccess;
 use App\Services\ExerciseProgress;
+use App\Services\PlanSchedule;
 use App\Services\TrainingContext;
 use App\Services\WorkoutCalorieEstimator;
 use Carbon\Carbon;
@@ -26,12 +27,26 @@ class ScheduleEntryController extends Controller
     public function calendar(Request $request)
     {
         $request->validate(['date' => 'nullable|date_format:Y-m-d', 'view' => 'nullable|in:dayGridMonth,dayGridWeek,listMonth']);
+        $context = app(TrainingContext::class);
+        $schedule = app(PlanSchedule::class);
+        $schedule->ensureWindow($context->owner(), $context->coaching() ? $context->actor() : null);
+        $subscription = $context->coaching() ? app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($context->actor(), $context->owner())) : null;
+        $managedPlans = $context->coaching() && $subscription ? $context->plans(true)->pluck('training_plans.id')->all() : [];
+        $coachCanMove = fn ($entry) => ! $context->coaching() || ($subscription &&
+            $entry->scheduled_by_user_id === $context->actor()->id && in_array($entry->trainingDay?->training_plan_id, $managedPlans, true) &&
+            $entry->scheduled_date->gte($subscription->starts_on) && (! $subscription->ends_on || $entry->scheduled_date->lte($subscription->ends_on)));
         $date = Carbon::parse($request->input('date', now()->toDateString()));
         $start = $date->copy()->startOfMonth()->subWeek();
         $end = $date->copy()->endOfMonth()->addWeek();
 
         return Inertia::render('Calendar/Index', [
-            'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->get(['id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_date', 'scheduled_time', 'status']),
+            'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan')->withExists('sessionExercises')->get()->map(fn ($entry) => [
+                ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key'),
+                'scheduled_date' => $entry->scheduled_date->toDateString(),
+                'can_move' => $schedule->canMove($entry, $context->owner()) && $coachCanMove($entry),
+                'can_move_series' => $schedule->canMoveSeries($entry),
+                'source' => $entry->trainingDay?->trainingPlan?->workspace_type === 'coach_assigned' ? 'Coach assigned' : 'Personal',
+            ]),
             'calendarDate' => $date->toDateString(), 'calendarView' => $request->input('view', 'dayGridMonth'),
             'plans' => $this->plans($request),
         ]);
@@ -39,7 +54,7 @@ class ScheduleEntryController extends Controller
 
     private function plans(Request $request)
     {
-        return app(TrainingContext::class)->plans(true)->with('trainingDays')->orderBy('name')->get();
+        return app(TrainingContext::class)->plans(true)->with('trainingDays', 'assignment.relationship.coach.coachProfile')->orderBy('name')->get()->map(fn ($plan) => [...$plan->only('id', 'name', 'workspace_type'), 'training_days' => $plan->trainingDays, 'coach_name' => $plan->assignment?->relationship?->coach?->coachProfile?->display_name]);
     }
 
     public function create(Request $request)
@@ -92,7 +107,7 @@ class ScheduleEntryController extends Controller
 
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'canManageSession' => ! $context->coaching() || app(CoachAccess::class)->canManageSession($context->actor(), $context->owner(), $scheduleEntry)]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'canMove' => app(PlanSchedule::class)->canMove($scheduleEntry, $context->owner(), $context->coaching() ? $context->actor() : null), 'canMoveSeries' => app(PlanSchedule::class)->canMoveSeries($scheduleEntry), 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'canManageSession' => ! $context->coaching() || app(CoachAccess::class)->canManageSession($context->actor(), $context->owner(), $scheduleEntry)]);
     }
 
     public function edit(Request $request, ScheduleEntry $scheduleEntry)
@@ -213,8 +228,10 @@ class ScheduleEntryController extends Controller
     {
         Gate::authorize('delete', $scheduleEntry);
         $paths = DB::transaction(function () use ($scheduleEntry) {
+            User::whereKey($scheduleEntry->user_id)->lockForUpdate()->firstOrFail();
             $entry = ScheduleEntry::lockForUpdate()->findOrFail($scheduleEntry->id);
             $paths = $entry->snapshotThumbnailPaths();
+            app(PlanSchedule::class)->rememberCancellation($entry);
             $entry->delete();
 
             return $paths;

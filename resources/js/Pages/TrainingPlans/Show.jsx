@@ -95,9 +95,11 @@ export default function Show({ plan, copyPlans = [] }) {
                     <div>
                         <h2>Plan schedule</h2>
                         <p>
-                            {plan.start_date && plan.end_date
-                                ? `${plan.start_date} to ${plan.end_date}`
-                                : "Add a start and end date to schedule your plan."}
+                            {plan.schedule_mode === "ongoing"
+                                ? `Ongoing from ${plan.start_date}${plan.end_date ? ` · Stops after ${plan.end_date}` : ""}`
+                                : plan.start_date && plan.end_date
+                                  ? `${plan.start_date} to ${plan.end_date}`
+                                  : "Add a start and end date to schedule your plan."}
                         </p>
                         <p>
                             Review generated dates, add missing sessions or

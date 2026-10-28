@@ -71,7 +71,12 @@ class TrainingPlanController extends Controller
             $this->context->plan($plan, 'update');
             $plan->update($request->validated());
 
-            return $plan->wasChanged(['start_date', 'end_date']);
+            $changed = $plan->wasChanged(['start_date', 'end_date', 'schedule_mode']);
+            if ($changed) {
+                $plan->forceFill(['schedule_enabled' => false])->save();
+            }
+
+            return $changed;
         });
 
         return $this->context->redirect('/training-plans/'.$trainingPlan->id)->with('success', 'Training plan updated.')

@@ -1,0 +1,55 @@
+.schedule-change-diff {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+}
+.schedule-change-diff details {
+    border: 1px solid var(--border, #dde4ed);
+    border-radius: 10px;
+    padding: 12px;
+    min-width: 0;
+}
+.schedule-change-diff summary {
+    font-weight: 600;
+    cursor: pointer;
+}
+.schedule-change-rows {
+    max-height: 220px;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+.schedule-change-rows p {
+    display: grid;
+    gap: 4px;
+    padding: 10px 0;
+    overflow-wrap: anywhere;
+}
+.schedule-change-rows small {
+    color: #64748b;
+}
+.calendar-date-sessions {
+    display: grid;
+    gap: 10px;
+    max-height: 280px;
+    overflow: auto;
+    margin: 16px 0;
+}
+.calendar-date-sessions a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid #dde4ed;
+    border-radius: 10px;
+    padding: 12px;
+}
+.calendar-date-sessions strong {
+    overflow-wrap: anywhere;
+    min-width: 0;
+}
+@media (max-width: 480px) {
+    .schedule-change-rows {
+        max-height: 180px;
+    }
+}

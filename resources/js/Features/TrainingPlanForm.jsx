@@ -1,3 +1,4 @@
+import PlanPeriodFields from "./PlanPeriodFields";
 import { useTraining } from "./CoachingUI";
 import { useForm } from "@inertiajs/react";
 import { Button, Field } from "../Components/UI";
@@ -8,6 +9,7 @@ export default function TrainingPlanForm({ plan, onCancel, onSaved }) {
         description: plan?.description || "",
         start_date: plan?.start_date || "",
         end_date: plan?.end_date || "",
+        schedule_mode: plan?.schedule_mode || "fixed",
     });
     return (
         <form
@@ -45,32 +47,7 @@ export default function TrainingPlanForm({ plan, onCancel, onSaved }) {
                     placeholder="What are you working towards?"
                 />
             </Field>
-            {!templates && (
-                <div className="form-grid">
-                    <Field label="Plan starts" error={form.errors.start_date}>
-                        <input
-                            type="date"
-                            value={form.data.start_date}
-                            required={!!form.data.end_date}
-                            max={form.data.end_date || undefined}
-                            onInput={(event) =>
-                                form.setData("start_date", event.target.value)
-                            }
-                        />
-                    </Field>
-                    <Field label="Plan ends" error={form.errors.end_date}>
-                        <input
-                            type="date"
-                            value={form.data.end_date}
-                            required={!!form.data.start_date}
-                            min={form.data.start_date || undefined}
-                            onInput={(event) =>
-                                form.setData("end_date", event.target.value)
-                            }
-                        />
-                    </Field>
-                </div>
-            )}
+            {!templates && <PlanPeriodFields form={form} />}
             <p className="field-hint">
                 {templates
                     ? "Reusable template. Set the trainee’s dates when assigning a copy."

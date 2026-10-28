@@ -10,7 +10,19 @@ class TrainingDay extends Model
 
     protected function casts(): array
     {
-        return ['weekdays' => 'array'];
+        return ['weekdays' => 'array', 'schedule_rules' => 'array'];
+    }
+
+    public function weekdaysOn(string $date): array
+    {
+        $weekdays = $this->weekdays ?? [];
+        foreach ($this->schedule_rules ?? [] as $rule) {
+            if ($rule['from'] === null || $rule['from'] <= $date) {
+                $weekdays = $rule['weekdays'];
+            }
+        }
+
+        return array_map('intval', $weekdays);
     }
 
     public function trainingPlan()

@@ -106,6 +106,9 @@ export default function ScheduleEntryForm({
                                 {plans.map((p) => (
                                     <option key={p.id} value={p.id}>
                                         {p.name}
+                                        {p.workspace_type === "coach_assigned"
+                                            ? ` · Coach assigned${p.coach_name ? ` — ${p.coach_name}` : ""}`
+                                            : " · Personal"}
                                     </option>
                                 ))}
                             </select>

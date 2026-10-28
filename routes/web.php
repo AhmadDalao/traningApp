@@ -14,6 +14,7 @@ use App\Http\Controllers\PlanScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\ScheduleChangeController;
 use App\Http\Controllers\ScheduleEntryController;
 use App\Http\Controllers\SessionExerciseController;
 use App\Http\Controllers\SessionSetController;
@@ -137,3 +138,13 @@ Route::middleware(['auth', CoachWorkspace::class])->prefix('/coach/trainees/{tra
     Route::get('/progress/exercises', ExerciseProgressController::class);
     Route::patch('/training-exercises/{trainingExercise}/progression', [ExerciseProgressController::class, 'coachApply']);
 });
+
+// Both workspaces use the same signed, locked rescheduling flow.
+foreach (['' => ['auth'], '/coach/trainees/{trainee}' => ['auth', CoachWorkspace::class]] as $prefix => $middleware) {
+    Route::middleware($middleware)->prefix($prefix)->group(function () {
+        Route::post('/schedule-entries/{scheduleEntry}/reschedule-preview', [ScheduleChangeController::class, 'preview']);
+        Route::post('/schedule-entries/{scheduleEntry}/reschedule', [ScheduleChangeController::class, 'store']);
+        Route::post('/training-plans/{trainingPlan}/stop-schedule-preview', [ScheduleChangeController::class, 'stopPreview']);
+        Route::post('/training-plans/{trainingPlan}/stop-schedule', [ScheduleChangeController::class, 'stopStore']);
+    });
+}

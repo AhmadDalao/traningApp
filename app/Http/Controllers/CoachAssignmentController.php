@@ -21,9 +21,12 @@ class CoachAssignmentController extends Controller
 
     public function store(Request $request, TrainingContext $context, TrainingPlanDuplicator $duplicator)
     {
-        $data = $request->validate(['training_plan_id' => 'required|integer', 'start_date' => 'required|date_format:Y-m-d', 'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date', 'confirmed' => 'required|accepted']);
+        $data = $request->validate(['training_plan_id' => 'required|integer', 'start_date' => 'required|date_format:Y-m-d', 'schedule_mode' => 'sometimes|in:fixed,ongoing', 'end_date' => ($request->input('schedule_mode') === 'ongoing' ? 'nullable' : 'required').'|date_format:Y-m-d|after_or_equal:start_date', 'confirmed' => 'required|accepted']);
+        if (($data['schedule_mode'] ?? 'fixed') === 'ongoing') {
+            $data['end_date'] = null;
+        }
         $source = TrainingPlan::where('user_id', $request->user()->id)->where('workspace_type', 'coach_template')->findOrFail($data['training_plan_id']);
-        $copy = $duplicator->assign($request->user(), $context->owner(), $source, collect($data)->only('start_date', 'end_date')->all());
+        $copy = $duplicator->assign($request->user(), $context->owner(), $source, collect($data)->only('start_date', 'end_date', 'schedule_mode')->all());
 
         return $context->redirect('/training-plans/'.$copy->id)->with('success', 'Plan assigned as an independent trainee-owned copy. Review its schedule to add sessions.');
     }

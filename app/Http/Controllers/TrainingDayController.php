@@ -88,8 +88,16 @@ class TrainingDayController extends Controller
                     $fields['focus_area'] = null;
                 }
                 if ($day) {
-                    $day->update($fields);
+                    if (array_key_exists('weekdays', $fields) && $fields['weekdays'] !== $day->weekdays) {
+                        $day->schedule_rules = null;
+                    }
+                    $day->fill($fields);
+                    if ($day->isDirty()) {
+                        $plan->forceFill(['schedule_enabled' => false])->save();
+                    }
+                    $day->save();
                 } else {
+                    $plan->forceFill(['schedule_enabled' => false])->save();
                     $day = $plan->trainingDays()->create([...$fields, 'position' => ($plan->trainingDays()->max('position') ?? -1) + 1]);
                 }
                 $existing = $day->exercises()->get()->keyBy('id');
@@ -154,7 +162,8 @@ class TrainingDayController extends Controller
         $paths = $trainingDay->exercises()->get()->flatMap(fn ($exercise) => [$exercise->thumbnail_path, $exercise->custom_icon_path])->filter()->all();
         $this->context->write(function () use ($trainingDay) {
             $this->context->day($trainingDay, 'update');
-            TrainingPlan::whereKey($trainingDay->training_plan_id)->lockForUpdate()->firstOrFail();
+            $plan = TrainingPlan::whereKey($trainingDay->training_plan_id)->lockForUpdate()->firstOrFail();
+            $plan->forceFill(['schedule_enabled' => false])->save();
             $trainingDay->delete();
         });
         Storage::disk('public')->delete($paths);

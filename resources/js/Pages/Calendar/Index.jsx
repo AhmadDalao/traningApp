@@ -1,12 +1,20 @@
+import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useRef, useState } from "react";
-import { Head, router, usePage } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
 import { Plus, ChevronLeft, ChevronRight, Check, Minus } from "lucide-react";
-import { PageHeader, Button, Modal } from "../../Components/UI";
+import {
+    PageHeader,
+    Button,
+    Modal,
+    DateLabel,
+    TimeLabel,
+    StatusBadge,
+} from "../../Components/UI";
 import TrainingIcon from "../../Components/TrainingIcon";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 export default function Index({ entries, plans, calendarDate, calendarView }) {
@@ -16,6 +24,8 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
     const [title, setTitle] = useState("");
     const [view, setView] = useState(calendarView);
     const [filter, setFilter] = useState("all");
+    const [moving, setMoving] = useState(null);
+    const [adding, setAdding] = useState(false);
     const [schedule, setSchedule] = useState(null);
     const [loading, setLoading] = useState(false);
     function navigate(action, value) {
@@ -46,6 +56,8 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
     const events = visible.map((e) => ({
         id: String(e.id),
         title: e.title,
+        startEditable: e.can_move && !moving,
+        durationEditable: false,
         url: url(`/schedule-entries/${e.id}`),
         start: e.scheduled_time
             ? `${e.scheduled_date}T${e.scheduled_time}`
@@ -69,7 +81,12 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                 description="A little structure for your strongest weeks."
             >
                 {canManage && (
-                    <Button onClick={() => setSchedule({ date: today })}>
+                    <Button
+                        onClick={() => {
+                            setAdding(true);
+                            setSchedule({ date: today });
+                        }}
+                    >
                         <Plus size={17} />
                         Schedule session
                     </Button>
@@ -170,11 +187,24 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                         fixedWeekCount={false}
                         dayMaxEvents={3}
                         events={events}
-                        editable={false}
+                        editable={true}
+                        eventDurationEditable={false}
+                        eventResizableFromStart={false}
+                        eventDrop={(info) => {
+                            const target = info.event.startStr.slice(0, 10);
+                            const entry = entries.find(
+                                (row) => row.id === Number(info.event.id),
+                            );
+                            info.revert();
+                            if (entry?.can_move)
+                                setMoving({ entry, date: target });
+                        }}
                         selectable={false}
                         datesSet={(info) => setTitle(info.view.title)}
                         dateClick={(info) =>
-                            canManage && setSchedule({ date: info.dateStr })
+                            canManage &&
+                            (setAdding(false),
+                            setSchedule({ date: info.dateStr }))
                         }
                         eventClick={(info) => {
                             info.jsEvent.preventDefault();
@@ -214,20 +244,79 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                 </div>
             </section>
             <p className="below-note">
-                Click a date to schedule. Open a session to view exercises or
-                change its status.
+                Click a date to schedule. Drag an eligible session to change its
+                date, or use Change date in session details.
             </p>
+            {moving && (
+                <ScheduleChangeModal
+                    {...moving}
+                    onClose={() => setMoving(null)}
+                />
+            )}
             {schedule && (
                 <Modal
                     title="Schedule a session"
                     onClose={() => setSchedule(null)}
                 >
-                    <ScheduleEntryForm
-                        plans={plans}
-                        selectedDate={schedule.date}
-                        onSaved={() => setSchedule(null)}
-                        onCancel={() => setSchedule(null)}
-                    />
+                    <p>
+                        <DateLabel date={schedule.date} long />
+                    </p>
+                    {entries.some(
+                        (entry) => entry.scheduled_date === schedule.date,
+                    ) && (
+                        <>
+                            <h3>Already scheduled</h3>
+                            <div className="calendar-date-sessions">
+                                {entries
+                                    .filter(
+                                        (entry) =>
+                                            entry.scheduled_date ===
+                                            schedule.date,
+                                    )
+                                    .map((entry) => (
+                                        <Link
+                                            key={entry.id}
+                                            href={url(
+                                                `/schedule-entries/${entry.id}`,
+                                            )}
+                                        >
+                                            <strong>{entry.title}</strong>
+                                            <span>
+                                                {entry.scheduled_time ? (
+                                                    <TimeLabel
+                                                        time={
+                                                            entry.scheduled_time
+                                                        }
+                                                    />
+                                                ) : (
+                                                    "No set time"
+                                                )}{" "}
+                                                ·{" "}
+                                                <StatusBadge
+                                                    status={entry.status}
+                                                />
+                                            </span>
+                                        </Link>
+                                    ))}
+                            </div>
+                        </>
+                    )}
+                    {!adding &&
+                    entries.some(
+                        (entry) => entry.scheduled_date === schedule.date,
+                    ) ? (
+                        <Button onClick={() => setAdding(true)}>
+                            <Plus size={16} />
+                            Add another session
+                        </Button>
+                    ) : (
+                        <ScheduleEntryForm
+                            plans={plans}
+                            selectedDate={schedule.date}
+                            onSaved={() => setSchedule(null)}
+                            onCancel={() => setSchedule(null)}
+                        />
+                    )}
                 </Modal>
             )}
         </>
