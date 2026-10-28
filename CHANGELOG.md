@@ -1,5 +1,15 @@
 # Changelog
 
+## Post-v1.6 stabilization — 2026-10-28
+
+- Exclude completed/skipped sessions from upcoming summaries and elapsed timed sessions from coach Next-session cards; Last workout now excludes rest days.
+- Eager-load bounded trainee session summaries: 26 → 6 data queries on the same QA fixture.
+- Serialize subscription calendar dates explicitly, fixing the previous-day display in My Coaching and assignment/trainee summaries.
+- Prevent automatic transaction retries from replaying filesystem side effects; retain existing failure cleanup.
+- Fix the library/schedule migration's SQLite rollback by dropping its unique index before its column. No production schema migration or rollback was run.
+- Add 15 regression cases. Final verification: 377 PHP tests / 4,853 assertions on SQLite and MySQL, 24 JS tests, 17 concurrency checks, 84 live checks and 102 responsive checks. Build/style checks pass; original data/media fingerprints match after cleanup.
+- Runtime fixes deployed; v1.6.0 tag unchanged. The [full QA report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.html) keeps the next-release gate open pending clarification of QA section 51 versus the accepted cross-coach read consent. Cross-coach edits remain denied; no new feature release started.
+
 ## v1.6.0 — 28 October 2026
 
 Deployed to Hostinger and released as **v1.6.0**, preserving earlier tags.

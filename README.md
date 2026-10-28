@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## Post-v1.6 stabilization — 28 October 2026
+
+Seven reproduced bugs are fixed and deployed: upcoming summaries, next/last workout selection, trainee-list repeated queries, subscription date serialization, media cleanup on transaction failure, and SQLite migration rollback. No new feature, schema migration or version tag was added.
+
+Verification: **377 PHP tests / 4,853 assertions** on SQLite and isolated MySQL, **24 JS tests**, **17 concurrency checks**, **84 live checks**, and **102 responsive checks**. Original local/live rows and media match their pre-QA fingerprints; all temporary accounts were removed.
+
+The [full QA and stabilization report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.html) records **NOT READY FOR NEXT RELEASE** pending one authorization-policy clarification: the accepted v1.6 consent allows reading a connected trainee’s other-coach workouts, while QA section 51 says those reads must fail. Cross-coach edits remain blocked. Existing consent behavior is preserved until that conflict is resolved.
+
 ## v1.6.0 Coaching Workspace
 
 **Deployed as v1.6.0.** See the [full 26-part implementation and release report](docs/V1.6.0-COACHING-REPORT.html).
