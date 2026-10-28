@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTrainingPlanRequest;
 use App\Http\Requests\UpdateTrainingPlanRequest;
 use App\Models\TrainingPlan;
+use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -36,7 +37,8 @@ class TrainingPlanController extends Controller
     {
         Gate::authorize('view', $trainingPlan);
 
-        return Inertia::render('TrainingPlans/Show', ['plan' => $trainingPlan->load(['trainingDays' => fn ($q) => $q->withCount('exercises')])]);
+        return Inertia::render('TrainingPlans/Show', ['plan' => $trainingPlan->load(['trainingDays' => fn ($q) => $q->withCount('exercises')]),
+            'copyPlans' => $trainingPlan->user->trainingPlans()->whereKeyNot($trainingPlan->id)->orderBy('name')->get(['id', 'name'])]);
     }
 
     public function edit(TrainingPlan $trainingPlan)
@@ -50,7 +52,17 @@ class TrainingPlanController extends Controller
     {
         $trainingPlan->update($request->validated());
 
-        return to_route('training-plans.show', $trainingPlan)->with('success', 'Training plan updated.');
+        return to_route('training-plans.show', $trainingPlan)->with('success', 'Training plan updated.')
+            ->with('schedule_review', $trainingPlan->wasChanged(['start_date', 'end_date']) ? $trainingPlan->only('id', 'name') : null);
+    }
+
+    public function duplicate(Request $request, TrainingPlan $trainingPlan, TrainingPlanDuplicator $duplicator)
+    {
+        Gate::authorize('update', $trainingPlan);
+        $request->validate(['confirmed' => 'required|accepted']);
+        $copy = $duplicator->plan($request->user(), $trainingPlan);
+
+        return to_route('training-plans.show', $copy)->with('success', 'Plan duplicated. Your copy has no Calendar sessions or workout history.');
     }
 
     public function destroy(TrainingPlan $trainingPlan)

@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateScheduleEntryStatusRequest;
 use App\Http\Requests\UpdateWorkoutWeightsRequest;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
+use App\Models\User;
 use App\Services\ExerciseProgress;
 use App\Services\WorkoutCalorieEstimator;
 use Carbon\Carbon;
@@ -46,7 +47,11 @@ class ScheduleEntryController extends Controller
 
     public function store(StoreScheduleEntryRequest $request)
     {
-        $entry = $request->user()->scheduleEntries()->create([...$this->entryData($request), 'status' => 'planned']);
+        $entry = DB::transaction(function () use ($request) {
+            User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+
+            return $request->user()->scheduleEntries()->create([...$this->entryData($request), 'status' => 'planned']);
+        });
 
         return to_route('schedule-entries.show', $entry)->with('success', 'Session added to your calendar.');
     }
@@ -111,6 +116,10 @@ class ScheduleEntryController extends Controller
                 $entry->save();
             } else {
                 $entry->fill($this->entryData($request, $entry));
+                if ($entry->plan_occurrence_key && $entry->isDirty(['title', 'training_day_id', 'entry_type', 'focus_area', 'icon', 'scheduled_date', 'scheduled_time', 'notes'])) {
+                    // The original key still prevents a duplicate after a manual move.
+                    $entry->schedule_managed = false;
+                }
                 if ($entry->isDirty(['entry_type', 'focus_area', 'scheduled_date'])) {
                     $entry->estimated_calories = $estimator->forSession($entry);
                     if ($entry->estimated_calories !== null) {

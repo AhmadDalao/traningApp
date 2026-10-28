@@ -23,8 +23,15 @@ import {
 import TrainingPlanForm from "../../Features/TrainingPlanForm";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 import { weekdaySummary } from "../../Components/WeekdayPicker";
-export default function Show({ plan }) {
+import {
+    CopyActions,
+    DayCopyDialog,
+    DuplicatePlanDialog,
+} from "../../Features/TrainingCopyActions";
+export default function Show({ plan, copyPlans = [] }) {
     const { errors } = usePage().props;
+    const [duplicating, setDuplicating] = useState(false);
+    const [copying, setCopying] = useState(null);
     const [edit, setEdit] = useState(false);
     const [deleting, setDeleting] = useState(null);
     const [schedule, setSchedule] = useState(null);
@@ -67,15 +74,35 @@ export default function Show({ plan }) {
                     <Plus size={17} />
                     Add training day
                 </ButtonLink>
+                <CopyActions
+                    label="More plan actions"
+                    onDuplicate={() => setDuplicating(true)}
+                />
             </PageHeader>
             <section className="panel plan-period-panel">
                 <div>
                     <h2>Plan schedule</h2>
-                    <p>{plan.start_date && plan.end_date ? `${plan.start_date} to ${plan.end_date}` : "Add a start and end date to schedule your plan."}</p>
-                    <p>Pick weekdays in each training day, then preview the dates before adding them to Calendar.</p>
-                    {errors.schedule && <p className="field-error" role="alert">{errors.schedule}</p>}
+                    <p>
+                        {plan.start_date && plan.end_date
+                            ? `${plan.start_date} to ${plan.end_date}`
+                            : "Add a start and end date to schedule your plan."}
+                    </p>
+                    <p>
+                        Review generated dates, add missing sessions or remove
+                        eligible future sessions after confirmation.
+                    </p>
+                    {errors.schedule && (
+                        <p className="field-error" role="alert">
+                            {errors.schedule}
+                        </p>
+                    )}
                 </div>
-                {plan.start_date && plan.end_date ? <ButtonLink href={`/training-plans/${plan.id}/schedule-preview`}><CalendarPlus size={16} />Preview schedule</ButtonLink> : <Button variant="secondary" onClick={() => setEdit(true)}>Set plan dates</Button>}
+                <ButtonLink
+                    href={`/training-plans/${plan.id}/schedule-preview`}
+                >
+                    <CalendarPlus size={16} />
+                    Manage schedule
+                </ButtonLink>
             </section>
             <section className="panel">
                 <div className="panel-heading">
@@ -116,7 +143,12 @@ export default function Show({ plan }) {
                                             ? "Rest & recovery"
                                             : `${day.focus_area || "Training"} · ${day.exercises_count} exercises`}
                                     </p>
-                                    <p>{weekdaySummary(day.weekdays || [])}{day.default_time ? ` · ${day.default_time.slice(0, 5)}` : ""}</p>
+                                    <p>
+                                        {weekdaySummary(day.weekdays || [])}
+                                        {day.default_time
+                                            ? ` · ${day.default_time.slice(0, 5)}`
+                                            : ""}
+                                    </p>
                                 </div>
                                 <TypeBadge type={day.type} />
                                 <div className="day-actions">
@@ -167,6 +199,18 @@ export default function Show({ plan }) {
                                         <CalendarPlus size={15} />
                                         Schedule
                                     </Button>
+                                    <CopyActions
+                                        label={`More actions for ${day.title}`}
+                                        onDuplicate={() =>
+                                            setCopying({
+                                                day,
+                                                mode: "duplicate",
+                                            })
+                                        }
+                                        onCopy={() =>
+                                            setCopying({ day, mode: "copy" })
+                                        }
+                                    />
                                     <button
                                         className="icon-btn danger-text"
                                         onClick={() => setDeleting(day)}
@@ -196,6 +240,19 @@ export default function Show({ plan }) {
                 Use the arrows to arrange your days. Your calendar schedule
                 stays the same.
             </p>
+            {duplicating && (
+                <DuplicatePlanDialog
+                    plan={plan}
+                    onClose={() => setDuplicating(false)}
+                />
+            )}
+            {copying && (
+                <DayCopyDialog
+                    {...copying}
+                    plans={copyPlans}
+                    onClose={() => setCopying(null)}
+                />
+            )}
             {edit && (
                 <Modal
                     title="Edit training plan"

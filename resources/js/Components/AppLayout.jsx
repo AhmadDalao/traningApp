@@ -14,6 +14,7 @@ import {
     UserRound,
     ChevronDown,
 } from "lucide-react";
+import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
 export default function AppLayout({ children }) {
     const { auth, flash } = usePage().props;
     const { url } = usePage();
@@ -182,6 +183,7 @@ export default function AppLayout({ children }) {
                             {flash.success}
                         </div>
                     )}
+                    <ScheduleReviewNotice plan={flash.schedule_review} />
                     {children}
                 </main>
                 <footer className="app-footer">

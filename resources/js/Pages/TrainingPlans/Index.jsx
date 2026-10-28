@@ -11,7 +11,10 @@ import {
     Pagination,
 } from "../../Components/UI";
 import TrainingPlanForm from "../../Features/TrainingPlanForm";
+import { DuplicatePlanDialog } from "../../Features/TrainingCopyActions";
+import { Copy } from "lucide-react";
 export default function Index({ plans }) {
+    const [duplicating, setDuplicating] = useState(null);
     const [editing, setEditing] = useState(null);
     const [deleting, setDeleting] = useState(null);
     return (
@@ -76,6 +79,15 @@ export default function Index({ plans }) {
                                                 <Pencil size={16} />
                                             </button>
                                             <button
+                                                className="icon-btn"
+                                                aria-label={`Duplicate ${plan.name}`}
+                                                onClick={() =>
+                                                    setDuplicating(plan)
+                                                }
+                                            >
+                                                <Copy size={16} />
+                                            </button>
+                                            <button
                                                 className="icon-btn danger-text"
                                                 aria-label={`Delete ${plan.name}`}
                                                 onClick={() =>
@@ -104,6 +116,12 @@ export default function Index({ plans }) {
                         </Button>
                     </EmptyState>
                 </section>
+            )}
+            {duplicating && (
+                <DuplicatePlanDialog
+                    plan={duplicating}
+                    onClose={() => setDuplicating(null)}
+                />
             )}
             {editing && (
                 <Modal

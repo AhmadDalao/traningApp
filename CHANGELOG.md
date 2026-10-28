@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.5.0 — 28 October 2026
+
+Deployed to Hostinger and released as **v1.5.0**. Earlier tags remain unchanged.
+
+### Added
+- Duplicate plans and days, plus copy a day to another owned plan, with independent prescriptions/media and automatic Copy / Copy 2 names.
+- Manage Schedule with ADD / KEEP / REMOVE / PROTECTED previews, add-missing, remove-future and optional obsolete-removal regeneration.
+- Explicit confirmation, signed preview validation and stale/replay protection; time/type replacements reuse the existing occurrence key.
+- Dismissible Review Schedule prompt after plan-period/day configuration changes.
+
+### Preserved and safety
+- Copies never copy sessions, snapshots, actual results, active workouts or history. Stable library identities and supersets are preserved.
+- One additive default-false `schedule_managed` flag protects older occurrences with unknown edit history. New generated sessions opt in; individual Calendar edits opt out and retain their original duplicate-prevention key.
+- Completed/skipped, started, saved/structured, historical and manual sessions are protected. Today's untimed/elapsed sessions stay unchanged.
+- No automatic Calendar mutation. Progression prescriptions and schedule management remain separate. No new indexes, tables, dependencies, recurrence engine, workers or AI.
+
+### Verification
+- 320 PHP tests / 4,084 assertions pass on SQLite and isolated MySQL; 33 new cases.
+- 24 JavaScript tests, production build, Pint, React formatting and whitespace checks pass.
+- 320px/390px browser flows and a 1280px desktop check pass with no measured horizontal overflow or console warnings/errors.
+- An independent two-connection MySQL stale-read check preserves a concurrently completed session.
+- Temporary local QA removed; original row/upload hashes match.
+- **47 authenticated live checks** and **63 deployed-file hash checks** passed. Migration applied; original production data/uploads/environment hashes match. Fresh private backup retained.
+- Temporary live QA account and deployment files removed; login/health return 200, updater/archive return 404. Existing login credentials are unchanged.
+- Full report: [v1.5 Plan & Schedule Management](docs/V1.5.0-PLAN-SCHEDULE-REPORT.html).
+
 ## v1.4.0 — 28 October 2026
 
 Deployed to Hostinger and released as **v1.4.0**. Earlier release tags remain unchanged.

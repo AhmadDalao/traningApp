@@ -13,7 +13,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [...parent::share($request),
             'auth' => ['user' => fn () => $request->user()?->only('id', 'name', 'email')],
-            'flash' => ['success' => fn () => $request->session()->get('success')],
+            'flash' => ['success' => fn () => $request->session()->get('success'), 'schedule_review' => fn () => $request->session()->get('schedule_review')],
             'today' => now()->toDateString(),
             'timezone' => config('app.timezone'),
         ];

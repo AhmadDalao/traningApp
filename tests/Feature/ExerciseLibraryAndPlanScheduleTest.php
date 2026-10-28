@@ -6,7 +6,6 @@ use App\Models\ExerciseLibraryItem;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingPlan;
 use App\Models\User;
-use App\Services\ExerciseLibrary;
 use App\Services\PlanSchedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +18,7 @@ class ExerciseLibraryAndPlanScheduleTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private TrainingPlan $plan;
 
     protected function setUp(): void
@@ -139,11 +139,11 @@ class ExerciseLibraryAndPlanScheduleTest extends TestCase
         $this->assertSame(1, $preview['existing_count']);
         $this->get('/training-plans/'.$this->plan->id.'/schedule-preview')->assertInertia(fn (Assert $page) => $page->component('TrainingPlans/Schedule')->has('preview.sessions', 6)->where('preview.new_count', 5));
         $this->assertDatabaseCount('schedule_entries', 1);
-        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature']])->assertSessionHasNoErrors()->assertRedirect('/training-plans/'.$this->plan->id);
+        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature'], 'action' => 'add', 'confirmed' => true])->assertSessionHasNoErrors()->assertRedirect('/training-plans/'.$this->plan->id.'/schedule-preview');
         $this->assertDatabaseCount('schedule_entries', 6);
         $this->assertSame($before, $entry->fresh()->getRawOriginal());
         $this->assertSame(2, ScheduleEntry::where('entry_type', 'rest')->count());
-        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature']])->assertSessionHasNoErrors();
+        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature'], 'action' => 'add', 'confirmed' => true])->assertSessionHasErrors('schedule');
         $this->assertDatabaseCount('schedule_entries', 6);
         $this->assertSame(0, app(PlanSchedule::class)->preview($this->plan->fresh())['new_count']);
     }
@@ -153,10 +153,10 @@ class ExerciseLibraryAndPlanScheduleTest extends TestCase
         $day = $this->plan->trainingDays()->create(['title' => 'Tuesday', 'type' => 'training', 'weekdays' => [2]]);
         $preview = app(PlanSchedule::class)->preview($this->plan->fresh());
         $day->update(['weekdays' => [3]]);
-        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature']])->assertSessionHasErrors('schedule');
+        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature'], 'action' => 'add', 'confirmed' => true])->assertSessionHasErrors('schedule');
         $this->assertDatabaseCount('schedule_entries', 0);
         $this->actingAs(User::factory()->create())->get('/training-plans/'.$this->plan->id.'/schedule-preview')->assertForbidden();
-        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature']])->assertForbidden();
+        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature'], 'action' => 'add', 'confirmed' => true])->assertForbidden();
         $this->actingAs($this->user);
         $this->plan->update(['start_date' => null, 'end_date' => null]);
         $this->assertSame([], app(PlanSchedule::class)->preview($this->plan->fresh())['sessions']);
@@ -171,15 +171,15 @@ class ExerciseLibraryAndPlanScheduleTest extends TestCase
     {
         $this->plan->trainingDays()->create(['title' => 'Tuesday', 'type' => 'training', 'weekdays' => [2]]);
         $preview = app(PlanSchedule::class)->preview($this->plan->fresh());
-        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature']])->assertSessionHasNoErrors();
+        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $preview['signature'], 'action' => 'add', 'confirmed' => true])->assertSessionHasNoErrors();
         $entry = $this->user->scheduleEntries()->orderBy('scheduled_date')->first();
         $entry->update(['scheduled_date' => '2026-12-20', 'title' => 'Moved by me']);
         $updated = app(PlanSchedule::class)->preview($this->plan->fresh());
         $this->assertSame(0, $updated['new_count']);
         $this->assertSame(2, $updated['existing_count']);
         $this->assertSame('2026-12-20', $updated['sessions'][0]['existing_date']);
-        $this->assertSame($preview['signature'], $updated['signature']);
-        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $updated['signature']])->assertSessionHasNoErrors();
+        $this->assertNotSame($preview['signature'], $updated['signature']);
+        $this->post('/training-plans/'.$this->plan->id.'/schedule', ['signature' => $updated['signature'], 'action' => 'add', 'confirmed' => true])->assertSessionHasNoErrors();
         $this->assertDatabaseCount('schedule_entries', 2);
         $this->assertSame('Moved by me', $entry->fresh()->title);
         $this->assertSame('2026-12-20', $entry->fresh()->scheduled_date->toDateString());

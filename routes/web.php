@@ -46,12 +46,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/training-history', [TrainingHistoryController::class, 'index'])->name('training-history.index');
     Route::get('/training-history/{scheduleEntry}', [TrainingHistoryController::class, 'show'])->name('training-history.show');
     Route::resource('training-plans', TrainingPlanController::class)->parameters(['training-plans' => 'trainingPlan']);
+    Route::post('/training-plans/{trainingPlan}/duplicate', [TrainingPlanController::class, 'duplicate'])->name('training-plans.duplicate');
     Route::get('/training-plans/{trainingPlan}/schedule-preview', [PlanScheduleController::class, 'preview'])->name('training-plans.schedule-preview');
     Route::post('/training-plans/{trainingPlan}/schedule', [PlanScheduleController::class, 'store'])->name('training-plans.schedule');
     Route::get('/training-plans/{trainingPlan}/days/create', [TrainingDayController::class, 'create'])->name('training-days.create');
     Route::post('/training-plans/{trainingPlan}/days', [TrainingDayController::class, 'store'])->name('training-days.store');
     Route::patch('/training-plans/{trainingPlan}/days/reorder', [TrainingDayController::class, 'reorderDays'])->name('training-days.reorder');
     Route::resource('training-days', TrainingDayController::class)->only(['show', 'edit', 'update', 'destroy'])->parameters(['training-days' => 'trainingDay']);
+    Route::post('/training-days/{trainingDay}/duplicate', [TrainingDayController::class, 'duplicate'])->name('training-days.duplicate');
     Route::patch('/training-days/{trainingDay}/exercises/reorder', [TrainingDayController::class, 'reorderExercises'])->name('exercises.reorder');
     Route::post('/schedule-entries/{scheduleEntry}/workout/start', [ActiveWorkoutController::class, 'start'])->name('workout.start');
     Route::get('/schedule-entries/{scheduleEntry}/workout', [ActiveWorkoutController::class, 'show'])->name('workout.show');

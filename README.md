@@ -2,6 +2,16 @@
 
 A personal training planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v1.5.0 Smart Plan & Schedule Management
+
+**Deployed and released as v1.5.0.** See the [full v1.5 report](docs/V1.5.0-PLAN-SCHEDULE-REPORT.html).
+
+- Duplicate a complete plan or day, or copy a day to another owned plan. Copies keep prescriptions, supersets, stable exercise identity, weekdays/time and independent media; they start without sessions or history.
+- **Manage Schedule** shows Add, Keep, Remove and Protected dates before confirmed add-missing, remove-future or regeneration actions. Time changes require explicit replacement; no automatic Calendar changes.
+- Existing occurrence keys and their unique index remain the duplicate guard. One additive `schedule_managed` boolean protects older sessions whose edit history is unknown and individually edited generated sessions. Manage these individually in Calendar; new untouched generated sessions support bulk management.
+- Completed, skipped, active, saved/structured, historical and manual sessions stay protected. v1.4 progression continues to change prescriptions only.
+- Verification: **320 PHP tests / 4,084 assertions** on SQLite and MySQL, **24 JavaScript tests**, production build, formatters, 320px/390px/1280px browser checks, data-preservation checks and a two-connection concurrency check pass.
+
 ## Released update: v1.4.0 Progressive Overload Suggestions
 
 **Deployed and verified on Hostinger; released as v1.4.0.** See the [v1.4 implementation report](docs/V1.4.0-PROGRESSION-REPORT.html) for rules, files, architecture and verification.
@@ -15,9 +25,9 @@ A personal training planner built as **one Laravel monolith**. Laravel owns auth
 
 ## Current release
 
-**v1.4.0 — 28 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds rule-based, editable next-target suggestions to Exercise Progress while preserving Active Workout, history, PRs and other plans. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.4.0](https://github.com/AhmadDalao/traningApp/tree/v1.4.0). See [CHANGELOG.md](CHANGELOG.md) and the [v1.4 implementation report](docs/V1.4.0-PROGRESSION-REPORT.html). Earlier releases and tags remain unchanged.
+**v1.5.0 — 28 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds independent plan/day copying and confirmed management of finite future schedules. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.5.0](https://github.com/AhmadDalao/traningApp/tree/v1.5.0). See the [full v1.5 report](docs/V1.5.0-PLAN-SCHEDULE-REPORT.html) and [CHANGELOG.md](CHANGELOG.md). Earlier releases and tags remain unchanged.
 
-Release verification: **287 PHP tests / 3,862 assertions on SQLite and MySQL**, **24 JavaScript tests**, production build, **40 live workflow checks** and **57 deployed-file checksum checks** passed. Local desktop and 320px/390px workflows passed; live browser navigation reported no console errors or warnings. Served CSS and JavaScript hashes match. Existing production records, uploads and environment fingerprints match; temporary QA data and deployment files were removed. No schema/index change was needed. The private backup is retained under `storage/app/private/deploy-backups/progression-v1.4.0-20261028-5ff86adc` on Hostinger. Login credentials remain unchanged. Credentials, uploads, backups, deployment helpers, dependencies and generated assets stay excluded from source control.
+Release verification: **320 PHP tests / 4,084 assertions on SQLite and MySQL**, **24 JavaScript tests**, production build, **47 live workflow checks** and **63 deployed-file checksum checks** passed. Local 320px/390px/1280px browser checks showed no horizontal overflow or console warnings/errors. Live plan/schedule navigation and served asset hashes passed. The additive safety-flag migration is applied; existing data, uploads and production environment fingerprints match. Temporary QA records and deployment files were removed. A private backup is retained under `storage/app/private/deploy-backups/management-v1.5.0-20261028-c3455eb4` on Hostinger. Existing login credentials are unchanged; secrets, backups, generated assets and deployment helpers remain outside source control.
 
 ## Released update: v1.3.0 Exercise Progress & Personal Records
 

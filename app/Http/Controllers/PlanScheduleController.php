@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TrainingPlan;
+use App\Models\User;
 use App\Services\PlanSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,36 +16,30 @@ class PlanScheduleController extends Controller
     public function preview(TrainingPlan $trainingPlan, PlanSchedule $schedule)
     {
         Gate::authorize('update', $trainingPlan);
+        $preview = $schedule->preview($trainingPlan);
 
-        return Inertia::render('TrainingPlans/Schedule', ['plan' => $trainingPlan, 'preview' => $schedule->preview($trainingPlan)]);
+        return Inertia::render('TrainingPlans/Schedule', ['plan' => $trainingPlan, 'preview' => $preview]);
     }
 
     public function store(Request $request, TrainingPlan $trainingPlan, PlanSchedule $schedule)
     {
         Gate::authorize('update', $trainingPlan);
-        $data = $request->validate(['signature' => 'required|string|size:64']);
-        $count = DB::transaction(function () use ($trainingPlan, $schedule, $data) {
-            $plan = TrainingPlan::whereKey($trainingPlan->id)->lockForUpdate()->firstOrFail();
-            $plan->setRelation('trainingDays', $plan->trainingDays()->lockForUpdate()->get());
-            $preview = $schedule->preview($plan);
-            if (! hash_equals($preview['signature'], $data['signature'])) {
-                throw ValidationException::withMessages(['schedule' => 'The plan has changed. Refresh this preview before adding sessions.']);
-            }
-            $count = 0;
-            foreach ($preview['sessions'] as $session) {
-                if ($session['existing']) {
-                    continue;
-                }
-                $entry = $plan->user->scheduleEntries()->firstOrCreate(['plan_occurrence_key' => $session['key']], [
-                    ...collect($session)->except('key', 'existing', 'existing_date')->all(),
-                    'status' => 'planned',
-                ]);
-                $count += $entry->wasRecentlyCreated ? 1 : 0;
-            }
+        $data = $request->validate([
+            'signature' => 'required|string|size:64', 'action' => 'required|in:add,remove,regenerate',
+            'confirmed' => 'required|accepted', 'remove_obsolete' => 'sometimes|boolean',
+        ]);
+        try {
+            $result = DB::transaction(function () use ($trainingPlan, $schedule, $data, $request) {
+                User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+                $plan = TrainingPlan::where('user_id', $request->user()->id)->lockForUpdate()->findOrFail($trainingPlan->id);
+                $plan->setRelation('trainingDays', $plan->trainingDays()->lockForUpdate()->get());
 
-            return $count;
-        });
+                return $schedule->apply($plan, $data['signature'], $data['action'], $data['remove_obsolete'] ?? false);
+            });
+        } catch (ValidationException $error) {
+            return to_route('training-plans.schedule-preview', $trainingPlan)->withErrors($error->errors());
+        }
 
-        return to_route('training-plans.show', $trainingPlan)->with('success', "$count sessions added to your calendar. Existing sessions were kept.");
+        return to_route('training-plans.schedule-preview', $trainingPlan)->with('success', "{$result['added']} sessions added. {$result['removed']} future generated sessions removed. All protected sessions were kept.");
     }
 }

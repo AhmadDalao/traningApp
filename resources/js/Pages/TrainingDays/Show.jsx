@@ -14,7 +14,9 @@ import TrainingIcon from "../../Components/TrainingIcon";
 import { weekdaySummary } from "../../Components/WeekdayPicker";
 import ExerciseList from "../../Features/ExerciseList";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
-export default function Show({ day }) {
+import { CopyActions, DayCopyDialog } from "../../Features/TrainingCopyActions";
+export default function Show({ day, copyPlans = [] }) {
+    const [copying, setCopying] = useState(null);
     const [schedule, setSchedule] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const plan = { ...day.training_plan, training_days: [day] };
@@ -48,6 +50,11 @@ export default function Show({ day }) {
                     <CalendarPlus size={17} />
                     Schedule day
                 </Button>
+                <CopyActions
+                    label="More day actions"
+                    onDuplicate={() => setCopying("duplicate")}
+                    onCopy={() => setCopying("copy")}
+                />
             </PageHeader>
             <div className="detail-meta">
                 <TypeBadge type={day.type} />
@@ -63,7 +70,12 @@ export default function Show({ day }) {
                         : day.focus_area || "General training"}
                 </span>
                 <span>From {plan.name}</span>
-                <span>{weekdaySummary(day.weekdays || [])}{day.default_time ? ` · ${day.default_time.slice(0, 5)}` : ""}</span>
+                <span>
+                    {weekdaySummary(day.weekdays || [])}
+                    {day.default_time
+                        ? ` · ${day.default_time.slice(0, 5)}`
+                        : ""}
+                </span>
             </div>
             {day.notes && (
                 <section className="panel notes-panel">
@@ -107,6 +119,14 @@ export default function Show({ day }) {
                     Delete training day
                 </button>
             </div>
+            {copying && (
+                <DayCopyDialog
+                    day={day}
+                    mode={copying}
+                    plans={copyPlans}
+                    onClose={() => setCopying(null)}
+                />
+            )}
             {schedule && (
                 <Modal
                     title="Schedule a session"

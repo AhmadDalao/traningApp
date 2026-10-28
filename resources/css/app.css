@@ -2959,3 +2959,47 @@ select:disabled {
     .weekday-options { gap: 6px; }
     .weekday-options label { padding: 8px 9px; }
 }
+
+/* Plan reuse and explicit finite schedule management. */
+.copy-actions { position: relative; flex-shrink: 0; }
+.copy-actions summary { list-style: none; cursor: pointer; }
+.copy-actions summary::-webkit-details-marker { display: none; }
+.copy-actions-list { position: absolute; right: 0; top: calc(100% + 5px); z-index: 20; width: 168px; padding: 6px; background: #fff; border: 1px solid #dfe6ef; border-radius: 10px; box-shadow: 0 8px 24px #1423341a; }
+.copy-actions-list button { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; text-align: left; padding: 11px; color: #344256; border-radius: 6px; font: inherit; font-size: 12px; cursor: pointer; }
+.copy-actions-list button:hover, .copy-actions-list button:focus-visible { background: #edf4ff; }
+.copy-description { margin-bottom: 22px; color: #64748b; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.day-actions { flex-wrap: wrap; }
+.schedule-review-notice { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; border: 1px solid #c8ddfc; background: #f0f6ff; border-radius: 12px; padding: 18px 22px; }
+.schedule-review-notice > div { min-width: 0; }
+.schedule-review-notice strong { font-size: 13px; }
+.schedule-review-notice p { font-size: 12px; color: #64748b; margin-top: 6px; overflow-wrap: anywhere; }
+.schedule-review-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.schedule-settings { margin-bottom: 24px; }
+.schedule-settings h2 { font-size: 15px; margin-bottom: 8px; }
+.schedule-settings > p { font-size: 12px; }
+.schedule-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; margin: 20px 0; }
+.schedule-days > div { min-width: 0; padding: 12px; border: 1px solid #e8edf4; border-radius: 8px; }
+.schedule-days strong, .schedule-days span { display: block; overflow-wrap: anywhere; font-size: 12px; }
+.schedule-days span { margin-top: 6px; color: #64748b; }
+.schedule-diff-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 24px; }
+.schedule-diff-tabs button { padding: 14px 6px; border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; color: #526178; cursor: pointer; }
+.schedule-diff-tabs button.active { border-color: #1763ef; background: #edf4ff; color: #1763ef; }
+.schedule-diff-tabs strong, .schedule-diff-tabs span { display: block; }
+.schedule-diff-tabs strong { font-size: 22px; margin-bottom: 5px; }
+.schedule-diff-tabs span { font-size: 11px; }
+.schedule-manager-actions { display: flex; gap: 10px; flex-wrap: wrap; padding: 24px; }
+.schedule-manager-actions .btn { white-space: normal; }
+.schedule-remove-choice { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
+.schedule-remove-choice input { width: auto; margin-top: 4px; flex-shrink: 0; }
+.modal .plan-schedule-list { max-height: 240px; margin: 12px 0 22px; padding: 0; }
+.modal .plan-schedule-row { padding: 14px 0; }
+.modal h3 { font-size: 13px; }
+@media (max-width: 640px) {
+    .schedule-review-notice { align-items: stretch; flex-direction: column; padding: 18px; }
+    .schedule-review-actions { flex-wrap: wrap; }
+    .schedule-diff-tabs { gap: 5px; padding: 0 18px; }
+    .schedule-manager-actions { padding: 18px; }
+    .schedule-manager-actions .btn { width: 100%; }
+    .modal .plan-schedule-row { grid-template-columns: 1fr; gap: 10px; }
+    .schedule-settings { padding: 18px; }
+}
