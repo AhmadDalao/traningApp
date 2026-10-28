@@ -1,4 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
+.progression-card { padding: 22px; margin: 24px 0; scroll-margin-top: 20px; min-width: 0; }
+.progression-card header h2 { display: flex; align-items: center; gap: 9px; font-size: 18px; }
+.progression-card header p, .progression-result p { color: var(--muted); line-height: 1.6; }
+.progression-card .field { max-width: 100%; margin-top: 18px; }
+.progression-card select { width: 100%; min-width: 0; text-overflow: ellipsis; }
+.progression-plan { overflow-wrap: anywhere; line-height: 1.6; color: var(--muted); }
+.progression-result { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 20px; }
+.progression-result > div { min-width: 0; }
+.progression-result h3 { font-size: 16px; }
+.progression-result .btn { flex-shrink: 0; }
+.progression-values { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin: 18px 0; }
+.progression-values span { display: grid; gap: 5px; min-width: 0; overflow-wrap: anywhere; }
+.progression-values small { color: var(--muted); }
+.progression-values strong { font-size: 22px; }
+.progression-values > svg { color: var(--muted); flex-shrink: 0; }
+.progression-empty { margin-top: 20px; color: var(--muted); }
+.workout-progress-links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+@media (max-width: 640px) {
+    .progression-card { padding: 18px; }
+    .progression-result { flex-direction: column; align-items: stretch; gap: 12px; }
+    .progression-result .btn { width: 100%; }
+    .progression-values { gap: 12px; }
+    .progression-values strong { font-size: 20px; }
+}
 :root {
     font-family:
         "DM Sans",

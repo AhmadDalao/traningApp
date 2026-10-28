@@ -29,7 +29,7 @@ class StoreTrainingDayRequest extends FormRequest
             'exercises.*.reps' => 'required|string|max:100', 'exercises.*.superset_group' => ['nullable', 'string', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],
             'exercises.*.tracking_mode' => 'nullable|in:reps,duration',
             'exercises.*.notes' => 'nullable|string|max:2000',
-            'exercises.*.target_weight' => 'nullable|numeric|decimal:0,2|min:0|max:9999.99',
+            'exercises.*.target_weight' => 'nullable|numeric|decimal:0,2|min:0|max:'.config('training.limits.weight_kg'),
             'exercises.*.thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'exercises.*.remove_thumbnail' => 'nullable|boolean',
             'exercises.*.library_key' => ['nullable', 'string', 'max:255', function ($attribute, $value, $fail) {

@@ -21,6 +21,7 @@ export default function Index({
     recentRecords,
     trackedCount,
     search,
+    errors,
 }) {
     const [query, setQuery] = useState(search);
     function submit(event) {
@@ -39,6 +40,11 @@ export default function Index({
                 description="See how your recorded exercise performance changes over time."
             />
             <ExerciseProgressTabs />
+            {errors.progression && (
+                <p className="field-error" role="alert">
+                    {errors.progression}
+                </p>
+            )}
             {trackedCount === 0 ? (
                 <section className="panel">
                     <EmptyState

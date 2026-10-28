@@ -13,9 +13,17 @@ import {
     RecordValue,
 } from "../../Features/ExerciseRecords";
 import ExerciseProgressChart from "../../Features/ExerciseProgressChart";
+import ExerciseProgression from "../../Features/ExerciseProgression";
 import { metricText } from "../../Features/exerciseProgress";
 
-export default function Show({ exercise, records, charts, history, range }) {
+export default function Show({
+    exercise,
+    records,
+    charts,
+    history,
+    range,
+    progression,
+}) {
     const cards = records.filter(
         (record) => !exercise.weighted || record.metric !== "max_reps",
     );
@@ -65,6 +73,11 @@ export default function Show({ exercise, records, charts, history, range }) {
                     )}
                 </div>
             </div>
+            <ExerciseProgression
+                progression={progression}
+                exercise={exercise}
+                range={range}
+            />
             <div className="exercise-progress-heading">
                 <div>
                     <h2>Personal Records</h2>
@@ -132,6 +145,9 @@ export default function Show({ exercise, records, charts, history, range }) {
                                     exercise: exercise.key,
                                     mode: exercise.tracking_mode,
                                     range: event.target.value,
+                                    ...(progression.selected_id
+                                        ? { template: progression.selected_id }
+                                        : {}),
                                 },
                                 { preserveScroll: true },
                             )

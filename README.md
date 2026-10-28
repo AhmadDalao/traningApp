@@ -2,11 +2,22 @@
 
 A personal training planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## Released update: v1.4.0 Progressive Overload Suggestions
+
+**Deployed and verified on Hostinger; released as v1.4.0.** See the [v1.4 implementation report](docs/V1.4.0-PROGRESSION-REPORT.html) for rules, files, architecture and verification.
+
+- Exercise Progress adds **Next target**, using the selected plan exercise's latest two completed structured occurrences. Unsuccessful recent workouts block an increase; extra sets do not make the planned set-count requirement stricter.
+- Suggested increases: **+2.5 kg**, **+1 rep to each range bound**, or **+5 seconds**. Hold/build guidance explains incomplete sets, lower reps and weights. Strict numeric parsing preserves free-text prescriptions elsewhere.
+- Select the target plan before calculation when multiple copies exist. Each copy uses its own history; legacy null tracking mode still means Reps. Deleted templates can show clearly labelled, read-only historical advice when their frozen prescription is unambiguous.
+- **Apply suggestion** opens an editable confirmation modal. The server rechecks ownership, current targets and results; stale or repeated requests cannot apply an increment twice. Only the selected planned weight or prescription changes. Active workouts, snapshots, historical results and other plan copies remain intact.
+- No schema changes, new indexes, dependencies, external services or background jobs. Existing identity/source-template indexes support the query.
+- Verification: **287 PHP tests / 3,862 assertions on SQLite and MySQL**, **24 JavaScript tests**, Vite production build, Pint, React formatting and browser checks at **320px, 390px and 1280px** pass. Temporary QA data was removed; original row hashes match.
+
 ## Current release
 
-**v1.3.0 — 27 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds Exercise Progress, Personal Records, exercise-specific history and weight/volume/rep/duration charts to the existing planner and v1.2 Active Workout. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.3.0](https://github.com/AhmadDalao/traningApp/tree/v1.3.0). See [CHANGELOG.md](CHANGELOG.md) and the [v1.3 implementation report](docs/V1.3.0-EXERCISE-PROGRESS-REPORT.html). Earlier releases and tags remain unchanged.
+**v1.4.0 — 28 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds rule-based, editable next-target suggestions to Exercise Progress while preserving Active Workout, history, PRs and other plans. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.4.0](https://github.com/AhmadDalao/traningApp/tree/v1.4.0). See [CHANGELOG.md](CHANGELOG.md) and the [v1.4 implementation report](docs/V1.4.0-PROGRESSION-REPORT.html). Earlier releases and tags remain unchanged.
 
-Release verification: **196 PHP tests / 3,569 assertions on SQLite and MySQL**, **24 JavaScript tests**, production build, **39 live workflow checks** and **62 deployed-file checksum checks** passed. Desktop and 320px/390px mobile checks passed. Existing production data fingerprints match; the temporary QA account and deployment files were removed. Credentials, uploads, database backups, deployment helpers, dependencies and generated assets remain excluded from source control.
+Release verification: **287 PHP tests / 3,862 assertions on SQLite and MySQL**, **24 JavaScript tests**, production build, **40 live workflow checks** and **57 deployed-file checksum checks** passed. Local desktop and 320px/390px workflows passed; live browser navigation reported no console errors or warnings. Served CSS and JavaScript hashes match. Existing production records, uploads and environment fingerprints match; temporary QA data and deployment files were removed. No schema/index change was needed. The private backup is retained under `storage/app/private/deploy-backups/progression-v1.4.0-20261028-5ff86adc` on Hostinger. Login credentials remain unchanged. Credentials, uploads, backups, deployment helpers, dependencies and generated assets stay excluded from source control.
 
 ## Released update: v1.3.0 Exercise Progress & Personal Records
 

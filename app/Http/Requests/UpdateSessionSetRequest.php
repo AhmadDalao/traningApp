@@ -14,9 +14,9 @@ class UpdateSessionSetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'actual_reps' => 'sometimes|nullable|integer|between:1,10000',
-            'actual_duration_seconds' => 'sometimes|nullable|integer|between:1,86400',
-            'actual_weight_kg' => 'sometimes|nullable|numeric|decimal:0,2|between:0,9999.99',
+            'actual_reps' => 'sometimes|nullable|integer|between:1,'.config('training.limits.reps'),
+            'actual_duration_seconds' => 'sometimes|nullable|integer|between:1,'.config('training.limits.duration_seconds'),
+            'actual_weight_kg' => 'sometimes|nullable|numeric|decimal:0,2|between:0,'.config('training.limits.weight_kg'),
             'completed' => 'sometimes|boolean',
         ];
     }

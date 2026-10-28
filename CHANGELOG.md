@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.4.0 — 28 October 2026
+
+Deployed to Hostinger and released as **v1.4.0**. Earlier release tags remain unchanged.
+
+### Added
+- Rule-based next weight, reps and duration suggestions in Exercise Progress, with clear hold/build explanations.
+- Template selection before calculation, editable Apply modal and completed-workout Next target links.
+- Strict centralized reps/duration parser and existing numeric limits shared with set-log/planner validation.
+- Read-only historical suggestions for deleted templates with reliable frozen prescriptions.
+
+### Safeguards
+- The latest two owned, completed structured occurrences for the selected plan exercise must both meet its current target and planned set count. Recent incomplete attempts are not skipped; extra sets do not raise the requirement.
+- Weighted progression requires positive actual weight at or above planned weight. Zero/null still count for reps. PRs and best sets alone do not trigger increases.
+- Apply recomputes current evidence, rejects stale/forged/repeated submissions and updates only the selected field. No automatic plan changes, reductions, historical rewrites or active-workout changes.
+- Null legacy template mode retains Reps behavior. Free-text prescriptions remain valid in the planner.
+- Existing indexes reused; no migrations, new tables, backfill, dependencies, queues or AI.
+
+### Verification
+- **287 PHP tests / 3,862 assertions** pass on SQLite and isolated MySQL; **91 cases added**.
+- **24 JavaScript tests**, production build, Pint, changed React formatting and git diff checks pass.
+- Browser verification at 320px, 390px and 1280px covers selection, edited weight/reps/duration Apply, stale refresh, deleted templates, historical preservation and completed-workout links.
+- Temporary local QA records removed; original row hashes match.
+- **40 authenticated live workflow checks** and **57 deployed-file checksum checks** passed on PHP 8.3 / MariaDB 11.8. Served CSS/JavaScript hashes also match.
+- Existing production records, uploads and environment hashes match the pre-deployment backup. No migrations or index changes. Temporary QA account, updater and archive removed; login/health return 200 and deployment files return 404. A fresh private database/uploads/environment/source backup is retained.
+- Full report: [v1.4 Progression Suggestions](docs/V1.4.0-PROGRESSION-REPORT.html).
+
 ## v1.3.0 — 27 October 2026
 
 Deployed to Hostinger and tagged **v1.3.0**. The accepted v1.2.0 baseline and previous tags remain unchanged.

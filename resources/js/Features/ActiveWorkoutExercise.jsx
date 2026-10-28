@@ -65,12 +65,20 @@ export default function ActiveWorkoutExercise({
                 </span>
             </header>
             {readOnly && progressUrl && (
-                <Link
-                    href={progressUrl}
-                    className="inline-link exercise-progress-link"
-                >
-                    View Exercise Progress
-                </Link>
+                <div className="workout-progress-links">
+                    <Link
+                        href={progressUrl}
+                        className="inline-link exercise-progress-link"
+                    >
+                        View Exercise Progress
+                    </Link>
+                    <Link
+                        href={`${progressUrl}#next-target`}
+                        className="inline-link exercise-progress-link"
+                    >
+                        View next target
+                    </Link>
+                </div>
             )}
             {readOnly && !exercise.source_exercise_key && (
                 <p className="workout-exercise-note">

@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/skip', [ProfileController::class, 'skip'])->name('onboarding.skip');
     Route::get('/progress', ProgressController::class)->name('progress');
     Route::get('/progress/exercises', ExerciseProgressController::class)->name('progress.exercises');
+    Route::patch('/training-exercises/{trainingExercise}/progression', [ExerciseProgressController::class, 'apply'])->name('training-exercises.progression');
     Route::post('/body-weight', [BodyWeightController::class, 'store'])->name('body-weight.store');
     Route::put('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'update'])->name('body-weight.update');
     Route::delete('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'destroy'])->name('body-weight.destroy');
