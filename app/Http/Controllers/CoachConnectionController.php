@@ -21,7 +21,7 @@ class CoachConnectionController extends Controller
         return Inertia::render('Coaching/Index', ['relationships' => $relationships->map(fn ($row) => [
             ...$row->only('id', 'status', 'requested_at', 'approved_at', 'ended_at', 'ended_reason'),
             'coach' => $row->coach->coachProfile?->only('display_name', 'specialization', 'bio'),
-            'subscriptions' => $row->subscriptions->map(fn ($sub) => [...$sub->only('id', 'package_name', 'starts_on', 'ends_on', 'status'), 'effective_status' => $sub->effective_status]),
+            'subscriptions' => $row->subscriptions->map(fn ($sub) => $sub->summary()),
             'plans' => $row->assignments->filter(fn ($a) => $a->plan)->map(fn ($a) => ['id' => $a->plan->id, 'name' => $a->plan->name, 'status' => $a->status])->values(),
         ])]);
     }

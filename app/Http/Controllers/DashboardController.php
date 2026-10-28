@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $week = (clone $entries)->where('entry_type', 'training')->whereBetween('scheduled_date', [now()->startOfWeek()->toDateString(), now()->endOfWeek()->toDateString()]);
         $today = (clone $entries)->whereDate('scheduled_date', today())->with(['trainingDay' => fn ($q) => $q->withCount('exercises')])->orderBy('scheduled_time')->orderBy('id')->get();
         $today->each(fn ($entry) => $entry->setAttribute('exercises_count', $entry->workoutExerciseCount()));
-        $upcoming = (clone $entries)->whereBetween('scheduled_date', [today()->addDay()->toDateString(), today()->addDays(7)->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id');
+        $upcoming = (clone $entries)->upcoming()->whereBetween('scheduled_date', [today()->addDay()->toDateString(), today()->addDays(7)->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id');
 
         return Inertia::render('Dashboard', [
             'checkIn' => $checkIn ? ['last_weight' => $latestWeight?->weight_kg ?? $profile->current_weight_kg, 'last_date' => $latestWeight?->recorded_date?->toDateString()] : null,

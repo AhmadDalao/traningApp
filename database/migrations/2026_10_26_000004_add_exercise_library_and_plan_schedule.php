@@ -37,7 +37,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('schedule_entries', fn (Blueprint $table) => $table->dropColumn('plan_occurrence_key'));
+        Schema::table('schedule_entries', function (Blueprint $table) {
+            $table->dropUnique(['plan_occurrence_key']);
+            $table->dropColumn('plan_occurrence_key');
+        });
         Schema::dropIfExists('exercise_library_items');
         Schema::table('training_exercises', fn (Blueprint $table) => $table->dropColumn(['library_key', 'custom_icon_path']));
         Schema::table('training_days', fn (Blueprint $table) => $table->dropColumn(['weekdays', 'default_time']));

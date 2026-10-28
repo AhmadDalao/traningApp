@@ -57,6 +57,18 @@ class User extends Authenticatable
         return $this->hasMany(ScheduleEntry::class);
     }
 
+    // Eager-loading limits apply per user, keeping trainee cards to two bounded queries.
+    public function nextPlannedSessions()
+    {
+        return $this->scheduleEntries()->upcoming()->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')->limit(1);
+    }
+
+    public function latestCompletedWorkouts()
+    {
+        return $this->scheduleEntries()->where('entry_type', 'training')->where('status', 'completed')
+            ->orderByDesc('scheduled_date')->orderByDesc('scheduled_time')->orderByDesc('id')->limit(1);
+    }
+
     public function profile()
     {
         return $this->hasOne(UserProfile::class);

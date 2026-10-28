@@ -39,4 +39,14 @@ class CoachSubscription extends Model
 
         return $this->ends_on && $this->ends_on->lt(today()) ? 'expired' : 'active';
     }
+
+    public function summary(): array
+    {
+        // These are calendar dates, not UTC instants. Never serialize raw Carbon
+        // attributes from only(), which shifts midnight in positive timezones.
+        return [...$this->only('id', 'package_name', 'status'),
+            'starts_on' => $this->starts_on->toDateString(),
+            'ends_on' => $this->ends_on?->toDateString(),
+            'effective_status' => $this->effective_status];
+    }
 }

@@ -26,6 +26,15 @@ class ScheduleEntry extends Model
         return $this->entry_type === 'training' && $this->status === 'planned' && $this->started_at !== null;
     }
 
+    public function scopeUpcoming(Builder $query): void
+    {
+        $query->where('status', 'planned')->where(function (Builder $dates) {
+            $dates->whereDate('scheduled_date', '>', today()->toDateString())
+                ->orWhere(fn (Builder $today) => $today->whereDate('scheduled_date', today()->toDateString())
+                    ->where(fn (Builder $time) => $time->whereNull('scheduled_time')->orWhere('scheduled_time', '>=', now()->format('H:i:s'))));
+        });
+    }
+
     public function sessionExercises()
     {
         return $this->hasMany(SessionExercise::class)->orderBy('position');

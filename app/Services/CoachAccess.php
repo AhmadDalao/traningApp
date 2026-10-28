@@ -95,6 +95,8 @@ class CoachAccess
             abort_if($manage && ! $subscription, 403, 'An active coaching subscription is required.');
 
             return $action($relationship, $subscription);
-        }, 3);
+            // Callbacks can copy/upload files. Let their failure cleanup run instead of
+            // replaying filesystem effects after a database deadlock.
+        });
     }
 }
