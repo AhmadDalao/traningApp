@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useRef, useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
 import FullCalendar from "@fullcalendar/react";
@@ -9,6 +10,7 @@ import { PageHeader, Button, Modal } from "../../Components/UI";
 import TrainingIcon from "../../Components/TrainingIcon";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 export default function Index({ entries, plans, calendarDate, calendarView }) {
+    const { url, canManage, coaching, templates } = useTraining();
     const { today } = usePage().props;
     const ref = useRef(null);
     const [title, setTitle] = useState("");
@@ -26,7 +28,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
         setView(api.view.type);
         setLoading(true);
         router.get(
-            "/calendar",
+            url("/calendar"),
             { date: dateString, view: api.view.type },
             {
                 only: ["entries", "calendarDate", "calendarView"],
@@ -44,7 +46,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
     const events = visible.map((e) => ({
         id: String(e.id),
         title: e.title,
-        url: `/schedule-entries/${e.id}`,
+        url: url(`/schedule-entries/${e.id}`),
         start: e.scheduled_time
             ? `${e.scheduled_date}T${e.scheduled_time}`
             : e.scheduled_date,
@@ -66,10 +68,12 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                 title="Your training calendar"
                 description="A little structure for your strongest weeks."
             >
-                <Button onClick={() => setSchedule({ date: today })}>
-                    <Plus size={17} />
-                    Schedule session
-                </Button>
+                {canManage && (
+                    <Button onClick={() => setSchedule({ date: today })}>
+                        <Plus size={17} />
+                        Schedule session
+                    </Button>
+                )}
             </PageHeader>
             <section
                 className={`panel calendar-panel ${loading ? "calendar-loading" : ""}`}
@@ -170,11 +174,13 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                         selectable={false}
                         datesSet={(info) => setTitle(info.view.title)}
                         dateClick={(info) =>
-                            setSchedule({ date: info.dateStr })
+                            canManage && setSchedule({ date: info.dateStr })
                         }
                         eventClick={(info) => {
                             info.jsEvent.preventDefault();
-                            router.visit(`/schedule-entries/${info.event.id}`);
+                            router.visit(
+                                url(`/schedule-entries/${info.event.id}`),
+                            );
                         }}
                         eventContent={({ event }) => (
                             <div

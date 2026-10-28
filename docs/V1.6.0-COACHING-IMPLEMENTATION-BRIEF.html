@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Training Planner v1.6 — Reconciled implementation brief</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f3f6fb;color:#182b43;font:16px/1.65 system-ui,-apple-system,sans-serif}header{padding:50px max(22px,calc((100vw - 1120px)/2));background:#14273e;color:white}h1{font-size:clamp(28px,4vw,42px);line-height:1.18;margin:12px 0}header p{max-width:850px;color:#d2dfef}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase}.badge{display:inline-block;padding:5px 13px;border-radius:24px;background:#fff0ce;color:#76500a;font-size:13px;font-weight:650}main{max-width:1168px;margin:auto;padding:28px 24px 70px}nav{display:flex;flex-wrap:wrap;gap:9px 18px;margin-bottom:28px}nav a{font-size:13px}a{color:#155ecc;overflow-wrap:anywhere}section{background:white;border:1px solid #dce5ef;border-radius:14px;padding:30px;margin-bottom:22px;scroll-margin-top:20px}h2{font-size:24px;line-height:1.3;margin:0 0 18px}h3{font-size:18px;margin:24px 0 8px}p{margin:12px 0}li{margin:7px 0}code{font-size:.88em;background:#edf3fa;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#14273e;color:#e0edff;border-radius:8px;padding:18px;font-size:13px;line-height:1.7}.note{background:#eaf3ff;border-left:4px solid #2374dc;padding:15px 18px;border-radius:4px}.decision{background:#fff6e3;border-left:4px solid #d49b25;padding:15px 18px;border-radius:4px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;vertical-align:top;padding:12px;border:1px solid #dce5ef;min-width:120px}th{background:#edf3fa}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.card{border:1px solid #dce5ef;border-radius:10px;padding:18px;background:#f7faff}.card strong{display:block;color:#1258bc}.muted{color:#586b82;font-size:14px}.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}.flow div{flex:1 1 170px;border:1px solid #cbdcf1;border-radius:8px;padding:15px;background:#f2f7ff}.flow b{display:block}.files{font-size:14px}footer{color:#586b82;font-size:13px;margin-top:24px}@media(max-width:650px){header{padding:32px 20px}main{padding:18px 12px 40px}section{padding:23px 17px}h2{font-size:21px}.cards{grid-template-columns:1fr}body{font-size:15px}ul,ol{padding-left:21px}th,td{font-size:12px;padding:9px}}@media print{header{background:white;color:#182b43;padding:16px}header p{color:#586b82}body{background:white}main{padding:0}nav{display:none}section{border:0;padding:15px 0;break-inside:auto}h2,h3{break-after:avoid}.table-wrap{overflow:visible}a{color:inherit}.cards{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<div class="eyebrow">Training Planner · Architecture review · 28 October 2026</div>
+<h1>v1.6 Coaching Workspace</h1>
+<p>Final implementation brief reconciled against the deployed v1.5.0 codebase. One account, personal training for everyone, and explicitly authorized coaching tools.</p>
+<span class="badge">Archived review · See the v1.6.0 release report</span>
+</header>
+<main><p class="note">This is the pre-implementation review. The approved work is documented in the <a href="V1.6.0-COACHING-REPORT.html">v1.6.0 Coaching Workspace release report</a>.</p>
+<nav aria-label="Brief contents">
+<a href="#baseline">1. Baseline</a><a href="#findings">2. Findings</a><a href="#model">3. Product model</a><a href="#decisions">4. Proposed defaults</a><a href="#schema">5. Schema</a><a href="#permissions">6. Authorization</a><a href="#accounts">7. Accounts and workspaces</a><a href="#connection">8. Connections and QR</a><a href="#subscriptions">9. Subscriptions</a><a href="#plans">10. Plans and library</a><a href="#schedule">11. Scheduling</a><a href="#monitoring">12. Monitoring</a><a href="#progression">13. Progression</a><a href="#concurrency">14. Consistency</a><a href="#routes">15. Routes and UI</a><a href="#files">16. Code map</a><a href="#phases">17. Delivery phases</a><a href="#tests">18. Acceptance tests</a><a href="#release">19. Release requirements</a><a href="#coverage">20. Draft coverage</a>
+</nav>
+
+<section id="baseline">
+<h2>1. Verified starting point</h2>
+<p>The accepted baseline is <strong>v1.5.0</strong>, commit <code>45590b4596cc138bd515cfa31acdd825e2c26e68</code>, on <code>main</code>. The working tree was clean when this review began. The application is already deployed at <a href="https://training.ahmaddalao.com">training.ahmaddalao.com</a>. The <a href="V1.5.0-PLAN-SCHEDULE-REPORT.html">v1.5 implementation and release report</a> was reviewed alongside the actual controllers, policies, services, frontend, migrations and local database indexes.</p>
+<div class="cards"><div class="card"><strong>320 PHP tests</strong>4,084 assertions passed in this review.</div><div class="card"><strong>24 JavaScript tests</strong>All passed; production build also passed.</div><div class="card"><strong>Live app reachable</strong>Login and health endpoints returned HTTP 200.</div></div>
+<p>Retained v1.5 release evidence records the same PHP suite passing on isolated MySQL, 47 authenticated live workflow checks, 63 deployed file checksums, preserved original data/uploads, and removal of temporary deployment files. Those are prior release results; authenticated production workflows were not rerun during this architecture review.</p>
+<p>No blocking v1.5 regression was identified by the fresh checks. The existing limitation remains intentional: older generated sessions without reliable edit provenance stay protected from bulk changes.</p>
+<p class="note">The supplied draft explicitly says “DO NOT IMPLEMENT YET.” This deliverable completes its reconciliation and implementation-brief steps. No v1.6 runtime code, database migration, release tag or deployment is included.</p>
+</section>
+
+<section id="findings">
+<h2>2. What the code changes about the draft</h2>
+<div class="table-wrap"><table><thead><tr><th>Actual v1.5 behavior</th><th>Required v1.6 treatment</th></tr></thead><tbody>
+<tr><td><code>TrainingPlanPolicy</code>, <code>TrainingDayPolicy</code> and <code>ScheduleEntryPolicy</code> implement update/delete through their owner-only view check.</td><td>Do not broaden these view checks to include coaches. That would also grant writes, including workout start/finish. Add distinct coach abilities and coach routes; preserve owner-only personal actions.</td></tr>
+<tr><td><code>TrainingPlanDuplicator</code> explicitly requires source and destination to have the same owner.</td><td>Reuse its copy implementation through a dedicated authorized assignment operation. Adding a trainee ID to the current duplication endpoint is insufficient.</td></tr>
+<tr><td><code>schedule_managed</code> records bulk-management eligibility; <code>plan_occurrence_key</code> identifies a generated occurrence. Neither identifies its creator.</td><td>Add server-written <code>scheduled_by_user_id</code>. Require both coach attribution and a live assignment belonging to that coach. Keep the existing flag, occurrence identity and protections.</td></tr>
+<tr><td>Private library validation resolves <code>custom:{id}</code> against the authenticated user. The day writer resolves media using the plan owner.</td><td>Separate the person editing from the person owning the plan. Preserve copied exercise identity and media without exposing either person's private library globally.</td></tr>
+<tr><td>Progress services accept an explicit <code>User</code>, but History and Calendar queries are largely in controllers. Several frontend and progress links hard-code personal URLs.</td><td>Extract only the shared query/presentation pieces needed twice. Pass an authorized trainee explicitly and supply coach-context URLs. Do not swap the authenticated user.</td></tr>
+<tr><td>Login sends users with incomplete onboarding to the personal dashboard before considering the intended URL.</td><td>Make QR return navigation and coach registration work without forcing personal onboarding. Keep personal onboarding available when a coach switches to personal training.</td></tr>
+<tr><td>There are no account types, coach tables, workspace discriminator or public training IDs. Existing foreign-key and history indexes already cover core ownership queries.</td><td>Use additive fields and six focused coaching tables. Do not replace the existing schema or add duplicate core indexes.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="model">
+<h2>3. Product and ownership model</h2>
+<div class="flow"><div><b>One authenticated user</b>Same email, password, session and user ID.</div><div><b>Personal Workspace</b>Own plans, Calendar, workouts, history, goals and progress.</div><div><b>Optional Coach Workspace</b>Templates, connected trainees, packages and authorized management.</div></div>
+<p><code>account_type = trainee</code> means personal access. <code>account_type = coach</code> adds coaching capability; it does not remove personal access. A coach can be another coach's trainee. Multiple coaches may connect to one person; self-coaching is rejected.</p>
+<p>Keep the same Laravel/Inertia/React application and database. A coach template belongs to its coach. An assigned copy, its days, its Calendar entries and all recorded performance belong to the trainee. No impersonation, second plan engine, second progress engine, organizations, admin workspace or role-management framework.</p>
+<p>Account capability controls whether coach routes are available. An accepted relationship controls read access. An effective subscription plus assignment/source ownership controls management. Workspace navigation alone never grants permission.</p>
+</section>
+
+<section id="decisions">
+<h2>4. Proposed defaults for gaps in the draft</h2>
+<p class="decision">These are explicit implementation recommendations, not claims that the draft already approved every detail. They make the brief executable without leaving security or ownership decisions to individual screens.</p>
+<ol>
+<li><strong>Owners keep control.</strong> Trainees may edit, duplicate and delete their own assigned plans through existing personal workflows. A personal duplicate is a personal plan without a coaching assignment. Coaches may edit their own active assignments or end them; they cannot delete the trainee-owned plan as an administrative shortcut.</li>
+<li><strong>One open subscription per relationship.</strong> Treat active and paused packages as open, so a second package requires ending the existing one. This is slightly stricter than the draft's “one active” rule and avoids ambiguous resumes. Effective management additionally requires today's date to fall inside its service dates.</li>
+<li><strong>Consent has a clear lifetime.</strong> Reconnecting after a relationship ends creates a new relationship row and requires fresh acceptance. It does not reactivate old subscriptions or assignments. Historical training is still visible after new consent, but old assignments do not silently regain management rights.</li>
+<li><strong>Renewal within an uninterrupted relationship is different.</strong> A new effective subscription can permit management of that relationship's still-active assignments. An assignment's original subscription ID records where it came from; it is not the only subscription that may authorize future management.</li>
+<li><strong>Coach scheduling stays within the service period.</strong> Only future dates inside the effective subscription are eligible for coach-created sessions. Show excluded dates in the preview; never silently shorten a plan. Existing sessions outside the period remain intact. Personal scheduling remains available to the trainee.</li>
+<li><strong>Read consent is broad but explicit.</strong> An accepted coach can view the trainee's training goals, body-weight progress, Calendar, workout history and performance, including personal workouts and sessions from other coaches. Full editable plan browsing is limited to the coach's own assigned plans; personal and other-coach plan contents are visible only where already part of authorized session/history detail. Acceptance must explain that scope.</li>
+<li><strong>No automatic external notifications.</strong> Requests appear in My Coaching and in-app counts. Email, push, chat, calls, “Join” and “Message” controls from the mockups are out of scope.</li>
+<li><strong>Template assignment creates an unscheduled copy.</strong> Confirm trainee and assignment dates, then offer the existing schedule preview as a separate action. Assigning a plan never silently adds Calendar sessions.</li>
+</ol>
+</section>
+
+<section id="schema">
+<h2>5. Additive schema</h2>
+<h3>Existing tables</h3>
+<div class="table-wrap"><table><thead><tr><th>Table / field</th><th>Definition and purpose</th></tr></thead><tbody>
+<tr><td><code>users.account_type</code></td><td>String constrained by application enum/constants: trainee or coach. Default trainee for existing users. Set only through validated registration/coach setup; not the general profile form.</td></tr>
+<tr><td><code>users.training_code</code></td><td>Unique, permanent <code>TP-</code> plus eight cryptographically random uppercase non-ambiguous characters. Unique database constraint plus collision retry. No derivation from ID or personal information.</td></tr>
+<tr><td><code>training_plans.workspace_type</code></td><td>personal, coach_template or coach_assigned. Existing plans default personal. This is a plan category, not ownership or authorization. All existing <code>user_id</code> values remain unchanged.</td></tr>
+<tr><td><code>schedule_entries.scheduled_by_user_id</code></td><td>Nullable user FK with null-on-delete, set by the server for new entries. Leave old rows null; do not guess their creator. Attribution survives ordinary session edits. It is necessary but not sufficient for coach management.</td></tr>
+</tbody></table></div>
+<h3>Six new tables</h3>
+<div class="table-wrap"><table><thead><tr><th>Table</th><th>Fields / invariants</th></tr></thead><tbody>
+<tr><td><code>coach_profiles</code></td><td>id, unique user_id, display_name, optional specialization and bio, active, timestamps. Registration or enabling coach tools creates this once in the same transaction as the capability change.</td></tr>
+<tr><td><code>coach_trainee_relationships</code></td><td>id, coach_user_id, trainee_user_id, status pending/active/ended, requested_by, requested_at, approved_at, ended_at, optional ended_reason, timestamps. A new row represents a new consent cycle. Only one pending/active row per directional pair, enforced under participant locks.</td></tr>
+<tr><td><code>coach_pairing_tokens</code></td><td>id, trainee_user_id, unique token_hash, expires_at, used_at, timestamps. Raw token is never stored. Expired rows can be pruned opportunistically; a background worker is not required.</td></tr>
+<tr><td><code>coach_subscription_plans</code></td><td>id, coach_user_id, name, optional description, optional positive duration_days, active, timestamps. Archive packages rather than deleting used ones.</td></tr>
+<tr><td><code>coach_subscriptions</code></td><td>id, relationship FK, optional package FK, package_name snapshot, starts_on, optional ends_on, status active/paused/ended, optional notes, ended_at, timestamps. Snapshot the package name and service dates so later package edits do not rewrite old subscriptions.</td></tr>
+<tr><td><code>coach_plan_assignments</code></td><td>id, <strong>relationship FK</strong>, optional originating subscription FK, optional source_training_plan_id, unique assigned_training_plan_id, assigned_at, status active/ended, ended_at, timestamps. Coach and trainee identities come from the relationship, avoiding contradictory duplicate ownership columns. The assigned plan's owner must match the relationship's trainee.</td></tr>
+</tbody></table></div>
+<p>The relationship FK on assignments is a necessary refinement to the draft: coach/trainee IDs alone cannot distinguish revoked consent from a later reconnection. Assignment plan references use null-on-delete so normal owner deletion can preserve provenance; end the assignment in that deletion transaction. Deleting a template never deletes assigned plans. Ending a relationship or subscription is a status transition, never a cascade into training data.</p>
+<h3>Indexes and backfill</h3>
+<p>The actual database already has <code>session_exercises_source_exercise_key_index</code>, a unique <code>schedule_entries.plan_occurrence_key</code> index, <code>schedule_entries(user_id, scheduled_date)</code>, and relevant training/session foreign-key indexes. Preserve these.</p>
+<p>New lookup constraints are unique training code, unique coach-profile user, unique token hash and unique assigned-plan reference. Relationship queries need coach/status and trainee/status access, subscriptions need relationship/status, assignments need relationship/status, and packages need coach/active access. Inspect generated FK indexes before adding composites; use representative EXPLAIN results and avoid duplicate single-column indexes. Start with existing plan-owner and schedule-owner/date indexes before adding speculative workspace/attribution composites.</p>
+<p>Add the training code as nullable with a unique index, backfill only missing values in chunks with collision retries, verify every account has a code, then enforce not-null. The deployment gate prevents new application registrations during this step. Preserve passwords, APP_KEY, user IDs, existing timestamps where practical, plans, logs and uploaded files. No reseeding, table recreation or core ownership migration.</p>
+</section>
+
+<section id="permissions">
+<h2>6. Authorization contract</h2>
+<p>Use a focused <code>CoachAccess</code> service and explicit coach abilities. Every controller rechecks the authenticated actor, target trainee, current relationship, effective subscription where required, and resource ownership. A nullable or missing assignment/source fails closed. Do not cache an authorization decision in the login session.</p>
+<div class="table-wrap"><table><thead><tr><th>Action on someone else's training</th><th>Pending / ended relationship</th><th>Active relationship, no effective subscription</th><th>Active relationship + effective subscription</th></tr></thead><tbody>
+<tr><td>View history, Calendar, body/exercise progress, PRs</td><td>No</td><td>Read only</td><td>Read only</td></tr>
+<tr><td>View own assigned plan / progression suggestion</td><td>No</td><td>Yes, no Apply</td><td>Yes</td></tr>
+<tr><td>Assign a plan / create custom trainee plan</td><td>No</td><td>No</td><td>Yes, trainee owns it</td></tr>
+<tr><td>Edit own active assignment / Apply progression</td><td>No</td><td>No</td><td>Yes, within the current consent cycle</td></tr>
+<tr><td>Edit personal or another coach's plan</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Manage eligible future sessions</td><td>No</td><td>No</td><td>Only own attributed sessions from own active assignment</td></tr>
+<tr><td>Start, finish, discard, complete or skip a workout; enter actual sets, weight, calories or body weight</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>Start/pause/resume/end this coach's subscription</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+</tbody></table></div>
+<p>Package management needs ownership and coach capability; starting a subscription needs an accepted relationship, not an already-active subscription. Accept/decline belongs only to the addressed trainee. Either participant can end the relationship with confirmation.</p>
+<p>Personal endpoints continue to authorize only the owner. Do not add a global “coach can update” policy shortcut. Coach schedule updates accept only planned scheduling fields; they cannot pass <code>status</code>, <code>started_at</code>, <code>completed_at</code>, snapshots, actuals, duration or calories through the generic session update endpoint.</p>
+<p>Return capability flags and context URLs for rendering, but enforce the same rules server-side for crafted requests, copied URLs and stale forms. Return only explicitly selected trainee fields; never serialize an entire User/profile relation into coach Inertia props.</p>
+</section>
+
+<section id="accounts">
+<h2>7. Registration, upgrade and workspace switching</h2>
+<ol>
+<li>Keep the existing login route, password hashing, session regeneration, CSRF protection and login rate limits. Registration adds “I'm training” and “I'm a coach” paths within the existing auth layout.</li>
+<li>Trainee registration creates a trainee account, training code and normal personal onboarding. Coach registration atomically creates a coach account, code and CoachProfile, then opens Coach Overview.</li>
+<li>Profile offers Enable Coach Workspace with display name, optional specialization and bio. Repeated submission is idempotent. Existing personal data remains untouched. No downgrade flow.</li>
+<li>Use the existing avatar menu for personal/coach switching. Route prefixes determine each page's actual context, so two tabs can safely show different workspaces. A validated session preference may control the next default landing page; it must not control query ownership.</li>
+<li>Personal onboarding is offered on the personal dashboard when needed. Coach navigation is never blocked by missing personal height, weight or goals.</li>
+<li>On login, honor a validated same-origin intended coach-connect URL before default onboarding redirection. A trainee who opens a coach-only link receives an explanation and optional coach setup, not automatic privilege elevation.</li>
+</ol>
+<p>Personal navigation retains Overview, Training plans, Calendar, Training History, Progress and Profile, with My Coaching added. Coach navigation starts with Overview, Trainees, Coach Plans and Subscriptions; Calendar, History and Progress are contextual trainee tabs. The broad duplicate navigation shown in one mockup is unnecessary for this release.</p>
+<p>Coach templates are excluded from all personal plan lists, schedule pickers, recommendation destinations, copy destinations and progression-template selections. Personal routes must also reject a manually supplied coach-template ID where it would enable personal scheduling or execution.</p>
+</section>
+
+<section id="connection">
+<h2>8. IDs, requests and QR</h2>
+<p>Every account displays its permanent Training Planner ID in Profile/My Coaching with Copy ID and Show Coach QR. Exact-ID lookup normalizes case and whitespace, validates the entire format, and returns only a limited display name and generic member label. No global email, phone, prefix or full-name search. Connected-trainee search may use name and code within the authorized relationship list.</p>
+<p>Sending a request creates a pending relationship. The trainee sees the coach's display name, specialization and the explicit data-access scope before accepting. Pending requests grant no training access. Decline ends the request with a reason; the coach cannot self-approve. Duplicate requests return the current request, not another pending row.</p>
+<h3>QR lifecycle</h3>
+<ol>
+<li>Authenticated trainee generates a cryptographically random 256-bit token; store its SHA-256 hash and a ten-minute expiry. Regeneration invalidates that trainee's older unused token. Do not place tokens in public storage or analytics.</li>
+<li>Render a local QR containing an HTTPS application URL. Do not send it to an external QR-generation service. No in-app camera scanner; use the phone camera.</li>
+<li>GET resolves the connection page or login return path. It never consumes the token, authenticates as the trainee, or sends a request. This avoids link previews and browser prefetch using it up.</li>
+<li>Authenticated coach explicitly submits Send Request with CSRF protection. In one transaction lock and validate the unused, unexpired, user-bound token; reject self-coaching; create/reuse the pending relationship; mark the token used.</li>
+<li>Acceptance is still required. Replays, expired tokens and simultaneous submissions cannot create another request or grant access.</li>
+</ol>
+<p>Use private/no-store responses and a restrictive referrer policy on token pages, no third-party assets, and redaction of raw tokens from application logs. A QR URL is a short-lived invitation secret, never an authentication credential. Show a copyable temporary link as an accessible fallback.</p>
+<p>Use Laravel per-account and per-IP rate limiting for exact lookup, request creation, token generation and token resolution. Initial caps can be 10 lookups/minute, 5 requests/minute plus 30/day, 5 QR generations/minute and 20 token resolutions/minute; keep these in one config location. Unknown/expired tokens get a generic unavailable response. The ID endpoint intentionally returns only the minimum lookup information.</p>
+<p>Disconnect or End Relationship requires confirmation and immediately prevents subsequent coach reads/writes. End its open subscriptions and active assignments in the same transaction, retaining their records. No Calendar cleanup, plan deletion or history rewrite. Information already seen by a coach cannot be recalled; the app must revoke future requests, including stale open forms.</p>
+</section>
+
+<section id="subscriptions">
+<h2>9. Service subscriptions</h2>
+<p>Coaches create reusable packages such as “8 Week Coaching,” 56 days. Creating a subscription snapshots the package name and chosen dates. Inclusive calculation is <code>ends_on = starts_on + duration_days - 1</code>. A custom date or open-ended service can be explicitly selected; an open-ended service still requires finite plan dates for schedule generation.</p>
+<p>Management requires relationship active, subscription status active, <code>starts_on &lt;= today</code>, and <code>ends_on IS NULL OR ends_on &gt;= today</code>, using the application's existing timezone. Future-start and expired subscriptions display those derived states and grant read-only access. Do not rely on a nightly job to revoke permissions.</p>
+<p>Pause disables management immediately. Resume rechecks dates and the single-open-subscription rule. End retains the record and plan/session data. Expiry does not delete sessions or stop the trainee completing their own workouts. Package edits affect only future subscriptions. Keep coach administrative notes private; share package, status and dates with the trainee.</p>
+<p>No prices, cards, invoices, billing integration, renewal charges or payment status. There is no entitlement granted solely by a frontend “Active” badge.</p>
+</section>
+
+<section id="plans">
+<h2>10. Coach plans, assignment and private exercises</h2>
+<p>Reuse TrainingPlan → TrainingDay → TrainingExercise. Coach templates are coach-owned and appear only in Coach Plans. They retain weekly patterns, usual times, prescriptions, icons, thumbnails and supersets; they do not generate the coach's personal Calendar. Assignment asks for a trainee, effective subscription and finite plan period.</p>
+<p>Extend <code>TrainingPlanDuplicator</code> with a dedicated assignment operation that takes the real actor and authorized trainee. Reuse its existing day/exercise/media copying primitive and rollback cleanup. In one transaction create the trainee-owned coach_assigned plan and its assignment record. Preserve exercise order, sets, reps/duration, target weights, tracking modes, library keys, supersets and independently copied media.</p>
+<p>No sessions, snapshots, actuals, workout history or PRs are copied. Editing or deleting the template later cannot alter the copy. Creating a custom plan for one trainee uses the existing builder and creates the same assignment record with a null source template. Ending an assignment preserves the plan and Calendar but removes coach management rights.</p>
+<p>Show “Coach assigned · [coach display name]” on personal plan cards/details. The owner can still train, edit, duplicate or delete their own plan. Coach Apply or plan edits never mutate another assignment, even when both copies share an exercise identity. A coach's Duplicate Template stays a template; an assignment always goes through Assign Plan. Copy-to-plan destinations must be authorized in the current context, not every plan owned by the trainee.</p>
+<h3>Custom library contract</h3>
+<p>The bundled library is shared. Private custom libraries remain private. During a coach edit, newly selected private exercises come from that coach's library; during a trainee edit, they come from the trainee's library. The authorized writer copies the chosen media into the destination exercise, independent of the source.</p>
+<p>An already-saved exercise may retain its unchanged inherited <code>custom:{id}</code> key even if the current actor cannot browse the original library or the original item is later removed. Validate that exception against the existing authorized exercise row, not a client-supplied key alone. New or changed keys must resolve in an allowed source library. Do not allow arbitrary custom IDs, storage paths or uploaded media belonging to strangers.</p>
+<p>Preserve the stable identity key on assignment; do not remap it to a new private-library row and split historical progress. Editing the assigned exercise's description/prescription/media does not edit the original library record. “Save to my library” creates only actor-owned custom content under existing rules; no full library is copied or shared automatically.</p>
+<p>Refactor the day writer and library validation together. Updating only the UI or duplicator would leave the assigned custom exercise failing validation when the trainee saves the day. Explicitly test that save, source deletion, disconnect and media independence.</p>
+</section>
+
+<section id="schedule">
+<h2>11. Reuse the v1.5 schedule manager</h2>
+<p>Keep <code>PlanSchedule</code> as the only finite schedule-diff engine. Its current preview queries the plan owner's entries, reserves original occurrence keys even after moves, and produces ADD / KEEP / REMOVE / PROTECTED. Add a coach management context with an authenticated actor and already-authorized assignment; do not replace its algorithm.</p>
+<ol>
+<li><strong>Preview everything relevant.</strong> Continue loading all existing occurrences/bookings for the trainee's assigned plan. Personal or other-coach bookings must still block duplicate creation even when the current coach cannot modify them.</li>
+<li><strong>Add only authorized dates.</strong> Plan dates, weekday/time rules, strict future cutoff and service dates determine available additions. Show outside-service dates separately with a reason. New entries use trainee <code>user_id</code>, coach attribution, the existing occurrence key and <code>schedule_managed = true</code> for generated entries.</li>
+<li><strong>Restrict removal/replacement.</strong> The row must pass every v1.5 protection and additionally belong to this trainee, be attributed to this coach and resolve to this coach's active assignment in the current consent cycle. Unknown origin, missing/deleted assignment, null attribution or another actor's session is protected.</li>
+<li><strong>Keep existing protections.</strong> Completed/skipped status, started workouts, snapshots, structured rows, historical dates, manually scheduled entries, independent edits and moved occurrences remain protected from bulk actions. Today without a time is historical, matching existing History behavior. The one-year/1,000-occurrence limits remain.</li>
+<li><strong>Confirm explicitly.</strong> Add Missing does not replace times. Regenerate removes obsolete eligible sessions only when selected. Remove Future shows the entire affected list. No Calendar change occurs merely because plan dates, weekdays, times or prescriptions changed.</li>
+</ol>
+<p>Extend the signed preview context to include actor, trainee, assignment, consent cycle and effective subscription state/dates. Recheck under locks at submission. A pause, disconnect, source change, owner edit, workout start or date-boundary change invalidates a stale request. Personal preview tokens cannot be reused as coach tokens.</p>
+<p>Single-session scheduling reuses the existing form and ScheduleEntry model, selecting a day only from this coach's active assignment. It writes a planned trainee-owned entry with attribution. A manually created entry remains protected from bulk regeneration. Explicit individual coach edits/deletion may affect only this coach's own future, unstarted, unsaved entry with a live assignment and valid service dates; never another coach's/personal entry or any actual-performance field. Individual Calendar edits retain attribution and keep the existing bulk opt-out behavior.</p>
+<p>When a day/assignment link no longer resolves, fail closed for coach management; the trainee retains their existing owner controls. No additional session-assignment FK is required for v1.6 because current plan ownership plus assignment and attribution establish authority; an unresolved link grants no access. Do not infer a manager from a matching title.</p>
+<p>Show a small “Scheduled by” label on Session Details. Do not flood the Calendar with badges. The Friday/Saturday weekend shortcuts and all personal scheduling behavior remain unchanged.</p>
+</section>
+
+<section id="monitoring">
+<h2>12. Monitoring without another reporting engine</h2>
+<p>The Coach Overview shows active relationships, today's trainee sessions, pending outgoing requests and upcoming sessions. Count people separately from sessions and label training/rest totals clearly. Upcoming lists and recent activity use authorized trainees only, with bounded lists and the existing scrolling-card treatment.</p>
+<p>Use current completed/skipped sessions, relationship/subscription timestamps and existing PR calculations for lightweight recent activity. This is a current-state summary, not a durable event log. Do not add an activity-stream table or fabricate the time a PR was achieved from unrelated timestamps.</p>
+<p>Trainee details use Overview, Plan, Calendar, Training History and Progress tabs. Overview includes goals, current package, this coach's active assignment(s), next session, recent workout, body summary, recent records and completion rate. Reuse the existing monthly due-training completion calculation and label its period; do not copy the mockup's “last four weeks” label onto a different calculation.</p>
+<ul>
+<li><strong>History:</strong> extract the existing filter/query/summary into a small shared query service accepting an explicit owner. Preserve 10 items by default, 25/50/100/all, actual date-period behavior, session-type/status/plan filters and snapshot-based historical plan identity.</li>
+<li><strong>Calendar:</strong> share the existing month/week/list query/rendering, passing the trainee and coach route URLs. Read visibility does not imply permission to schedule or edit every visible session.</li>
+<li><strong>Session detail:</strong> reuse <code>ScheduleEntry::workoutDetails()</code>, actual-set rendering and <code>ExerciseProgress::forSession()</code>. Omit all status, start/finish/discard, actual-weight, calorie and duration editing actions in coach context.</li>
+<li><strong>Progress:</strong> call <code>BodyWeightHistory</code> and <code>ExerciseProgress</code> with the authorized trainee. Preserve current-completed-only inclusion, source identity/tracking mode, date ranges, charts and PR definitions.</li>
+<li><strong>Weighted metrics:</strong> only actual weights greater than zero qualify for weighted PRs/volume/charts. Zero/null weight may still count as reps or duration; never fabricate a zero-kg record.</li>
+</ul>
+<p>Shared components need capability props and context-specific links. <code>ExerciseProgress::url()</code>, session record links, pagination, history filter forms and the progression selector currently point to personal paths; parameterize presentation links without changing metric calculations. Tests must confirm a coach's click stays on the intended trainee and never shows the coach's own progress.</p>
+<p>Before acceptance expose no profile, body weight, history or metrics. After acceptance expose only the fields necessary for the stated training consent; email, birthdate, login details and unrelated coaching administrative notes are not trainee-monitoring props. Existing public exercise media is not an access-control mechanism: do not store QR tokens or sensitive coaching documents on that disk.</p>
+</section>
+
+<section id="progression">
+<h2>13. v1.4 progression stays the same calculation</h2>
+<p>The existing <code>ExerciseProgression</code> service already scopes evidence to the subject user and selected training-exercise template, evaluates the latest two current completed occurrences before qualifying sets, and protects Apply with a signed fingerprint and locking reads. Preserve those behaviors exactly.</p>
+<p>Add a distinct coach Apply entry point using the real actor, trainee and assignment, sharing the existing evaluation and update core. Its selected template must belong to this coach's active assignment and trainee. Do not pass the trainee as an authenticated stand-in to bypass authorization. The coach identity remains unchanged throughout.</p>
+<p>Read-only coach views may show suggestions for that coach's assigned plans, but no write token or Apply action when management is unavailable. A signed coach Apply token binds actor, trainee, current relationship/assignment/subscription and existing template/evidence fingerprint. Recheck all permissions in the transaction before changing only the selected planned weight or reps/duration field.</p>
+<p>Changes to personal templates, another coach's assignment, ended assignments, expired/paused services or disconnected relationships are rejected. Deleting the template leaves historical performance read-only. No auto-Apply, automatic schedule regeneration, actual-log changes, cross-copy prescription updates or new progression algorithm.</p>
+</section>
+
+<section id="concurrency">
+<h2>14. Transactions, revocation and stale forms</h2>
+<p>New cross-user writes lock participant user rows in ascending ID order, then relationship, relevant subscription and assignment, followed by plan/day/exercise/session rows in a consistent order. This extends the existing owner and parent-session locks rather than introducing a distributed lock system.</p>
+<ul>
+<li>Request creation and reconnection use the same participant locks to enforce one open directional relationship without a speculative generated-column uniqueness scheme.</li>
+<li>Subscription start/resume and all management mutations lock the relationship and reread effective state. Pause/end/disconnect use those same locks, preventing a stale authorization check from committing later.</li>
+<li>Schedule application locks the trainee owner, plan, days and relevant entries, then recomputes the signed preview using current reads. Workout start/log/status protection remains serialized by the existing user/session locks.</li>
+<li>Assignment atomically writes the copied plan plus provenance. If any database or media operation fails, remove only the newly copied files and roll back the records.</li>
+<li>QR request creation consumes the token atomically; page viewing does not. A repeated submission returns a safe existing-state result or an unavailable token, never duplicate authorization.</li>
+<li>Recheck at the mutation boundary; neither a previous GET nor a visible button is sufficient. Authorization is checked on every read request as well. Already-rendered information is not retroactively erased.</li>
+</ul>
+<p>Exercise identity and occurrence indexes are reused. No Redis, queues, WebSockets, Node server, cron-dependent permissions or generic event/version history. Use two database connections in targeted MySQL tests to prove the important races under REPEATABLE READ, rather than trusting sequential tests alone.</p>
+</section>
+
+<section id="routes">
+<h2>15. Route and interface contract</h2>
+<p>Keep existing personal route names and URLs. Add a small <code>/coach</code> group protected by authentication and active coach capability, and personal My Coaching routes. Nested trainee resources must be bound to the authorized relationship/owner before use; a matching numeric ID alone is never sufficient.</p>
+<div class="table-wrap"><table><thead><tr><th>Route family</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>/register</code>, <code>/profile/coach</code>, <code>/workspace</code></td><td>Existing registration plus validated account type; enable/update coach profile; validated workspace preference/redirect. All mutations use CSRF-protected POST/PATCH.</td></tr>
+<tr><td><code>/my-coaching</code></td><td>ID, connected coaches, requests, package details and assigned-plan links; QR generation, accept/decline and confirmed disconnect.</td></tr>
+<tr><td><code>/coach/connect/{token}</code></td><td>Read-only invitation landing page and separate request submission. No auth impersonation or GET mutation.</td></tr>
+<tr><td><code>/coach/trainees</code></td><td>Connected/pending lists, exact-code lookup, request creation, confirmed relationship ending.</td></tr>
+<tr><td><code>/coach/trainees/{trainee}/…</code></td><td>Authorized overview, plans, Calendar, session detail, History and Progress; assignment, schedule and progression writes with current relationship checks.</td></tr>
+<tr><td><code>/coach/plans</code></td><td>Coach-owned reusable templates using the existing plan/day builder and copy UI.</td></tr>
+<tr><td><code>/coach/subscription-plans</code>, <code>/coach/subscriptions</code></td><td>Reusable service packages, start/pause/resume/end, owned records only.</td></tr>
+</tbody></table></div>
+<p>Do not create coach routes for actual logs, workout completion or body-weight writes. Thin coach controllers can share tested readers and writers without duplicating domain calculations. Pass allowed URLs/permissions to the current forms and components instead of replacing layouts or creating a second frontend application.</p>
+<p>Use existing Modal, ConfirmDialog, form fields, badges, icons and responsive tables/cards. Test long names and large lists at 320px/390px plus desktop. Modals must scroll within the viewport, buttons remain reachable, QR is readable and keyboard users can copy the ID/link. Forms explain read-only state when a package is paused/expired rather than merely hiding every action.</p>
+</section>
+
+<section id="files">
+<h2>16. Expected implementation map</h2>
+<p>These are planned changes, not files created by this review. Keep new abstractions focused on a second real caller; do not prebuild a generic permissions, tenancy or repository framework.</p>
+<div class="table-wrap"><table><thead><tr><th>Area</th><th>Existing code to extend / proposed additions</th></tr></thead><tbody>
+<tr><td>Identity</td><td class="files"><a href="../app/Models/User.php">User</a>, <a href="../app/Http/Controllers/AuthController.php">AuthController</a>, <a href="../app/Http/Middleware/HandleInertiaRequests.php">Inertia shared props</a>, <a href="../routes/web.php">routes</a>; new CoachProfile, account-type constants/enum and coach-capability middleware.</td></tr>
+<tr><td>Coaching domain</td><td>Six Eloquent models matching the six proposed tables; focused CoachAccess, pairing/relationship and subscription actions; coach controllers/requests. No duplicated core training models.</td></tr>
+<tr><td>Copy and builder</td><td class="files"><a href="../app/Services/TrainingPlanDuplicator.php">TrainingPlanDuplicator</a>, <a href="../app/Services/ExerciseLibrary.php">ExerciseLibrary</a>, <a href="../app/Http/Controllers/TrainingDayController.php">TrainingDayController</a>, <a href="../app/Http/Requests/StoreTrainingDayRequest.php">day request validation</a>, personal plan query scopes; extract a shared day-writing action only as needed.</td></tr>
+<tr><td>Scheduling</td><td class="files"><a href="../app/Services/PlanSchedule.php">PlanSchedule</a>, <a href="../app/Http/Controllers/PlanScheduleController.php">PlanScheduleController</a>, <a href="../app/Http/Controllers/ScheduleEntryController.php">ScheduleEntryController</a>, ScheduleEntry model, requests and source presentation; thin coach schedule adapters.</td></tr>
+<tr><td>History and metrics</td><td class="files"><a href="../app/Http/Controllers/TrainingHistoryController.php">History controller</a> and ProgressController: extract shared reads. Reuse <a href="../app/Services/ExerciseProgress.php">ExerciseProgress</a>, <a href="../app/Services/BodyWeightHistory.php">BodyWeightHistory</a> and <a href="../app/Services/ExerciseProgression.php">ExerciseProgression</a>; extend URL/context handling and authorized Apply.</td></tr>
+<tr><td>Shared UI</td><td class="files"><a href="../resources/js/Components/AppLayout.jsx">AppLayout</a>, existing auth/profile pages, plan/day forms, Calendar, History, Session Details, Progress, Schedule, CopyActions, ExerciseProgression and ScheduleReviewNotice. Add workspace-aware routes/actions and read-only capabilities.</td></tr>
+<tr><td>New screens</td><td>My Coaching; Coach Overview; trainee list/details; package/subscription forms; coach setup; QR/request views. Reuse current CSS and components.</td></tr>
+<tr><td>Verification and release</td><td>Add focused connection, workspace, authorization, assignment, scheduling, subscription and progression tests; additive migrations; README/CHANGELOG; final v1.6 report. Update compiled assets only for the eventual release.</td></tr>
+</tbody></table></div>
+<p>QR generation is the only likely new library requirement. Choose one small locally rendered SVG-capable implementation after checking PHP/browser compatibility and its license at implementation time. Do not add a camera scanner, remote QR service or hand-written QR encoder.</p>
+</section>
+
+<section id="phases">
+<h2>17. Build in seven verified phases</h2>
+<div class="table-wrap"><table><thead><tr><th>Phase</th><th>Deliverable</th><th>Gate before continuing</th></tr></thead><tbody>
+<tr><td>A · Accounts</td><td>Types, code backfill, CoachProfile, registration, enable tools, workspace switch.</td><td>Existing accounts/data preserved; coach personal training works; ordinary accounts cannot open coach routes; template context isolation planned into all selectors.</td></tr>
+<tr><td>B · Connections</td><td>Exact-code lookup, hashed expiring QR, requests, acceptance, decline, disconnect and CoachAccess.</td><td>No data before acceptance; no self-coaching; coach-as-trainee works; token races/replay and immediate revocation pass.</td></tr>
+<tr><td>C · Subscriptions</td><td>Packages and date-aware start/pause/resume/end.</td><td>Permissions follow live state/dates; one open service enforced under concurrency; historical data preserved.</td></tr>
+<tr><td>D · Plans</td><td>Templates, assignment deep copy, custom trainee plan and independent media/library identity.</td><td>Owner remains trainee; only assigning coach can manage; personal-copy and reconnect behavior verified.</td></tr>
+<tr><td>E · Scheduling</td><td>Attribution, single-session creation/editing, shared schedule manager and confirmation.</td><td>Personal/other-coach/active/saved/history rows protected; duplicate prevention and stale/paused/disconnected writes rejected.</td></tr>
+<tr><td>F · Monitoring</td><td>Overview and trainee tabs, reused History/Progress/PRs, restricted progression Apply.</td><td>Metrics equal personal results for the same subject; no owner writes or wrong-context links exposed.</td></tr>
+<tr><td>G · Release readiness</td><td>Complete authorization matrix, regression, mobile, MySQL concurrency, deployment rehearsal and final report.</td><td>All security/ownership gates pass together. No partial cross-user feature deployment.</td></tr>
+</tbody></table></div>
+<p>Each phase is local implementation and verification, not an independent production release. Recheck the exact baseline and working-tree changes when implementation is authorized; this brief does not replace that check.</p>
+</section>
+
+<section id="tests">
+<h2>18. Required acceptance evidence</h2>
+<p>Use at least two coaches, two trainees and a coach who is also a trainee. Include shared builtin keys, private custom exercises, long names, active workouts, saved-but-planned sessions, expired packages and both personal and assigned plans. Never run destructive database tests against real local or production accounts.</p>
+<ol>
+<li><strong>Account preservation:</strong> unique non-sequential code backfill, collision retry, repeated upgrade, no password/data changes, both registration flows, unchanged login/session protections, personal onboarding and QR login return.</li>
+<li><strong>Workspace isolation:</strong> ordinary user denied every coach route; switching preserves identity; two tabs keep their contexts; templates never leak into personal plan/calendar/progression selectors or crafted personal requests.</li>
+<li><strong>Connection states:</strong> duplicate requests, self-request, reversed coach/trainee pair, coach receiving coaching, accept/decline by correct person only, disconnect, reconnect with fresh consent and no revived old management.</li>
+<li><strong>Discovery/QR:</strong> exact code only, no sensitive pre-consent fields, throttling, wrong/expired/used token, token bound to target, GET does not consume, logged-out return, no impersonation, simultaneous POSTs consume once.</li>
+<li><strong>Subscriptions:</strong> owner-only packages, inclusive 56-day date calculation, package edits leave existing service unchanged, start/end boundaries, open-ended case, future start, expiry, pause/resume/end, no second open subscription under races.</li>
+<li><strong>Assignment:</strong> trainee ownership, complete deep copy of training/rest days, stable identity/modes/supersets, independent media and rollback; source edits/deletion have no effect; copied private custom exercise remains editable; stranger custom keys rejected.</li>
+<li><strong>Plan permissions:</strong> coach cannot edit personal/other-coach plans or select unauthorized copy destinations; trainee keeps owner controls; personal duplicate has no inherited management assignment; ending/deleting preserves workout history.</li>
+<li><strong>Schedule permissions:</strong> correct trainee/actor attribution, service-date preview, manual/other-coach bookings still prevent duplicates; all v1.5 protections remain; missing assignment/null attribution fail closed; personal and coach preview tokens cannot cross contexts.</li>
+<li><strong>Forbidden writes:</strong> send direct requests to start, finish, discard, complete/skip, actual weights/sets, calories, duration and body-weight endpoints as coach. Every attempt against the trainee is rejected, even with an active subscription.</li>
+<li><strong>Read equivalence:</strong> authorized trainee History, Calendar, body progress, exercise charts, PRs and session detail match existing personal calculations; filters, default 10 items, pagination and links retain correct subject/context.</li>
+<li><strong>Metric regression:</strong> zero/null actual weight still counts for reps/duration as applicable but never weighted PRs/volume; reopening/skipping removes a session from metrics; recompletion uses final saved structured data.</li>
+<li><strong>Progression:</strong> same latest-occurrence/template rules, permitted coach Apply affects one planned field only; reject other-coach/personal templates, stale evidence, paused/expired/ended/disconnected access and token replay.</li>
+<li><strong>Concurrency:</strong> two-connection MySQL tests for request uniqueness, subscription uniqueness, QR consumption, disconnect/pause racing plan/schedule/Apply, and workout start/completion racing schedule edits. Use current locking reads.</li>
+<li><strong>Mobile/browser:</strong> 320px, 390px and desktop across both workspaces, QR, requests, subscriptions, assignment, long trainee lists, modals, Calendar and Progress. Check page/dialog overflow, keyboard access, loading/error/empty states and browser console.</li>
+</ol>
+<p>Run PHP on SQLite and the isolated MySQL database sequentially because filesystem fakes share paths. Run JavaScript tests, production build, relevant formatting and whitespace checks. Full regression includes the existing 320 PHP / 24 JavaScript baseline; record actual new totals rather than predicting them. No tests were added for this documentation-only review.</p>
+</section>
+
+<section id="release">
+<h2>19. Eventual release requirements</h2>
+<p>Target <strong>v1.6.0</strong>, retaining Hostinger compatibility. Do not deploy until all seven phases and the complete cross-user authorization model are finished. Use the established private backup, maintenance deployment, additive migration, cache rebuild, checksum and cleanup workflow. Include any QR dependency in the tested artifact; production must not require a Node process or queue worker.</p>
+<p>Before migration record original account/training/upload fingerprints. Verify the expected baseline, database capabilities and actual indexes on the target. Back up database, files and environment privately; apply code/schema as a compatible set. Afterward, compare all original training columns and uploads, verify only expected account backfills/new fields changed, and confirm existing credentials and APP_KEY remain intact.</p>
+<p>Run authenticated live tests with isolated temporary coach/trainee accounts, including authorization denials and preserved personal workflows; remove only those fixtures. Verify served assets, health/login, original accounts and removal of deployment helpers. Publish the immutable v1.6.0 tag only for the verified release commit.</p>
+<p>Rollback must preserve newly recorded trainee data. During an immediately failed maintenance deployment, restore the private pre-release backup before reopening. After users have written v1.6 data, prefer a forward fix; do not blindly roll back to v1.5, which does not filter coach templates or understand new permissions, and do not drop coaching tables to make old code start.</p>
+<p>The completion report must cover all 26 requested topics: summary; account model; registration; workspace behavior; upgrade; training IDs; QR security; relationships; subscriptions; coach-plan architecture; trainee ownership; schedule attribution; authorization matrix; disconnect; files added/changed; migrations; security tests; functional tests; mobile checks; PHP/JavaScript/build results; live verification; release notes; and remaining issues.</p>
+<p class="note">This review makes no production changes. v1.5.0 remains the deployed release. The next step is implementation of this reconciled scope when requested.</p>
+</section>
+
+<section id="coverage">
+<h2>20. Coverage of the supplied architecture</h2>
+<div class="table-wrap"><table><thead><tr><th>Draft sections</th><th>Where addressed</th></tr></thead><tbody>
+<tr><td>1–20 · account/workspace/core reuse</td><td>Product model, schema, registration and route/context isolation (§3–7, §15).</td></tr>
+<tr><td>21–43 · coach profile, overview, IDs, QR and relationships</td><td>Schema, connections, authorization and monitoring (§5–8, §12).</td></tr>
+<tr><td>44–52 · service packages/subscriptions</td><td>Proposed date/state decisions, schema, permissions and subscription rules (§4–6, §9).</td></tr>
+<tr><td>53–74 · templates, assignment, scheduling and performance access</td><td>Plan/library reuse, schedule origin/protection, shared reporting and progression (§10–14).</td></tr>
+<tr><td>75–87 · trainee views, consent and authorization</td><td>My Coaching, monitoring, permission matrix, server validation/rate limits (§6, §8, §12, §15).</td></tr>
+<tr><td>88–93 · scope and schema</td><td>Six domain tables, preserved ownership, no unnecessary systems (§3, §5, §16).</td></tr>
+<tr><td>94–101 · phased implementation and no partial authorization release</td><td>Seven gates and deployment requirements (§17, §19).</td></tr>
+<tr><td>102–110 · required tests/mobile</td><td>Acceptance evidence and additional integration/concurrency cases (§18).</td></tr>
+<tr><td>111–115 · hosting, exclusions, version and final report</td><td>Shared-hosting deployment and all 26 final-report topics (§19); exclusions below.</td></tr>
+</tbody></table></div>
+<p><strong>Out of scope:</strong> billing, marketplace, ratings, certification verification, organizations/gyms/teams, super-admin UI, messaging/comments/calls/video, AI, nutrition/meal plans, file sharing, classes, public trainee profiles, social feed, coach downgrade and an in-app camera scanner. The supplied images guide layout and flow; their illustrative counts, people and additional buttons are not new requirements.</p>
+</section>
+<footer>Source: supplied updated v1.6 architecture draft and two flow images; repository and schema inspected at v1.5.0. This brief defines future work, not completed v1.6 functionality.</footer>
+</main>
+</body>
+</html>

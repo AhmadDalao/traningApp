@@ -9,7 +9,9 @@ use App\Http\Requests\UpdateWorkoutWeightsRequest;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
 use App\Models\User;
+use App\Services\CoachAccess;
 use App\Services\ExerciseProgress;
+use App\Services\TrainingContext;
 use App\Services\WorkoutCalorieEstimator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -29,7 +31,7 @@ class ScheduleEntryController extends Controller
         $end = $date->copy()->endOfMonth()->addWeek();
 
         return Inertia::render('Calendar/Index', [
-            'entries' => $request->user()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->get(['id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_date', 'scheduled_time', 'status']),
+            'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->get(['id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_date', 'scheduled_time', 'status']),
             'calendarDate' => $date->toDateString(), 'calendarView' => $request->input('view', 'dayGridMonth'),
             'plans' => $this->plans($request),
         ]);
@@ -37,7 +39,7 @@ class ScheduleEntryController extends Controller
 
     private function plans(Request $request)
     {
-        return $request->user()->trainingPlans()->with('trainingDays')->orderBy('name')->get();
+        return app(TrainingContext::class)->plans(true)->with('trainingDays')->orderBy('name')->get();
     }
 
     public function create(Request $request)
@@ -50,7 +52,7 @@ class ScheduleEntryController extends Controller
         $entry = DB::transaction(function () use ($request) {
             User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
 
-            return $request->user()->scheduleEntries()->create([...$this->entryData($request), 'status' => 'planned']);
+            return $request->user()->scheduleEntries()->create([...$this->entryData($request), 'status' => 'planned', 'scheduled_by_user_id' => $request->user()->id]);
         });
 
         return to_route('schedule-entries.show', $entry)->with('success', 'Session added to your calendar.');
@@ -80,11 +82,17 @@ class ScheduleEntryController extends Controller
 
     public function show(ScheduleEntry $scheduleEntry, ExerciseProgress $progress)
     {
-        Gate::authorize('view', $scheduleEntry);
+        $context = app(TrainingContext::class);
+        if ($context->coaching()) {
+            app(CoachAccess::class)->relationship($context->actor(), $context->owner());
+            abort_unless($scheduleEntry->user_id === $context->owner()->id, 403);
+        } else {
+            Gate::authorize('view', $scheduleEntry);
+        }
 
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession(auth()->user(), $scheduleEntry)]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'canManageSession' => ! $context->coaching() || app(CoachAccess::class)->canManageSession($context->actor(), $context->owner(), $scheduleEntry)]);
     }
 
     public function edit(Request $request, ScheduleEntry $scheduleEntry)

@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm, router } from "@inertiajs/react";
 import { CalendarPlus, RefreshCw, Trash2 } from "lucide-react";
@@ -65,6 +66,7 @@ function Sessions({ rows, label }) {
     );
 }
 export default function Schedule({ plan, preview }) {
+    const { url } = useTraining();
     const [group, setGroup] = useState("add");
     const [action, setAction] = useState(null);
     const [removeObsolete, setRemoveObsolete] = useState(false);
@@ -74,6 +76,9 @@ export default function Schedule({ plan, preview }) {
         { key: "keep", name: "Keep" },
         { key: "remove", name: "Remove" },
         { key: "protected", name: "Protected" },
+        ...(preview.excluded?.length
+            ? [{ key: "excluded", name: "Outside service dates" }]
+            : []),
     ];
     const adding =
         action === "remove"
@@ -100,14 +105,17 @@ export default function Schedule({ plan, preview }) {
             <Head title={`Manage schedule · ${plan.name}`} />
             <Breadcrumbs
                 items={[
-                    { label: "Training plans", href: "/training-plans" },
-                    { label: plan.name, href: `/training-plans/${plan.id}` },
+                    { label: "Training plans", href: url("/training-plans") },
+                    {
+                        label: plan.name,
+                        href: url(`/training-plans/${plan.id}`),
+                    },
                     { label: "Manage schedule" },
                 ]}
             />
             <PageHeader title="Manage schedule" description={plan.name}>
                 <ButtonLink
-                    href={`/training-plans/${plan.id}`}
+                    href={url(`/training-plans/${plan.id}`)}
                     variant="secondary"
                 >
                     Back to plan
@@ -257,11 +265,14 @@ export default function Schedule({ plan, preview }) {
                                 remove_obsolete: removeObsolete,
                                 confirmed: true,
                             }));
-                            form.post(`/training-plans/${plan.id}/schedule`, {
-                                preserveScroll: true,
-                                onSuccess: () => setAction(null),
-                                onError: () => setAction(null),
-                            });
+                            form.post(
+                                url(`/training-plans/${plan.id}/schedule`),
+                                {
+                                    preserveScroll: true,
+                                    onSuccess: () => setAction(null),
+                                    onError: () => setAction(null),
+                                },
+                            );
                         }}
                     >
                         {action === "regenerate" && (

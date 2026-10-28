@@ -1,13 +1,15 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { Head, router } from "@inertiajs/react";
 import { Breadcrumbs, PageHeader } from "../../Components/UI";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 export default function Form({ plans, entry, selectedDay, selectedDate }) {
+    const { url } = useTraining();
     return (
         <>
             <Head title={entry ? "Edit session" : "Schedule session"} />
             <Breadcrumbs
                 items={[
-                    { label: "Calendar", href: "/calendar" },
+                    { label: "Calendar", href: url("/calendar") },
                     { label: entry ? "Edit session" : "Schedule session" },
                 ]}
             />
@@ -24,8 +26,8 @@ export default function Form({ plans, entry, selectedDay, selectedDate }) {
                     onCancel={() =>
                         router.visit(
                             entry
-                                ? `/schedule-entries/${entry.id}`
-                                : "/calendar",
+                                ? url(`/schedule-entries/${entry.id}`)
+                                : url("/calendar"),
                         )
                     }
                 />

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Services\ExerciseLibrary;
+use App\Services\TrainingContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +11,10 @@ class StoreTrainingDayRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->route('trainingDay') ? $this->user()->can('update', $this->route('trainingDay')) : $this->user()->can('update', $this->route('trainingPlan'));
+        $context = app(TrainingContext::class);
+        $this->route('trainingDay') ? $context->day($this->route('trainingDay'), 'update') : $context->plan($this->route('trainingPlan'), 'update');
+
+        return true;
     }
 
     public function rules(): array
@@ -33,6 +37,11 @@ class StoreTrainingDayRequest extends FormRequest
             'exercises.*.thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'exercises.*.remove_thumbnail' => 'nullable|boolean',
             'exercises.*.library_key' => ['nullable', 'string', 'max:255', function ($attribute, $value, $fail) {
+                $index = explode('.', $attribute)[1];
+                $existing = $this->route('trainingDay')?->exercises()->whereKey($this->input('exercises.'.$index.'.id'))->first();
+                if ($existing && $existing->library_key === $value) {
+                    return;
+                }
                 if (! app(ExerciseLibrary::class)->find($value, $this->user()->id)) {
                     $fail('Choose an exercise from your library, or create a custom exercise.');
                 }

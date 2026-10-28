@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
 import {
@@ -33,7 +34,10 @@ export default function Show({
     workout,
     history = false,
     progressSummary = null,
+    canManageSession = true,
+    scheduledBy = null,
 }) {
+    const { url, canManage, coaching, templates } = useTraining();
     const [deleting, setDeleting] = useState(false);
     const [editingWeights, setEditingWeights] = useState(false);
     const { timezone } = usePage().props;
@@ -44,14 +48,15 @@ export default function Show({
     const progress = workoutProgress(entry.session_exercises || []);
     const saved = Boolean(entry.workout_snapshot);
     const canRecordWeights =
+        !coaching &&
         entry.status === "completed" &&
         entry.entry_type === "training" &&
         saved &&
         !detailed &&
         exercises.length > 0;
     const backUrl = history
-        ? "/training-history"
-        : `/calendar?date=${entry.scheduled_date}`;
+        ? url("/training-history")
+        : url(`/calendar?date=${entry.scheduled_date}`);
     return (
         <>
             <Head title={entry.title} />
@@ -83,14 +88,16 @@ export default function Show({
                     </>
                 }
             >
-                <SessionStatusActions entry={entry} />
-                <ButtonLink
-                    href={`/schedule-entries/${entry.id}/edit`}
-                    variant="secondary"
-                >
-                    <Pencil size={16} />
-                    Edit
-                </ButtonLink>
+                {!coaching && <SessionStatusActions entry={entry} />}
+                {canManageSession && (
+                    <ButtonLink
+                        href={url(`/schedule-entries/${entry.id}/edit`)}
+                        variant="secondary"
+                    >
+                        <Pencil size={16} />
+                        Edit
+                    </ButtonLink>
+                )}
             </PageHeader>
             {entry.status !== "planned" && (
                 <div className={`status-banner ${entry.status}`}>
@@ -119,10 +126,15 @@ export default function Show({
                                     .{" "}
                                 </>
                             )}
-                            You can change the status anytime.
+                            {coaching
+                                ? "Recorded by the trainee."
+                                : "You can change the status anytime."}
                         </p>
                     </div>
                 </div>
+            )}
+            {scheduledBy && (
+                <p className="field-hint">Scheduled by {scheduledBy}</p>
             )}
             <div className="session-summary panel">
                 <div>
@@ -198,10 +210,12 @@ export default function Show({
                                     )}
                             </div>
                         </div>
-                        <WorkoutDetailsForm
-                            key={`${entry.id}-${entry.duration_minutes}-${entry.intensity}-${entry.calories_burned}-${entry.calories_source}-${entry.estimated_calories}`}
-                            entry={entry}
-                        />
+                        {!coaching && (
+                            <WorkoutDetailsForm
+                                key={`${entry.id}-${entry.duration_minutes}-${entry.intensity}-${entry.calories_burned}-${entry.calories_source}-${entry.estimated_calories}`}
+                                entry={entry}
+                            />
+                        )}
                     </>
                 )}
             <WorkoutRecords summary={progressSummary} />
@@ -243,12 +257,16 @@ export default function Show({
                             ) : day && entry.status !== "completed" ? (
                                 <p>
                                     From{" "}
-                                    <Link
-                                        className="inline-link"
-                                        href={`/training-days/${day.id}`}
-                                    >
-                                        {day.title}
-                                    </Link>{" "}
+                                    {!coaching && (
+                                        <Link
+                                            className="inline-link"
+                                            href={url(
+                                                `/training-days/${day.id}`,
+                                            )}
+                                        >
+                                            {day.title}
+                                        </Link>
+                                    )}{" "}
                                     · {day.training_plan.name}
                                 </p>
                             ) : (
@@ -309,15 +327,17 @@ export default function Show({
                     <CalendarDays size={16} />
                     {history ? "Back to Training History" : "Back to calendar"}
                 </ButtonLink>
-                <button
-                    className="text-button danger-text"
-                    onClick={() => setDeleting(true)}
-                >
-                    <Trash2 size={15} />
-                    Delete session
-                </button>
+                {canManageSession && (
+                    <button
+                        className="text-button danger-text"
+                        onClick={() => setDeleting(true)}
+                    >
+                        <Trash2 size={15} />
+                        Delete session
+                    </button>
+                )}
             </div>
-            {editingWeights && (
+            {editingWeights && !coaching && (
                 <ActualWeightsForm
                     entry={entry}
                     exercises={exercises}
@@ -328,7 +348,7 @@ export default function Show({
                 <ConfirmDialog
                     title="Delete training session?"
                     description={`“${entry.title}” will be permanently removed from your calendar. This cannot be undone.`}
-                    url={`/schedule-entries/${entry.id}`}
+                    url={url(`/schedule-entries/${entry.id}`)}
                     onClose={() => setDeleting(false)}
                 />
             )}

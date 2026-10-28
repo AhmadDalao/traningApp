@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { calorieDisplay } from "../../Features/calories";
 import { useEffect, useState } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
@@ -21,6 +22,7 @@ import {
 } from "../../Components/UI";
 
 export default function Index({ entries, summary, filters, plans }) {
+    const { url } = useTraining();
     const { errors } = usePage().props;
     const [draft, setDraft] = useState(filters);
     const [busy, setBusy] = useState(false);
@@ -63,7 +65,7 @@ export default function Index({ entries, summary, filters, plans }) {
     function apply(next) {
         setBusy(true);
         router.get(
-            "/training-history",
+            url("/training-history"),
             Object.fromEntries(
                 Object.entries(next).filter(
                     ([key, value]) =>
@@ -88,7 +90,7 @@ export default function Index({ entries, summary, filters, plans }) {
                 title="Training History"
                 description="Your past sessions, saved one workout at a time."
             >
-                <ButtonLink variant="secondary" href="/calendar">
+                <ButtonLink variant="secondary" href={url("/calendar")}>
                     <CalendarDays size={16} />
                     Calendar
                 </ButtonLink>
@@ -364,7 +366,9 @@ export default function Index({ entries, summary, filters, plans }) {
                                         </td>
                                         <td className="history-link-cell">
                                             <Link
-                                                href={`/training-history/${entry.id}`}
+                                                href={url(
+                                                    `/training-history/${entry.id}`,
+                                                )}
                                                 className="text-link"
                                                 aria-label={`View details for ${entry.title} on ${entry.scheduled_date}`}
                                             >
@@ -382,7 +386,9 @@ export default function Index({ entries, summary, filters, plans }) {
                         title="No sessions in this view"
                         description="Past completed, skipped, planned, and rest sessions appear here. Try another filter or schedule your next session."
                     >
-                        <ButtonLink href="/calendar">Open calendar</ButtonLink>
+                        <ButtonLink href={url("/calendar")}>
+                            Open calendar
+                        </ButtonLink>
                     </EmptyState>
                 )}
                 <Pagination links={entries.links} />

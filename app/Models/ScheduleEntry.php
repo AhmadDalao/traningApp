@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class ScheduleEntry extends Model
 {
-    protected $fillable = ['icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'schedule_managed', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity', 'started_at'];
+    protected $fillable = ['scheduled_by_user_id', 'icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'schedule_managed', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity', 'started_at'];
 
     protected function casts(): array
     {
@@ -109,6 +109,11 @@ class ScheduleEntry extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scheduledBy()
+    {
+        return $this->belongsTo(User::class, 'scheduled_by_user_id');
     }
 
     public function trainingDay()

@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.6.0 — 28 October 2026
+
+Deployed to Hostinger and released as **v1.6.0**, preserving earlier tags.
+
+### Added
+- Trainee/coach registration, idempotent coach upgrade, permanent random Training Planner IDs and route-based Personal/Coach Workspace switching.
+- Exact-code lookup, temporary locally rendered QR links, explicit coaching consent, multiple coaches and immediate disconnect.
+- Reusable coaching packages and inclusive, date-aware active/paused/ended subscriptions; private administrative notes and explicit open-ended service.
+- Coach templates, independent trainee-owned assignments, custom trainee plans and shared plan/day/exercise editors.
+- Attributed future scheduling, service-date exclusions in signed schedule previews, trainee overview and read-only Calendar/History/Progress/PR views.
+- Restricted coach progression Apply using the existing evidence and prescription rules.
+
+### Preserved and protected
+- Existing authentication, personal ownership, layouts, navigation, workouts, snapshot/set history, metric definitions and progression behavior.
+- Coaches cannot complete or log workouts, change status, actuals, calories/duration or body weight for trainees.
+- Pending/ended connections deny access. Paused/expired services are read-only. Reconnection does not revive old management permissions.
+- Only eligible future sessions attributed to the coach and linked to their current active assignment can be managed. Legacy attribution remains null; completed, skipped, active, saved and manual sessions remain protected.
+- One additive migration creates six coaching tables and adds account/workspace/attribution fields. No core ownership rewrite, duplicate metrics engine, billing or queue requirement.
+
+### Verification
+- **362 PHP tests / 4,630 assertions** pass on SQLite and isolated MySQL; 42 new cases.
+- **24 JavaScript tests**, production build, Pint, JSX/CSS formatting and whitespace checks pass.
+- **17 two-connection MySQL checks** validate current reads for request/subscription uniqueness, QR consumption, revocation and active/completed workout protection.
+- **48 responsive page checks** at 320/390/1280px report no page overflow, incorrect trainee links or console errors. Additional QR, registration and modal interactions pass.
+- **60 authenticated live workflow checks** pass. All **124 runtime/build file hashes**, original data-column hashes, uploads and environment were verified; a private backup is retained.
+- Temporary QA accounts and deployment helpers are removed. Existing credentials are unchanged.
+- Full report: [v1.6 Coaching Workspace](docs/V1.6.0-COACHING-REPORT.html).
+
 ## v1.5.0 — 28 October 2026
 
 Deployed to Hostinger and released as **v1.5.0**. Earlier tags remain unchanged.

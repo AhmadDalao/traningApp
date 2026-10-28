@@ -1,9 +1,11 @@
+import { useTraining } from "./CoachingUI";
 import { useState } from "react";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button, Field, Modal } from "../Components/UI";
 
 export default function ExerciseProgression({ progression, exercise, range }) {
+    const { url } = useTraining();
     const [open, setOpen] = useState(false);
     const { errors } = usePage().props;
     const { templates, selected_id, suggestion } = progression;
@@ -33,7 +35,7 @@ export default function ExerciseProgression({ progression, exercise, range }) {
                         onChange={(event) => {
                             setOpen(false);
                             router.get(
-                                "/progress/exercises",
+                                url("/progress/exercises"),
                                 {
                                     exercise: exercise.key,
                                     mode: exercise.tracking_mode,
@@ -139,6 +141,7 @@ export default function ExerciseProgression({ progression, exercise, range }) {
 }
 
 function ApplyProgression({ suggestion, template, exercise, onClose }) {
+    const { url } = useTraining();
     const form = useForm({
         token: suggestion.token,
         value: suggestion.proposed_value,
@@ -157,7 +160,7 @@ function ApplyProgression({ suggestion, template, exercise, onClose }) {
                 onSubmit={(event) => {
                     event.preventDefault();
                     form.patch(
-                        `/training-exercises/${template.id}/progression`,
+                        url(`/training-exercises/${template.id}/progression`),
                         {
                             preserveScroll: true,
                             onSuccess: onClose,

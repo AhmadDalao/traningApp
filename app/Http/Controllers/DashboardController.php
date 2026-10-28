@@ -30,7 +30,7 @@ class DashboardController extends Controller
             'stats' => ['completed' => (clone $week)->where('status', 'completed')->count(), 'planned' => (clone $week)->where('status', 'planned')->count(), 'today' => $today->count(), 'upcoming' => (clone $upcoming)->count()],
             'activeWorkout' => $request->user()->scheduleEntries()->activeWorkout()->first(['id', 'title', 'started_at']),
             'todayEntries' => $today, 'upcomingEntries' => $upcoming->get(),
-            'plans' => $request->user()->trainingPlans()->with('trainingDays')->orderBy('name')->get(),
+            'plans' => $request->user()->personalPlans()->with('trainingDays')->orderBy('name')->get(),
         ]);
     }
 }

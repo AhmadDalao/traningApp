@@ -2,9 +2,12 @@ import { Head, Link, useForm } from "@inertiajs/react";
 import { ArrowRight } from "lucide-react";
 import AuthLayout from "../../Components/AuthLayout";
 import { Button, Field } from "../../Components/UI";
-export default function Register() {
+export default function Register({ accountType = "trainee" }) {
     const form = useForm({
         name: "",
+        account_type: accountType,
+        display_name: "",
+        specialization: "",
         email: "",
         password: "",
         password_confirmation: "",
@@ -26,6 +29,64 @@ export default function Register() {
                     });
                 }}
             >
+                <div className="account-choice" aria-label="Account type">
+                    <button
+                        type="button"
+                        className={
+                            form.data.account_type === "trainee" ? "active" : ""
+                        }
+                        aria-pressed={form.data.account_type === "trainee"}
+                        onClick={() => form.setData("account_type", "trainee")}
+                    >
+                        I'm training
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            form.data.account_type === "coach" ? "active" : ""
+                        }
+                        aria-pressed={form.data.account_type === "coach"}
+                        onClick={() => form.setData("account_type", "coach")}
+                    >
+                        I'm a coach
+                    </button>
+                </div>
+                {form.data.account_type === "coach" && (
+                    <>
+                        <Field
+                            label="Coach display name"
+                            required
+                            error={form.errors.display_name}
+                        >
+                            <input
+                                required
+                                maxLength={100}
+                                value={form.data.display_name}
+                                onChange={(e) =>
+                                    form.setData("display_name", e.target.value)
+                                }
+                            />
+                        </Field>
+                        <Field
+                            label="Specialization (optional)"
+                            error={form.errors.specialization}
+                        >
+                            <input
+                                maxLength={150}
+                                value={form.data.specialization}
+                                onChange={(e) =>
+                                    form.setData(
+                                        "specialization",
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                        </Field>
+                        <p className="field-hint">
+                            Includes Personal Workspace and Coach Workspace.
+                        </p>
+                    </>
+                )}
                 <Field label="Your name" error={form.errors.name}>
                     <input
                         autoFocus

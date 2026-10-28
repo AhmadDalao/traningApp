@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -21,6 +22,7 @@ export default function Index({
     training,
     initialTab = "body",
 }) {
+    const { url, canManage, coaching, templates } = useTraining();
     const [tab, setTab] = useState(initialTab),
         [editing, setEditing] = useState(null),
         [deleting, setDeleting] = useState(null);
@@ -63,10 +65,12 @@ export default function Index({
                 title="Progress"
                 description="See how your body weight and training consistency change over time."
             >
-                <Button onClick={() => setEditing({})}>
-                    <Plus size={16} />
-                    Record weight
-                </Button>
+                {!coaching && (
+                    <Button onClick={() => setEditing({})}>
+                        <Plus size={16} />
+                        Record weight
+                    </Button>
+                )}
             </PageHeader>
             <div
                 className="progress-tabs"
@@ -80,7 +84,10 @@ export default function Index({
                 >
                     Body weight
                 </Button>
-                <ButtonLink href="/progress/exercises" variant="secondary">
+                <ButtonLink
+                    href={url("/progress/exercises")}
+                    variant="secondary"
+                >
                     Exercise Progress
                 </ButtonLink>
                 <Button
@@ -143,24 +150,28 @@ export default function Index({
                                                 )}
                                             </div>
                                             <div className="weight-entry-actions">
-                                                <button
-                                                    className="icon-btn"
-                                                    aria-label={`Edit weight on ${entry.recorded_date}`}
-                                                    onClick={() =>
-                                                        setEditing(entry)
-                                                    }
-                                                >
-                                                    <Pencil size={15} />
-                                                </button>
-                                                <button
-                                                    className="icon-btn danger-text"
-                                                    aria-label={`Delete weight on ${entry.recorded_date}`}
-                                                    onClick={() =>
-                                                        setDeleting(entry)
-                                                    }
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
+                                                {!coaching && (
+                                                    <button
+                                                        className="icon-btn"
+                                                        aria-label={`Edit weight on ${entry.recorded_date}`}
+                                                        onClick={() =>
+                                                            setEditing(entry)
+                                                        }
+                                                    >
+                                                        <Pencil size={15} />
+                                                    </button>
+                                                )}
+                                                {!coaching && (
+                                                    <button
+                                                        className="icon-btn danger-text"
+                                                        aria-label={`Delete weight on ${entry.recorded_date}`}
+                                                        onClick={() =>
+                                                            setDeleting(entry)
+                                                        }
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </li>
                                     ))}
@@ -174,9 +185,11 @@ export default function Index({
                                 title="Start tracking your progress"
                                 description="Record your first body weight to see changes over time."
                             >
-                                <Button onClick={() => setEditing({})}>
-                                    Record weight
-                                </Button>
+                                {!coaching && (
+                                    <Button onClick={() => setEditing({})}>
+                                        Record weight
+                                    </Button>
+                                )}
                             </EmptyState>
                         </section>
                     )}
@@ -194,7 +207,9 @@ export default function Index({
                         <p>No training sessions are due this month yet.</p>
                     )}
                     <ButtonLink
-                        href="/training-history?period=this_month&type=training"
+                        href={url(
+                            "/training-history?period=this_month&type=training",
+                        )}
                         variant="secondary"
                     >
                         View Training History

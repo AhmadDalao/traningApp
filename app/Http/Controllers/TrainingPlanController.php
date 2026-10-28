@@ -5,20 +5,27 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTrainingPlanRequest;
 use App\Http\Requests\UpdateTrainingPlanRequest;
 use App\Models\TrainingPlan;
+use App\Services\TrainingContext;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class TrainingPlanController extends Controller
 {
+    public function __construct(private TrainingContext $context) {}
+
     public function index(Request $request)
     {
-        return Inertia::render('TrainingPlans/Index', ['plans' => $request->user()->trainingPlans()->withCount([
+        return Inertia::render('TrainingPlans/Index', ['plans' => $this->context->plans()->with('assignment.relationship.coach.coachProfile')->withCount([
             'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
             'trainingDays as rest_days_count' => fn ($q) => $q->where('type', 'rest'),
-        ])->latest()->paginate(12)]);
+        ])->latest()->paginate(12)->through(fn ($plan) => $this->describe($plan))]);
+    }
+
+    private function describe(TrainingPlan $plan): array
+    {
+        return [...$plan->attributesToArray(), 'assignment_id' => $plan->assignment?->id, 'assignment_status' => $plan->assignment?->status, 'coach_name' => $plan->workspace_type === 'coach_assigned' ? $plan->assignment?->relationship?->coach?->coachProfile?->display_name : null];
     }
 
     public function create()
@@ -28,50 +35,73 @@ class TrainingPlanController extends Controller
 
     public function store(StoreTrainingPlanRequest $request)
     {
-        $plan = $request->user()->trainingPlans()->create($request->validated());
+        $plan = $this->context->write(function ($relationship = null, $subscription = null) use ($request) {
+            $plan = $this->context->owner()->trainingPlans()->make($request->validated());
+            $plan->workspace_type = $this->context->templates() ? 'coach_template' : ($this->context->coaching() ? 'coach_assigned' : 'personal');
+            $plan->save();
+            if ($relationship) {
+                $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'assigned_training_plan_id' => $plan->id, 'assigned_at' => now(), 'status' => 'active']);
+            }
 
-        return to_route('training-plans.show', $plan)->with('success', 'Training plan created. Add your first day.');
+            return $plan;
+        });
+
+        return $this->context->redirect('/training-plans/'.$plan->id)->with('success', 'Training plan created. Add your first day.');
     }
 
     public function show(TrainingPlan $trainingPlan)
     {
-        Gate::authorize('view', $trainingPlan);
+        $this->context->plan($trainingPlan);
 
-        return Inertia::render('TrainingPlans/Show', ['plan' => $trainingPlan->load(['trainingDays' => fn ($q) => $q->withCount('exercises')]),
-            'copyPlans' => $trainingPlan->user->trainingPlans()->whereKeyNot($trainingPlan->id)->orderBy('name')->get(['id', 'name'])]);
+        return Inertia::render('TrainingPlans/Show', ['plan' => [...$this->describe($trainingPlan), 'training_days' => $trainingPlan->trainingDays()->withCount('exercises')->get()],
+            'copyPlans' => $this->context->plans(true)->whereKeyNot($trainingPlan->id)->orderBy('name')->get(['id', 'name'])]);
     }
 
     public function edit(TrainingPlan $trainingPlan)
     {
-        Gate::authorize('update', $trainingPlan);
+        $this->context->plan($trainingPlan, 'update');
 
         return Inertia::render('TrainingPlans/Form', ['plan' => $trainingPlan]);
     }
 
     public function update(UpdateTrainingPlanRequest $request, TrainingPlan $trainingPlan)
     {
-        $trainingPlan->update($request->validated());
+        $changed = $this->context->write(function () use ($request, $trainingPlan) {
+            $plan = TrainingPlan::lockForUpdate()->findOrFail($trainingPlan->id);
+            $this->context->plan($plan, 'update');
+            $plan->update($request->validated());
 
-        return to_route('training-plans.show', $trainingPlan)->with('success', 'Training plan updated.')
-            ->with('schedule_review', $trainingPlan->wasChanged(['start_date', 'end_date']) ? $trainingPlan->only('id', 'name') : null);
+            return $plan->wasChanged(['start_date', 'end_date']);
+        });
+
+        return $this->context->redirect('/training-plans/'.$trainingPlan->id)->with('success', 'Training plan updated.')
+            ->with('schedule_review', $changed && ! $this->context->templates() ? $trainingPlan->only('id', 'name') : null);
     }
 
     public function duplicate(Request $request, TrainingPlan $trainingPlan, TrainingPlanDuplicator $duplicator)
     {
-        Gate::authorize('update', $trainingPlan);
+        $this->context->plan($trainingPlan, 'update');
+        abort_if($this->context->coaching(), 403, 'Use Assign Plan to create another trainee-owned copy.');
         $request->validate(['confirmed' => 'required|accepted']);
         $copy = $duplicator->plan($request->user(), $trainingPlan);
 
-        return to_route('training-plans.show', $copy)->with('success', 'Plan duplicated. Your copy has no Calendar sessions or workout history.');
+        return $this->context->redirect('/training-plans/'.$copy->id)->with('success', 'Plan duplicated. Your copy has no Calendar sessions or workout history.');
     }
 
     public function destroy(TrainingPlan $trainingPlan)
     {
-        Gate::authorize('delete', $trainingPlan);
-        $paths = $trainingPlan->trainingDays()->with('exercises')->get()->flatMap(fn ($day) => $day->exercises->flatMap(fn ($exercise) => [$exercise->thumbnail_path, $exercise->custom_icon_path]))->filter()->all();
-        $trainingPlan->delete();
+        $this->context->plan($trainingPlan, 'delete');
+        $paths = $this->context->write(function () use ($trainingPlan) {
+            $plan = TrainingPlan::lockForUpdate()->findOrFail($trainingPlan->id);
+            $this->context->plan($plan, 'delete');
+            $paths = $plan->trainingDays()->with('exercises')->get()->flatMap(fn ($day) => $day->exercises->flatMap(fn ($exercise) => [$exercise->thumbnail_path, $exercise->custom_icon_path]))->filter()->all();
+            $plan->assignment()->update(['status' => 'ended', 'ended_at' => now()]);
+            $plan->delete();
+
+            return $paths;
+        });
         Storage::disk('public')->delete($paths);
 
-        return to_route('training-plans.index')->with('success', 'Plan deleted. Your calendar history is preserved.');
+        return $this->context->redirect('/training-plans')->with('success', 'Plan deleted. Your calendar history is preserved.');
     }
 }

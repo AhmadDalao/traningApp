@@ -1,9 +1,11 @@
+import { useTraining } from "./CoachingUI";
 import { useEffect, useState } from "react";
 import { Button, ButtonLink } from "../Components/UI";
 export default function ScheduleReviewNotice({ plan }) {
+    const { url, templates } = useTraining();
     const [dismissed, setDismissed] = useState(false);
     useEffect(() => setDismissed(false), [plan]);
-    if (!plan || dismissed) return null;
+    if (templates || !plan || dismissed) return null;
     return (
         <section
             className="schedule-review-notice"
@@ -18,7 +20,7 @@ export default function ScheduleReviewNotice({ plan }) {
             </div>
             <div className="schedule-review-actions">
                 <ButtonLink
-                    href={`/training-plans/${plan.id}/schedule-preview`}
+                    href={url(`/training-plans/${plan.id}/schedule-preview`)}
                     className="small"
                 >
                     Review schedule

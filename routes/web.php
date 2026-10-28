@@ -3,6 +3,11 @@
 use App\Http\Controllers\ActiveWorkoutController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BodyWeightController;
+use App\Http\Controllers\CoachAssignmentController;
+use App\Http\Controllers\CoachConnectionController;
+use App\Http\Controllers\CoachController;
+use App\Http\Controllers\CoachScheduleController;
+use App\Http\Controllers\CoachSubscriptionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExerciseProgressController;
 use App\Http\Controllers\PlanScheduleController;
@@ -15,6 +20,7 @@ use App\Http\Controllers\SessionSetController;
 use App\Http\Controllers\TrainingDayController;
 use App\Http\Controllers\TrainingHistoryController;
 use App\Http\Controllers\TrainingPlanController;
+use App\Http\Middleware\CoachWorkspace;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect(auth()->check() ? '/dashboard' : '/login'));
@@ -67,4 +73,67 @@ Route::middleware('auth')->group(function () {
     Route::resource('schedule-entries', ScheduleEntryController::class)->except('index')->parameters(['schedule-entries' => 'scheduleEntry']);
     Route::patch('/schedule-entries/{scheduleEntry}/status', [ScheduleEntryController::class, 'status'])->name('schedule-entries.status');
     Route::patch('/schedule-entries/{scheduleEntry}/weights', [ScheduleEntryController::class, 'weights'])->name('schedule-entries.weights');
+});
+
+// Coaching capabilities are additional access, never a substituted authentication identity.
+Route::middleware('auth')->group(function () {
+    Route::get('/profile/coach', [CoachController::class, 'setup']);
+    Route::post('/profile/coach', [CoachController::class, 'enable']);
+    Route::post('/workspace', [CoachController::class, 'switch']);
+    Route::get('/my-coaching', [CoachConnectionController::class, 'index']);
+    Route::post('/my-coaching/qr', [CoachConnectionController::class, 'qr'])->middleware('throttle:coach-qr');
+    Route::post('/my-coaching/relationships/{relationship}', [CoachConnectionController::class, 'respond']);
+    Route::prefix('coach')->middleware(CoachWorkspace::class)->group(function () {
+        Route::get('/', [CoachController::class, 'overview']);
+        Route::get('/trainees', [CoachController::class, 'trainees']);
+        Route::post('/lookup', [CoachConnectionController::class, 'lookup'])->middleware('throttle:coach-lookup');
+        Route::get('/connect/{token}', [CoachConnectionController::class, 'connect'])->middleware('throttle:coach-token');
+        Route::post('/requests', [CoachConnectionController::class, 'store'])->middleware('throttle:coach-requests');
+        Route::get('/subscriptions', [CoachSubscriptionController::class, 'index']);
+        Route::post('/subscription-plans', [CoachSubscriptionController::class, 'package']);
+        Route::put('/subscription-plans/{package}', [CoachSubscriptionController::class, 'package']);
+        Route::post('/subscriptions', [CoachSubscriptionController::class, 'store']);
+        Route::patch('/subscriptions/{subscription}', [CoachSubscriptionController::class, 'update']);
+        Route::get('/trainees/{trainee}', [CoachController::class, 'trainee']);
+    });
+});
+
+Route::middleware(['auth', CoachWorkspace::class])->prefix('coach')->group(function () {
+    foreach (['' => 'coach.templates.', '/trainees/{trainee}' => 'coach.trainee.'] as $prefix => $name) {
+        Route::prefix($prefix)->name($name)->group(function () {
+            Route::resource('training-plans', TrainingPlanController::class)->parameters(['training-plans' => 'trainingPlan']);
+            Route::post('/training-plans/{trainingPlan}/duplicate', [TrainingPlanController::class, 'duplicate']);
+            Route::get('/training-plans/{trainingPlan}/days/create', [TrainingDayController::class, 'create']);
+            Route::post('/training-plans/{trainingPlan}/days', [TrainingDayController::class, 'store']);
+            Route::patch('/training-plans/{trainingPlan}/days/reorder', [TrainingDayController::class, 'reorderDays']);
+            Route::resource('training-days', TrainingDayController::class)->only(['show', 'edit', 'update', 'destroy'])->parameters(['training-days' => 'trainingDay']);
+            Route::post('/training-days/{trainingDay}/duplicate', [TrainingDayController::class, 'duplicate']);
+            Route::patch('/training-days/{trainingDay}/exercises/reorder', [TrainingDayController::class, 'reorderExercises']);
+        });
+    }
+    Route::prefix('/trainees/{trainee}')->group(function () {
+        Route::get('/assign', [CoachAssignmentController::class, 'create']);
+        Route::post('/assign', [CoachAssignmentController::class, 'store']);
+        Route::post('/assignments/{assignment}/end', [CoachAssignmentController::class, 'end']);
+    });
+});
+
+Route::middleware(['auth', CoachWorkspace::class])->prefix('/coach/trainees/{trainee}')->group(function () {
+    Route::get('/training-plans/{trainingPlan}/schedule-preview', [PlanScheduleController::class, 'preview']);
+    Route::post('/training-plans/{trainingPlan}/schedule', [PlanScheduleController::class, 'store']);
+    Route::get('/calendar', [ScheduleEntryController::class, 'calendar']);
+    Route::get('/schedule-entries/create', [CoachScheduleController::class, 'create']);
+    Route::get('/schedule-entries/{scheduleEntry}', [ScheduleEntryController::class, 'show']);
+    Route::get('/schedule-entries/{scheduleEntry}/edit', [CoachScheduleController::class, 'edit']);
+    Route::post('/schedule-entries', [CoachScheduleController::class, 'store']);
+    Route::put('/schedule-entries/{scheduleEntry}', [CoachScheduleController::class, 'update']);
+    Route::delete('/schedule-entries/{scheduleEntry}', [CoachScheduleController::class, 'destroy']);
+});
+
+Route::middleware(['auth', CoachWorkspace::class])->prefix('/coach/trainees/{trainee}')->group(function () {
+    Route::get('/training-history', [TrainingHistoryController::class, 'index']);
+    Route::get('/training-history/{scheduleEntry}', [TrainingHistoryController::class, 'show']);
+    Route::get('/progress', ProgressController::class);
+    Route::get('/progress/exercises', ExerciseProgressController::class);
+    Route::patch('/training-exercises/{trainingExercise}/progression', [ExerciseProgressController::class, 'coachApply']);
 });

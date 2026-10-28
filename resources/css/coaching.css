@@ -1,0 +1,308 @@
+.coach-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+.coach-card {
+    padding: 25px;
+    min-width: 0;
+}
+.coach-card h2 {
+    font-size: 18px;
+    margin: 0 0 12px;
+}
+.coach-card p {
+    color: var(--muted, #66758b);
+    line-height: 1.65;
+}
+.coach-card-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.coach-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.coach-actions .field {
+    flex: 1 1 200px;
+    margin: 0;
+}
+.coach-actions .btn {
+    flex-shrink: 0;
+}
+.coach-form {
+    max-width: 760px;
+    padding: 28px;
+}
+.coach-callout {
+    background: #edf5ff;
+    border: 1px solid #d8e8ff;
+    border-radius: 10px;
+    padding: 18px;
+    color: #385777;
+    line-height: 1.6;
+}
+.coach-status {
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f4f8;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 4px 10px;
+    text-transform: capitalize;
+    white-space: nowrap;
+    color: #53657c;
+}
+.coach-status.active,
+.coach-status.completed {
+    background: #e7f8ee;
+    color: #19845b;
+    border-color: #caeeda;
+}
+.coach-status.pending,
+.coach-status.paused,
+.coach-status.upcoming,
+.coach-status.planned {
+    background: #fff5df;
+    color: #96640d;
+    border-color: #f6e3b9;
+}
+.coach-status.ended,
+.coach-status.expired,
+.coach-status.skipped {
+    background: #fff0f1;
+    color: #ac4454;
+    border-color: #f6dce2;
+}
+.coach-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+.coach-stat {
+    padding: 22px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.coach-stat > span {
+    font-size: 13px;
+    color: #74849a;
+}
+.coach-stat > strong {
+    font-size: 30px;
+}
+.coach-stat .coach-small-value {
+    font-size: 16px;
+    line-height: 1.5;
+}
+.coach-scroll {
+    height: 340px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 5px;
+}
+.coach-session {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid #edf1f6;
+    color: inherit;
+    align-items: flex-start;
+}
+.coach-session div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+.coach-session small {
+    color: #76879c;
+}
+.coach-session span,
+.coach-session strong,
+.coach-card h2,
+.coach-plan-link {
+    overflow-wrap: anywhere;
+}
+.training-code {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    background: #eff5ff;
+    border-radius: 8px;
+    padding: 12px;
+    color: #17488e;
+}
+.coach-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+.coach-qr svg {
+    width: min(240px, 100%);
+    height: auto;
+}
+.coach-qr input {
+    width: 100%;
+    font-size: 13px;
+}
+.coach-subscription {
+    padding: 16px;
+    background: #f7faff;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+.coach-subscription .coach-status {
+    margin-left: 12px;
+}
+.coach-plan-link {
+    display: block;
+    padding: 12px 0;
+}
+.coach-member {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 18px;
+    margin-top: 15px;
+    background: #f1f7ff;
+    border-radius: 10px;
+}
+.trainee-context {
+    background: #fff;
+    border: 1px solid #dbe6f3;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+.trainee-context > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
+}
+.trainee-context small {
+    color: #74849a;
+}
+.trainee-context nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-top: 16px;
+}
+.trainee-context nav a {
+    padding: 9px 13px;
+    border-radius: 7px;
+    white-space: nowrap;
+    color: #687b94;
+    font-size: 13px;
+}
+.trainee-context nav a.active {
+    background: #edf4ff;
+    color: #1763ef;
+}
+.account-choice {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 0 0 20px;
+}
+.account-choice button {
+    padding: 14px;
+    border: 1px solid #dbe4ef;
+    background: white;
+    border-radius: 10px;
+    font: inherit;
+    cursor: pointer;
+}
+.account-choice button.active {
+    border-color: #1763ef;
+    background: #edf4ff;
+    color: #1763ef;
+}
+.coach-card .form-actions {
+    flex-wrap: wrap;
+}
+.coach-card select,
+.coach-form select,
+.coach-actions input {
+    max-width: 100%;
+}
+.coach-card .btn {
+    white-space: normal;
+}
+.coach-package-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.coach-package-list > div {
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    flex: 1 1 220px;
+}
+.coach-readonly-note {
+    padding: 12px 16px;
+    background: #fff7e6;
+    border: 1px solid #f6e3b9;
+    border-radius: 8px;
+    margin: 12px 0;
+}
+@media (max-width: 800px) {
+    .coach-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .coach-grid {
+        grid-template-columns: 1fr;
+    }
+    .coach-card,
+    .coach-form {
+        padding: 20px;
+    }
+    .coach-actions .field {
+        flex-basis: 100%;
+    }
+    .coach-stat {
+        padding: 18px;
+    }
+    .trainee-context {
+        padding: 16px;
+    }
+}
+@media (max-width: 390px) {
+    .coach-stats {
+        gap: 8px;
+    }
+    .coach-stat {
+        padding: 14px;
+    }
+    .coach-stat > strong {
+        font-size: 25px;
+    }
+    .training-code {
+        font-size: 18px;
+    }
+    .coach-card,
+    .coach-form {
+        padding: 16px;
+    }
+    .coach-actions .btn {
+        width: 100%;
+    }
+}

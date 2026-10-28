@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
 import { Pencil, CalendarPlus, Trash2 } from "lucide-react";
@@ -16,6 +17,7 @@ import ExerciseList from "../../Features/ExerciseList";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 import { CopyActions, DayCopyDialog } from "../../Features/TrainingCopyActions";
 export default function Show({ day, copyPlans = [] }) {
+    const { url, canManage, coaching, templates } = useTraining();
     const [copying, setCopying] = useState(null);
     const [schedule, setSchedule] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -25,8 +27,11 @@ export default function Show({ day, copyPlans = [] }) {
             <Head title={day.title} />
             <Breadcrumbs
                 items={[
-                    { label: "Training plans", href: "/training-plans" },
-                    { label: plan.name, href: `/training-plans/${plan.id}` },
+                    { label: "Training plans", href: url("/training-plans") },
+                    {
+                        label: plan.name,
+                        href: url(`/training-plans/${plan.id}`),
+                    },
                     { label: day.title },
                 ]}
             />
@@ -39,22 +44,28 @@ export default function Show({ day, copyPlans = [] }) {
                         : `${day.focus_area || "Training"} · ${day.exercises.length} exercises`
                 }
             >
-                <ButtonLink
-                    href={`/training-days/${day.id}/edit`}
-                    variant="secondary"
-                >
-                    <Pencil size={16} />
-                    Edit day
-                </ButtonLink>
-                <Button onClick={() => setSchedule(true)}>
-                    <CalendarPlus size={17} />
-                    Schedule day
-                </Button>
-                <CopyActions
-                    label="More day actions"
-                    onDuplicate={() => setCopying("duplicate")}
-                    onCopy={() => setCopying("copy")}
-                />
+                {canManage && (
+                    <ButtonLink
+                        href={url(`/training-days/${day.id}/edit`)}
+                        variant="secondary"
+                    >
+                        <Pencil size={16} />
+                        Edit day
+                    </ButtonLink>
+                )}
+                {canManage && !templates && (
+                    <Button onClick={() => setSchedule(true)}>
+                        <CalendarPlus size={17} />
+                        Schedule day
+                    </Button>
+                )}
+                {canManage && (
+                    <CopyActions
+                        label="More day actions"
+                        onDuplicate={() => setCopying("duplicate")}
+                        onCopy={() => setCopying("copy")}
+                    />
+                )}
             </PageHeader>
             <div className="detail-meta">
                 <TypeBadge type={day.type} />
@@ -110,15 +121,17 @@ export default function Show({ day, copyPlans = [] }) {
                     <ExerciseList exercises={day.exercises} />
                 </section>
             )}
-            <div className="danger-zone">
-                <button
-                    className="text-button danger-text"
-                    onClick={() => setDeleting(true)}
-                >
-                    <Trash2 size={15} />
-                    Delete training day
-                </button>
-            </div>
+            {canManage && (
+                <div className="danger-zone">
+                    <button
+                        className="text-button danger-text"
+                        onClick={() => setDeleting(true)}
+                    >
+                        <Trash2 size={15} />
+                        Delete training day
+                    </button>
+                </div>
+            )}
             {copying && (
                 <DayCopyDialog
                     day={day}
@@ -144,7 +157,7 @@ export default function Show({ day, copyPlans = [] }) {
                 <ConfirmDialog
                     title="Delete training day?"
                     description="This day and its exercises will be permanently deleted. Calendar history will be preserved."
-                    url={`/training-days/${day.id}`}
+                    url={url(`/training-days/${day.id}`)}
                     onClose={() => setDeleting(false)}
                 />
             )}

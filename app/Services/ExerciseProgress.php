@@ -129,7 +129,7 @@ class ExerciseProgress
             $latest = $rows->last();
             $exercise = $metadata[$latest['exercise_id']];
             $records = $this->records($rows);
-            $item = $this->summary($rows, $exercise, $records);
+            $item = $this->summary($rows, $exercise, $records, $user);
             foreach ($records['events'] as $event) {
                 $recent[] = [...$event, 'name' => $exercise->name, 'url' => $item['url']];
             }
@@ -169,7 +169,7 @@ class ExerciseProgress
         $history->through(fn ($row) => [...$row, 'sets' => ($sets[$row['session_id']] ?? collect())->values()]);
 
         return [
-            'exercise' => $this->summary($workouts, $exercise, $records), 'records' => $records['records'],
+            'exercise' => $this->summary($workouts, $exercise, $records, $user), 'records' => $records['records'],
             'charts' => $charts, 'history' => $history, 'range' => $range,
         ];
     }
@@ -191,7 +191,7 @@ class ExerciseProgress
         $first = [];
         $links = [];
         foreach ($eligible->unique('exercise_id') as $set) {
-            $links[$set->exercise_id] = $this->url($set->source_exercise_key, $set->tracking_mode);
+            $links[$set->exercise_id] = $this->url($set->source_exercise_key, $set->tracking_mode, $user);
         }
         foreach ($eligible->unique(fn ($set) => $set->source_exercise_key.'|'.$set->tracking_mode) as $set) {
             $records = $this->records($groups[$set->source_exercise_key.'|'.$set->tracking_mode]);
@@ -209,7 +209,7 @@ class ExerciseProgress
         return ['records' => $events, 'firstPerformances' => $first, 'links' => $links];
     }
 
-    private function summary(Collection $workouts, SessionExercise $exercise, array $records): array
+    private function summary(Collection $workouts, SessionExercise $exercise, array $records, User $user): array
     {
         $latest = $workouts->last();
 
@@ -218,7 +218,7 @@ class ExerciseProgress
             'icon' => $exercise->icon, 'thumbnail_url' => $exercise->thumbnail_url, 'custom_icon_url' => $exercise->custom_icon_url,
             'workouts' => $workouts->count(), 'last_performed' => $latest['scheduled_date'], 'last_session_id' => $latest['session_id'],
             'latest_weight' => $latest['heaviest_weight'], 'weighted' => $records['weighted'], 'records' => $records['records'],
-            'url' => $this->url($exercise->source_exercise_key, $exercise->tracking_mode),
+            'url' => $this->url($exercise->source_exercise_key, $exercise->tracking_mode, $user),
         ];
     }
 
@@ -236,8 +236,10 @@ class ExerciseProgress
         return $row['source_exercise_key'].'|'.$row['tracking_mode'];
     }
 
-    public function url(string $key, string $mode): string
+    public function url(string $key, string $mode, ?User $subject = null): string
     {
-        return '/progress/exercises?'.http_build_query(['exercise' => $key, 'mode' => $mode], '', '&', PHP_QUERY_RFC3986);
+        $prefix = request()->attributes->get('coach_workspace') && $subject && request()->user()?->id !== $subject->id ? '/coach/trainees/'.$subject->id : '';
+
+        return $prefix.'/progress/exercises?'.http_build_query(['exercise' => $key, 'mode' => $mode], '', '&', PHP_QUERY_RFC3986);
     }
 }

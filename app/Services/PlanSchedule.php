@@ -4,18 +4,21 @@ namespace App\Services;
 
 use App\Models\ScheduleEntry;
 use App\Models\TrainingPlan;
+use App\Models\User;
 use Carbon\CarbonPeriod;
 use Illuminate\Validation\ValidationException;
 
 class PlanSchedule
 {
-    public function preview(TrainingPlan $plan, bool $lock = false): array
+    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null): array
     {
         $plan->loadMissing('trainingDays');
+        $assignment = $coach ? app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true, $lock) : null;
+        $subscription = $assignment ? app(CoachAccess::class)->subscription($assignment->relationship, $lock) : null;
         $entries = ScheduleEntry::where('user_id', $plan->user_id)
             ->where(fn ($q) => $q->whereIn('training_day_id', $plan->trainingDays->modelKeys())
                 ->orWhere('plan_occurrence_key', 'like', 'plan:'.$plan->id.':%'))
-            ->select('id', 'training_day_id', 'title', 'entry_type', 'scheduled_date', 'scheduled_time', 'status', 'started_at', 'plan_occurrence_key', 'schedule_managed', 'updated_at')
+            ->select('id', 'training_day_id', 'title', 'entry_type', 'scheduled_date', 'scheduled_time', 'status', 'started_at', 'plan_occurrence_key', 'schedule_managed', 'updated_at', 'scheduled_by_user_id')
             ->selectRaw('workout_snapshot IS NOT NULL AS has_snapshot')->withExists('sessionExercises')
             ->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')
             ->when($lock, fn ($q) => $q->lockForUpdate())->get();
@@ -23,6 +26,13 @@ class PlanSchedule
         $protected = [];
         foreach ($entries as $entry) {
             $reason = $this->protection($entry, $plan);
+            if ($coach && ! $reason) {
+                if ($entry->scheduled_by_user_id !== $coach->id || ! $plan->trainingDays->contains('id', $entry->training_day_id)) {
+                    $reason = 'Personal, other-coach or detached session';
+                } elseif ($entry->scheduled_date->lt($subscription->starts_on) || ($subscription->ends_on && $entry->scheduled_date->gt($subscription->ends_on))) {
+                    $reason = 'Outside the active subscription dates';
+                }
+            }
             $row = [...$entry->only('id', 'title', 'entry_type', 'status', 'scheduled_time'), 'scheduled_date' => $entry->scheduled_date->toDateString(), 'reason' => $reason];
             if ($reason) {
                 $protected[] = $row;
@@ -33,9 +43,15 @@ class PlanSchedule
         $occurrences = $entries->whereNotNull('plan_occurrence_key')->keyBy('plan_occurrence_key');
         $bookings = $entries->keyBy(fn ($entry) => $entry->training_day_id.':'.$entry->scheduled_date->toDateString());
         $sessions = [];
+        $excluded = [];
         $add = [];
         $keep = [];
         foreach ($this->desired($plan) as $session) {
+            if ($subscription && ($session['scheduled_date'] < $subscription->starts_on->toDateString() || ($subscription->ends_on && $session['scheduled_date'] > $subscription->ends_on->toDateString()))) {
+                $excluded[] = [...$session, 'reason' => 'Outside the active subscription dates'];
+
+                continue;
+            }
             // The original occurrence key survives a manual move and still prevents a duplicate.
             $booked = $occurrences->get($session['key']) ?? $bookings->get($session['training_day_id'].':'.$session['scheduled_date']);
             $session['existing'] = $booked !== null;
@@ -52,6 +68,7 @@ class PlanSchedule
         }
         $remove = array_values(array_diff_key($eligible, $keep));
         $result = [
+            'excluded' => $excluded,
             'sessions' => $sessions, 'add' => $add, 'keep' => array_values($keep), 'remove' => $remove, 'protected' => $protected,
             'eligible' => array_values($eligible),
             'new_count' => count(array_filter($add, fn ($row) => ! $row['replaces_id'])),
@@ -60,6 +77,7 @@ class PlanSchedule
             'message' => ! $plan->start_date || ! $plan->end_date ? 'Add a start and end date to this plan to generate sessions.' : (count($sessions) ? null : 'No future dates match this plan. Check the period, weekdays and usual times.'),
         ];
         $result['signature'] = hash_hmac('sha256', json_encode([
+            $coach?->id, $assignment?->getAttributes(), $assignment?->relationship->getAttributes(), $subscription?->getAttributes(),
             $plan->id, $plan->user_id, $plan->only('start_date', 'end_date'),
             $plan->trainingDays->map->getAttributes()->all(), $entries->map->getAttributes()->all(), $result,
         ], JSON_THROW_ON_ERROR), config('app.key'));
@@ -136,10 +154,10 @@ class PlanSchedule
         return null;
     }
 
-    public function apply(TrainingPlan $plan, string $signature, string $action, bool $removeObsolete): array
+    public function apply(TrainingPlan $plan, string $signature, string $action, bool $removeObsolete, ?User $coach = null): array
     {
         // Called inside a transaction holding the user, plan and training-day locks.
-        $preview = $this->preview($plan, lock: true);
+        $preview = $this->preview($plan, lock: true, coach: $coach);
         if (! hash_equals($preview['signature'], $signature)) {
             throw ValidationException::withMessages(['schedule' => 'The plan or Calendar changed. Review the refreshed preview before confirming.']);
         }
@@ -157,7 +175,7 @@ class PlanSchedule
                 }
                 $entry = $plan->user->scheduleEntries()->firstOrCreate(['plan_occurrence_key' => $session['key']], [
                     ...collect($session)->except('key', 'existing', 'existing_date', 'replaces_id')->all(),
-                    'status' => 'planned', 'schedule_managed' => true,
+                    'status' => 'planned', 'schedule_managed' => true, 'scheduled_by_user_id' => $coach?->id ?? $plan->user_id,
                 ]);
                 $added += $entry->wasRecentlyCreated ? 1 : 0;
             }

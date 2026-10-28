@@ -13,10 +13,13 @@ import {
     TrendingUp,
     UserRound,
     ChevronDown,
+    Users,
+    BriefcaseBusiness,
 } from "lucide-react";
 import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
+import { TraineeNav } from "../Features/CoachingUI";
 export default function AppLayout({ children }) {
-    const { auth, flash } = usePage().props;
+    const { auth, flash, trainingContext } = usePage().props;
     const { url } = usePage();
     const [open, setOpen] = useState(false);
     const [userOpen, setUserOpen] = useState(false);
@@ -24,47 +27,86 @@ export default function AppLayout({ children }) {
         setUserOpen(false);
         setOpen(false);
     }, [url]);
-    const nav = [
-        {
-            href: "/dashboard",
-            label: "Overview",
-            icon: LayoutDashboard,
-            active: url.startsWith("/dashboard"),
-        },
-        {
-            href: "/training-plans",
-            label: "Training plans",
-            icon: Layers,
-            active:
-                url.startsWith("/training-plans") ||
-                url.startsWith("/training-days"),
-        },
-        {
-            href: "/calendar",
-            label: "Calendar",
-            icon: CalendarDays,
-            active: url.startsWith("/calendar") || url.startsWith("/schedule-"),
-        },
-        {
-            href: "/training-history",
-            label: "Training History",
-            icon: History,
-            active: url.startsWith("/training-history"),
-        },
-        {
-            href: "/progress",
-            label: "Progress",
-            icon: TrendingUp,
-            active: url.startsWith("/progress"),
-        },
-    ];
+    const coach = trainingContext?.workspace === "coach";
+    const home = coach ? "/coach" : "/dashboard";
+    const nav = coach
+        ? [
+              {
+                  href: "/coach",
+                  label: "Coach Overview",
+                  icon: LayoutDashboard,
+                  active: url === "/coach",
+              },
+              {
+                  href: "/coach/trainees",
+                  label: "Trainees",
+                  icon: Users,
+                  active: url.startsWith("/coach/trainees"),
+              },
+              {
+                  href: "/coach/training-plans",
+                  label: "Coach Plans",
+                  icon: Layers,
+                  active:
+                      url.startsWith("/coach/training-plans") ||
+                      url.startsWith("/coach/training-days"),
+              },
+              {
+                  href: "/coach/subscriptions",
+                  label: "Subscriptions",
+                  icon: BriefcaseBusiness,
+                  active: url.startsWith("/coach/subscriptions"),
+              },
+          ]
+        : [
+              {
+                  href: "/dashboard",
+                  label: "Overview",
+                  icon: LayoutDashboard,
+                  active: url.startsWith("/dashboard"),
+              },
+              {
+                  href: "/training-plans",
+                  label: "Training plans",
+                  icon: Layers,
+                  active:
+                      url.startsWith("/training-plans") ||
+                      url.startsWith("/training-days"),
+              },
+              {
+                  href: "/calendar",
+                  label: "Calendar",
+                  icon: CalendarDays,
+                  active:
+                      url.startsWith("/calendar") ||
+                      url.startsWith("/schedule-"),
+              },
+              {
+                  href: "/training-history",
+                  label: "Training History",
+                  icon: History,
+                  active: url.startsWith("/training-history"),
+              },
+              {
+                  href: "/progress",
+                  label: "Progress",
+                  icon: TrendingUp,
+                  active: url.startsWith("/progress"),
+              },
+              {
+                  href: "/my-coaching",
+                  label: "My Coaching",
+                  icon: Users,
+                  active: url.startsWith("/my-coaching"),
+              },
+          ];
     return (
         <div className="app">
             <a className="skip-link" href="#main">
                 Skip to content
             </a>
             <div className="mobile-top">
-                <Link href="/dashboard" className="brand">
+                <Link href={home} className="brand">
                     <Dumbbell />
                     Training Planner
                 </Link>
@@ -81,7 +123,7 @@ export default function AppLayout({ children }) {
                 <div className="nav-backdrop" onClick={() => setOpen(false)} />
             )}
             <aside className={`sidebar ${open ? "open" : ""}`}>
-                <Link href="/dashboard" className="brand">
+                <Link href={home} className="brand">
                     <span className="brand-mark">
                         <Dumbbell size={23} />
                     </span>
@@ -89,7 +131,9 @@ export default function AppLayout({ children }) {
                         Training<span className="brand-second">Planner</span>
                     </span>
                 </Link>
-                <div className="nav-label">YOUR WORKSPACE</div>
+                <div className="nav-label">
+                    {coach ? "COACH WORKSPACE" : "PERSONAL WORKSPACE"}
+                </div>
                 <nav>
                     {nav.map(({ href, label, icon: Icon, active }) => (
                         <Link
@@ -125,12 +169,46 @@ export default function AppLayout({ children }) {
                         </div>
                         <div>
                             <strong>{auth.user.name}</strong>
-                            <span>Personal workspace</span>
+                            <span>
+                                {coach
+                                    ? "Coach workspace"
+                                    : "Personal workspace"}
+                            </span>
                         </div>
                         <ChevronDown size={15} />
                     </button>
                     {userOpen && (
                         <div id="user-menu" className="user-menu">
+                            {auth.user.is_coach && (
+                                <>
+                                    <Link
+                                        href="/workspace"
+                                        method="post"
+                                        data={{ workspace: "personal" }}
+                                        as="button"
+                                        className="nav-item"
+                                    >
+                                        <UserRound size={17} />
+                                        Personal Workspace
+                                    </Link>
+                                    <Link
+                                        href="/workspace"
+                                        method="post"
+                                        data={{ workspace: "coach" }}
+                                        as="button"
+                                        className="nav-item"
+                                    >
+                                        <Users size={17} />
+                                        Coach Workspace
+                                    </Link>
+                                    <Link
+                                        href="/profile/coach"
+                                        className="nav-item"
+                                    >
+                                        Coach profile
+                                    </Link>
+                                </>
+                            )}
                             <Link href="/profile" className="nav-item">
                                 <UserRound size={17} />
                                 Profile
@@ -159,7 +237,11 @@ export default function AppLayout({ children }) {
             </aside>
             <div className="workspace">
                 <div className="topbar">
-                    <span>YOUR PERSONAL TRAINING SPACE</span>
+                    <span>
+                        {coach
+                            ? "YOUR COACHING WORKSPACE"
+                            : "YOUR PERSONAL TRAINING SPACE"}
+                    </span>
                     <div className="topbar-right">
                         <span className="live-dot" />
                         Make time for yourself
@@ -184,6 +266,7 @@ export default function AppLayout({ children }) {
                         </div>
                     )}
                     <ScheduleReviewNotice plan={flash.schedule_review} />
+                    <TraineeNav />
                     {children}
                 </main>
                 <footer className="app-footer">

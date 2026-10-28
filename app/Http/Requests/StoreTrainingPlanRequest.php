@@ -2,13 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Services\TrainingContext;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTrainingPlanRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->route('trainingPlan') ? $this->user()->can('update', $this->route('trainingPlan')) : true;
+        if ($plan = $this->route('trainingPlan')) {
+            app(TrainingContext::class)->plan($plan, 'update');
+        }
+
+        return true;
     }
 
     public function rules(): array

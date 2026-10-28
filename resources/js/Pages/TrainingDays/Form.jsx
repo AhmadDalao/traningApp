@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
 import {
@@ -40,6 +41,7 @@ const focusAreas = [
     "Other",
 ];
 export default function Form({ plan, day, customExercises = [] }) {
+    const { url } = useTraining();
     const [exercises, setExercises] = useState(
         (day?.exercises || []).map((e) => ({
             ...e,
@@ -122,8 +124,8 @@ export default function Form({ plan, day, customExercises = [] }) {
         }));
         form.post(
             day
-                ? `/training-days/${day.id}`
-                : `/training-plans/${plan.id}/days`,
+                ? url(`/training-days/${day.id}`)
+                : url(`/training-plans/${plan.id}/days`),
             { forceFormData: true },
         );
     }
@@ -135,8 +137,11 @@ export default function Form({ plan, day, customExercises = [] }) {
             <Head title={day ? `Edit ${day.title}` : "Create training day"} />
             <Breadcrumbs
                 items={[
-                    { label: "Training plans", href: "/training-plans" },
-                    { label: plan.name, href: `/training-plans/${plan.id}` },
+                    { label: "Training plans", href: url("/training-plans") },
+                    {
+                        label: plan.name,
+                        href: url(`/training-plans/${plan.id}`),
+                    },
                     { label: day ? "Edit day" : "Create day" },
                 ]}
             />
@@ -211,12 +216,38 @@ export default function Form({ plan, day, customExercises = [] }) {
                         />
                     </Field>
                     <div className="workout-schedule-settings">
-                        <WeekdayPicker value={form.data.weekdays} onChange={(value) => form.setData("weekdays", value)}
-                            error={form.errors.weekdays || Object.entries(form.errors).find(([key]) => key.startsWith("weekdays."))?.[1]} />
-                        <Field label="Usual time (optional)" error={form.errors.default_time}>
-                            <input type="time" value={form.data.default_time} onInput={(event) => form.setData("default_time", event.target.value)} />
+                        <WeekdayPicker
+                            value={form.data.weekdays}
+                            onChange={(value) =>
+                                form.setData("weekdays", value)
+                            }
+                            error={
+                                form.errors.weekdays ||
+                                Object.entries(form.errors).find(([key]) =>
+                                    key.startsWith("weekdays."),
+                                )?.[1]
+                            }
+                        />
+                        <Field
+                            label="Usual time (optional)"
+                            error={form.errors.default_time}
+                        >
+                            <input
+                                type="time"
+                                value={form.data.default_time}
+                                onInput={(event) =>
+                                    form.setData(
+                                        "default_time",
+                                        event.target.value,
+                                    )
+                                }
+                            />
                         </Field>
-                        <p className="field-hint">{plan.start_date && plan.end_date ? `Plan period: ${plan.start_date} to ${plan.end_date}.` : "Set plan start/end dates from Edit plan to use weekday scheduling."}</p>
+                        <p className="field-hint">
+                            {plan.start_date && plan.end_date
+                                ? `Plan period: ${plan.start_date} to ${plan.end_date}.`
+                                : "Set plan start/end dates from Edit plan to use weekday scheduling."}
+                        </p>
                     </div>
                 </section>
                 {form.data.type === "training" ? (
@@ -437,8 +468,8 @@ export default function Form({ plan, day, customExercises = [] }) {
                         variant="secondary"
                         href={
                             day
-                                ? `/training-days/${day.id}`
-                                : `/training-plans/${plan.id}`
+                                ? url(`/training-days/${day.id}`)
+                                : url(`/training-plans/${plan.id}`)
                         }
                     >
                         Cancel

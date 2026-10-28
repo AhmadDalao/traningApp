@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
 import { Plus, Pencil, Trash2, ArrowRight, Layers } from "lucide-react";
@@ -14,22 +15,49 @@ import TrainingPlanForm from "../../Features/TrainingPlanForm";
 import { DuplicatePlanDialog } from "../../Features/TrainingCopyActions";
 import { Copy } from "lucide-react";
 export default function Index({ plans }) {
+    const { url, canManage, coaching, templates } = useTraining();
     const [duplicating, setDuplicating] = useState(null);
     const [editing, setEditing] = useState(null);
     const [deleting, setDeleting] = useState(null);
     return (
         <>
-            <Head title="Training plans" />
+            <Head
+                title={
+                    templates
+                        ? "Coach Plans"
+                        : coaching
+                          ? "Assigned plans"
+                          : "Training plans"
+                }
+            />
             <PageHeader
                 eyebrow="BUILD YOUR ROUTINE"
-                title="Training plans"
+                title={
+                    templates
+                        ? "Coach Plans"
+                        : coaching
+                          ? "Assigned plans"
+                          : "Training plans"
+                }
                 description="Your goals, broken down into days you can show up for."
             >
-                <Button onClick={() => setEditing({})}>
-                    <Plus size={17} />
-                    Create training plan
-                </Button>
+                {canManage && (
+                    <Button onClick={() => setEditing({})}>
+                        <Plus size={17} />
+                        Create training plan
+                    </Button>
+                )}
             </PageHeader>
+            {coaching && canManage && (
+                <div className="coach-actions" style={{ marginBottom: 20 }}>
+                    <ButtonLink href={url("/assign")}>
+                        Assign a coach template
+                    </ButtonLink>
+                    <p className="field-hint">
+                        Or create a custom plan just for this trainee.
+                    </p>
+                </div>
+            )}
             {plans.data.length ? (
                 <>
                     <div className="plan-grid">
@@ -46,6 +74,14 @@ export default function Index({ plans }) {
                                 </div>
                                 <div className="plan-body">
                                     <h2>{plan.name}</h2>
+                                    {plan.coach_name && (
+                                        <p className="field-hint">
+                                            Coach assigned · {plan.coach_name}
+                                            {plan.assignment_status === "ended"
+                                                ? " · Assignment ended"
+                                                : ""}
+                                        </p>
+                                    )}
                                     <div className="plan-meta">
                                         {plan.workout_days_count} training{" "}
                                         {plan.workout_days_count === 1
@@ -63,7 +99,9 @@ export default function Index({ plans }) {
                                     </p>
                                     <div className="plan-actions">
                                         <ButtonLink
-                                            href={`/training-plans/${plan.id}`}
+                                            href={url(
+                                                `/training-plans/${plan.id}`,
+                                            )}
                                             variant="secondary"
                                             className="small"
                                         >
@@ -71,31 +109,42 @@ export default function Index({ plans }) {
                                             <ArrowRight size={14} />
                                         </ButtonLink>
                                         <div>
-                                            <button
-                                                className="icon-btn"
-                                                aria-label={`Edit ${plan.name}`}
-                                                onClick={() => setEditing(plan)}
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
-                                            <button
-                                                className="icon-btn"
-                                                aria-label={`Duplicate ${plan.name}`}
-                                                onClick={() =>
-                                                    setDuplicating(plan)
-                                                }
-                                            >
-                                                <Copy size={16} />
-                                            </button>
-                                            <button
-                                                className="icon-btn danger-text"
-                                                aria-label={`Delete ${plan.name}`}
-                                                onClick={() =>
-                                                    setDeleting(plan)
-                                                }
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            {canManage &&
+                                                (!coaching ||
+                                                    plan.assignment_status ===
+                                                        "active") && (
+                                                    <button
+                                                        className="icon-btn"
+                                                        aria-label={`Edit ${plan.name}`}
+                                                        onClick={() =>
+                                                            setEditing(plan)
+                                                        }
+                                                    >
+                                                        <Pencil size={16} />
+                                                    </button>
+                                                )}
+                                            {!coaching && (
+                                                <button
+                                                    className="icon-btn"
+                                                    aria-label={`Duplicate ${plan.name}`}
+                                                    onClick={() =>
+                                                        setDuplicating(plan)
+                                                    }
+                                                >
+                                                    <Copy size={16} />
+                                                </button>
+                                            )}
+                                            {!coaching && (
+                                                <button
+                                                    className="icon-btn danger-text"
+                                                    aria-label={`Delete ${plan.name}`}
+                                                    onClick={() =>
+                                                        setDeleting(plan)
+                                                    }
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -110,10 +159,12 @@ export default function Index({ plans }) {
                         title="Every routine starts with a plan"
                         description="Create your first plan, then add training days and exercises."
                     >
-                        <Button onClick={() => setEditing({})}>
-                            <Plus size={16} />
-                            Create your first plan
-                        </Button>
+                        {canManage && (
+                            <Button onClick={() => setEditing({})}>
+                                <Plus size={16} />
+                                Create your first plan
+                            </Button>
+                        )}
                     </EmptyState>
                 </section>
             )}
@@ -143,7 +194,7 @@ export default function Index({ plans }) {
                 <ConfirmDialog
                     title="Delete training plan?"
                     description={`“${deleting.name}” and its training days, exercises, and thumbnails will be permanently removed. Your scheduled session history will remain.`}
-                    url={`/training-plans/${deleting.id}`}
+                    url={url(`/training-plans/${deleting.id}`)}
                     onClose={() => setDeleting(null)}
                 />
             )}

@@ -1,18 +1,23 @@
+import { useTraining } from "./CoachingUI";
 import { Link } from "@inertiajs/react";
 import { Trophy } from "lucide-react";
 import { ButtonLink, DateLabel } from "../Components/UI";
 import { metricText } from "./exerciseProgress";
 
 export function ExerciseProgressTabs() {
+    const { url } = useTraining();
     return (
         <nav className="progress-tabs" aria-label="Progress view">
-            <ButtonLink variant="secondary" href="/progress">
+            <ButtonLink variant="secondary" href={url("/progress")}>
                 Body weight
             </ButtonLink>
-            <ButtonLink href="/progress/exercises" aria-current="page">
+            <ButtonLink href={url("/progress/exercises")} aria-current="page">
                 Exercise Progress
             </ButtonLink>
-            <ButtonLink variant="secondary" href="/progress?tab=training">
+            <ButtonLink
+                variant="secondary"
+                href={url("/progress?tab=training")}
+            >
                 Training stats
             </ButtonLink>
         </nav>
@@ -31,6 +36,7 @@ export function RecordValue({ record }) {
 }
 
 export function RecordList({ records }) {
+    const { url } = useTraining();
     return (
         <ul className="exercise-record-list">
             {records.map((record) => (
@@ -50,7 +56,7 @@ export function RecordList({ records }) {
                         </small>
                     </div>
                     <Link
-                        href={`/schedule-entries/${record.session_id}`}
+                        href={url(`/schedule-entries/${record.session_id}`)}
                         className="inline-link"
                     >
                         View workout

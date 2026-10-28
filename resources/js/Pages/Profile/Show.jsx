@@ -23,6 +23,24 @@ export default function Show({ profile, options }) {
                     Edit profile
                 </ButtonLink>
             </PageHeader>
+            <section className="panel coach-card">
+                <h2>Training Planner ID</h2>
+                <p>
+                    <code className="training-code">
+                        {auth.user.training_code}
+                    </code>
+                </p>
+                <div className="coach-actions">
+                    <ButtonLink href="/my-coaching" variant="secondary">
+                        Copy ID, show QR & My Coaching
+                    </ButtonLink>
+                    <ButtonLink href="/profile/coach" variant="secondary">
+                        {auth.user.is_coach
+                            ? "Coach profile"
+                            : "Enable Coach Workspace"}
+                    </ButtonLink>
+                </div>
+            </section>
             {!profile.onboarding_completed_at && (
                 <div className="profile-reminder">
                     <span>

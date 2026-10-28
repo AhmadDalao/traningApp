@@ -1,3 +1,4 @@
+import { useTraining } from "./CoachingUI";
 import { useState } from "react";
 import { Link } from "@inertiajs/react";
 import { formatDate } from "../Components/UI";
@@ -19,6 +20,7 @@ const labels = {
     ],
 };
 export default function ExerciseProgressChart({ chart }) {
+    const { url } = useTraining();
     const [selected, setSelected] = useState(null);
     const [title, description] = labels[chart.metric];
     const values = chart.points.map((point) => Number(point.value));
@@ -159,7 +161,9 @@ export default function ExerciseProgressChart({ chart }) {
                         </label>
                         <Link
                             className="inline-link"
-                            href={`/schedule-entries/${current.session_id}`}
+                            href={url(
+                                `/schedule-entries/${current.session_id}`,
+                            )}
                         >
                             View workout
                         </Link>

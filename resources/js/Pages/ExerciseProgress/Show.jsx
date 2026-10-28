@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { Head, Link, router } from "@inertiajs/react";
 import {
     PageHeader,
@@ -24,6 +25,7 @@ export default function Show({
     range,
     progression,
 }) {
+    const { url } = useTraining();
     const cards = records.filter(
         (record) => !exercise.weighted || record.metric !== "max_reps",
     );
@@ -33,7 +35,10 @@ export default function Show({
             <Head title={`${exercise.name} progress`} />
             <Breadcrumbs
                 items={[
-                    { label: "Exercise Progress", href: "/progress/exercises" },
+                    {
+                        label: "Exercise Progress",
+                        href: url("/progress/exercises"),
+                    },
                     { label: exercise.name },
                 ]}
             />
@@ -96,7 +101,7 @@ export default function Show({
                         </strong>
                         <Link
                             className="inline-link"
-                            href={`/schedule-entries/${record.session_id}`}
+                            href={url(`/schedule-entries/${record.session_id}`)}
                         >
                             <DateLabel date={record.date} long />
                         </Link>
@@ -140,7 +145,7 @@ export default function Show({
                         value={range}
                         onChange={(event) =>
                             router.get(
-                                "/progress/exercises",
+                                url("/progress/exercises"),
                                 {
                                     exercise: exercise.key,
                                     mode: exercise.tracking_mode,
@@ -196,7 +201,9 @@ export default function Show({
                                     <ButtonLink
                                         variant="secondary"
                                         className="small"
-                                        href={`/schedule-entries/${workout.session_id}`}
+                                        href={url(
+                                            `/schedule-entries/${workout.session_id}`,
+                                        )}
                                     >
                                         View workout
                                     </ButtonLink>

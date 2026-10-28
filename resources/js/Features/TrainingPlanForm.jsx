@@ -1,6 +1,8 @@
+import { useTraining } from "./CoachingUI";
 import { useForm } from "@inertiajs/react";
 import { Button, Field } from "../Components/UI";
 export default function TrainingPlanForm({ plan, onCancel, onSaved }) {
+    const { url, templates } = useTraining();
     const form = useForm({
         name: plan?.name || "",
         description: plan?.description || "",
@@ -12,11 +14,11 @@ export default function TrainingPlanForm({ plan, onCancel, onSaved }) {
             onSubmit={(e) => {
                 e.preventDefault();
                 plan
-                    ? form.put(`/training-plans/${plan.id}`, {
+                    ? form.put(url(`/training-plans/${plan.id}`), {
                           onSuccess: onSaved,
                           onSaved,
                       })
-                    : form.post("/training-plans", {
+                    : form.post(url("/training-plans"), {
                           onSuccess: onSaved,
                           onSaved,
                       });
@@ -43,17 +45,37 @@ export default function TrainingPlanForm({ plan, onCancel, onSaved }) {
                     placeholder="What are you working towards?"
                 />
             </Field>
-            <div className="form-grid">
-                <Field label="Plan starts" error={form.errors.start_date}>
-                    <input type="date" value={form.data.start_date} required={!!form.data.end_date}
-                        max={form.data.end_date || undefined} onInput={(event) => form.setData("start_date", event.target.value)} />
-                </Field>
-                <Field label="Plan ends" error={form.errors.end_date}>
-                    <input type="date" value={form.data.end_date} required={!!form.data.start_date}
-                        min={form.data.start_date || undefined} onInput={(event) => form.setData("end_date", event.target.value)} />
-                </Field>
-            </div>
-            <p className="field-hint">Optional. Set a period, choose weekdays in each workout, then preview the schedule before adding it to Calendar.</p>
+            {!templates && (
+                <div className="form-grid">
+                    <Field label="Plan starts" error={form.errors.start_date}>
+                        <input
+                            type="date"
+                            value={form.data.start_date}
+                            required={!!form.data.end_date}
+                            max={form.data.end_date || undefined}
+                            onInput={(event) =>
+                                form.setData("start_date", event.target.value)
+                            }
+                        />
+                    </Field>
+                    <Field label="Plan ends" error={form.errors.end_date}>
+                        <input
+                            type="date"
+                            value={form.data.end_date}
+                            required={!!form.data.start_date}
+                            min={form.data.start_date || undefined}
+                            onInput={(event) =>
+                                form.setData("end_date", event.target.value)
+                            }
+                        />
+                    </Field>
+                </div>
+            )}
+            <p className="field-hint">
+                {templates
+                    ? "Reusable template. Set the trainee’s dates when assigning a copy."
+                    : "Optional. Set a period, choose weekdays in each workout, then preview the schedule before adding it to Calendar."}
+            </p>
             <div className="form-actions">
                 <Button type="button" variant="secondary" onClick={onCancel}>
                     Cancel

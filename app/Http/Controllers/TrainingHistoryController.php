@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\ScheduleEntry;
+use App\Services\CoachAccess;
 use App\Services\ExerciseProgress;
+use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -20,7 +22,7 @@ class TrainingHistoryController extends Controller
             'to' => 'exclude_unless:period,custom|required|date_format:Y-m-d|after_or_equal:from',
             'type' => ['nullable', Rule::in(['all', 'training', 'rest'])],
             'per_page' => ['nullable', Rule::in(['10', '25', '50', '100', 'all'])],
-            'plan' => ['nullable', 'integer', Rule::exists('training_plans', 'id')->where('user_id', $request->user()->id)],
+            'plan' => ['nullable', 'integer', Rule::exists('training_plans', 'id')->where('user_id', app(TrainingContext::class)->owner()->id)],
         ]);
         $period = $filters['period'] ?? 'all';
         $status = $filters['status'] ?? 'all';
@@ -40,7 +42,7 @@ class TrainingHistoryController extends Controller
             'custom' => [$filters['from'], $filters['to']],
             default => null,
         };
-        $query = $request->user()->scheduleEntries()->past();
+        $query = app(TrainingContext::class)->owner()->scheduleEntries()->past();
         if ($dates) {
             $query->whereBetween('scheduled_date', $dates);
         }
@@ -90,16 +92,22 @@ class TrainingHistoryController extends Controller
                 'from' => $filters['from'] ?? '', 'to' => $filters['to'] ?? '',
                 'per_page' => (string) $perPage, 'plan' => $filters['plan'] ?? '',
             ],
-            'plans' => $request->user()->trainingPlans()->orderBy('name')->get(['id', 'name']),
+            'plans' => app(TrainingContext::class)->owner()->personalPlans()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function show(Request $request, ScheduleEntry $scheduleEntry, ExerciseProgress $progress)
     {
-        Gate::authorize('view', $scheduleEntry);
-        abort_unless($request->user()->scheduleEntries()->past()->whereKey($scheduleEntry->id)->exists(), 404);
+        $context = app(TrainingContext::class);
+        if ($context->coaching()) {
+            app(CoachAccess::class)->relationship($context->actor(), $context->owner());
+            abort_unless($scheduleEntry->user_id === $context->owner()->id, 403);
+        } else {
+            Gate::authorize('view', $scheduleEntry);
+        }
+        abort_unless(app(TrainingContext::class)->owner()->scheduleEntries()->past()->whereKey($scheduleEntry->id)->exists(), 404);
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true, 'progressSummary' => $progress->forSession($request->user(), $scheduleEntry)]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true, 'canManageSession' => ! $context->coaching(), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry)]);
     }
 }

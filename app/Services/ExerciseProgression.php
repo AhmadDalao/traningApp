@@ -22,12 +22,17 @@ class ExerciseProgression
         return TrainingExercise::where('library_key', $key)
             ->where(fn ($q) => $q->where('tracking_mode', $mode)->when($mode === 'reps', fn ($q) => $q->orWhereNull('tracking_mode')))
             ->whereHas('trainingDay', fn ($q) => $q->where('type', 'training')
-                ->whereHas('trainingPlan', fn ($q) => $q->where('user_id', $user->id)));
+                ->whereHas('trainingPlan', fn ($q) => $q->where('user_id', $user->id)->whereIn('workspace_type', ['personal', 'coach_assigned'])));
     }
 
-    public function detail(User $user, string $key, string $mode, ?int $selected = null): array
+    public function detail(User $user, string $key, string $mode, ?int $selected = null, ?User $coach = null): array
     {
-        $templates = $this->templates($user, $key, $mode)->with('trainingDay.trainingPlan')->orderBy('id')->get();
+        $query = $this->templates($user, $key, $mode);
+        if ($coach) {
+            $relationship = app(CoachAccess::class)->relationship($coach, $user);
+            $query->whereHas('trainingDay.trainingPlan.assignment', fn ($q) => $q->where('coach_trainee_relationship_id', $relationship->id));
+        }
+        $templates = $query->with('trainingDay.trainingPlan')->orderBy('id')->get();
         if ($selected !== null) {
             abort_unless($templates->contains('id', $selected), 404);
         } elseif ($templates->count() === 1) {
@@ -36,7 +41,7 @@ class ExerciseProgression
         $template = $templates->firstWhere('id', $selected);
         $suggestion = null;
         if ($template) {
-            $suggestion = $this->forTemplate($user, $template);
+            $suggestion = $this->forTemplate($user, $template, coach: $coach);
         } elseif ($templates->isEmpty()) {
             $recent = $this->recent($user, $key, $mode);
             $prescriptions = $recent->map(fn ($row) => $this->frozenTarget($row));
@@ -79,7 +84,7 @@ class ExerciseProgression
             ->limit(config('training.progression.workouts'))->get();
     }
 
-    public function forTemplate(User $user, TrainingExercise $template, bool $lock = false): array
+    public function forTemplate(User $user, TrainingExercise $template, bool $lock = false, ?User $coach = null): array
     {
         $recent = $this->recent($user, $template->library_key, $template->tracking_mode ?? 'reps', $template->id, $lock);
         $result = $this->evaluate([
@@ -90,6 +95,14 @@ class ExerciseProgression
             $user->id, $template->getAttributes(), config('training.progression'), config('training.limits'),
             $recent->map(fn ($row) => [$row->getAttributes(), $row->sets->map->getAttributes()->all()])->all(),
         ], JSON_THROW_ON_ERROR), config('app.key'));
+
+        if ($coach) {
+            $assignment = app(CoachAccess::class)->assignment($coach, $user, $template->trainingDay->trainingPlan, false, $lock);
+            $relationship = app(CoachAccess::class)->relationship($coach, $user, $lock);
+            $subscription = app(CoachAccess::class)->subscription($relationship, $lock);
+            $result['can_apply'] = $result['can_apply'] && $assignment->status === 'active' && $subscription !== null;
+            $result['token'] = $result['can_apply'] ? hash_hmac('sha256', json_encode([$result['token'], $coach->id, $assignment->getAttributes(), $relationship->getAttributes(), $subscription->getAttributes()], JSON_THROW_ON_ERROR), config('app.key')) : null;
+        }
 
         return $result;
     }
@@ -188,11 +201,30 @@ class ExerciseProgression
     public function apply(User $user, TrainingExercise $template, string $token, mixed $value): void
     {
         Gate::forUser($user)->authorize('update', $template->trainingDay);
-        DB::transaction(function () use ($user, $template, $token, $value) {
+        abort_if($template->trainingDay->trainingPlan->workspace_type === 'coach_template', 403);
+        $this->applyTarget($user, $template, $token, $value);
+    }
+
+    public function applyForCoach(User $coach, User $trainee, TrainingExercise $template, string $token, mixed $value): void
+    {
+        app(CoachAccess::class)->transaction($coach, $trainee, fn () => $this->applyTarget($trainee, $template, $token, $value, $coach));
+    }
+
+    private function applyTarget(User $user, TrainingExercise $template, string $token, mixed $value, ?User $coach = null): void
+    {
+        $authorize = function ($day) use ($user, $coach) {
+            if ($coach) {
+                app(CoachAccess::class)->assignment($coach, $user, $day->trainingPlan, true, true);
+            } else {
+                Gate::forUser($user)->authorize('update', $day);
+            }
+        };
+        $authorize($template->trainingDay);
+        DB::transaction(function () use ($user, $template, $token, $value, $coach, $authorize) {
             // Share the start-workout lock, and the day-editor lock, without rewriting either workflow.
             User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $day = TrainingDay::lockForUpdate()->findOrFail($template->training_day_id);
-            Gate::forUser($user)->authorize('update', $day);
+            $authorize($day);
             $template = TrainingExercise::where('training_day_id', $day->id)->lockForUpdate()->findOrFail($template->id);
             if (! $template->library_key || $day->type !== 'training') {
                 throw ValidationException::withMessages(['progression' => 'This plan exercise has changed. Refresh and choose a current training exercise.']);
@@ -204,7 +236,7 @@ class ExerciseProgression
                 ->orderBy('id')->lockForUpdate()->get(['id']);
             // Locking reads see the latest committed evidence under MySQL REPEATABLE READ,
             // even if the ownership lookup established an earlier transaction snapshot.
-            $suggestion = $this->forTemplate($user, $template, lock: true);
+            $suggestion = $this->forTemplate($user, $template, lock: true, coach: $coach);
             if (! hash_equals($suggestion['token'], $token) || ! $suggestion['can_apply']) {
                 throw ValidationException::withMessages(['progression' => 'Your plan or workout results changed. Review the refreshed suggestion before applying.']);
             }

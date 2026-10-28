@@ -24,6 +24,9 @@ class TrainingPlanDuplicator
                 ...$source->only('description', 'start_date', 'end_date'),
                 'name' => $this->name($source->name, $user->trainingPlans(), 'name'),
             ]);
+            if ($source->workspace_type === 'coach_template') {
+                $copy->forceFill(['workspace_type' => 'coach_template'])->save();
+            }
             foreach ($source->trainingDays()->lockForUpdate()->get() as $day) {
                 $this->dayCopy($day, $copy, $day->title, $day->position, $paths);
             }
@@ -32,15 +35,45 @@ class TrainingPlanDuplicator
         });
     }
 
-    public function day(User $user, TrainingDay $source, TrainingPlan $destination): TrainingDay
+    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates): TrainingPlan
     {
-        Gate::forUser($user)->authorize('update', $source);
-        Gate::forUser($user)->authorize('update', $destination);
+        $paths = [];
+        try {
+            return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, &$paths) {
+                $source = TrainingPlan::where('user_id', $coach->id)->where('workspace_type', 'coach_template')->lockForUpdate()->findOrFail($source->id);
+                $copy = $trainee->trainingPlans()->make([...$source->only('name', 'description'), ...$dates]);
+                $copy->workspace_type = 'coach_assigned';
+                $copy->save();
+                foreach ($source->trainingDays()->lockForUpdate()->get() as $day) {
+                    $this->dayCopy($day, $copy, $day->title, $day->position, $paths);
+                }
+                $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
 
-        return $this->copy($user, function (&$paths) use ($user, $source, $destination) {
+                return $copy;
+            });
+        } catch (\Throwable $error) {
+            Storage::disk('public')->delete($paths);
+            throw $error;
+        }
+    }
+
+    public function day(User $user, TrainingDay $source, TrainingPlan $destination, ?User $coach = null): TrainingDay
+    {
+        $authorize = function () use ($user, $source, $destination, $coach) {
+            if ($coach) {
+                app(CoachAccess::class)->assignment($coach, $user, $source->trainingPlan, true);
+                app(CoachAccess::class)->assignment($coach, $user, $destination, true);
+            } else {
+                Gate::forUser($user)->authorize('update', $source);
+                Gate::forUser($user)->authorize('update', $destination);
+            }
+        };
+        $authorize();
+
+        return $this->copy($user, function (&$paths) use ($user, $source, $destination, $authorize) {
             TrainingPlan::where('user_id', $user->id)->whereIn('id', [$source->training_plan_id, $destination->id])->orderBy('id')->lockForUpdate()->get();
             $source = TrainingDay::lockForUpdate()->findOrFail($source->id);
-            Gate::forUser($user)->authorize('update', $source);
+            $authorize();
             $destination = TrainingPlan::where('user_id', $user->id)->findOrFail($destination->id);
 
             return $this->dayCopy($source, $destination, $this->name($source->title, $destination->trainingDays(), 'title'), ($destination->trainingDays()->max('position') ?? -1) + 1, $paths);

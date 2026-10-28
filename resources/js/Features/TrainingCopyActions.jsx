@@ -1,3 +1,4 @@
+import { useTraining } from "./CoachingUI";
 import { useForm } from "@inertiajs/react";
 import { Copy, MoreHorizontal } from "lucide-react";
 import { Button, ConfirmDialog, Field, Modal } from "../Components/UI";
@@ -37,11 +38,12 @@ export function CopyActions({ label = "More actions", onDuplicate, onCopy }) {
 }
 
 export function DuplicatePlanDialog({ plan, onClose }) {
+    const { url } = useTraining();
     return (
         <ConfirmDialog
             title="Duplicate training plan?"
             description={`Create an independent copy of “${plan.name}”, including its days, exercises and schedule preferences. The copy starts unscheduled, with no workout history.`}
-            url={`/training-plans/${plan.id}/duplicate`}
+            url={url(`/training-plans/${plan.id}/duplicate`)}
             method="post"
             data={{ confirmed: true }}
             confirmLabel="Duplicate plan"
@@ -52,6 +54,7 @@ export function DuplicatePlanDialog({ plan, onClose }) {
 }
 
 export function DayCopyDialog({ day, plans, mode, onClose }) {
+    const { url } = useTraining();
     const form = useForm({
         confirmed: true,
         training_plan_id: mode === "copy" ? plans[0]?.id || "" : "",
@@ -73,7 +76,7 @@ export function DayCopyDialog({ day, plans, mode, onClose }) {
             <form
                 onSubmit={(event) => {
                     event.preventDefault();
-                    form.post(`/training-days/${day.id}/duplicate`, {
+                    form.post(url(`/training-days/${day.id}/duplicate`), {
                         onSuccess: onClose,
                     });
                 }}

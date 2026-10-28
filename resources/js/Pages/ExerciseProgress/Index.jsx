@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
 import { Search, ArrowUpRight } from "lucide-react";
@@ -23,11 +24,12 @@ export default function Index({
     search,
     errors,
 }) {
+    const { url } = useTraining();
     const [query, setQuery] = useState(search);
     function submit(event) {
         event.preventDefault();
         router.get(
-            "/progress/exercises",
+            url("/progress/exercises"),
             { search: query },
             { preserveState: true, preserveScroll: true },
         );
@@ -51,7 +53,9 @@ export default function Index({
                         title="No detailed exercise progress yet."
                         description="Start logging workouts with Active Workout to build your exercise history."
                     >
-                        <ButtonLink href="/calendar">Open Calendar</ButtonLink>
+                        <ButtonLink href={url("/calendar")}>
+                            Open Calendar
+                        </ButtonLink>
                     </EmptyState>
                 </section>
             ) : (
@@ -195,7 +199,7 @@ export default function Index({
                                 >
                                     <ButtonLink
                                         variant="secondary"
-                                        href="/progress/exercises"
+                                        href={url("/progress/exercises")}
                                     >
                                         Clear search
                                     </ButtonLink>

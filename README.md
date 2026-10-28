@@ -1,6 +1,26 @@
 # Training Planner
 
-A personal training planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
+A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
+
+## v1.6.0 Coaching Workspace
+
+**Deployed as v1.6.0.** See the [full 26-part implementation and release report](docs/V1.6.0-COACHING-REPORT.html).
+
+- One account keeps personal training and can enable Coach Workspace from Profile. Registration supports trainee and coach accounts; workspace switching never changes identity.
+- Permanent Training Planner IDs, exact lookup and locally rendered, expiring single-use QR links. Trainees explicitly accept requests and can disconnect at any time.
+- Coaching packages and date-aware subscriptions control management. Accepted relationships retain read-only monitoring when service is paused or expired.
+- Reuse the existing plan/day builder for templates, independent trainee-owned assignments and custom plans. Reuse Calendar, History, body/exercise Progress, PRs and progression calculations.
+- Coach scheduling is limited to their active assignments and attributed eligible future sessions within service dates. Coaches cannot log actual results, change workout status, complete workouts or record body weight for trainees.
+- One additive migration, six coaching tables, no new PHP dependency or background service. QR uses pinned `qrcode.react` 4.2.0; [license notices](public/licenses/qrcode-react.txt) are included.
+- Verification: **362 PHP tests / 4,630 assertions** on SQLite and isolated MySQL, **24 JavaScript tests**, **17 two-connection MySQL checks**, **60 authenticated live workflow checks**, and 48 responsive page checks at 320/390/1280px.
+
+Run the additional concurrency checks only against the isolated test database:
+
+```sh
+DB_CONNECTION=mysql DB_DATABASE=training_planner_test php tests/Concurrency/CoachingConcurrency.php
+```
+
+The runner refuses other database names. Personal policies remain owner-only; `CoachAccess` and explicit trainee route context provide coaching authorization. Future features should extend these shared services rather than impersonating trainees or duplicating training engines.
 
 ## v1.5.0 Smart Plan & Schedule Management
 
@@ -25,9 +45,7 @@ A personal training planner built as **one Laravel monolith**. Laravel owns auth
 
 ## Current release
 
-**v1.5.0 — 28 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). It adds independent plan/day copying and confirmed management of finite future schedules. Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.5.0](https://github.com/AhmadDalao/traningApp/tree/v1.5.0). See the [full v1.5 report](docs/V1.5.0-PLAN-SCHEDULE-REPORT.html) and [CHANGELOG.md](CHANGELOG.md). Earlier releases and tags remain unchanged.
-
-Release verification: **320 PHP tests / 4,084 assertions on SQLite and MySQL**, **24 JavaScript tests**, production build, **47 live workflow checks** and **63 deployed-file checksum checks** passed. Local 320px/390px/1280px browser checks showed no horizontal overflow or console warnings/errors. Live plan/schedule navigation and served asset hashes passed. The additive safety-flag migration is applied; existing data, uploads and production environment fingerprints match. Temporary QA records and deployment files were removed. A private backup is retained under `storage/app/private/deploy-backups/management-v1.5.0-20261028-c3455eb4` on Hostinger. Existing login credentials are unchanged; secrets, backups, generated assets and deployment helpers remain outside source control.
+**v1.6.0 — 28 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.6.0](https://github.com/AhmadDalao/traningApp/tree/v1.6.0). The [full report](docs/V1.6.0-COACHING-REPORT.html) covers architecture, authorization, migration, tests, live verification and remaining scope. Existing login credentials are unchanged.
 
 ## Released update: v1.3.0 Exercise Progress & Personal Records
 

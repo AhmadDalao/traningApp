@@ -1,4 +1,5 @@
 import "../css/app.css";
+import "../css/coaching.css";
 import "../css/profile.css";
 import "../css/workout.css";
 import "../css/exercise-progress.css";

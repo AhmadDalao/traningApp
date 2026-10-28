@@ -7,44 +7,46 @@ use App\Http\Requests\UpdateTrainingDayRequest;
 use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
 use App\Services\ExerciseLibrary;
+use App\Services\TrainingContext;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class TrainingDayController extends Controller
 {
+    public function __construct(private TrainingContext $context) {}
+
     public function create(TrainingPlan $trainingPlan)
     {
-        Gate::authorize('update', $trainingPlan);
+        $this->context->plan($trainingPlan, 'update');
 
-        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($trainingPlan->user_id)]);
+        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
     }
 
     public function store(StoreTrainingDayRequest $request, TrainingPlan $trainingPlan)
     {
         $day = $this->saveDay($request, $trainingPlan);
 
-        return to_route('training-days.show', $day)->with('success', 'Training day created.')
+        return $this->context->redirect('/training-days/'.$day->id)->with('success', 'Training day created.')
             ->with('schedule_review', $trainingPlan->only('id', 'name'));
     }
 
     public function show(TrainingDay $trainingDay)
     {
-        Gate::authorize('view', $trainingDay);
+        $this->context->day($trainingDay);
 
         return Inertia::render('TrainingDays/Show', ['day' => $trainingDay->load('trainingPlan', 'exercises'),
-            'copyPlans' => $trainingDay->trainingPlan->user->trainingPlans()->whereKeyNot($trainingDay->training_plan_id)->orderBy('name')->get(['id', 'name'])]);
+            'copyPlans' => $this->context->plans(true)->whereKeyNot($trainingDay->training_plan_id)->orderBy('name')->get(['id', 'name'])]);
     }
 
     public function edit(TrainingDay $trainingDay)
     {
-        Gate::authorize('update', $trainingDay);
+        $this->context->day($trainingDay, 'update');
 
-        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($trainingDay->trainingPlan->user_id)]);
+        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
     }
 
     public function update(UpdateTrainingDayRequest $request, TrainingDay $trainingDay)
@@ -53,18 +55,19 @@ class TrainingDayController extends Controller
         $before = $trainingDay->only($fields);
         $this->saveDay($request, $trainingDay->trainingPlan, $trainingDay);
 
-        return to_route('training-days.show', $trainingDay)->with('success', 'Training day updated.')
+        return $this->context->redirect('/training-days/'.$trainingDay->id)->with('success', 'Training day updated.')
             ->with('schedule_review', $before !== $trainingDay->fresh()->only($fields) ? $trainingDay->trainingPlan->only('id', 'name') : null);
     }
 
     public function duplicate(Request $request, TrainingDay $trainingDay, TrainingPlanDuplicator $duplicator)
     {
-        Gate::authorize('update', $trainingDay);
+        $this->context->day($trainingDay, 'update');
         $data = $request->validate(['confirmed' => 'required|accepted', 'training_plan_id' => 'nullable|integer']);
         $destination = isset($data['training_plan_id']) ? TrainingPlan::findOrFail($data['training_plan_id']) : $trainingDay->trainingPlan;
-        $copy = $duplicator->day($request->user(), $trainingDay, $destination);
+        $this->context->plan($destination, 'update');
+        $copy = $this->context->write(fn () => $duplicator->day($this->context->owner(), $trainingDay, $destination, $this->context->coaching() ? $request->user() : null));
 
-        return to_route('training-days.show', $copy)->with('success', 'Training day copied independently. No Calendar sessions were copied.')
+        return $this->context->redirect('/training-days/'.$copy->id)->with('success', 'Training day copied independently. No Calendar sessions were copied.')
             ->with('schedule_review', $destination->only('id', 'name'));
     }
 
@@ -74,8 +77,9 @@ class TrainingDayController extends Controller
         $newPaths = [];
         $oldPaths = [];
         try {
-            $day = DB::transaction(function () use ($data, $plan, $day, &$newPaths, &$oldPaths) {
-                TrainingPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
+            $day = $this->context->write(function () use ($data, $plan, $day, &$newPaths, &$oldPaths) {
+                $plan = TrainingPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
+                $this->context->plan($plan, 'update');
                 if ($day) {
                     $day = TrainingDay::lockForUpdate()->findOrFail($day->id);
                 }
@@ -98,7 +102,7 @@ class TrainingDayController extends Controller
                     $fields['position'] = $position;
                     $fields['superset_group'] = empty($row['superset_group']) ? null : strtoupper($row['superset_group']);
                     $sourceChanged = array_key_exists('library_key', $row) && ($row['library_key'] ?? null) !== $exercise->library_key;
-                    $source = $sourceChanged ? $library->find($row['library_key'] ?? null, $plan->user_id) : null;
+                    $source = $sourceChanged ? $library->find($row['library_key'] ?? null, $this->context->actor()->id) : null;
                     foreach (['thumbnail' => 'exercise-thumbnails', 'custom_icon' => 'exercise-icons'] as $media => $directory) {
                         $column = $media.'_path';
                         if ($sourceChanged || ! empty($row[$media]) || ! empty($row['remove_'.$media])) {
@@ -115,7 +119,7 @@ class TrainingDayController extends Controller
                     }
                     $exercise->fill($fields)->save();
                     if (! empty($row['save_to_library']) && ! $exercise->library_key) {
-                        $custom = $library->saveCustom($exercise, $plan->user_id, $day->focus_area, $newPaths);
+                        $custom = $library->saveCustom($exercise, $this->context->actor()->id, $day->focus_area, $newPaths);
                         $exercise->update(['library_key' => 'custom:'.$custom->id]);
                     }
                     $kept[] = $exercise->id;
@@ -145,31 +149,40 @@ class TrainingDayController extends Controller
 
     public function destroy(TrainingDay $trainingDay)
     {
-        Gate::authorize('delete', $trainingDay);
+        $this->context->day($trainingDay, 'delete');
         $plan = $trainingDay->training_plan_id;
         $paths = $trainingDay->exercises()->get()->flatMap(fn ($exercise) => [$exercise->thumbnail_path, $exercise->custom_icon_path])->filter()->all();
-        DB::transaction(function () use ($trainingDay) {
+        $this->context->write(function () use ($trainingDay) {
+            $this->context->day($trainingDay, 'update');
             TrainingPlan::whereKey($trainingDay->training_plan_id)->lockForUpdate()->firstOrFail();
             $trainingDay->delete();
         });
         Storage::disk('public')->delete($paths);
 
-        return to_route('training-plans.show', $plan)->with('success', 'Training day deleted. Calendar history is preserved.')
+        return $this->context->redirect('/training-plans/'.$plan)->with('success', 'Training day deleted. Calendar history is preserved.')
             ->with('schedule_review', TrainingPlan::findOrFail($plan)->only('id', 'name'));
     }
 
     public function reorderDays(Request $request, TrainingPlan $trainingPlan)
     {
-        Gate::authorize('update', $trainingPlan);
-        $this->reorder($request, $trainingPlan->trainingDays());
+        $this->context->plan($trainingPlan, 'update');
+        $this->context->write(function () use ($request, $trainingPlan) {
+            $plan = TrainingPlan::lockForUpdate()->findOrFail($trainingPlan->id);
+            $this->context->plan($plan, 'update');
+            $this->reorder($request, $plan->trainingDays());
+        });
 
         return back();
     }
 
     public function reorderExercises(Request $request, TrainingDay $trainingDay)
     {
-        Gate::authorize('update', $trainingDay);
-        $this->reorder($request, $trainingDay->exercises());
+        $this->context->day($trainingDay, 'update');
+        $this->context->write(function () use ($request, $trainingDay) {
+            $day = TrainingDay::lockForUpdate()->findOrFail($trainingDay->id);
+            $this->context->day($day, 'update');
+            $this->reorder($request, $day->exercises());
+        });
 
         return back();
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\BodyWeightHistory;
+use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,7 +11,7 @@ class ProgressController extends Controller
 {
     public function __invoke(Request $request, BodyWeightHistory $history)
     {
-        $user = $request->user();
+        $user = app(TrainingContext::class)->owner();
         $month = $user->scheduleEntries()->where('entry_type', 'training')->past()->whereBetween('scheduled_date', [today()->startOfMonth()->toDateString(), today()->toDateString()]);
         $completed = (clone $month)->where('status', 'completed')->count();
         $skipped = (clone $month)->where('status', 'skipped')->count();

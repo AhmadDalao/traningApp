@@ -13,6 +13,40 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public const TRAINEE = 'trainee';
+
+    public const COACH = 'coach';
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (! $user->training_code) {
+                do {
+                    $code = 'TP-';
+                    for ($i = 0; $i < 8; $i++) {
+                        $code .= '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[random_int(0, 31)];
+                    }
+                } while (self::where('training_code', $code)->exists());
+                $user->training_code = $code;
+            }
+        });
+    }
+
+    public function coachProfile()
+    {
+        return $this->hasOne(CoachProfile::class);
+    }
+
+    public function isCoach(): bool
+    {
+        return $this->account_type === self::COACH && $this->coachProfile()->where('active', true)->exists();
+    }
+
+    public function personalPlans()
+    {
+        return $this->trainingPlans()->whereIn('workspace_type', ['personal', 'coach_assigned']);
+    }
+
     public function trainingPlans()
     {
         return $this->hasMany(TrainingPlan::class);

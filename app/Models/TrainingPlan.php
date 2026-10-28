@@ -8,6 +8,11 @@ class TrainingPlan extends Model
 {
     protected $fillable = ['name', 'description', 'start_date', 'end_date'];
 
+    public function assignment()
+    {
+        return $this->hasOne(CoachPlanAssignment::class, 'assigned_training_plan_id');
+    }
+
     protected function casts(): array
     {
         return ['start_date' => 'date:Y-m-d', 'end_date' => 'date:Y-m-d'];

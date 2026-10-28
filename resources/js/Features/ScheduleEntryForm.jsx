@@ -1,3 +1,4 @@
+import { useTraining } from "./CoachingUI";
 import { useState } from "react";
 import { Link, useForm, usePage } from "@inertiajs/react";
 import { Button, Field } from "../Components/UI";
@@ -9,6 +10,7 @@ export default function ScheduleEntryForm({
     onCancel,
     onSaved,
 }) {
+    const { url } = useTraining();
     const { today } = usePage().props;
     const initialDay = plans
         .flatMap((p) => p.training_days)
@@ -54,11 +56,11 @@ export default function ScheduleEntryForm({
             onSubmit={(e) => {
                 e.preventDefault();
                 entry
-                    ? form.put(`/schedule-entries/${entry.id}`, {
+                    ? form.put(url(`/schedule-entries/${entry.id}`), {
                           onSuccess: onSaved,
                           onSaved,
                       })
-                    : form.post("/schedule-entries", {
+                    : form.post(url("/schedule-entries"), {
                           onSuccess: onSaved,
                           onSaved,
                       });
@@ -131,7 +133,7 @@ export default function ScheduleEntryForm({
                     {!plans.length && (
                         <p className="info-note">
                             Create a{" "}
-                            <Link href="/training-plans/create">
+                            <Link href={url("/training-plans/create")}>
                                 training plan
                             </Link>{" "}
                             and add a day first, or schedule a rest day.
@@ -141,7 +143,9 @@ export default function ScheduleEntryForm({
                         <p className="info-note">
                             This plan has no days yet.{" "}
                             <Link
-                                href={`/training-plans/${planId}/days/create`}
+                                href={url(
+                                    `/training-plans/${planId}/days/create`,
+                                )}
                             >
                                 Add a training day
                             </Link>
