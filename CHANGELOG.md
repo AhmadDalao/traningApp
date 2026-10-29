@@ -1,14 +1,14 @@
 # Changelog
 
-## v2.1.1 — 29 October 2026 — source release, deployment held
+## v2.1.1 — 29 October 2026; deployed 30 October 2026
 
 - Fix held History actions, paused-workout monthly completion rates, silent stale Start errors and 404 redirects after early program History status changes. Preserve existing History date/status visibility.
 - Put the next workout before secondary program controls, promote Resume, separate End, and show week/block context and eligible workouts before a future pause date.
 - Centralize individual/bulk assigned-session checks in CoachAccess; batch locked definition snapshots and review/update reads. Coach preview uses 34 HTTP queries for both 12 and 156 workouts, down from 141/1,437.
 - Add five PHP regressions and two real UI lifecycle suites; retain all existing authorization, media, concurrency and mobile checks. Architecture Health: GOOD, with three explicit noncritical technical-debt items.
 - READY: 504 tests / 10,877 assertions on SQLite and isolated MySQL; 46 concurrency, 28 JavaScript, 862 browser and 133 local HTTP checks. Build, Pint, scoped Prettier and whitespace checks pass.
-- Remove 17 QA accounts and 1,252 generated images. All 19 original table fingerprints and 44 original media hashes match. No migration, dependency, authentication or architecture rebuild.
-- **Production remains v2.0.1.** Deploy only after a later explicit request; do not deploy v2.1.0 separately. [Full 50-section report](docs/V2.1.1-FULL-LIFECYCLE-STABILIZATION-REPORT.html).
+- Source QA cleanup: remove 17 local QA accounts and 1,252 generated images. All 19 original local table fingerprints and 44 original media hashes match. No migration, dependency, authentication or architecture rebuild.
+- **Deployed directly from v2.0.1 on 30 October 2026 after explicit authorization.** Immutable tag `v2.1.1` (`b8fad5e`) and the existing additive v2.1 migration are live. Fresh private backups, all 252 release hashes, 150 live HTTP checks and 428 live browser checks pass. All 13 live QA accounts/media and temporary deployment files removed; original 19 production table fingerprints, 60 media files and settings unchanged. [Full 50-section report](docs/V2.1.1-FULL-LIFECYCLE-STABILIZATION-REPORT.html).
 
 ## v2.1.0 — 29 October 2026 — source release, deployment held
 
@@ -18,7 +18,7 @@
 - Serialized controls with starts and status changes, validated return/subscription dates and retained source-deleted owner access. No coach performance logging or trainee self-upgrade.
 - Fixed long workout names overlapping status actions and added internal-overflow checks in both browser engines.
 - READY: 499 tests / 10,635 assertions per database; 46 concurrency, 28 JavaScript, 742 browser and 133 local HTTP checks; build/format checks pass. Original 19 tables and 44 media files unchanged after removing five QA accounts and 554 generated images.
-- **Production remains v2.0.1.** The v2.1 brief explicitly requires a later deployment request. [Full 45-section report](docs/V2.1-PROGRAM-CONTROL-FLEXIBILITY-REPORT.html).
+- Initially held as a source release; deployed within v2.1.1 on 30 October 2026 after explicit authorization. No separate v2.1.0 deployment. [Full 45-section report](docs/V2.1-PROGRAM-CONTROL-FLEXIBILITY-REPORT.html).
 
 ## v2.0.1 — 29 October 2026 — deployed and verified
 

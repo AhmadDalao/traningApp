@@ -2,8 +2,8 @@
   "version": "v2.1.1",
   "baseline_commit": "e9ed12ba6e63af7c042a9ee727a7b01ac9fb12ec",
   "source_baseline": "v2.1.0",
-  "production": "v2.0.1; not accessed or changed during this audit",
-  "deployment": "HELD — later explicit deploy request required",
+  "production": "v2.1.1 — deployed directly from v2.0.1 after explicit authorization",
+  "deployment": "DEPLOYED AND VERIFIED — see deployment.json",
   "architecture_health": "GOOD",
   "baseline": {
     "sqlite": {
@@ -368,10 +368,9 @@
       }
     ]
   },
-  "gate": "READY — source only",
+  "gate": "READY — deployed and verified",
   "limitations": [
     "Physical devices and screen readers not certified.",
-    "Production deployment and production smoke checks intentionally not performed.",
     "Browser fixture creation/reset ordering corrected during test development; only successful final runs are counted."
   ],
   "log_sha256": {
@@ -424,7 +423,8 @@
     "atomic_push": true,
     "prior_tag_refs_unchanged": 36,
     "verified_at_utc": "2026-10-29T20:11:10.549951+00:00",
-    "deployment": "HELD — NOT DEPLOYED",
+    "deployment": "DEPLOYED AND VERIFIED — see deployment.json",
     "evidence_note": "Publication evidence committed in a documentation-only follow-up; immutable release tag unchanged."
-  }
+  },
+  "deployment_evidence": "deployment.json"
 }

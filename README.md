@@ -2,11 +2,13 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
-## v2.1.1 Full Lifecycle Stabilization — source release, deployment held
+## v2.1.1 Full Lifecycle Stabilization — deployed and verified
 
 Full personal and coach lifecycle QA fixes held History actions, paused-workout completion rates, silent stale Start errors and invalid History redirects after reopening early-completed sessions. Program pages put the next workout first, make Resume primary and keep End secondary. Coach schedule review now uses 34 queries for both 12 and 156 workouts, with shared authorization checks and unchanged ownership rules.
 
-**READY — source only. Architecture Health: GOOD.** Production remains v2.0.1 until a later explicit deployment request. No migration or dependency changes in this patch; a later deployment includes the existing v2.1 additive migration. Verification: **504 tests / 10,877 assertions per database**, **46 concurrency checks**, **28 JavaScript tests**, **862 browser checks** and **133 local HTTP checks**. Build and formatting pass. All 19 original table fingerprints and 44 media hashes match after removing 17 disposable accounts and 1,252 QA images.
+**READY — deployed and verified on Hostinger, 30 October 2026. Architecture Health: GOOD.** Deployed directly from v2.0.1 using immutable tag `v2.1.1` (`b8fad5e`), including the existing additive v2.1 migration. Fresh backups, 252 file hashes, 150 live HTTP checks and 428 Chromium/WebKit checks pass. All 13 live QA accounts/media and temporary deployment files are removed; the original 19 production table fingerprints, 60 media files and environment match the backup. No dependency change.
+
+Source QA: **504 tests / 10,877 assertions per database**, **46 concurrency checks**, **28 JavaScript tests**, **862 browser checks** and **133 local HTTP checks**. Build and formatting pass. All 19 original local table fingerprints and 44 local media hashes match after removing 17 disposable accounts and 1,252 QA images.
 
 [Full 50-section stabilization report](docs/V2.1.1-FULL-LIFECYCLE-STABILIZATION-REPORT.html) · [Verification evidence and findings](docs/v2.1.1-qa/verification.json). Browser fixtures and credentials are private; run shared-account browser suites and database suites sequentially.
 
@@ -14,7 +16,7 @@ Full personal and coach lifecycle QA fixes held History actions, paused-workout 
 
 Pause with a known return date or indefinitely, explicitly resume on a chosen date, shift the remaining schedule, recover missed workouts and end a run early. Signed previews preserve completed/skipped/saved workouts, manual exceptions, logical weeks, block identity and frozen prescriptions. Coaches retain existing assignment/subscription boundaries; trainees cannot self-enable Coach Workspace.
 
-**READY — source only.** The v2.1 brief explicitly holds production deployment until a later request to deploy. Production remains v2.0.1. One additive migration extends `program_runs`; no rebuild or dependency changes. Verification: 499 tests / 10,635 assertions on each database, 46 concurrency checks, 28 JavaScript tests, 742 browser checks, build and formatting pass. Five local QA accounts and 554 generated images removed; 19 original table fingerprints and 44 media hashes match.
+**Initially source only; subsequently deployed as part of v2.1.1 on 30 October 2026.** v2.1.0 was not deployed separately. One additive migration extends `program_runs`; no rebuild or dependency changes. Verification: 499 tests / 10,635 assertions on each database, 46 concurrency checks, 28 JavaScript tests, 742 browser checks, build and formatting pass. Five local QA accounts and 554 generated images removed; 19 original table fingerprints and 44 media hashes match.
 
 [Full 45-section v2.1 report](docs/V2.1-PROGRAM-CONTROL-FLEXIBILITY-REPORT.html) · [Verification evidence](docs/v2.1.0-qa/verification.json). Run shared-account browser flows and the two database suites sequentially.
 
@@ -137,7 +139,7 @@ The runner refuses other database names. Personal policies remain owner-only; `C
 
 ## Current release
 
-**v1.7.2 — 29 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.7.2](https://github.com/AhmadDalao/traningApp/tree/v1.7.2). This patch fixes Profile card spacing. The [v1.7.1 report](docs/V1.7.1-COACH-ACCESS-REPORT.html) documents the underlying calendar release, trainee restriction and live verification. Existing login credentials are unchanged.
+**v2.1.1 — 30 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source tag: [v2.1.1](https://github.com/AhmadDalao/traningApp/tree/v2.1.1). The [full stabilization and deployment report](docs/V2.1.1-FULL-LIFECYCLE-STABILIZATION-REPORT.html) records backups, live verification and data preservation. Existing login credentials are unchanged.
 
 ## Released update: v1.3.0 Exercise Progress & Personal Records
 
