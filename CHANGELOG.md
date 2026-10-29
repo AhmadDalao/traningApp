@@ -2,7 +2,7 @@
 
 ## v1.7.1 — 29 October 2026
 
-GitHub source release; Hostinger is unchanged. Existing tags remain intact.
+Deployed to Hostinger on 29 October 2026 after the GitHub source release. Existing tags remain intact; v1.7.1 still identifies runtime commit `35f1d23`.
 
 - Remove trainee “Enable Coach Workspace” actions from Profile and My Coaching. Existing active coaches retain their Coach profile links and workspace switcher.
 - Restrict GET and POST `/profile/coach` to existing active coaches. Rename the write handler to `updateProfile`; it updates profile information only and never creates a profile, upgrades an account or reactivates access.
@@ -10,6 +10,7 @@ GitHub source release; Hostinger is unchanged. Existing tags remain intact.
 - Preserve coach registration, personal training, coaching connections and existing coach profile editing. No schema, dependency or account-data migration.
 - Verification: 414 PHP tests / 5,197 assertions on SQLite and isolated MySQL; 24 JavaScript tests; 15 responsive page checks plus coach profile saving and workspace switching. Build, Pint, changed-file Prettier and whitespace checks pass.
 - Temporary QA accounts removed; original 17 table hashes and 44 media hashes unchanged.
+- Live deployment includes the pending v1.7.0 calendar migration and build. Verified all 86 deployed file hashes, 79 authenticated live workflow checks and 15 live responsive checks. Production settings, uploads and all original data are preserved; three QA accounts and temporary deployment files are removed. Fresh private backups retained.
 - Full report: [v1.7.1 Coach Access](docs/V1.7.1-COACH-ACCESS-REPORT.html).
 
 ## v1.7.0 — 28 October 2026

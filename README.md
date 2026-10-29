@@ -8,7 +8,7 @@ Trainees can no longer enable Coach Workspace. Profile and My Coaching show the 
 
 Verification: **414 PHP tests / 5,197 assertions** on SQLite and isolated MySQL, **24 JS tests**, **15 responsive page checks** at 320/390/1280px, and browser profile-save/workspace-switch checks. Build, formatting and whitespace checks pass. Temporary QA accounts are removed; all 17 original data-table hashes and 44 media hashes match.
 
-[Full v1.7.1 report](docs/V1.7.1-COACH-ACCESS-REPORT.html). **GitHub source release only; Hostinger remains unchanged.** This patch adds no migration or dependency. Deploying the full v1.7.1 tree over the live v1.6 baseline also requires the existing v1.7.0 migration and rebuilt frontend.
+[Full v1.7.1 report](docs/V1.7.1-COACH-ACCESS-REPORT.html). **Deployed and verified on Hostinger on 29 October 2026**, including the pending v1.7.0 calendar update and additive migration. All 86 deployed file hashes, 79 authenticated live workflow checks and 15 live responsive page checks pass. Original data, environment and uploads are preserved; temporary QA accounts and public deployment files are removed. The v1.7.1 tag remains on runtime commit `35f1d23`.
 
 ## v1.7.0 Smart Calendar & Recurring Schedules
 
@@ -16,7 +16,7 @@ Source release **v1.7.0** adds ongoing plans, confirmed rolling generation throu
 
 Verification: **409 PHP tests / 5,160 assertions** on SQLite and isolated MySQL, **24 JS tests**, **21 two-connection checks**, and **42 responsive page checks** at 320/390/1280px. Build, Pint, changed-file Prettier and whitespace checks pass. Temporary local QA accounts are removed; all original rows and media match their fingerprints.
 
-[Full v1.7 report](docs/V1.7.0-SMART-CALENDAR-REPORT.html). This is a **GitHub source release**; Hostinger remains on the deployed v1.6 stabilization code. Deploying v1.7 requires its additive migration and frontend build. No queue or cron is required.
+[Full v1.7 report](docs/V1.7.0-SMART-CALENDAR-REPORT.html). Initially released to GitHub, this calendar update was subsequently deployed to Hostinger as part of **v1.7.1 on 29 October 2026**, including its additive migration and frontend build. No queue or cron is required.
 
 The v1.6 policy hold is resolved by retaining the accepted consent: connected coaches may read a trainee’s full workout history, including other-coach sessions, while mutations remain restricted to their own eligible assigned sessions. Earlier tags are preserved.
 
@@ -77,7 +77,7 @@ The runner refuses other database names. Personal policies remain owner-only; `C
 
 ## Current release
 
-**v1.6.0 — 28 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.6.0](https://github.com/AhmadDalao/traningApp/tree/v1.6.0). The [full report](docs/V1.6.0-COACHING-REPORT.html) covers architecture, authorization, migration, tests, live verification and remaining scope. Existing login credentials are unchanged.
+**v1.7.1 — 29 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.7.1](https://github.com/AhmadDalao/traningApp/tree/v1.7.1), runtime commit `35f1d23`. The [full report](docs/V1.7.1-COACH-ACCESS-REPORT.html) includes the trainee restriction, test results and live deployment verification. Existing login credentials are unchanged.
 
 ## Released update: v1.3.0 Exercise Progress & Personal Records
 
