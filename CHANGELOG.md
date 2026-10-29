@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.7.2 — 29 October 2026
+
+- Fix the Profile Training Planner ID card: 16px between heading, ID badge and actions, plus 24px before the next card. The padded ID badge now occupies its own layout row and no longer overlaps the button.
+- Verified locally and live at 320px, 390px and 1280px with no horizontal overflow or console errors. Production build, formatting and whitespace checks pass.
+- Deployed 57 source/build files with matching hashes. Existing production data, settings and uploads are unchanged; no backend or schema change. Temporary deployment files removed.
+
 ## v1.7.1 — 29 October 2026
 
 Deployed to Hostinger on 29 October 2026 after the GitHub source release. Existing tags remain intact; v1.7.1 still identifies runtime commit `35f1d23`.

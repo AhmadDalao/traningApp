@@ -2,6 +2,10 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v1.7.2 Profile Card Spacing
+
+Deployed on 29 October 2026. The Profile Training Planner ID card now has 16px between its heading, badge and actions, plus 24px before the cards below. Verified locally and live at 320/390/1280px. This patch changes only markup and styling; existing data and permissions are unchanged.
+
 ## v1.7.1 Trainee Account Restrictions
 
 Trainees can no longer enable Coach Workspace. Profile and My Coaching show the coach-profile link only to active coaches. Both GET and POST `/profile/coach` reject trainee accounts with 403; POST now edits an existing active coach profile without creating profiles, changing roles or reactivating access. Existing coach registration, workspace switching and trainee coaching connections are preserved.
@@ -77,7 +81,7 @@ The runner refuses other database names. Personal policies remain owner-only; `C
 
 ## Current release
 
-**v1.7.1 — 29 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.7.1](https://github.com/AhmadDalao/traningApp/tree/v1.7.1), runtime commit `35f1d23`. The [full report](docs/V1.7.1-COACH-ACCESS-REPORT.html) includes the trainee restriction, test results and live deployment verification. Existing login credentials are unchanged.
+**v1.7.2 — 29 October 2026** is deployed at [training.ahmaddalao.com](https://training.ahmaddalao.com). Source: [AhmadDalao/traningApp](https://github.com/AhmadDalao/traningApp). Tag: [v1.7.2](https://github.com/AhmadDalao/traningApp/tree/v1.7.2). This patch fixes Profile card spacing. The [v1.7.1 report](docs/V1.7.1-COACH-ACCESS-REPORT.html) documents the underlying calendar release, trainee restriction and live verification. Existing login credentials are unchanged.
 
 ## Released update: v1.3.0 Exercise Progress & Personal Records
 
