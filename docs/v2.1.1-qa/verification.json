@@ -3,7 +3,7 @@
   "baseline_commit": "e9ed12ba6e63af7c042a9ee727a7b01ac9fb12ec",
   "source_baseline": "v2.1.0",
   "production": "v2.0.1; not accessed or changed during this audit",
-  "deployment": "HELD \u2014 later explicit deploy request required",
+  "deployment": "HELD — later explicit deploy request required",
   "architecture_health": "GOOD",
   "baseline": {
     "sqlite": {
@@ -252,7 +252,7 @@
         "id": "BUG-01",
         "severity": "Medium",
         "area": "History session actions",
-        "viewport": "320\u20131280 px; both engines",
+        "viewport": "320–1280 px; both engines",
         "reproduction": "Open a retained past, unresolved workout from an ended program through Training History.",
         "expected": "History and Calendar expose the same hold and omit forbidden workout/edit actions.",
         "actual": "History omitted programHeld, so the shared page advertised actions rejected by the server.",
@@ -306,7 +306,7 @@
         "id": "UX-01",
         "severity": "Medium",
         "area": "Program run action hierarchy",
-        "viewport": "320\u20131280 px, plus 320\u00d7480",
+        "viewport": "320–1280 px, plus 320×480",
         "problem": "Solid red End appeared above Start; Resume was secondary. The destructive action dominated the next useful action.",
         "fix": "Place the next workout first; make Resume primary; make End a separated secondary action with the existing confirmation preview.",
         "verification": "Visual before/after inspection and real lifecycle assertions in both engines."
@@ -315,7 +315,7 @@
         "id": "UX-02",
         "severity": "Medium",
         "area": "Paused program orientation",
-        "viewport": "320\u20131280 px",
+        "viewport": "320–1280 px",
         "problem": "Paused state hid the logical week in the header and suppressed an earlier workout even when its date was before the future pause boundary.",
         "fix": "Show status, week and block together. Return the existing hold decision with next_workout and show eligible pre-pause work. Clarify pause-boundary wording.",
         "verification": "Backend hold-boundary regression and browser checks at all seven widths."
@@ -368,7 +368,7 @@
       }
     ]
   },
-  "gate": "READY \u2014 source only",
+  "gate": "READY — source only",
   "limitations": [
     "Physical devices and screen readers not certified.",
     "Production deployment and production smoke checks intentionally not performed.",
@@ -415,5 +415,16 @@
     "program-stabilization-webkit.log": "692f13cf1a96ba4e5de7a14c789eed6f08e184bf12d67b77f4a49431cef5251d",
     "build.log": "31d84d20beea89db4633a924d5778a94131b0db5c9c9bcdaa6796d782e665fb2",
     "program-stabilization-chromium.log": "692f13cf1a96ba4e5de7a14c789eed6f08e184bf12d67b77f4a49431cef5251d"
+  },
+  "release": {
+    "commit": "b8fad5e2940098633b6dafb367518c22828f45ac",
+    "tag": "v2.1.1",
+    "tag_object": "9a170d8e41d398f181f43335243a95b0671d3652",
+    "source_pushed": true,
+    "atomic_push": true,
+    "prior_tag_refs_unchanged": 36,
+    "verified_at_utc": "2026-10-29T20:11:10.549951+00:00",
+    "deployment": "HELD — NOT DEPLOYED",
+    "evidence_note": "Publication evidence committed in a documentation-only follow-up; immutable release tag unchanged."
   }
 }
