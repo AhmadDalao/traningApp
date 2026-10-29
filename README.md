@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v1.8.0 Smart Calendar — verified source release
+
+Built on v1.7.2, preserving the calendar system already shipped in v1.7.0/v1.7.1. This release bounds automatic rolling-refresh queries without losing moved occurrences, removes the invalid standalone rest-day option from coach scheduling, and corrects stopped-schedule status text. Fixed/ongoing plans, date-click scheduling, confirmed drag/drop, mobile Change date, recurring exceptions, inclusive stop dates and coaching permissions are verified end to end.
+
+**419 PHP tests / 5,386 assertions** pass on both SQLite and isolated MySQL, plus **24 JS tests**, **21 concurrency checks**, **79 authenticated local HTTP checks** and desktop/mobile browser workflows at 320/390/1280px. Build, formatting and whitespace checks pass. All 17 original data-table fingerprints and 44 media hashes match after removing disposable QA data. No schema or dependency changes.
+
+[Full v1.8 report](docs/V1.8-SMART-CALENDAR-RECURRING-SCHEDULES-REPORT.html). **Source release only; not deployed. Hostinger remains on v1.7.2.** Deployment is a separate task under the v1.8 brief.
+
 ## v1.7.2 Profile Card Spacing
 
 Deployed on 29 October 2026. The Profile Training Planner ID card now has 16px between its heading, badge and actions, plus 24px before the cards below. Verified locally and live at 320/390/1280px. This patch changes only markup and styling; existing data and permissions are unchanged.

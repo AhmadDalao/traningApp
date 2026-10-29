@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.8.0 — 29 October 2026
+
+Source release only. Production remains v1.7.2; prior tags are preserved.
+
+- Reuse and verify the fixed/ongoing calendar features already present in v1.7.0/v1.7.1 instead of rebuilding the scheduler.
+- Bound automatic rolling-refresh queries to the future window and desired original occurrence keys. A regression fixture now hydrates zero unrelated old workouts instead of 300, while preserving moved originals outside the window and all stored history.
+- Remove standalone Rest day mode from coach session forms; assigned rest days remain available through the authorized plan/day selector.
+- Correct stopped-schedule messaging and limit the displayed future window to an earlier plan stop date.
+- Add full personal and coach/trainee lifecycle tests plus rolling-history, moved-original and query-count regressions. Strengthen reschedule/stop application checks after paused, ended, expired, disconnected or ended-assignment access.
+- Verify 419 PHP tests / 5,386 assertions on SQLite and isolated MySQL, 24 JS tests, 21 concurrency checks, 79 local authenticated HTTP checks, and desktop/mobile date-click, drag, Change date and Stop Schedule workflows.
+- Build, Pint, changed-file Prettier and whitespace checks pass. All 17 original table fingerprints and 44 original media hashes match after disposable QA cleanup.
+- No new migration, index, dependency, account promotion path or background service.
+- Full report: [v1.8 Smart Calendar & Recurring Schedules](docs/V1.8-SMART-CALENDAR-RECURRING-SCHEDULES-REPORT.html).
+
 ## v1.7.2 — 29 October 2026
 
 - Fix the Profile Training Planner ID card: 16px between heading, ID badge and actions, plus 24px before the next card. The padded ID badge now occupies its own layout row and no longer overlaps the button.
