@@ -109,11 +109,11 @@ export default function Show({ profile, options }) {
                         <div className="panel-heading">
                             <h2>Training preferences</h2>
                             <ButtonLink
-                                href="/profile/edit#preferences"
+                                href="/training-preferences"
                                 variant="secondary"
                                 className="small"
                             >
-                                Edit training preferences
+                                Update preferences & find a plan
                             </ButtonLink>
                         </div>
                         <dl className="profile-details">
@@ -124,9 +124,13 @@ export default function Show({ profile, options }) {
                                         ? profile.training_goals.map(
                                               (goal, index) => (
                                                   <div key={goal}>
-                                                      {index === 0
-                                                          ? "Primary"
-                                                          : "Secondary"}
+                                                      {
+                                                          [
+                                                              "Primary",
+                                                              "Secondary",
+                                                              "Supporting",
+                                                          ][index]
+                                                      }
                                                       : {options.goals[goal]}
                                                   </div>
                                               ),
@@ -169,7 +173,7 @@ export default function Show({ profile, options }) {
                             </div>
                         </dl>
                         <ButtonLink href="/recommendations" variant="secondary">
-                            Recommended plans
+                            Find a training plan
                             <ArrowRight size={16} />
                         </ButtonLink>
                     </section>

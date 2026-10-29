@@ -41,6 +41,11 @@ export default function Index({ plans }) {
                 }
                 description="Your goals, broken down into days you can show up for."
             >
+                {!coaching && !templates && (
+                    <ButtonLink href="/recommendations" variant="secondary">
+                        Find a training plan
+                    </ButtonLink>
+                )}
                 {canManage && (
                     <Button onClick={() => setEditing({})}>
                         <Plus size={17} />

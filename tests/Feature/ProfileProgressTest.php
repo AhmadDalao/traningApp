@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\BodyWeightEntry;
 use App\Models\ScheduleEntry;
 use App\Models\User;
-use App\Models\UserProfile;
 use App\Services\BodyWeightHistory;
 use App\Services\PlanRecommendations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -131,7 +130,7 @@ class ProfileProgressTest extends TestCase
     public function test_onboarding_can_finish_with_every_optional_field_empty(): void
     {
         $this->actingAs($this->user)->post('/onboarding', [])->assertSessionHasNoErrors()->assertRedirect('/recommendations');
-        $this->get('/recommendations')->assertInertia(fn (Assert $page) => $page->has('recommendations', 0));
+        $this->get('/recommendations')->assertInertia(fn (Assert $page) => $page->has('recommendations', 3));
         $this->assertNotNull($this->user->fresh()->profile->onboarding_completed_at);
     }
 
@@ -235,16 +234,16 @@ class ProfileProgressTest extends TestCase
         $profile = $this->user->profile()->create($this->preferences());
         $service = app(PlanRecommendations::class);
         $this->assertSame('upper-lower', $service->forProfile($profile)[0]['key']);
-        $profile->update(['training_days_per_week' => 5]);
-        $this->assertSame('push-pull-legs', $service->forProfile($profile)[0]['key']);
+        $profile->update(['training_days_per_week' => 6, 'experience_level' => 'advanced']);
         $split = $service->forProfile($profile)[0];
-        $this->assertSame('Push · A', $split['days'][0]['title']);
-        $this->assertSame('Pull · B', $split['days'][1]['title']);
+        $this->assertSame('ppl-6', $split['key']);
+        $this->assertSame('Push', $split['days'][0]['title']);
+        $this->assertSame('Pull', $split['days'][1]['title']);
         $this->assertContains('builtin:Triceps_Pushdown', array_column($split['days'][0]['exercises'], 'key'));
         $this->assertContains('builtin:Wide-Grip_Lat_Pulldown', array_column($split['days'][1]['exercises'], 'key'));
         $profile->update(['experience_level' => 'beginner', 'training_days_per_week' => 3]);
         $this->assertSame('full-body', $service->forProfile($profile)[0]['key']);
-        $profile->update(['training_goal' => 'endurance']);
+        $profile->update(['training_goal' => 'endurance', 'training_days_per_week' => 4, 'experience_level' => 'intermediate']);
         $this->assertSame('endurance', $service->forProfile($profile)[0]['key']);
         $profile->update(['training_goal' => 'mobility']);
         $before = $service->forProfile($profile);
@@ -255,27 +254,22 @@ class ProfileProgressTest extends TestCase
         $this->assertSame('mixed-fitness', $service->forProfile($profile)[0]['key']);
     }
 
-    public function test_recommendations_adapt_equipment_and_duration_and_support_all_presets(): void
+    public function test_recommendations_rank_equipment_and_duration_and_catalog_media_exists(): void
     {
         $service = app(PlanRecommendations::class);
         $profile = $this->user->profile()->create($this->preferences(['equipment_access' => ['bodyweight']]));
-        $plans = $service->forProfile($profile);
-        $this->assertNotContains('upper-lower', array_column($plans, 'key'));
-        $this->assertSame('builtin:Bodyweight_Squat', $plans[0]['days'][0]['exercises'][0]['key']);
-        $profile->update(['equipment_access' => ['dumbbells']]);
-        $plans = $service->forProfile($profile);
-        $this->assertSame('upper-lower', $plans[0]['key']);
-        $this->assertSame('builtin:Dumbbell_Bench_Press', $plans[0]['days'][0]['exercises'][0]['key']);
+        $this->assertSame('bodyweight', $service->forProfile($profile)[0]['equipment']);
+        $profile->update(['equipment_access' => ['dumbbells'], 'experience_level' => 'beginner', 'training_days_per_week' => 3]);
+        $this->assertSame('full-body', $service->forProfile($profile)[0]['key']);
+        $plan = $service->catalog()[0];
+        $profile->update(['session_duration_minutes' => 45]);
+        $matched = $service->match($plan, $profile)['score'];
         $profile->update(['session_duration_minutes' => 30]);
-        $this->assertCount(3, $service->forProfile($profile)[0]['days'][0]['exercises']);
-        $profile->update(['equipment_access' => ['full_gym'], 'session_duration_minutes' => 90, 'training_days_per_week' => 7, 'experience_level' => 'advanced']);
-        foreach (array_keys(UserProfile::GOALS) as $goal) {
-            $profile->update(['training_goal' => $goal]);
-            foreach ($service->forProfile($profile) as $plan) {
-                foreach ($plan['days'] as $day) {
-                    foreach ($day['exercises'] as $exercise) {
-                        $this->assertFileExists(public_path('exercise-library/'.$exercise['image']));
-                    }
+        $this->assertLessThan($matched, $service->match($plan, $profile)['score']);
+        foreach ($service->catalog() as $plan) {
+            foreach ($plan['days'] as $day) {
+                foreach ($day['exercises'] as $exercise) {
+                    $this->assertFileExists(public_path('exercise-library/'.$exercise['image']));
                 }
             }
         }
@@ -296,7 +290,8 @@ class ProfileProgressTest extends TestCase
         $this->post('/recommendations', ['preset' => 'invalid'])->assertSessionHasErrors('preset');
         $this->assertDatabaseCount('training_plans', 1);
         $other = User::factory()->create();
-        $this->actingAs($other)->post('/recommendations', ['preset' => 'upper-lower'])->assertSessionHasErrors('preset');
+        $this->actingAs($other)->post('/recommendations', ['preset' => 'upper-lower'])->assertSessionHasNoErrors();
+        $this->assertSame(1, $other->trainingPlans()->count());
         $this->get('/training-plans/'.$plan->id)->assertForbidden();
     }
 

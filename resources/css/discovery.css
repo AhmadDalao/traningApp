@@ -1,0 +1,393 @@
+/* Start with a single-column layout that fits a 320px viewport. */
+.discovery-page {
+    min-width: 0;
+}
+.discovery-page h1,
+.discovery-page h2,
+.discovery-page h3,
+.discovery-page p,
+.discovery-page dd {
+    overflow-wrap: anywhere;
+}
+.discovery-page .btn,
+.discovery-filters .btn,
+.onboarding-wrap .btn {
+    min-height: 44px;
+    white-space: normal;
+    text-align: center;
+}
+.discovery-page .header-actions {
+    flex-wrap: wrap;
+}
+.discovery-section {
+    margin: 28px 0;
+}
+.discovery-section-heading {
+    margin-bottom: 18px;
+}
+.discovery-section-heading h2 {
+    font-size: 20px;
+    margin-bottom: 7px;
+}
+.discovery-section-heading p {
+    color: var(--muted);
+    max-width: 800px;
+    line-height: 1.65;
+}
+.discovery-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+.discovery-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+.discovery-card h3 {
+    font-size: 18px;
+    line-height: 1.4;
+}
+.discovery-card > p {
+    line-height: 1.65;
+    color: #5c6c82;
+    font-size: 14px;
+}
+.discovery-card .discovery-meta {
+    font-size: 12px;
+    font-weight: 600;
+    color: #425774;
+}
+.discovery-focus {
+    font-size: 12px;
+    align-self: center;
+}
+.discovery-card > .btn {
+    margin-top: auto;
+}
+.discovery-reasons h4,
+.discovery-reasons h2 {
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+.discovery-reasons ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px;
+}
+.discovery-reasons li {
+    display: flex;
+    gap: 7px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 5px 0;
+}
+.discovery-reasons svg {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: var(--green);
+}
+.discovery-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.discovery-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-width: 0;
+    flex: 1 1 220px;
+}
+.discovery-search > svg {
+    position: absolute;
+    left: 13px;
+    color: #66758c;
+    pointer-events: none;
+}
+.discovery-search input {
+    width: 100%;
+    min-width: 0;
+    padding-left: 40px;
+    font-size: 16px;
+    min-height: 44px;
+}
+.discovery-toolbar > .btn {
+    flex: 1 1 auto;
+}
+.discovery-results-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0 18px;
+}
+.discovery-results-summary p {
+    flex: 1;
+    min-width: 140px;
+    color: #5c6c82;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.discovery-filters select {
+    font-size: 16px;
+    min-height: 44px;
+}
+.discovery-filters .form-actions {
+    position: sticky;
+    bottom: -1px;
+    background: white;
+    padding-top: 14px;
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+}
+.discovery-overview {
+    padding: 20px;
+}
+.discovery-overview dl {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0 0 24px;
+}
+.discovery-overview dt {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+.discovery-overview dd {
+    margin: 0;
+    font-weight: 600;
+}
+.discovery-level-note {
+    padding: 12px;
+    background: #fff6df;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.65;
+}
+.discovery-overview > .field-hint {
+    margin-top: 18px;
+    line-height: 1.7;
+}
+.discovery-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px;
+}
+.discovery-split li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+}
+.discovery-split li > span {
+    color: var(--muted);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.discovery-split a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    overflow-wrap: anywhere;
+    color: var(--blue);
+    font-size: 14px;
+}
+.discovery-day {
+    margin: 16px 0;
+    scroll-margin-top: 80px;
+}
+.discovery-day summary {
+    padding: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 64px;
+}
+.discovery-day summary::after {
+    content: "+";
+    color: var(--blue);
+}
+.discovery-day[open] summary::after {
+    content: "−";
+}
+.discovery-day summary > span:first-child {
+    flex: 1 1 160px;
+    min-width: 0;
+}
+.discovery-day summary strong {
+    display: block;
+    font-size: 16px;
+    margin-top: 6px;
+    overflow-wrap: anywhere;
+}
+.discovery-day summary small,
+.discovery-day summary > span:nth-child(2) {
+    color: var(--muted);
+    font-size: 11px;
+}
+.discovery-day-note {
+    padding: 0 18px 14px;
+    color: #5c6c82;
+    font-size: 13px;
+    line-height: 1.65;
+}
+.discovery-exercises {
+    list-style: none;
+    padding: 0 18px 12px;
+    margin: 0;
+}
+.discovery-exercises li {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.discovery-exercises img {
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.discovery-exercises li > div {
+    min-width: 0;
+}
+.discovery-exercises h3 {
+    font-size: 14px;
+    line-height: 1.5;
+}
+.discovery-exercises p {
+    font-size: 13px;
+    color: #5c6c82;
+    margin-top: 5px;
+    line-height: 1.6;
+}
+.discovery-exercises .badge {
+    margin-top: 7px;
+}
+.discovery-use {
+    display: grid;
+    gap: 18px;
+    padding: 20px;
+}
+.discovery-use h2 {
+    font-size: 18px;
+    margin-bottom: 7px;
+}
+.discovery-use p {
+    color: var(--muted);
+    line-height: 1.65;
+}
+.discovery-use > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.discovery-use .btn {
+    flex: 1 1 160px;
+}
+.goal-order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.goal-order-actions .text-button,
+.profile-choices > .text-button,
+.goal-choice label,
+.equipment-options .checkbox {
+    min-height: 44px;
+}
+.goal-order-actions .text-button {
+    border: 1px solid #c8d8f0;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+.goal-order-actions .text-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+@media (max-width: 600px) {
+    .onboarding-wrap input,
+    .onboarding-wrap select,
+    .profile-edit input,
+    .profile-edit select {
+        font-size: 16px;
+        min-width: 0;
+    }
+    .onboarding-actions,
+    .onboarding-actions > div {
+        width: 100%;
+    }
+    .onboarding-actions > div .btn {
+        flex: 1;
+    }
+    .onboarding-actions > .btn {
+        width: 100%;
+    }
+    .goal-choice {
+        padding: 10px 12px;
+        gap: 6px 10px;
+    }
+    .goal-choice label {
+        flex-basis: 100%;
+    }
+    .goal-priority {
+        width: 100%;
+    }
+    .discovery-page .header-actions > .btn {
+        width: 100%;
+    }
+}
+@media (min-width: 390px) {
+    .discovery-overview dl {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .discovery-toolbar > .btn {
+        flex: 0 0 auto;
+    }
+}
+@media (min-width: 760px) {
+    .discovery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .discovery-split {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .discovery-search {
+        max-width: 560px;
+    }
+    .discovery-overview,
+    .discovery-use {
+        padding: 26px;
+    }
+}
+@media (min-width: 1200px) {
+    .discovery-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .discovery-overview dl {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+.modal:has(.discovery-filters) .icon-btn {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+}
+.discovery-page :is(button, a, input):focus-visible,
+.discovery-filters :is(button, select):focus-visible,
+.onboarding-wrap :is(button, a, input, select):focus-visible,
+.goal-order-actions button:focus-visible {
+    outline: 2px solid #1763ef;
+    outline-offset: 3px;
+}

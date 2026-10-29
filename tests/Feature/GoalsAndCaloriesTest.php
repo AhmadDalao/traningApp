@@ -78,13 +78,16 @@ class GoalsAndCaloriesTest extends TestCase
         return [
             'profile one' => ['put', '/profile', ['build_muscle']],
             'profile two' => ['put', '/profile', ['lose_fat', 'build_muscle']],
+            'profile three' => ['put', '/profile', ['build_muscle', 'get_stronger', 'mobility']],
+            'onboarding three' => ['post', '/onboarding', ['lose_fat', 'endurance', 'general_fitness']],
+            'returning three' => ['put', '/training-preferences', ['get_stronger', 'build_muscle', 'mobility']],
             'onboarding one' => ['post', '/onboarding', ['endurance']],
             'onboarding two' => ['post', '/onboarding', ['build_muscle', 'get_stronger']],
         ];
     }
 
     #[DataProvider('goalSaves')]
-    public function test_one_or_two_ordered_goals_save_in_profile_and_onboarding(string $method, string $url, array $goals): void
+    public function test_one_two_or_three_ordered_goals_save_in_profile_and_onboarding(string $method, string $url, array $goals): void
     {
         $this->$method($url, ['training_goals' => $goals, 'training_goal' => 'mobility'])->assertSessionHasNoErrors();
         $profile = $this->user->fresh()->profile;
@@ -97,10 +100,10 @@ class GoalsAndCaloriesTest extends TestCase
         }
     }
 
-    public function test_goal_validation_rejects_third_duplicate_unknown_equipment_and_non_list_values(): void
+    public function test_goal_validation_rejects_fourth_duplicate_unknown_equipment_and_non_list_values(): void
     {
         $profile = $this->profile();
-        foreach ([['build_muscle', 'lose_fat', 'endurance'], ['build_muscle', 'build_muscle'], ['bodyweight'], ['unknown'], [''], ['primary' => 'build_muscle']] as $goals) {
+        foreach ([['build_muscle', 'lose_fat', 'endurance', 'mobility'], ['build_muscle', 'build_muscle'], ['bodyweight'], ['unknown'], [''], ['primary' => 'build_muscle']] as $goals) {
             $this->put('/profile', ['training_goals' => $goals])->assertSessionHasErrors();
             $this->assertNull($profile->fresh()->getRawOriginal('training_goals'));
         }
@@ -130,44 +133,38 @@ class GoalsAndCaloriesTest extends TestCase
         $this->assertSame('mobility', $before[0]['key']);
         $profile->update(['height_cm' => 150, 'current_weight_kg' => 150, 'body_weight_goal' => 'gain']);
         $this->assertSame($before, $service->forProfile($profile));
-        $this->assertContains('Full Body', array_column($before[0]['days'], 'focus_area'));
+        $this->assertContains('Mobility', array_column($before[0]['days'], 'focus_area'));
     }
 
-    public function test_primary_goal_drives_structure_and_secondary_changes_conditioning_and_rep_ranges(): void
+    public function test_ordered_goals_rank_curated_plans_without_mutating_their_prescriptions(): void
     {
-        $profile = $this->profile(['training_goals' => ['build_muscle']]);
+        $profile = $this->profile(['training_goals' => ['build_muscle'], 'session_duration_minutes' => 60]);
         $service = app(PlanRecommendations::class);
-        $plain = $service->forProfile($profile)[0];
-        $profile->update(['training_goals' => ['build_muscle', 'lose_fat']]);
+        $catalog = $service->catalog();
         $muscle = $service->forProfile($profile)[0];
         $this->assertSame('upper-lower', $muscle['key']);
-        $this->assertNotSame($plain['days'], $muscle['days']);
-        $this->assertSame('cardio', $muscle['days'][3]['exercises'][3]['category']);
         $profile->update(['training_goals' => ['lose_fat', 'build_muscle']]);
         $fatLoss = $service->forProfile($profile)[0];
-        $this->assertNotSame($muscle['key'], $fatLoss['key']);
+        $this->assertSame('mixed-fitness', $fatLoss['key']);
         $this->assertContains('Cardio', array_column($fatLoss['days'], 'focus_area'));
-        $this->assertContains('Full Body', array_column($fatLoss['days'], 'focus_area'));
-        $profile->update(['training_goals' => ['build_muscle', 'get_stronger']]);
-        $this->assertSame('6–10', $service->forProfile($profile)[0]['days'][0]['exercises'][0]['reps']);
         $profile->update(['training_goals' => ['get_stronger', 'build_muscle']]);
-        $this->assertSame('5–8', $service->forProfile($profile)[0]['days'][0]['exercises'][0]['reps']);
+        $strength = $service->forProfile($profile)[0];
+        $this->assertSame('strength', $strength['key']);
+        $this->assertSame('4–6', $strength['days'][0]['exercises'][0]['reps']);
+        $this->assertSame($catalog, $service->catalog());
     }
 
     public function test_bodyweight_combination_reuses_four_day_preset_and_copies_without_scheduling(): void
     {
         $this->profile(['training_goals' => ['build_muscle', 'lose_fat'], 'equipment_access' => ['bodyweight']]);
         $this->get('/recommendations')->assertInertia(fn (Assert $page) => $page
-            ->where('recommendations.0.key', 'full-body')->has('recommendations.0.days', 4)
-            ->where('recommendations.0.reasons.0', 'Primary: Build muscle')
-            ->where('recommendations.0.reasons.1', 'Secondary: Lose fat')
-            ->where('recommendations.0.reasons.2', 'Equipment access: Bodyweight')
-            ->where('recommendations.0.reasons.3', 'Intermediate')
-            ->where('recommendations.0.reasons.4', '4 training days within your 4 available days')
-            ->where('recommendations.0.reasons.5', 'Adapted for 45-minute sessions')
-            ->where('recommendations.0.days.3.focus_area', 'Cardio'));
+            ->where('recommendations.0.key', 'bodyweight-strength')->where('recommendations.0.days_per_week', 4)
+            ->where('recommendations.0.reasons.0', 'Primary goal: Build muscle')
+            ->where('recommendations.0.reasons.1', 'Secondary goal: Lose fat')
+            ->where('recommendations.0.equipment', 'bodyweight'));
+        $this->get('/recommendations/bodyweight-strength')->assertInertia(fn (Assert $page) => $page->where('plan.days.3.focus_area', 'Cardio'));
         $this->assertDatabaseCount('training_plans', 0);
-        $this->post('/recommendations', ['preset' => 'full-body'])->assertSessionHasNoErrors();
+        $this->post('/recommendations', ['preset' => 'bodyweight-strength'])->assertSessionHasNoErrors();
         $plan = $this->user->trainingPlans()->firstOrFail();
         $this->assertSame(4, $plan->trainingDays()->count());
         foreach ($plan->trainingDays as $day) {
@@ -180,18 +177,25 @@ class GoalsAndCaloriesTest extends TestCase
         $this->assertDatabaseCount('schedule_entries', 0);
     }
 
-    public function test_common_goal_pairs_stay_within_available_days_and_have_valid_exercises(): void
+    public function test_common_goal_pairs_rank_bodyweight_first_and_have_valid_library_exercises(): void
     {
         $profile = $this->profile(['equipment_access' => ['bodyweight']]);
         $service = app(PlanRecommendations::class);
         foreach ([['build_muscle', 'lose_fat'], ['build_muscle', 'get_stronger'], ['get_stronger', 'build_muscle'], ['lose_fat', 'endurance'], ['general_fitness', 'lose_fat'], ['mobility', 'general_fitness'], ['endurance', 'general_fitness']] as $goals) {
             $profile->update(['training_goals' => $goals]);
-            foreach ($service->forProfile($profile) as $plan) {
-                $this->assertLessThanOrEqual(4, count($plan['days']));
-                $this->assertSame('Primary: '.UserProfile::GOALS[$goals[0]], $plan['reasons'][0]);
+            $plans = $service->forProfile($profile);
+            $this->assertSame('bodyweight', $plans[0]['equipment']);
+            foreach ($plans as $plan) {
+                foreach ($plan['reasons'] as $reason) {
+                    if (str_starts_with($reason, 'Primary goal: ')) {
+                        $this->assertContains($goals[0], $plan['goals']);
+                    }
+                }
                 foreach ($plan['days'] as $day) {
                     foreach ($day['exercises'] as $exercise) {
-                        $this->assertContains($exercise['equipment'], [null, 'body only']);
+                        if ($plan['equipment'] === 'bodyweight') {
+                            $this->assertContains($exercise['equipment'], [null, 'body only']);
+                        }
                         $this->assertNotEmpty($exercise['key']);
                     }
                 }

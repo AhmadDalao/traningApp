@@ -1,173 +1,302 @@
-import { useState } from "react";
-import { Head, useForm } from "@inertiajs/react";
-import { Check, ArrowRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { Head, useRemember } from "@inertiajs/react";
+import { ArrowRight, Check, SlidersHorizontal, Search } from "lucide-react";
 import {
     PageHeader,
     Button,
     ButtonLink,
-    EmptyState,
+    Field,
     Modal,
+    EmptyState,
 } from "../../Components/UI";
+import { emptyPlanFilters, filterPlans } from "../../Features/planDiscovery";
 
-export default function Index({ recommendations }) {
-    const [selected, setSelected] = useState(null);
-    const form = useForm({ preset: "" });
-    function addPlan(key) {
-        form.transform(() => ({ preset: key }));
-        form.post("/recommendations");
-    }
+function PlanCard({ plan, recommended = false }) {
     return (
-        <>
-            <Head title="Recommended plans" />
-            <PageHeader
-                title="Recommended for you"
-                description="Starting points based on your training preferences. Every plan can be customized."
-            >
-                <ButtonLink
-                    href="/profile/edit#preferences"
-                    variant="secondary"
+        <article className="panel discovery-card">
+            <div className="recommendation-tags">
+                <span
+                    className={`badge ${plan.level === "advanced" ? "planned" : "training"}`}
                 >
-                    Edit preferences
+                    {plan.level_label}
+                </span>
+                <span className="discovery-focus">{plan.focus_label}</span>
+            </div>
+            <h3>{plan.name}</h3>
+            <p className="discovery-meta">
+                {plan.days_per_week} days / week · About {plan.duration} min ·{" "}
+                {plan.equipment_label}
+            </p>
+            <p>{plan.description}</p>
+            {recommended && (
+                <div className="discovery-reasons">
+                    <h4>Why this fits</h4>
+                    <ul>
+                        {plan.reasons.map((reason) => (
+                            <li key={reason}>
+                                <Check size={14} aria-hidden="true" />
+                                <span>{reason}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+            <ButtonLink
+                href={`/recommendations/${plan.key}`}
+                variant="secondary"
+                aria-label={`Preview ${plan.name}`}
+            >
+                Preview plan <ArrowRight size={16} />
+            </ButtonLink>
+        </article>
+    );
+}
+
+export default function Index({
+    recommendations,
+    plans,
+    options,
+    hasPreferences,
+}) {
+    const [filters, setFilters] = useRemember(
+        emptyPlanFilters,
+        "discovery-filters",
+    );
+    const [search, setSearch] = useRemember("", "discovery-search");
+    const [draft, setDraft] = useState(null);
+    const filterButton = useRef(null);
+    function closeFilters() {
+        setDraft(null);
+        requestAnimationFrame(() => filterButton.current?.focus());
+    }
+    const filtered = filterPlans(plans, filters, search);
+    const selected = [
+        options.levels[filters.level],
+        options.goals[filters.goal],
+        filters.days && `${filters.days} days / week`,
+        options.equipment[filters.equipment],
+    ].filter(Boolean);
+    const reset = () => {
+        setFilters(emptyPlanFilters);
+        setSearch("");
+    };
+    return (
+        <div className="discovery-page">
+            <Head title="Find a training plan" />
+            <PageHeader
+                eyebrow="FIND YOUR NEXT ROUTINE"
+                title="Find a training plan"
+                description="Explore a starting point, make it yours, and schedule it when you’re ready."
+            >
+                <ButtonLink href="/training-preferences" variant="secondary">
+                    Update preferences
+                </ButtonLink>
+                <ButtonLink href="/training-plans" variant="secondary">
+                    My plans
                 </ButtonLink>
             </PageHeader>
-            {form.errors.preset && (
-                <p className="field-error" role="alert">
-                    {form.errors.preset}
-                </p>
-            )}
-            {recommendations.length ? (
-                <>
-                    <div className="recommendation-grid">
-                        {recommendations.map((plan) => (
-                            <article
-                                className="panel recommendation-card"
-                                key={plan.key}
-                            >
-                                <img
-                                    src={
-                                        plan.days[0]?.exercises[0]
-                                            ?.thumbnail_url || "/images/gym.jpg"
-                                    }
-                                    alt=""
-                                />
-                                <div className="recommendation-content">
-                                    <h2>{plan.name}</h2>
-                                    <div className="recommendation-tags">
-                                        <span className="badge training">
-                                            {plan.level}
-                                        </span>
-                                        <span className="badge planned">
-                                            {plan.equipment}
-                                        </span>
-                                    </div>
-                                    <p>{plan.description}</p>
-                                    <h3>Why this fits you</h3>
-                                    <ul>
-                                        {plan.reasons.map((reason) => (
-                                            <li key={reason}>
-                                                <Check size={15} />
-                                                {reason}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <p className="field-hint">{plan.reason}</p>
-                                    <button
-                                        className="text-link"
-                                        onClick={() => setSelected(plan)}
-                                    >
-                                        View plan details
-                                        <ArrowRight size={15} />
-                                    </button>
-                                    <Button
-                                        disabled={form.processing}
-                                        onClick={() => addPlan(plan.key)}
-                                    >
-                                        {form.processing
-                                            ? "Adding…"
-                                            : "Use this plan"}
-                                    </Button>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
-                    <div className="recommendation-note">
-                        <h3>Why these plans?</h3>
-                        <p>
-                            We use your primary and secondary goals, experience,
-                            available days, equipment, and typical session
-                            duration. BMI does not choose your goal. Nothing is
-                            added until you select Use this plan. You can always
-                            create your own plan.
-                        </p>
-                    </div>
-                </>
-            ) : (
-                <section className="panel">
-                    <EmptyState
-                        title="Complete your training preferences to get recommendations."
-                        description="Choose a goal, experience level, days, equipment, and typical session duration."
-                    >
-                        <ButtonLink href="/profile/edit#preferences">
-                            Complete profile
-                        </ButtonLink>
-                    </EmptyState>
-                </section>
-            )}
-            {selected && (
-                <Modal
-                    title={selected.name}
-                    description="Review the routine before adding it to your Training plans."
-                    onClose={() => !form.processing && setSelected(null)}
-                    wide
-                >
-                    <div className="recommendation-details">
-                        <h3>Why this fits you</h3>
-                        <p className="progress-explanation">
-                            {selected.reason}
-                        </p>
-                        <ul>
-                            {selected.reasons.map((reason) => (
-                                <li key={reason}>{reason}</li>
-                            ))}
-                        </ul>
-                        {selected.days.map((day) => (
-                            <section key={day.title}>
-                                <h3>{day.title}</h3>
-                                <ul>
-                                    {day.exercises.map((exercise) => (
-                                        <li key={exercise.key}>
-                                            <strong>{exercise.name}</strong>
-                                            <span>
-                                                {exercise.sets} ×{" "}
-                                                {exercise.reps}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </section>
-                        ))}
-                    </div>
-                    <p className="field-hint">
-                        Customize the saved plan's exercises, dates, and
-                        weekdays before previewing its calendar schedule.
+            <section
+                aria-labelledby="recommended-title"
+                className="discovery-section"
+            >
+                <div className="discovery-section-heading">
+                    <h2 id="recommended-title">
+                        {hasPreferences
+                            ? "Recommended for you"
+                            : "Good places to start"}
+                    </h2>
+                    <p>
+                        {hasPreferences
+                            ? "Your ordered goals, experience, days, time, and equipment help rank these plans."
+                            : "Browse freely, or add preferences for more tailored suggestions."}
                     </p>
-                    <div className="form-actions">
-                        <Button
-                            variant="secondary"
-                            disabled={form.processing}
-                            onClick={() => setSelected(null)}
-                        >
-                            Cancel
+                </div>
+                <div className="discovery-grid">
+                    {recommendations.map((plan) => (
+                        <PlanCard key={plan.key} plan={plan} recommended />
+                    ))}
+                </div>
+            </section>
+            <section
+                aria-labelledby="all-plans-title"
+                className="discovery-section"
+            >
+                <div className="discovery-section-heading">
+                    <h2 id="all-plans-title">All plans</h2>
+                    <p>
+                        Every level is available. Advanced plans involve more
+                        volume or more demanding movements; choose the
+                        commitment that suits you.
+                    </p>
+                </div>
+                <div className="discovery-toolbar">
+                    <label className="discovery-search">
+                        <Search size={18} aria-hidden="true" />
+                        <span className="sr-only">Search plans</span>
+                        <input
+                            type="search"
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Search plans, goals, or split…"
+                        />
+                    </label>
+                    <Button
+                        variant="secondary"
+                        onClick={(event) => {
+                            filterButton.current = event.currentTarget;
+                            event.currentTarget.focus();
+                            setDraft({ ...filters });
+                        }}
+                    >
+                        <SlidersHorizontal size={17} />
+                        Filters{selected.length ? ` (${selected.length})` : ""}
+                    </Button>
+                </div>
+                <div className="discovery-results-summary">
+                    <p role="status" aria-live="polite">
+                        {filtered.length} of {plans.length} plans
+                        {selected.length ? ` · ${selected.join(" · ")}` : ""}
+                    </p>
+                    {(selected.length > 0 || search) && (
+                        <Button variant="secondary" onClick={reset}>
+                            Clear filters
                         </Button>
-                        <Button
-                            disabled={form.processing}
-                            onClick={() => addPlan(selected.key)}
-                        >
-                            Use this plan & customize
-                        </Button>
+                    )}
+                </div>
+                {filtered.length ? (
+                    <div className="discovery-grid">
+                        {filtered.map((plan) => (
+                            <PlanCard key={plan.key} plan={plan} />
+                        ))}
                     </div>
+                ) : (
+                    <section className="panel">
+                        <EmptyState
+                            title="No plans match these filters"
+                            description="Try fewer filters or a different search."
+                        >
+                            <Button variant="secondary" onClick={reset}>
+                                Show all plans
+                            </Button>
+                        </EmptyState>
+                    </section>
+                )}
+            </section>
+            {draft && (
+                <Modal
+                    title="Filter plans"
+                    description="Combine filters to narrow the full library."
+                    onClose={closeFilters}
+                >
+                    <form
+                        className="discovery-filters"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            setFilters(draft);
+                            closeFilters();
+                        }}
+                    >
+                        <Field label="Experience level">
+                            <select
+                                value={draft.level}
+                                onChange={(event) =>
+                                    setDraft({
+                                        ...draft,
+                                        level: event.target.value,
+                                    })
+                                }
+                            >
+                                <option value="">All levels</option>
+                                {Object.entries(options.levels).map(
+                                    ([key, name]) => (
+                                        <option key={key} value={key}>
+                                            {name}
+                                        </option>
+                                    ),
+                                )}
+                            </select>
+                        </Field>
+                        <Field label="Training goal">
+                            <select
+                                value={draft.goal}
+                                onChange={(event) =>
+                                    setDraft({
+                                        ...draft,
+                                        goal: event.target.value,
+                                    })
+                                }
+                            >
+                                <option value="">All goals</option>
+                                {Object.entries(options.goals).map(
+                                    ([key, name]) => (
+                                        <option key={key} value={key}>
+                                            {name}
+                                        </option>
+                                    ),
+                                )}
+                            </select>
+                        </Field>
+                        <Field label="Days per week">
+                            <select
+                                value={draft.days}
+                                onChange={(event) =>
+                                    setDraft({
+                                        ...draft,
+                                        days: event.target.value,
+                                    })
+                                }
+                            >
+                                <option value="">Any number of days</option>
+                                {[2, 3, 4, 5, 6].map((days) => (
+                                    <option key={days} value={days}>
+                                        {days} days
+                                    </option>
+                                ))}
+                            </select>
+                        </Field>
+                        <Field label="Equipment used">
+                            <select
+                                value={draft.equipment}
+                                onChange={(event) =>
+                                    setDraft({
+                                        ...draft,
+                                        equipment: event.target.value,
+                                    })
+                                }
+                            >
+                                <option value="">Any equipment</option>
+                                {["bodyweight", "dumbbells", "full_gym"].map(
+                                    (key) => (
+                                        <option key={key} value={key}>
+                                            {options.equipment[key]}
+                                        </option>
+                                    ),
+                                )}
+                            </select>
+                        </Field>
+                        <p className="field-hint">
+                            Equipment filters show what a plan uses. Home gyms
+                            vary; choose dumbbells or bodyweight to explore
+                            those routines.
+                        </p>
+                        <div className="form-actions">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() =>
+                                    setDraft({ ...emptyPlanFilters })
+                                }
+                            >
+                                Clear
+                            </Button>
+                            <Button>
+                                Show {filterPlans(plans, draft, search).length}{" "}
+                                plans
+                            </Button>
+                        </div>
+                    </form>
                 </Modal>
             )}
-        </>
+        </div>
     );
 }

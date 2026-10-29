@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Head, useForm, usePage, router } from "@inertiajs/react";
 import { Check } from "lucide-react";
-import { Button } from "../../Components/UI";
+import { Button, ButtonLink } from "../../Components/UI";
 import ProfileFields, { profileDefaults } from "../../Features/ProfileFields";
 
-export default function Index({ profile, options }) {
+export default function Index({ profile, options, editing = false }) {
     const [step, setStep] = useState(0);
     const [skipping, setSkipping] = useState(false);
     const { today } = usePage().props;
@@ -13,13 +13,19 @@ export default function Index({ profile, options }) {
         window.scrollTo({ top: 0, behavior: "instant" });
     }, [step]);
     const titles = [
-        "Welcome to Training Planner",
+        editing ? "Update your preferences" : "Welcome to Training Planner",
         "What are you training for?",
         "How do you train?",
     ];
     return (
         <div className="onboarding-wrap">
-            <Head title="Set up your profile" />
+            <Head
+                title={
+                    editing
+                        ? "Update training preferences"
+                        : "Set up your profile"
+                }
+            />
             <section className="panel onboarding-panel">
                 <ol
                     className="onboarding-steps"
@@ -49,9 +55,11 @@ export default function Index({ profile, options }) {
                 <h1>{titles[step]}</h1>
                 <p className="onboarding-intro">
                     {step === 0
-                        ? "A few optional details help personalize your planner. You can skip this and come back anytime."
+                        ? editing
+                            ? "Your saved details are ready to update. Your existing plans and workout records stay as they are."
+                            : "A few optional details help personalize your planner. You can skip this and come back anytime."
                         : step === 1
-                          ? "Choose up to 2 goals. Your first choice is primary."
+                          ? "Choose up to 3 goals, then arrange them by priority."
                           : "Tell us about your experience, availability, and equipment."}
                 </p>
                 <form
@@ -61,24 +69,29 @@ export default function Index({ profile, options }) {
                             setStep(step + 1);
                             return;
                         }
-                        form.post("/onboarding", {
-                            onError: (errors) =>
-                                setStep(
-                                    Object.keys(errors).some((key) =>
-                                        [
-                                            "date_of_birth",
-                                            "height_cm",
-                                            "current_weight_kg",
-                                        ].includes(key),
-                                    )
-                                        ? 0
-                                        : Object.keys(errors).some((key) =>
-                                                key.startsWith("training_goal"),
-                                            )
-                                          ? 1
-                                          : 2,
-                                ),
-                        });
+                        form[editing ? "put" : "post"](
+                            editing ? "/training-preferences" : "/onboarding",
+                            {
+                                onError: (errors) =>
+                                    setStep(
+                                        Object.keys(errors).some((key) =>
+                                            [
+                                                "date_of_birth",
+                                                "height_cm",
+                                                "current_weight_kg",
+                                            ].includes(key),
+                                        )
+                                            ? 0
+                                            : Object.keys(errors).some((key) =>
+                                                    key.startsWith(
+                                                        "training_goal",
+                                                    ),
+                                                )
+                                              ? 1
+                                              : 2,
+                                    ),
+                            },
+                        );
                     }}
                 >
                     <ProfileFields
@@ -88,21 +101,27 @@ export default function Index({ profile, options }) {
                         today={today}
                     />
                     <div className="form-actions onboarding-actions">
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            disabled={form.processing || skipping}
-                            onClick={() => {
-                                setSkipping(true);
-                                router.post(
-                                    "/onboarding/skip",
-                                    {},
-                                    { onFinish: () => setSkipping(false) },
-                                );
-                            }}
-                        >
-                            Skip for now
-                        </Button>
+                        {editing ? (
+                            <ButtonLink href="/profile" variant="secondary">
+                                Cancel
+                            </ButtonLink>
+                        ) : (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                disabled={form.processing || skipping}
+                                onClick={() => {
+                                    setSkipping(true);
+                                    router.post(
+                                        "/onboarding/skip",
+                                        {},
+                                        { onFinish: () => setSkipping(false) },
+                                    );
+                                }}
+                            >
+                                Skip for now
+                            </Button>
+                        )}
                         <div>
                             {step > 0 && (
                                 <Button

@@ -22,6 +22,18 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', $this->props($request));
     }
 
+    public function preferences(Request $request)
+    {
+        return Inertia::render('Onboarding/Index', [...$this->props($request), 'editing' => true]);
+    }
+
+    public function updatePreferences(SaveProfileRequest $request, BodyWeightHistory $history)
+    {
+        $this->save($request, $history, false);
+
+        return to_route('recommendations.index')->with('success', 'Preferences updated. Explore your new recommendations.');
+    }
+
     public function onboarding(Request $request)
     {
         $request->session()->forget('show_onboarding');

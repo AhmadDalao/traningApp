@@ -107,7 +107,7 @@ export default function ProfileFields({ form, options, section, today }) {
                     </Field>
                 </div>
                 <p className="field-hint">
-                    A new body weight is recorded for today. Earlier entries
+                    A changed body weight is recorded for today. Earlier entries
                     stay in Progress. Leaving this blank keeps any recorded
                     weight.
                 </p>
@@ -121,7 +121,7 @@ export default function ProfileFields({ form, options, section, today }) {
         return (
             <fieldset className="profile-choices">
                 <legend>
-                    Training goals (optional) · Choose up to 2 goals
+                    Training goals (optional) · Choose up to 3 goals
                 </legend>
                 {Object.entries(options.goals).map(([key, label]) => {
                     const index = data.training_goals.indexOf(key);
@@ -139,10 +139,10 @@ export default function ProfileFields({ form, options, section, today }) {
                                     onChange={() => {
                                         if (
                                             index < 0 &&
-                                            data.training_goals.length === 2
+                                            data.training_goals.length >= 3
                                         ) {
                                             setGoalMessage(
-                                                "You can choose up to 2 training goals.",
+                                                "You can choose up to 3 training goals.",
                                             );
                                             return;
                                         }
@@ -161,24 +161,53 @@ export default function ProfileFields({ form, options, section, today }) {
                             </label>
                             {index >= 0 && (
                                 <span className="goal-priority">
-                                    {index === 0 ? "Primary" : "Secondary"}
+                                    {
+                                        ["Primary", "Secondary", "Supporting"][
+                                            index
+                                        ]
+                                    }
                                 </span>
                             )}
-                            {index === 1 && (
-                                <button
-                                    type="button"
-                                    className="text-button"
-                                    aria-label={`Make ${label} primary`}
-                                    onClick={() => {
-                                        setData(
-                                            "training_goals",
-                                            [...data.training_goals].reverse(),
-                                        );
-                                        setGoalMessage("");
-                                    }}
-                                >
-                                    Make primary
-                                </button>
+                            {index >= 0 && (
+                                <div className="goal-order-actions">
+                                    {[
+                                        [-1, "Move up"],
+                                        [1, "Move down"],
+                                    ].map(([direction, label]) => (
+                                        <button
+                                            key={direction}
+                                            type="button"
+                                            className="text-button"
+                                            disabled={
+                                                index + direction < 0 ||
+                                                index + direction >=
+                                                    data.training_goals.length
+                                            }
+                                            aria-label={`${label}: ${options.goals[key]}`}
+                                            onClick={() => {
+                                                const goals = [
+                                                    ...data.training_goals,
+                                                ];
+                                                [
+                                                    goals[index],
+                                                    goals[index + direction],
+                                                ] = [
+                                                    goals[index + direction],
+                                                    goals[index],
+                                                ];
+                                                setData(
+                                                    "training_goals",
+                                                    goals,
+                                                );
+                                                setGoalMessage(
+                                                    `${options.goals[key]} is now your ${["primary", "secondary", "supporting"][index + direction]} goal.`,
+                                                );
+                                            }}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     );
@@ -279,7 +308,8 @@ export default function ProfileFields({ form, options, section, today }) {
                 )}
                 <p className="field-hint">
                     For home gyms, also select Dumbbells if you have them.
-                    Otherwise recommendations use bodyweight exercises.
+                    Bodyweight plans need no gym equipment; every plan lists
+                    what it uses.
                 </p>
             </fieldset>
             <div className="form-grid">

@@ -21,7 +21,7 @@ class SaveProfileRequest extends FormRequest
             'height_cm' => 'nullable|numeric|decimal:0,2|between:40,300',
             'current_weight_kg' => 'nullable|numeric|decimal:0,2|between:20,500',
             'training_goal' => ['nullable', Rule::in(array_keys(UserProfile::GOALS))],
-            'training_goals' => 'nullable|array|list|max:2',
+            'training_goals' => 'nullable|array|list|max:3',
             'training_goals.*' => ['required', 'string', 'distinct', Rule::in(array_keys(UserProfile::GOALS))],
             'body_weight_goal' => ['nullable', Rule::in(array_keys(UserProfile::BODY_GOALS))],
             'target_body_weight_kg' => 'nullable|numeric|decimal:0,2|between:20,500',

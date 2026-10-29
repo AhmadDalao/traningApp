@@ -45,6 +45,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'update'])->name('body-weight.update');
     Route::delete('/body-weight/{bodyWeightEntry}', [BodyWeightController::class, 'destroy'])->name('body-weight.destroy');
     Route::post('/body-weight-check-in/dismiss', [BodyWeightController::class, 'dismiss'])->name('body-weight.dismiss');
+    Route::get('/training-preferences', [ProfileController::class, 'preferences'])->name('preferences.edit');
+    Route::put('/training-preferences', [ProfileController::class, 'updatePreferences'])->name('preferences.update');
+    Route::get('/recommendations/{preset}', [RecommendationController::class, 'show'])->name('recommendations.show');
     Route::get('/recommendations', [RecommendationController::class, 'index'])->name('recommendations.index');
     Route::post('/recommendations', [RecommendationController::class, 'store'])->name('recommendations.store');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
