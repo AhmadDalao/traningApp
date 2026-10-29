@@ -23,6 +23,10 @@ export default function AppLayout({ children }) {
     const { url } = usePage();
     const [open, setOpen] = useState(false);
     const [userOpen, setUserOpen] = useState(false);
+    const closeNavigation = () => {
+        setUserOpen(false);
+        setOpen(false);
+    };
     useEffect(() => {
         setUserOpen(false);
         setOpen(false);
@@ -178,7 +182,14 @@ export default function AppLayout({ children }) {
                         <ChevronDown size={15} />
                     </button>
                     {userOpen && (
-                        <div id="user-menu" className="user-menu">
+                        <div
+                            id="user-menu"
+                            className="user-menu"
+                            onClick={(event) => {
+                                if (event.target.closest("a, button"))
+                                    closeNavigation();
+                            }}
+                        >
                             {auth.user.is_coach && (
                                 <>
                                     <Link

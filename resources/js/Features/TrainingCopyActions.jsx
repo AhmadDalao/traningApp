@@ -14,7 +14,11 @@ export function CopyActions({ label = "More actions", onDuplicate, onCopy }) {
                 <button
                     type="button"
                     onClick={(event) => {
-                        event.currentTarget.closest("details").open = false;
+                        const menu = event.currentTarget.closest("details");
+                        menu.querySelector("summary").focus({
+                            preventScroll: true,
+                        });
+                        menu.open = false;
                         onDuplicate();
                     }}
                 >
@@ -25,7 +29,11 @@ export function CopyActions({ label = "More actions", onDuplicate, onCopy }) {
                     <button
                         type="button"
                         onClick={(event) => {
-                            event.currentTarget.closest("details").open = false;
+                            const menu = event.currentTarget.closest("details");
+                            menu.querySelector("summary").focus({
+                                preventScroll: true,
+                            });
+                            menu.open = false;
                             onCopy();
                         }}
                     >

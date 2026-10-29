@@ -1,0 +1,83 @@
+/* Shared fixes verified by the v1.9.1 mobile audit. */
+.header-actions {
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+.page-header > div,
+.modal-header > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.table-scroll {
+    position: relative;
+}
+
+.breadcrumbs > span,
+.detail-meta > span {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.modal {
+    max-height: 90dvh;
+    overscroll-behavior: contain;
+}
+
+.modal-header .icon-btn {
+    flex-shrink: 0;
+}
+
+.sidebar {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.sidebar > nav,
+.sidebar-bottom {
+    flex-shrink: 0;
+}
+
+@media (max-width: 760px) {
+    :root input:not([type="checkbox"]):not([type="radio"]),
+    :root select,
+    :root textarea {
+        font-size: 16px;
+        min-height: 44px;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    :root :is(button, .btn, summary),
+    .weekday-options label,
+    .checkbox,
+    .pagination a {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    :root .icon-btn {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+
+    .btn {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .text-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .weekday-options,
+    .weekday-presets,
+    .form-actions {
+        flex-wrap: wrap;
+    }
+}

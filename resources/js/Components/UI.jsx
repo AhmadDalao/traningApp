@@ -15,10 +15,19 @@ export function Button({
     children,
     className = "",
     variant = "primary",
+    onClick,
     ...props
 }) {
     return (
-        <button className={`btn btn-${variant} ${className}`} {...props}>
+        <button
+            className={`btn btn-${variant} ${className}`}
+            {...props}
+            onClick={(event) => {
+                // Safari does not focus buttons on click; dialogs need an opener.
+                event.currentTarget.focus({ preventScroll: true });
+                onClick?.(event);
+            }}
+        >
             {children}
         </button>
     );
@@ -141,12 +150,27 @@ export function EmptyState({ title, description, children, compact = false }) {
         </div>
     );
 }
-export function Modal({ title, description, children, onClose, wide = false }) {
+export function Modal({
+    title,
+    description,
+    children,
+    onClose,
+    wide = false,
+    returnFocus,
+}) {
     const ref = useRef(null);
+    const opener = useRef(returnFocus || document.activeElement);
     useEffect(() => {
         const dialog = ref.current;
         dialog.showModal();
-        return () => dialog.close();
+        return () => {
+            dialog.close();
+            requestAnimationFrame(() => {
+                if (opener.current?.isConnected) {
+                    opener.current.focus({ preventScroll: true });
+                }
+            });
+        };
     }, []);
     return (
         <dialog
