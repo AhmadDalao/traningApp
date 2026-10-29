@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.1.1 — 29 October 2026 — source release, deployment held
+
+- Fix held History actions, paused-workout monthly completion rates, silent stale Start errors and 404 redirects after early program History status changes. Preserve existing History date/status visibility.
+- Put the next workout before secondary program controls, promote Resume, separate End, and show week/block context and eligible workouts before a future pause date.
+- Centralize individual/bulk assigned-session checks in CoachAccess; batch locked definition snapshots and review/update reads. Coach preview uses 34 HTTP queries for both 12 and 156 workouts, down from 141/1,437.
+- Add five PHP regressions and two real UI lifecycle suites; retain all existing authorization, media, concurrency and mobile checks. Architecture Health: GOOD, with three explicit noncritical technical-debt items.
+- READY: 504 tests / 10,877 assertions on SQLite and isolated MySQL; 46 concurrency, 28 JavaScript, 862 browser and 133 local HTTP checks. Build, Pint, scoped Prettier and whitespace checks pass.
+- Remove 17 QA accounts and 1,252 generated images. All 19 original table fingerprints and 44 original media hashes match. No migration, dependency, authentication or architecture rebuild.
+- **Production remains v2.0.1.** Deploy only after a later explicit request; do not deploy v2.1.0 separately. [Full 50-section report](docs/V2.1.1-FULL-LIFECYCLE-STABILIZATION-REPORT.html).
+
 ## v2.1.0 — 29 October 2026 — source release, deployment held
 
 - Added signed Pause, Resume, Adjust Remaining Schedule and End Program previews for personal and authorized coach Program Runs.

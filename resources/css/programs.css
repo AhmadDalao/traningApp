@@ -45,6 +45,9 @@
     gap: 8px;
     margin: 12px 0;
 }
+.program-actions .program-end {
+    margin-inline-start: auto;
+}
 .program-timeline {
     display: grid;
     gap: 12px;

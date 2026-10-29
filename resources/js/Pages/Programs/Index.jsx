@@ -1,4 +1,4 @@
-import { programStatus } from "../../Features/ProgramControlModal";
+import { programStatus } from "../../Features/ProgramUI";
 import { Head } from "@inertiajs/react";
 import {
     PageHeader,

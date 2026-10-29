@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\CoachPlanAssignment;
+use App\Models\CoachSubscription;
 use App\Models\ProgramRun;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingPlan;
@@ -9,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /** Finite schedules share Calendar entries, occurrence keys and protection rules with simple plans. */
 class ProgramSchedule
@@ -98,8 +101,12 @@ class ProgramSchedule
     public function changes(ProgramRun $run, TrainingPlan $plan, ?User $coach = null): array
     {
         abort_unless($run->status === 'active', 422, 'Only an active program run can be updated.');
+        $access = app(CoachAccess::class);
+        $assignment = $coach ? $access->assignment($coach, $plan->user, $plan, true) : null;
+        $subscription = $assignment ? $access->subscription($assignment->relationship) : null;
         $desired = $this->desired($plan, $run->started_on->toDateString(), (string) $run->id);
-        $entries = $run->sessions()->withExists('sessionExercises')->lockForUpdate()->get();
+        $entries = $run->sessions()->with('trainingDay')->withExists('sessionExercises')->lockForUpdate()->get();
+        $entries->each(fn ($entry) => $entry->setRelation('programRun', $run));
         $byKey = $entries->keyBy('plan_occurrence_key');
         $currentWeek = $coach ? app(ProgramLifecycle::class)->position($run)['current_week'] : null;
         $resolvedBlocks = $entries->where('entry_type', 'training')->groupBy('program_context.block_id')
@@ -116,7 +123,7 @@ class ProgramSchedule
             $keys[] = $row['key'];
             $entry = $byKey->get($row['key']);
             if ($entry) {
-                $reason = $this->protection($entry, $coach, $currentWeek);
+                $reason = $this->protection($entry, $assignment, $subscription, $currentWeek);
                 if (! $reason && ! app(CoachAccess::class)->future($row['scheduled_date'], $row['scheduled_time'])) {
                     $reason = 'Proposed time is no longer in the future';
                 }
@@ -134,18 +141,18 @@ class ProgramSchedule
                     continue;
                 }
                 if ($coach) {
-                    app(CoachAccess::class)->scheduleDate(app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($coach, $plan->user)), $row['scheduled_date'], $row['scheduled_time']);
+                    $access->scheduleDate($subscription, $row['scheduled_date'], $row['scheduled_time']);
                 }
                 $result['add'][] = $row;
             }
         }
         foreach ($entries as $entry) {
             if (! in_array($entry->plan_occurrence_key, $keys, true)) {
-                $reason = $this->protection($entry, $coach, $currentWeek);
+                $reason = $this->protection($entry, $assignment, $subscription, $currentWeek);
                 $result[$reason ? 'protected' : 'remove'][] = [...$entry->only('id', 'title', 'entry_type', 'program_week', 'scheduled_date', 'scheduled_time', 'program_context'), 'reason' => $reason];
             }
         }
-        $result['signature'] = $this->sign([$coach?->id, $run->getAttributes(), $desired, $entries->map->getAttributes()->all(), $result]);
+        $result['signature'] = $this->sign([$coach?->id, $run->getAttributes(), $desired, $entries->map->getAttributes()->all(), $assignment?->getAttributes(), $subscription?->getAttributes(), $result]);
         $result['definition'] = $desired['definition'];
 
         return $result;
@@ -156,8 +163,9 @@ class ProgramSchedule
         $changes = $this->changes($run, $plan, $coach);
         $this->check($signature, $changes['signature']);
         $media = [];
+        $updating = $run->sessions()->whereIn('id', array_column($changes['update'], 'id'))->get()->keyBy('id');
         foreach ($changes['update'] as $row) {
-            $entry = ScheduleEntry::findOrFail($row['id']);
+            $entry = $updating[$row['id']];
             $entry->fill(collect($row)->except('key', 'id')->all());
             $entry->program_prescription = $this->prescription($row, $media, $paths);
             $entry->save();
@@ -180,7 +188,7 @@ class ProgramSchedule
         $run->update(['definition_snapshot' => $definition]);
     }
 
-    private function protection(ScheduleEntry $entry, ?User $coach, ?int $currentWeek): ?string
+    private function protection(ScheduleEntry $entry, ?CoachPlanAssignment $assignment, ?CoachSubscription $subscription, ?int $currentWeek): ?string
     {
         if ($entry->status !== 'planned' || $entry->started_at || $entry->workout_snapshot !== null || $entry->session_exercises_exists) {
             return 'Completed, skipped, active or saved workout';
@@ -191,11 +199,15 @@ class ProgramSchedule
         if (! $entry->schedule_managed) {
             return 'Moved or edited individually';
         }
-        if ($coach && ($entry->program_context['start_week'] ?? 1) <= ($currentWeek ?? 52)) {
+        if ($assignment && ($entry->program_context['start_week'] ?? 1) <= ($currentWeek ?? 52)) {
             return 'Current or resolved program block';
         }
-        if ($coach && ! app(CoachAccess::class)->canManageSession($coach, $entry->user, $entry)) {
-            return 'Outside this coach’s management permissions';
+        if ($assignment) {
+            try {
+                app(CoachAccess::class)->futureAssignedSession($entry, $assignment, $subscription);
+            } catch (HttpExceptionInterface|ValidationException $error) {
+                return 'Outside this coach’s management permissions';
+            }
         }
 
         return null;

@@ -12,7 +12,7 @@ class ProgressController extends Controller
     public function __invoke(Request $request, BodyWeightHistory $history)
     {
         $user = app(TrainingContext::class)->owner();
-        $month = $user->scheduleEntries()->where('entry_type', 'training')->past()->whereBetween('scheduled_date', [today()->startOfMonth()->toDateString(), today()->toDateString()]);
+        $month = $user->scheduleEntries()->availableOnSchedule()->where('entry_type', 'training')->past()->whereBetween('scheduled_date', [today()->startOfMonth()->toDateString(), today()->toDateString()]);
         $completed = (clone $month)->where('status', 'completed')->count();
         $skipped = (clone $month)->where('status', 'skipped')->count();
         $total = (clone $month)->count();

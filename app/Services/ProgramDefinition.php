@@ -35,13 +35,10 @@ class ProgramDefinition
 
     public function snapshot(TrainingPlan $plan): array
     {
-        $plan->setRelation('blocks', $plan->blocks()->lockForUpdate()->get());
-        foreach ($plan->blocks as $block) {
-            $block->setRelation('trainingDays', $block->trainingDays()->lockForUpdate()->get());
-            foreach ($block->trainingDays as $day) {
-                $day->setRelation('exercises', $day->exercises()->lockForUpdate()->get());
-            }
-        }
+        $plan->setRelation('blocks', $plan->blocks()->with([
+            'trainingDays' => fn ($query) => $query->lockForUpdate(),
+            'trainingDays.exercises' => fn ($query) => $query->lockForUpdate(),
+        ])->lockForUpdate()->get());
 
         return ['version' => 1, 'name' => $plan->name, 'description' => $plan->description, 'duration_weeks' => $plan->duration_weeks,
             'blocks' => $plan->blocks->map(fn ($block) => [...$block->only('id', 'name', 'start_week', 'end_week', 'position', 'type', 'description'),

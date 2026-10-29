@@ -1,8 +1,14 @@
-import { programStatus } from "./ProgramControlModal";
 import { Link } from "@inertiajs/react";
 import { Button, ButtonLink, DateLabel, StatusBadge } from "../Components/UI";
 import { useTraining } from "./CoachingUI";
 
+export const programStatus = (status) =>
+    ({
+        active: "Active",
+        paused: "Paused",
+        completed: "Completed",
+        ended: "Ended early",
+    })[status] || status;
 export function ProgramContext({ entry }) {
     const { url } = useTraining();
     if (!entry.program_run_id) return null;

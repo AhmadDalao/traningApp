@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v2.1.1 Full Lifecycle Stabilization — source release, deployment held
+
+Full personal and coach lifecycle QA fixes held History actions, paused-workout completion rates, silent stale Start errors and invalid History redirects after reopening early-completed sessions. Program pages put the next workout first, make Resume primary and keep End secondary. Coach schedule review now uses 34 queries for both 12 and 156 workouts, with shared authorization checks and unchanged ownership rules.
+
+**READY — source only. Architecture Health: GOOD.** Production remains v2.0.1 until a later explicit deployment request. No migration or dependency changes in this patch; a later deployment includes the existing v2.1 additive migration. Verification: **504 tests / 10,877 assertions per database**, **46 concurrency checks**, **28 JavaScript tests**, **862 browser checks** and **133 local HTTP checks**. Build and formatting pass. All 19 original table fingerprints and 44 media hashes match after removing 17 disposable accounts and 1,252 QA images.
+
+[Full 50-section stabilization report](docs/V2.1.1-FULL-LIFECYCLE-STABILIZATION-REPORT.html) · [Verification evidence and findings](docs/v2.1.1-qa/verification.json). Browser fixtures and credentials are private; run shared-account browser suites and database suites sequentially.
+
 ## v2.1.0 Program Control & Flexibility — source release, deployment held
 
 Pause with a known return date or indefinitely, explicitly resume on a chosen date, shift the remaining schedule, recover missed workouts and end a run early. Signed previews preserve completed/skipped/saved workouts, manual exceptions, logical weeks, block identity and frozen prescriptions. Coaches retain existing assignment/subscription boundaries; trainees cannot self-enable Coach Workspace.

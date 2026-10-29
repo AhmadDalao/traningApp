@@ -42,19 +42,34 @@ class CoachAccess
             abort_unless($assignment->status === 'active' && $this->subscription($relationship, $lock), 403, 'An active coaching subscription and assignment are required.');
         }
 
-        return $assignment;
+        return $assignment->setRelation('relationship', $relationship);
     }
 
     public function futureSession(User $coach, User $trainee, ScheduleEntry $entry): void
     {
-        abort_if($entry->programRun?->holds($entry) ?? false, 403, 'Resume the program before managing its sessions.');
         abort_unless($entry->user_id === $trainee->id && $entry->scheduled_by_user_id === $coach->id, 403);
-        abort_unless($entry->status === 'planned' && ! $entry->started_at && $entry->workout_snapshot === null && ! $entry->sessionExercises()->exists(), 403, 'Saved and active workouts are protected.');
-        abort_unless($this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time), 403, 'Past sessions are protected.');
         $plan = $entry->trainingDay?->trainingPlan ?? $entry->programRun?->trainingPlan;
         abort_unless($plan, 403);
-        $this->assignment($coach, $trainee, $plan, true);
-        $this->scheduleDate($this->subscription($this->relationship($coach, $trainee)), $entry->scheduled_date->toDateString(), $entry->scheduled_time);
+        $assignment = $this->assignment($coach, $trainee, $plan, true);
+        $subscription = $this->subscription($assignment->relationship);
+        abort_unless($subscription, 403, 'An active coaching subscription is required.');
+        $this->futureAssignedSession($entry, $assignment, $subscription);
+    }
+
+    /** Reuse one freshly authorized assignment during a locked bulk review. No global permission cache. */
+    public function futureAssignedSession(ScheduleEntry $entry, CoachPlanAssignment $assignment, CoachSubscription $subscription): void
+    {
+        $relationship = $assignment->relationship;
+        abort_unless($relationship->status === 'active' && $assignment->status === 'active'
+            && $subscription->coach_trainee_relationship_id === $relationship->id && $subscription->status === 'active'
+            && $subscription->starts_on->lte(today()) && (! $subscription->ends_on || $subscription->ends_on->gte(today())), 403);
+        abort_unless($entry->user_id === $relationship->trainee_user_id && $entry->scheduled_by_user_id === $relationship->coach_user_id
+            && ($entry->trainingDay?->training_plan_id ?? $entry->programRun?->training_plan_id) === $assignment->assigned_training_plan_id, 403);
+        abort_if($entry->programRun?->holds($entry) ?? false, 403, 'Resume the program before managing its sessions.');
+        abort_unless($entry->status === 'planned' && ! $entry->started_at && $entry->workout_snapshot === null
+            && ! ($entry->session_exercises_exists ?? $entry->sessionExercises()->exists()), 403, 'Saved and active workouts are protected.');
+        abort_unless($this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time), 403, 'Past sessions are protected.');
+        $this->scheduleDate($subscription, $entry->scheduled_date->toDateString(), $entry->scheduled_time);
     }
 
     public function canManageSession(User $coach, User $trainee, ScheduleEntry $entry): bool

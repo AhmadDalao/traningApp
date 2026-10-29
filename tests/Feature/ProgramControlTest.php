@@ -54,14 +54,14 @@ class ProgramControlTest extends TestCase
         return ProgramRun::findOrFail(basename($url));
     }
 
-    private function coaching(): array
+    private function coaching(int $weeks = 4): array
     {
         $coach = User::factory()->create(['account_type' => 'coach']);
         $coach->coachProfile()->create(['display_name' => 'Lifecycle coach']);
         $trainee = User::factory()->create();
         $relationship = CoachTraineeRelationship::create(['coach_user_id' => $coach->id, 'trainee_user_id' => $trainee->id, 'status' => 'active', 'requested_by' => $coach->id, 'requested_at' => now(), 'approved_at' => now()]);
-        $subscription = $relationship->subscriptions()->create(['package_name' => 'QA coaching', 'starts_on' => today(), 'ends_on' => today()->addDays(120), 'status' => 'active']);
-        $template = $this->program($coach);
+        $subscription = $relationship->subscriptions()->create(['package_name' => 'QA coaching', 'starts_on' => today(), 'ends_on' => today()->addDays(max(120, $weeks * 7 + 30)), 'status' => 'active']);
+        $template = $this->program($coach, $weeks);
         $template->forceFill(['workspace_type' => 'coach_template'])->save();
         $base = '/coach/trainees/'.$trainee->id;
         $this->actingAs($coach)->post($base.'/assign', ['training_plan_id' => $template->id, 'confirmed' => true])->assertSessionHasNoErrors();
@@ -396,6 +396,7 @@ class ProgramControlTest extends TestCase
         $this->assertSame(2, $position['missed']);
         $this->assertSame(2, $position['due']);
         $this->assertSame(1, $position['current_week']);
+        $this->get('/progress?tab=training')->assertInertia(fn (Assert $page) => $page->where('training.due', 2));
     }
 
     public function test_ended_history_status_corrections_preserve_saved_actuals_without_reopening_run(): void
@@ -434,6 +435,108 @@ class ProgramControlTest extends TestCase
         DB::disableQueryLog();
         $this->assertCount(2, $queries);
         $this->assertSame(156, $run->sessions()->count());
+    }
+
+    public function test_history_and_calendar_expose_the_same_hold_for_retained_program_sessions(): void
+    {
+        $run = $this->start($this->program());
+        $saved = $run->sessions()->first();
+        $saved->update(['scheduled_date' => today()->subDays(2)]);
+        $this->record($saved);
+        $past = $run->sessions()->skip(1)->first();
+        $past->update(['scheduled_date' => today()->subDay()]);
+        $this->control($run, ['action' => 'pause', 'pause_date' => today()->toDateString()]);
+        foreach ([$saved, $past] as $entry) {
+            $held = $run->fresh()->holds($entry->fresh());
+            foreach (['schedule-entries', 'training-history'] as $route) {
+                $this->get('/'.$route.'/'.$entry->id)->assertInertia(fn (Assert $page) => $page->where('programHeld', $held));
+            }
+        }
+        $this->control($run, ['action' => 'end']);
+        $this->patch('/schedule-entries/'.$saved->id.'/status', ['status' => 'planned'])->assertSessionHasNoErrors();
+        foreach ([$saved, $past] as $entry) {
+            foreach (['schedule-entries', 'training-history'] as $route) {
+                $this->get('/'.$route.'/'.$entry->id)->assertInertia(fn (Assert $page) => $page->where('programHeld', true));
+            }
+            $this->post('/schedule-entries/'.$entry->id.'/workout/start')->assertSessionHasErrors('program');
+        }
+        $this->assertSame('ended', $run->fresh()->status);
+    }
+
+    public function test_next_workout_exposes_hold_without_hiding_pre_pause_eligible_work(): void
+    {
+        $run = $this->start($this->program());
+        $this->control($run, ['action' => 'pause', 'pause_date' => '2026-11-05']);
+        $this->get('/program-runs/'.$run->id)->assertInertia(fn (Assert $page) => $page
+            ->where('run.status', 'paused')->where('position.next_workout.held', false));
+        foreach ($run->sessions()->whereDate('scheduled_date', '<', '2026-11-05')->get() as $entry) {
+            $this->patch('/schedule-entries/'.$entry->id.'/status', ['status' => 'completed'])->assertSessionHasNoErrors();
+        }
+        $this->get('/program-runs/'.$run->id)->assertInertia(fn (Assert $page) => $page->where('position.next_workout.held', true));
+    }
+
+    public function test_early_program_history_status_corrections_redirect_to_an_available_detail_page(): void
+    {
+        $run = $this->start($this->program());
+        $entry = $run->sessions()->first();
+        $this->record($entry);
+        $actuals = $entry->sessionExercises()->with('sets')->get()->toArray();
+        foreach (['planned', 'skipped', 'completed'] as $status) {
+            $destination = ($status === 'completed' ? '/training-history/' : '/schedule-entries/').$entry->id;
+            $this->from('/training-history/'.$entry->id)->patch('/schedule-entries/'.$entry->id.'/status', ['status' => $status])->assertSessionHasNoErrors()->assertRedirect($destination);
+            $this->get($destination)->assertInertia(fn (Assert $page) => $page->where('entry.status', $status));
+        }
+        $this->assertSame($actuals, $entry->sessionExercises()->with('sets')->get()->toArray());
+        $untouched = $run->sessions()->skip(1)->first();
+        $this->get('/training-history/'.$untouched->id)->assertNotFound();
+        $this->actingAs(User::factory()->create())->get('/training-history/'.$entry->id)->assertForbidden();
+    }
+
+    public function test_repeated_control_cycles_preserve_identity_and_final_completion_with_other_states_present(): void
+    {
+        $plan = $this->program();
+        $run = $this->start($plan);
+        $paused = $this->start($plan);
+        $this->control($paused, ['action' => 'pause', 'pause_date' => today()->toDateString()]);
+        $ended = $this->start($plan);
+        $this->control($ended, ['action' => 'end']);
+        $completed = $this->start($plan);
+        foreach (range(1, 4) as $week) {
+            $this->resolve($completed, $week);
+        }
+        $before = $run->sessions()->get()->map->only('id', 'plan_occurrence_key', 'program_week', 'program_prescription')->all();
+        $others = ProgramRun::whereIn('id', [$paused->id, $ended->id, $completed->id])->get()->toArray();
+        foreach (range(1, 5) as $cycle) {
+            $this->control($run, ['action' => 'pause', 'pause_date' => today()->toDateString()]);
+            $this->control($run, ['action' => 'resume', 'start_date' => today()->addDays($cycle * 7)->toDateString()]);
+            $this->control($run, ['action' => 'shift', 'start_date' => today()->addDays($cycle * 7 + 2)->toDateString()]);
+            $this->assertSame(1, app(ProgramLifecycle::class)->position($run->fresh())['current_week']);
+            $this->assertSame($before, $run->sessions()->get()->map->only('id', 'plan_occurrence_key', 'program_week', 'program_prescription')->all());
+        }
+        $this->assertSame($others, ProgramRun::whereIn('id', [$paused->id, $ended->id, $completed->id])->get()->toArray());
+        foreach (range(1, 4) as $week) {
+            $this->resolve($run, $week);
+        }
+        $this->assertSame('completed', $run->fresh()->status);
+        $entry = $run->sessions()->first();
+        $this->patch('/schedule-entries/'.$entry->id.'/status', ['status' => 'planned'])->assertSessionHasNoErrors();
+        $this->assertSame('active', $run->fresh()->status);
+        $this->patch('/schedule-entries/'.$entry->id.'/status', ['status' => 'completed'])->assertSessionHasNoErrors();
+        $this->assertSame('completed', $run->fresh()->status);
+    }
+
+    public function test_coach_program_review_queries_do_not_grow_per_scheduled_workout(): void
+    {
+        $counts = [];
+        foreach ([4, 52] as $weeks) {
+            [$coach, $trainee, $plan, $run, $base] = $this->coaching($weeks);
+            DB::enableQueryLog();
+            DB::flushQueryLog();
+            $this->postJson($base.'/program-runs/'.$run->id.'/change-preview')->assertOk();
+            $counts[] = count(DB::getQueryLog());
+            DB::disableQueryLog();
+        }
+        $this->assertLessThanOrEqual($counts[0] + 3, $counts[1], 'Coach review query counts: '.implode(', ', $counts));
     }
 
     public function test_known_resume_rejects_elapsed_time_even_when_no_date_shift_was_needed(): void

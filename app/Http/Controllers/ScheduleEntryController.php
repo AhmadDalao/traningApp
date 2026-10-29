@@ -206,6 +206,13 @@ class ScheduleEntryController extends Controller
             throw $error;
         }
 
+        // A future program workout leaves History when reopened. Keep the user's
+        // next page valid without changing History's scheduled-date/status rules.
+        if (parse_url(url()->previous(), PHP_URL_PATH) === '/training-history/'.$scheduleEntry->id
+            && ! $request->user()->scheduleEntries()->historyVisible()->whereKey($scheduleEntry->id)->exists()) {
+            return to_route('schedule-entries.show', $scheduleEntry)->with('success', 'Session marked '.$status.'.');
+        }
+
         return back()->with('success', 'Session marked '.$status.'.');
     }
 

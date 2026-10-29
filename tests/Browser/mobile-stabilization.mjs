@@ -89,6 +89,8 @@ try {
     }
     await page.goto("http://localhost:8000/training-plans");
     await page
+        .locator(".plan-card")
+        .filter({ hasText: "YOUR TRAINING PLAN" })
         .getByRole("link", { name: "View plan", exact: true })
         .first()
         .click();

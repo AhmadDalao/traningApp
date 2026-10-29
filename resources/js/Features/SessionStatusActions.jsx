@@ -38,6 +38,7 @@ export default function SessionStatusActions({
         );
     }
     if (
+        !programHeld &&
         entry.status === "planned" &&
         entry.started_at &&
         entry.entry_type === "training"

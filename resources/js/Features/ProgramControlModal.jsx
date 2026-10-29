@@ -3,13 +3,6 @@ import { router, usePage } from "@inertiajs/react";
 import { Modal, Field, Button, DateLabel } from "../Components/UI";
 import { coachingJson, useTraining } from "./CoachingUI";
 
-export const programStatus = (status) =>
-    ({
-        active: "Active",
-        paused: "Paused",
-        completed: "Completed",
-        ended: "Ended early",
-    })[status] || status;
 const titles = {
     pause: "Pause program",
     resume: "Resume program",

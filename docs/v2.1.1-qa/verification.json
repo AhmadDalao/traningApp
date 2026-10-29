@@ -1,0 +1,419 @@
+{
+  "version": "v2.1.1",
+  "baseline_commit": "e9ed12ba6e63af7c042a9ee727a7b01ac9fb12ec",
+  "source_baseline": "v2.1.0",
+  "production": "v2.0.1; not accessed or changed during this audit",
+  "deployment": "HELD \u2014 later explicit deploy request required",
+  "architecture_health": "GOOD",
+  "baseline": {
+    "sqlite": {
+      "tests": 499,
+      "assertions": 10635,
+      "seconds": 10.18
+    },
+    "mysql": {
+      "tests": 499,
+      "assertions": 10635,
+      "seconds": 20.95
+    }
+  },
+  "final": {
+    "sqlite": {
+      "tests": 504,
+      "assertions": 10877,
+      "seconds": 10.68
+    },
+    "mysql": {
+      "tests": 504,
+      "assertions": 10877,
+      "seconds": 21.45
+    }
+  },
+  "javascript": {
+    "passed": 28,
+    "failed": 0
+  },
+  "concurrency": {
+    "Coaching": 17,
+    "RecurringSchedule": 4,
+    "Program": 10,
+    "ProgramControl": 15
+  },
+  "browser": [
+    {
+      "name": "mobile-stabilization-chromium",
+      "exit": 0,
+      "seconds": 4.56,
+      "checks": 37
+    },
+    {
+      "name": "mobile-stabilization-webkit",
+      "exit": 0,
+      "seconds": 5.53,
+      "checks": 37
+    },
+    {
+      "name": "programs-chromium",
+      "exit": 0,
+      "seconds": 6.17,
+      "checks": 90
+    },
+    {
+      "name": "programs-webkit",
+      "exit": 0,
+      "seconds": 7.22,
+      "checks": 90
+    },
+    {
+      "name": "coach-programs-chromium",
+      "exit": 0,
+      "seconds": 5.25,
+      "checks": 60
+    },
+    {
+      "name": "coach-programs-webkit",
+      "exit": 0,
+      "seconds": 6.22,
+      "checks": 60
+    },
+    {
+      "name": "program-stabilization-chromium",
+      "exit": 0,
+      "seconds": 5.46,
+      "checks": 75
+    },
+    {
+      "name": "program-stabilization-webkit",
+      "exit": 0,
+      "seconds": 6.58,
+      "checks": 75
+    },
+    {
+      "name": "program-calendar-stabilization-chromium",
+      "exit": 0,
+      "seconds": 2.78,
+      "checks": 6
+    },
+    {
+      "name": "program-calendar-stabilization-webkit",
+      "exit": 0,
+      "seconds": 2.67,
+      "checks": 6
+    },
+    {
+      "name": "program-controls-chromium",
+      "exit": 0,
+      "seconds": 7.88,
+      "checks": 99
+    },
+    {
+      "name": "program-controls-webkit",
+      "exit": 0,
+      "seconds": 9.01,
+      "checks": 99
+    },
+    {
+      "name": "full-lifecycle-chromium",
+      "exit": 0,
+      "seconds": 12.71,
+      "checks": 27
+    },
+    {
+      "name": "full-lifecycle-webkit",
+      "exit": 0,
+      "seconds": 15.17,
+      "checks": 27
+    },
+    {
+      "name": "lifecycle-regressions-chromium",
+      "exit": 0,
+      "seconds": 2.82,
+      "checks": 37
+    },
+    {
+      "name": "lifecycle-regressions-webkit",
+      "exit": 0,
+      "seconds": 3.11,
+      "checks": 37
+    }
+  ],
+  "browser_checks": 862,
+  "local_http_checks": 133,
+  "integrity": {
+    "original_data_and_media_unchanged": true,
+    "tables": 19,
+    "original_media_files": 44,
+    "qa_accounts_removed": 17,
+    "qa_images_removed": 1252
+  },
+  "original_row_counts": {
+    "users": 3,
+    "user_profiles": 2,
+    "body_weight_entries": 3,
+    "training_plans": 21,
+    "training_days": 76,
+    "training_exercises": 318,
+    "schedule_entries": 246,
+    "session_exercises": 0,
+    "session_sets": 0,
+    "exercise_library_items": 2,
+    "coach_profiles": 0,
+    "coach_trainee_relationships": 0,
+    "coach_subscription_plans": 0,
+    "coach_subscriptions": 0,
+    "coach_plan_assignments": 0,
+    "coach_pairing_tokens": 0,
+    "schedule_occurrence_cancellations": 0,
+    "training_blocks": 0,
+    "program_runs": 0
+  },
+  "query_comparison": {
+    "before_http_queries_12_and_156_workouts": [
+      141,
+      1437
+    ],
+    "after_http_queries_12_and_156_workouts": [
+      34,
+      34
+    ]
+  },
+  "service_queries": {
+    "coach_program_review": {
+      "queries": 12,
+      "elapsed_ms": 24.37
+    },
+    "definition_snapshot": {
+      "queries": 3,
+      "elapsed_ms": 2.35
+    },
+    "long_run_position": {
+      "queries": 1,
+      "elapsed_ms": 4.06
+    },
+    "six_dashboard_program_cards": {
+      "queries": 13,
+      "elapsed_ms": 10.18
+    },
+    "completion_summary": {
+      "queries": 7,
+      "elapsed_ms": 18.38
+    }
+  },
+  "page_queries": {
+    "/dashboard": {
+      "status": 200,
+      "queries": 36,
+      "elapsed_ms": 71.73
+    },
+    "/program-runs": {
+      "status": 200,
+      "queries": 38,
+      "elapsed_ms": 32.77
+    },
+    "/program-runs/81": {
+      "status": 200,
+      "queries": 6,
+      "elapsed_ms": 12.37
+    },
+    "/calendar": {
+      "status": 200,
+      "queries": 17,
+      "elapsed_ms": 39.09
+    },
+    "/training-history?per_page=100": {
+      "status": 200,
+      "queries": 9,
+      "elapsed_ms": 34.74
+    },
+    "/progress": {
+      "status": 200,
+      "queries": 9,
+      "elapsed_ms": 4.67
+    },
+    "/progress/exercises": {
+      "status": 200,
+      "queries": 2,
+      "elapsed_ms": 18.67
+    },
+    "/coach": {
+      "status": 200,
+      "queries": 33,
+      "elapsed_ms": 21.82
+    },
+    "/coach/trainees/81": {
+      "status": 200,
+      "queries": 47,
+      "elapsed_ms": 24.78
+    }
+  },
+  "findings": {
+    "bugs": [
+      {
+        "id": "BUG-01",
+        "severity": "Medium",
+        "area": "History session actions",
+        "viewport": "320\u20131280 px; both engines",
+        "reproduction": "Open a retained past, unresolved workout from an ended program through Training History.",
+        "expected": "History and Calendar expose the same hold and omit forbidden workout/edit actions.",
+        "actual": "History omitted programHeld, so the shared page advertised actions rejected by the server.",
+        "root": "TrainingHistoryController did not pass the existing ProgramRun::holds result to the shared detail page.",
+        "fix": "Pass the hold flag; ensure the shared Resume action also respects it.",
+        "test": "ProgramControlTest::test_history_and_calendar_expose_the_same_hold_for_retained_program_sessions; lifecycle-regressions.mjs",
+        "result": "Passed"
+      },
+      {
+        "id": "BUG-02",
+        "severity": "Medium",
+        "area": "Progress training completion rate",
+        "viewport": "All viewports",
+        "reproduction": "Pause a program from 5 November, advance to 20 November, leaving two earlier workouts unresolved.",
+        "expected": "Only the two uncovered workouts are due; held workouts do not penalize the rate.",
+        "actual": "Progress counted covered paused workouts, unlike the program and coach overview.",
+        "root": "ProgressController omitted the shared availableOnSchedule scope.",
+        "fix": "Reuse that scope in the existing monthly query.",
+        "test": "ProgramControlTest::test_pause_excludes_only_covered_due_workouts_and_handles_future_pause_boundary",
+        "result": "Passed"
+      },
+      {
+        "id": "BUG-03",
+        "severity": "Medium",
+        "area": "Program Start feedback",
+        "viewport": "390 px; Chromium and WebKit",
+        "reproduction": "Open the same active run in two tabs. Pause it in one, then press Start workout in the stale tab.",
+        "expected": "An actionable server rejection appears.",
+        "actual": "Start silently refreshed state with no explanation.",
+        "root": "The run page POST had no onError handler.",
+        "fix": "Render returned errors in an alert directly below the header; clear errors on a new attempt.",
+        "test": "full-lifecycle.mjs stale Start scenario",
+        "result": "Passed"
+      },
+      {
+        "id": "BUG-04",
+        "severity": "Medium",
+        "area": "Early program History status correction",
+        "viewport": "390 px; both engines",
+        "reproduction": "Complete a future program session early; open its History detail and change it back to Planned or Skipped.",
+        "expected": "Land on a valid session detail after the status change.",
+        "actual": "The redirect returned to a History URL that no longer qualified, producing 404.",
+        "root": "The status endpoint always redirected back despite changing History eligibility.",
+        "fix": "Use the existing History scope to redirect to Calendar session detail only when that History URL is no longer eligible. Existing date filters and future simple-plan visibility are preserved.",
+        "test": "ProgramControlTest::test_early_program_history_status_corrections_redirect_to_an_available_detail_page; full-lifecycle.mjs",
+        "result": "Passed"
+      }
+    ],
+    "ux": [
+      {
+        "id": "UX-01",
+        "severity": "Medium",
+        "area": "Program run action hierarchy",
+        "viewport": "320\u20131280 px, plus 320\u00d7480",
+        "problem": "Solid red End appeared above Start; Resume was secondary. The destructive action dominated the next useful action.",
+        "fix": "Place the next workout first; make Resume primary; make End a separated secondary action with the existing confirmation preview.",
+        "verification": "Visual before/after inspection and real lifecycle assertions in both engines."
+      },
+      {
+        "id": "UX-02",
+        "severity": "Medium",
+        "area": "Paused program orientation",
+        "viewport": "320\u20131280 px",
+        "problem": "Paused state hid the logical week in the header and suppressed an earlier workout even when its date was before the future pause boundary.",
+        "fix": "Show status, week and block together. Return the existing hold decision with next_workout and show eligible pre-pause work. Clarify pause-boundary wording.",
+        "verification": "Backend hold-boundary regression and browser checks at all seven widths."
+      }
+    ],
+    "architecture": [
+      {
+        "id": "ARCH-01",
+        "area": "Shared program presentation",
+        "finding": "Read-only program lists imported a status formatter from the mutation modal.",
+        "action": "Move the formatter to existing ProgramUI. No new component layer."
+      },
+      {
+        "id": "ARCH-02",
+        "area": "Coach program review queries",
+        "finding": "Repeated permission lookups and nested snapshot queries grew from 141 to 1,437 HTTP queries for 12 versus 156 workouts.",
+        "action": "Reuse freshly authorized assignment/subscription data within a review; centralize session eligibility in CoachAccess; eager-load the locked definition tree and batch update reads. Both sizes now use 34 HTTP queries."
+      },
+      {
+        "id": "ARCH-03",
+        "area": "Schedule-state reuse",
+        "finding": "Progress used a separate due-session query without the existing hold scope.",
+        "action": "Use availableOnSchedule consistently. ProgramLifecycle remains the logical-week/completion/adherence authority."
+      }
+    ],
+    "debt": [
+      {
+        "id": "TECH-DEBT-01",
+        "area": "ExerciseEditor.jsx (590 lines)",
+        "problem": "Library choice, custom media and nested superset-partner editing share a sizable stateful feature.",
+        "risk": "Future editor changes could regress nested focus or draft preservation.",
+        "deferred": "Current behavior and keyboard restoration pass; splitting state ownership now would add stabilization risk.",
+        "direction": "When changing partner editing, extract that meaningful flow with existing behavior tests; avoid tiny markup-only components."
+      },
+      {
+        "id": "TECH-DEBT-02",
+        "area": "app.css (3,005 lines) plus feature/mobile styles",
+        "problem": "The original global stylesheet remains large and mobile rules override some base selectors.",
+        "risk": "Future broad selectors can unintentionally affect unrelated features.",
+        "deferred": "No conflicting rule requiring a broad rewrite was reproduced; mobile regressions pass.",
+        "direction": "Move cohesive feature rules only when touching that feature, keeping shared tokens and mobile precedence explicit."
+      },
+      {
+        "id": "TECH-DEBT-03",
+        "area": "ProgramLifecycle cards / paginated run history",
+        "problem": "Each displayed run is synchronized and its position read; work is bounded by six cards or twelve rows but repeats reads per run.",
+        "risk": "Larger accounts can make these pages slower; current measured timings remain acceptable.",
+        "deferred": "Combining synchronization with list reads changes transaction/locking behavior. The per-workout query explosion was fixed separately.",
+        "direction": "If measured latency grows, return a synchronized position once per run or batch the read side while preserving row-lock and reopening tests."
+      }
+    ]
+  },
+  "gate": "READY \u2014 source only",
+  "limitations": [
+    "Physical devices and screen readers not certified.",
+    "Production deployment and production smoke checks intentionally not performed.",
+    "Browser fixture creation/reset ordering corrected during test development; only successful final runs are counted."
+  ],
+  "log_sha256": {
+    "RecurringSchedule-concurrency.log": "2bcebaf00040dee4f4b701a42695f46427e63376cee594c637255e10ebbcd3da",
+    "reset-controls.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mobile-stabilization-webkit.log": "d13c4ff2de8d637b471c560380d3a71ac7447dea519cf68ebd233302329713b8",
+    "page-probes.log": "bc27ba1d513fb670d5adda6c69778db6abc20b671bcbd36c6a9bbb6da5cc248e",
+    "control-fixtures.log": "b19995f3ef4da5060db4ba9a5a74d2e4cec5ff846a4cea1a01dc0ac6679f65cb",
+    "lifecycle-regressions-webkit.log": "5543e922f25cbb5eb84a7763506f39bb225e1d1a4a4bc0e86a17ceb9728023e3",
+    "sqlite.log": "9a6a290e7698425bd8fe12024a7cd2df4993fb048dfdd4b84e5a6621116fdf71",
+    "more-fixtures.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "regression-fixtures.log": "06eaa1345a4824fe0869b6b3eed7ee25108707dde45046acf20828b542078c2b",
+    "format.log": "b3d1866dd43737ca5a5a9a16856706f25c4c64cdae77bc1a5d0ba2224b70bd03",
+    "program-http.log": "a9fbd112aacc40d268d14b542a03827f93e9e9de70292034852c3b43ba38e067",
+    "prettier.log": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "full-lifecycle-chromium.log": "e693ae67e0fefd0204282823bbff42085f199e72a4df4f345d36c0630d511916",
+    "mobile-fixture.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "program-calendar-stabilization-webkit.log": "39dc266c2fe65fa493e1e56fdb89d9e2aca91ba6c8b1a50845b2887c47935724",
+    "pint.log": "cd1a94fc2cf6a965b86e1a4809d6c7fb9148b1ee374e1010ed2ac96ff4876ec2",
+    "mysql.log": "3b1115f2e832258ccac3aecda1bc2d4a6f174ac6326084dc2369dfcf2128fa64",
+    "Coaching-concurrency.log": "1cc2242d92740709e6f71fee48cae31e2981f4a00e095425b475ac8d89a2e640",
+    "Program-concurrency.log": "7ca17d23a1a76e35f1e3566eae85b55f67c2b5bb15a3533cff75dc00d52e5052",
+    "lifecycle-regressions-chromium.log": "5543e922f25cbb5eb84a7763506f39bb225e1d1a4a4bc0e86a17ceb9728023e3",
+    "format-last.log": "cd1a94fc2cf6a965b86e1a4809d6c7fb9148b1ee374e1010ed2ac96ff4876ec2",
+    "full-lifecycle-webkit.log": "e693ae67e0fefd0204282823bbff42085f199e72a4df4f345d36c0630d511916",
+    "program-controls-webkit.log": "bd3756a124bffa5ae3453b7c1ef5ec61d544db32d39e3f7414627ce579be68e0",
+    "program-controls-chromium.log": "bd3756a124bffa5ae3453b7c1ef5ec61d544db32d39e3f7414627ce579be68e0",
+    "reset-controls-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "js.log": "5c0591490d72dec3681ed38b8819936fe6042f2bdad07c751a236620b5b46b93",
+    "http.log": "bb980fc595d93bf198068bf8a7b4945fabdfb3a83a3dbefce864e473ed223499",
+    "programs-webkit.log": "fe36dc9fcb09f2bedfaeaf669ae070eeacf0fadb95f86a3de1d29e44c1132434",
+    "coach-programs-webkit.log": "8ad7fb1f59b6b5b852bb258bf30dee1fd4530873c4f3298827853a99c4404810",
+    "control-fixtures-final.log": "b19995f3ef4da5060db4ba9a5a74d2e4cec5ff846a4cea1a01dc0ac6679f65cb",
+    "regression-fixtures-final.log": "06eaa1345a4824fe0869b6b3eed7ee25108707dde45046acf20828b542078c2b",
+    "ProgramControl-concurrency.log": "0707dc54ecb75ee58cd6be758774fb82b05bd7fd20b15e4f1f0b737e2e415933",
+    "coach-programs-chromium.log": "8ad7fb1f59b6b5b852bb258bf30dee1fd4530873c4f3298827853a99c4404810",
+    "programs-chromium.log": "fe36dc9fcb09f2bedfaeaf669ae070eeacf0fadb95f86a3de1d29e44c1132434",
+    "program-calendar-stabilization-chromium.log": "39dc266c2fe65fa493e1e56fdb89d9e2aca91ba6c8b1a50845b2887c47935724",
+    "mobile-stabilization-chromium.log": "a541d07b30d3e26ab082ba6d5cc15a2b9d1c45b57f770ca62e5e142845cecaa6",
+    "query-probe.log": "67d45399ef9cc927002a56983291cdb061a340107abf96d70259f0247d07fb3c",
+    "program-stabilization-webkit.log": "692f13cf1a96ba4e5de7a14c789eed6f08e184bf12d67b77f4a49431cef5251d",
+    "build.log": "31d84d20beea89db4633a924d5778a94131b0db5c9c9bcdaa6796d782e665fb2",
+    "program-stabilization-chromium.log": "692f13cf1a96ba4e5de7a14c789eed6f08e184bf12d67b77f4a49431cef5251d"
+  }
+}

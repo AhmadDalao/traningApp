@@ -1,6 +1,4 @@
-import ProgramControlModal, {
-    programStatus,
-} from "../../Features/ProgramControlModal";
+import ProgramControlModal from "../../Features/ProgramControlModal";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
@@ -14,6 +12,7 @@ import {
 } from "../../Components/UI";
 import { useTraining, coachingJson } from "../../Features/CoachingUI";
 import {
+    programStatus,
     ProgramStats,
     ProgramWeeks,
     ProgramSessions,
@@ -88,7 +87,7 @@ export default function Run({ run, position, summary }) {
                 title={definition.name}
                 description={
                     position.current_block
-                        ? `${position.current_block.name} · Weeks ${position.current_block.start_week}–${position.current_block.end_week}`
+                        ? `${programStatus(run.status)} · Week ${position.current_week} of ${position.duration_weeks} · ${position.current_block.name}`
                         : "Your completed training journey"
                 }
             >
@@ -112,6 +111,61 @@ export default function Run({ run, position, summary }) {
                         </ButtonLink>
                     )}
             </PageHeader>
+            {error && (
+                <p className="field-error" role="alert">
+                    {error}
+                </p>
+            )}
+            {next &&
+                !next.held &&
+                ["active", "paused"].includes(run.status) && (
+                    <section className="panel program-card program-next">
+                        <small>
+                            NEXT UNRESOLVED WORKOUT · WEEK {next.program_week}
+                        </small>
+                        <h2>{next.title}</h2>
+                        <p>
+                            <DateLabel date={next.scheduled_date} />{" "}
+                            {next.scheduled_time?.slice(0, 5)}
+                        </p>
+                        <div className="program-actions">
+                            <ButtonLink
+                                variant="secondary"
+                                href={url(`/schedule-entries/${next.id}`)}
+                            >
+                                View session
+                            </ButtonLink>
+                            {!coaching && (
+                                <Button
+                                    disabled={busy}
+                                    onClick={() =>
+                                        router.post(
+                                            `/schedule-entries/${next.id}/workout/start`,
+                                            {},
+                                            {
+                                                onStart: () => {
+                                                    setBusy(true);
+                                                    setError("");
+                                                },
+                                                onError: (errors) =>
+                                                    setError(
+                                                        Object.values(errors)
+                                                            .flat()
+                                                            .join(" "),
+                                                    ),
+                                                onFinish: () => setBusy(false),
+                                            },
+                                        )
+                                    }
+                                >
+                                    {next.started_at
+                                        ? "Resume workout"
+                                        : "Start workout"}
+                                </Button>
+                            )}
+                        </div>
+                    </section>
+                )}
             <section className="panel program-card">
                 <span className={`badge program-status-${run.status}`}>
                     {programStatus(run.status)}
@@ -126,7 +180,8 @@ export default function Run({ run, position, summary }) {
                                 <DateLabel date={run.resume_on} />
                             </>
                         )}
-                        . Resume explicitly when ready. Paused workouts do not
+                        . Workouts before the pause date remain available.
+                        Resume explicitly when ready. Workouts on hold do not
                         become missed.
                     </p>
                 )}
@@ -151,7 +206,11 @@ export default function Run({ run, position, summary }) {
                 {canManage && ["active", "paused"].includes(run.status) && (
                     <div className="program-actions">
                         <Button
-                            variant="secondary"
+                            variant={
+                                run.status === "paused"
+                                    ? "primary"
+                                    : "secondary"
+                            }
                             onClick={() =>
                                 setControl(
                                     run.status === "paused"
@@ -173,7 +232,8 @@ export default function Run({ run, position, summary }) {
                             </Button>
                         )}
                         <Button
-                            variant="danger"
+                            variant="secondary"
+                            className="danger-text program-end"
                             onClick={() => setControl("end")}
                         >
                             End program
@@ -194,45 +254,6 @@ export default function Run({ run, position, summary }) {
                     entry={moving}
                     onClose={() => setMoving(null)}
                 />
-            )}
-            {next && run.status === "active" && (
-                <section className="panel program-card program-next">
-                    <small>
-                        NEXT UNRESOLVED WORKOUT · WEEK {next.program_week}
-                    </small>
-                    <h2>{next.title}</h2>
-                    <p>
-                        <DateLabel date={next.scheduled_date} />{" "}
-                        {next.scheduled_time?.slice(0, 5)}
-                    </p>
-                    <div className="program-actions">
-                        <ButtonLink
-                            variant="secondary"
-                            href={url(`/schedule-entries/${next.id}`)}
-                        >
-                            View session
-                        </ButtonLink>
-                        {!coaching && (
-                            <Button
-                                disabled={busy}
-                                onClick={() =>
-                                    router.post(
-                                        `/schedule-entries/${next.id}/workout/start`,
-                                        {},
-                                        {
-                                            onStart: () => setBusy(true),
-                                            onFinish: () => setBusy(false),
-                                        },
-                                    )
-                                }
-                            >
-                                {next.started_at
-                                    ? "Resume workout"
-                                    : "Start workout"}
-                            </Button>
-                        )}
-                    </div>
-                </section>
             )}
             {position.current_week && (
                 <section className="panel program-card">
@@ -302,11 +323,6 @@ export default function Run({ run, position, summary }) {
                         Review program changes
                     </Button>
                 </section>
-            )}
-            {error && (
-                <p className="field-error" role="alert">
-                    {error}
-                </p>
             )}
             <section>
                 <h2>All program weeks</h2>

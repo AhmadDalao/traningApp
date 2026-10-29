@@ -43,7 +43,7 @@ class ProgramLifecycle
             'due_completed' => $completed, 'due_skipped' => $due->where('status', 'skipped')->count(), 'missed' => $missed,
             'adherence' => $due->isEmpty() ? null : round($completed / $due->count() * 100),
             'all_resolved' => $required->isNotEmpty() && $unresolved->isEmpty() && ! $sessions->contains(fn ($entry) => $entry->isActiveWorkout()),
-            'next_workout' => $next ? [...$next->only('id', 'title', 'scheduled_time', 'program_week', 'started_at'), 'scheduled_date' => $next->scheduled_date->toDateString()] : null,
+            'next_workout' => $next ? [...$next->only('id', 'title', 'scheduled_time', 'program_week', 'started_at'), 'scheduled_date' => $next->scheduled_date->toDateString(), 'held' => $run->holds($next)] : null,
             'sessions' => $sessions->map(fn ($entry) => [...$entry->only('id', 'title', 'entry_type', 'status', 'scheduled_date', 'scheduled_time', 'program_week', 'program_context', 'started_at'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(), 'held' => $run->holds($entry),
                 'can_reschedule' => $entry->status === 'planned' && ! $entry->started_at && $entry->workout_snapshot === null && ! $entry->session_exercises_exists && ! $run->holds($entry),
