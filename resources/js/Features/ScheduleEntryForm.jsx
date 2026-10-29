@@ -10,7 +10,7 @@ export default function ScheduleEntryForm({
     onCancel,
     onSaved,
 }) {
-    const { url } = useTraining();
+    const { url, coaching } = useTraining();
     const { today } = usePage().props;
     const initialDay = plans
         .flatMap((p) => p.training_days)
@@ -66,24 +66,26 @@ export default function ScheduleEntryForm({
                       });
             }}
         >
-            <div className="segmented schedule-mode">
-                <button
-                    type="button"
-                    className={!directRest ? "active" : ""}
-                    disabled={recorded}
-                    onClick={() => changeMode(false)}
-                >
-                    From a training plan
-                </button>
-                <button
-                    type="button"
-                    className={directRest ? "active" : ""}
-                    disabled={recorded}
-                    onClick={() => changeMode(true)}
-                >
-                    Rest day
-                </button>
-            </div>
+            {!coaching && (
+                <div className="segmented schedule-mode">
+                    <button
+                        type="button"
+                        className={!directRest ? "active" : ""}
+                        disabled={recorded}
+                        onClick={() => changeMode(false)}
+                    >
+                        From a training plan
+                    </button>
+                    <button
+                        type="button"
+                        className={directRest ? "active" : ""}
+                        disabled={recorded}
+                        onClick={() => changeMode(true)}
+                    >
+                        Rest day
+                    </button>
+                </div>
+            )}
             {!directRest && (
                 <>
                     <div className="form-grid">

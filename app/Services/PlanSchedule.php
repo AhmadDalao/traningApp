@@ -15,20 +15,28 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class PlanSchedule
 {
-    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null, array $change = []): array
+    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null, array $change = [], bool $rolling = false): array
     {
         $plan->loadMissing('trainingDays');
         $assignment = $coach ? app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true, $lock) : null;
         $subscription = $assignment ? app(CoachAccess::class)->subscription($assignment->relationship, $lock) : null;
+        $desired = $this->desired($plan);
+        $keys = array_column($desired, 'key');
         $entries = ScheduleEntry::where('user_id', $plan->user_id)
             ->where(fn ($q) => $q->whereIn('training_day_id', $plan->trainingDays->modelKeys())
                 ->orWhere('plan_occurrence_key', 'like', 'plan:'.$plan->id.':%'))
+            // Rolling refresh needs window bookings and their moved originals, not full history.
+            ->when($rolling, fn ($q) => $q->where(fn ($q) => $q
+                ->whereBetween('scheduled_date', [today()->toDateString(), $this->horizon()])
+                ->orWhereIn('plan_occurrence_key', $keys)))
             ->select('id', 'training_day_id', 'title', 'entry_type', 'scheduled_date', 'scheduled_time', 'status', 'started_at', 'plan_occurrence_key', 'schedule_managed', 'updated_at', 'scheduled_by_user_id')
             ->selectRaw('workout_snapshot IS NOT NULL AS has_snapshot')->withExists('sessionExercises')
             ->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')
             ->when($lock, fn ($q) => $q->lockForUpdate())->get();
         $originalEntries = $entries->map->getAttributes()->all();
-        $cancelled = DB::table('schedule_occurrence_cancellations')->where('training_plan_id', $plan->id)->orderBy('occurrence_key')->when($lock, fn ($q) => $q->lockForUpdate())->pluck('occurrence_key')->all();
+        $cancelled = DB::table('schedule_occurrence_cancellations')->where('training_plan_id', $plan->id)
+            ->when($rolling, fn ($q) => $q->whereIn('occurrence_key', $keys))
+            ->orderBy('occurrence_key')->when($lock, fn ($q) => $q->lockForUpdate())->pluck('occurrence_key')->all();
         if (isset($change['entry'])) {
             $moved = $entries->firstWhere('id', $change['entry']);
             $moved?->forceFill(['scheduled_date' => $change['date'], 'scheduled_time' => $change['time'], 'schedule_managed' => false]);
@@ -57,7 +65,7 @@ class PlanSchedule
         $excluded = [];
         $add = [];
         $keep = [];
-        foreach ($this->desired($plan) as $session) {
+        foreach ($desired as $session) {
             if (in_array($session['key'], $cancelled, true)) {
                 continue;
             }
@@ -295,7 +303,7 @@ class PlanSchedule
                         return;
                     }
                     $plan->setRelation('trainingDays', $plan->trainingDays()->lockForUpdate()->get());
-                    $preview = $this->preview($plan, lock: true, coach: $coach);
+                    $preview = $this->preview($plan, lock: true, coach: $coach, rolling: true);
                     // Rolling refresh is additive only. Removal always requires a reviewed diff.
                     foreach ($preview['add'] as $session) {
                         if ($session['replaces_id']) {

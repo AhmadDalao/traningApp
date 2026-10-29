@@ -1,7 +1,7 @@
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
-import { Head, useForm, router } from "@inertiajs/react";
+import { Head, useForm, router, usePage } from "@inertiajs/react";
 import { CalendarPlus, RefreshCw, Trash2 } from "lucide-react";
 import {
     PageHeader,
@@ -68,6 +68,12 @@ function Sessions({ rows, label }) {
 }
 export default function Schedule({ plan, preview }) {
     const { url } = useTraining();
+    const { today } = usePage().props;
+    const stopped = plan.end_date && plan.end_date <= today;
+    const windowEnd =
+        plan.end_date && plan.end_date < preview.horizon
+            ? plan.end_date
+            : preview.horizon;
     const [stopping, setStopping] = useState(false);
     const [group, setGroup] = useState("add");
     const [action, setAction] = useState(null);
@@ -151,12 +157,24 @@ export default function Schedule({ plan, preview }) {
                 {plan.schedule_mode === "ongoing" && (
                     <>
                         <p className="field-hint">
-                            {plan.schedule_enabled
-                                ? "Rolling generation is active."
-                                : "Confirm Add missing sessions to activate rolling generation."}{" "}
-                            Future window through{" "}
-                            <DateLabel date={preview.horizon} />. Only missing
-                            sessions are added when Calendar opens.
+                            {stopped ? (
+                                <>
+                                    No sessions will be generated after{" "}
+                                    <DateLabel date={plan.end_date} />. Your
+                                    existing sessions and history are kept. To
+                                    restart, edit the plan’s stop date and
+                                    review its schedule.
+                                </>
+                            ) : (
+                                <>
+                                    {plan.schedule_enabled
+                                        ? "Rolling generation is active."
+                                        : "Confirm Add missing sessions to activate rolling generation."}{" "}
+                                    Future window through{" "}
+                                    <DateLabel date={windowEnd} />. Only missing
+                                    sessions are added when Calendar opens.
+                                </>
+                            )}
                         </p>
                         <Button
                             variant="secondary"

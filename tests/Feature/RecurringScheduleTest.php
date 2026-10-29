@@ -107,6 +107,68 @@ class RecurringScheduleTest extends TestCase
         $this->assertSame('2028-03-03', substr(ScheduleEntry::max('scheduled_date'), 0, 10));
     }
 
+    public function test_calendar_rolling_refresh_does_not_load_unrelated_old_workout_history(): void
+    {
+        $this->activate();
+        $history = [];
+        for ($i = 0; $i < 300; $i++) {
+            $history[] = ['user_id' => $this->user->id, 'training_day_id' => $this->day->id, 'title' => 'Old workout', 'entry_type' => 'training', 'status' => 'completed', 'scheduled_date' => '2020-01-01'];
+        }
+        DB::table('schedule_entries')->insert($history);
+        $dispatcher = ScheduleEntry::getEventDispatcher();
+        ScheduleEntry::setEventDispatcher(clone $dispatcher);
+        $oldRows = 0;
+        ScheduleEntry::retrieved(function ($entry) use (&$oldRows) {
+            if ($entry->scheduled_date->year === 2020) {
+                $oldRows++;
+            }
+        });
+        try {
+            $this->get('/calendar')->assertOk();
+            $this->assertSame(0, $oldRows, 'Opening Calendar must not hydrate old workouts while extending the future window.');
+            $this->assertSame(300, ScheduleEntry::whereYear('scheduled_date', 2020)->count());
+        } finally {
+            ScheduleEntry::setEventDispatcher($dispatcher);
+        }
+    }
+
+    public function test_rolling_refresh_remembers_occurrences_moved_outside_its_visible_window(): void
+    {
+        $this->activate();
+        // A previously moved occurrence may now be historical or beyond the horizon.
+        $past = $this->entry('2026-11-02');
+        $past->update(['scheduled_date' => '2026-09-01', 'schedule_managed' => false, 'status' => 'completed']);
+        $later = $this->entry('2026-11-09');
+        $later->update(['scheduled_date' => '2027-05-01', 'schedule_managed' => false]);
+        $before = [$past->fresh()->getAttributes(), $later->fresh()->getAttributes()];
+        app(PlanSchedule::class)->ensureWindow($this->user);
+        app(PlanSchedule::class)->ensureWindow($this->user);
+        $this->assertSame($before, [$past->fresh()->getAttributes(), $later->fresh()->getAttributes()]);
+        $this->assertDatabaseMissing('schedule_entries', ['training_day_id' => $this->day->id, 'scheduled_date' => '2026-11-02']);
+        $this->assertDatabaseMissing('schedule_entries', ['training_day_id' => $this->day->id, 'scheduled_date' => '2026-11-09']);
+    }
+
+    public function test_calendar_query_count_does_not_grow_per_existing_session(): void
+    {
+        $this->activate();
+        $queries = function () {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            try {
+                $this->get('/calendar')->assertOk();
+
+                return count(DB::getQueryLog());
+            } finally {
+                DB::disableQueryLog();
+            }
+        };
+        $baseline = $queries();
+        for ($i = 0; $i < 40; $i++) {
+            $this->user->scheduleEntries()->create(['training_day_id' => $this->day->id, 'title' => 'Manual extra', 'entry_type' => 'rest', 'status' => 'planned', 'scheduled_date' => '2026-11-03']);
+        }
+        $this->assertLessThanOrEqual($baseline + 1, $queries());
+    }
+
     public function test_fixed_period_still_ends_at_its_end_date_and_never_rolls(): void
     {
         $this->plan->update(['schedule_mode' => 'fixed', 'end_date' => '2026-11-16']);
@@ -400,6 +462,15 @@ class RecurringScheduleTest extends TestCase
         [$coach, $relationship, $subscription, $assignment, $base] = $this->coaching();
         $this->activate($base);
         $entry = $this->entry();
+        $moves = [];
+        foreach (['one', 'future'] as $scope) {
+            $data = ['scheduled_date' => '2026-11-03', 'scheduled_time' => '18:00', 'scope' => $scope];
+            $preview = $this->postJson($base.'/schedule-entries/'.$entry->id.'/reschedule-preview', $data)->assertOk()->json('preview');
+            $moves[$scope] = $data + ['signature' => $preview['signature'], 'confirmed' => true];
+        }
+        $stopUrl = $base.'/training-plans/'.$this->plan->id.'/stop-schedule';
+        $stop = ['end_date' => '2026-11-15'];
+        $stopPreview = $this->postJson($stopUrl.'-preview', $stop)->assertOk()->json('preview');
         match ($state) {
             'paused', 'ended' => $subscription->update(['status' => $state]),
             'expired' => $subscription->update(['ends_on' => today()->subDay()]),
@@ -410,7 +481,12 @@ class RecurringScheduleTest extends TestCase
         foreach (['one', 'future'] as $scope) {
             $response = $this->postJson($base.'/schedule-entries/'.$entry->id.'/reschedule-preview', ['scheduled_date' => '2026-11-03', 'scheduled_time' => '18:00', 'scope' => $scope]);
             $this->assertContains($response->status(), [403, 404]);
+            $response = $this->postJson($base.'/schedule-entries/'.$entry->id.'/reschedule', $moves[$scope]);
+            $this->assertContains($response->status(), [403, 404]);
         }
+        $this->assertContains($this->postJson($stopUrl.'-preview', $stop)->status(), [403, 404]);
+        $this->assertContains($this->postJson($stopUrl, $stop + ['signature' => $stopPreview['signature'], 'confirmed' => true])->status(), [403, 404]);
+        $this->assertNull($this->plan->fresh()->end_date);
         $this->actingAs($this->user)->get('/calendar')->assertOk();
         $this->assertSame($before, ScheduleEntry::orderBy('id')->get()->map->getAttributes()->all());
     }
