@@ -8,7 +8,7 @@ Eight confirmed UI defects fixed: mobile text and touch targets, crowded session
 
 **434 responsive checks**, **37 Chromium + 37 WebKit regressions**, **434 PHP tests / 8,778 assertions on SQLite and MySQL**, **27 JS tests**, **21 concurrency checks** and **119 local HTTP workflow checks** pass. Five QA accounts and 130 images were removed; original data/media fingerprints match. Viewport emulation and native preview were used; physical phones were not tested.
 
-[Full v1.9.1 report and before/after evidence](docs/V1.9.1-MOBILE-QA-STABILIZATION-REPORT.html). Local release gate: **READY**; live deployment verification is recorded in the report. The browser regression script is [tests/Browser/mobile-stabilization.mjs](tests/Browser/mobile-stabilization.mjs); its header documents private fixture inputs and optional Playwright module selection.
+[Full v1.9.1 report and before/after evidence](docs/V1.9.1-MOBILE-QA-STABILIZATION-REPORT.html). **READY — deployed and verified on Hostinger.** Tag `v1.9.1` identifies `f9e650d`. All 64 deployed file hashes, 119 live HTTP checks, 252 live responsive checks and 37 live browser regressions pass. Three production QA accounts and temporary deployment tools are removed; original production data, uploads and settings match their pre-release fingerprints. The browser regression script is [tests/Browser/mobile-stabilization.mjs](tests/Browser/mobile-stabilization.mjs); its header documents private fixture inputs and optional Playwright module selection.
 
 ## v1.9.0 Plan Discovery & Personalization
 

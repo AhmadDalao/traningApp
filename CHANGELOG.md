@@ -9,7 +9,7 @@
 - Verify mobile trainee/coach lifecycles, populated dashboard scrolling, actual set logging, calendar date-click/drag, one/future recurring changes, cancellation, simulated failed saves, stale progression, and subscription/disconnect behavior.
 - Full verification: 434 PHP tests / 8,778 assertions on SQLite and isolated MySQL, 27 JS tests, 21 concurrency checks, 119 authenticated local HTTP checks, production build, Pint, scoped Prettier and whitespace checks.
 - Remove five local QA accounts and 130 QA images. All 17 original table fingerprints and 44 original media hashes match. No schema, backend behavior or dependency change.
-- Local release gate: READY. Hostinger deployment verification is recorded in the [full report](docs/V1.9.1-MOBILE-QA-STABILIZATION-REPORT.html).
+- READY: deployed tag `v1.9.1` (`f9e650d`) to Hostinger. All 64 file hashes, 119 live HTTP checks, 252 live responsive checks and 37 live browser regressions pass. Three production QA accounts and temporary deployment tools are removed; original data, uploads and settings match their pre-release fingerprints. [Full report](docs/V1.9.1-MOBILE-QA-STABILIZATION-REPORT.html).
 
 ## v1.9.0 — 29 October 2026
 
