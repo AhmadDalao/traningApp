@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.9.1 — 29 October 2026
+
+- Audit the existing application at 320/360/375/390/430/768/1280px and fix eight reproducible defects without adding product features.
+- Make phone form inputs 16px, button/icon controls at least 44px, crowded actions wrap, long breadcrumbs/metadata stay within the page, and History cards usable at tablet widths.
+- Restore dialog focus, including nested superset and copy-menu flows; make short-screen navigation scrollable and close account menus when selecting the current workspace.
+- Add a reusable browser regression script: 37 checks pass in Chromium and 37 in WebKit. The main responsive matrix passes 434 page/viewport checks without document overflow or console warnings.
+- Verify mobile trainee/coach lifecycles, populated dashboard scrolling, actual set logging, calendar date-click/drag, one/future recurring changes, cancellation, simulated failed saves, stale progression, and subscription/disconnect behavior.
+- Full verification: 434 PHP tests / 8,778 assertions on SQLite and isolated MySQL, 27 JS tests, 21 concurrency checks, 119 authenticated local HTTP checks, production build, Pint, scoped Prettier and whitespace checks.
+- Remove five local QA accounts and 130 QA images. All 17 original table fingerprints and 44 original media hashes match. No schema, backend behavior or dependency change.
+- Local release gate: READY. Hostinger deployment verification is recorded in the [full report](docs/V1.9.1-MOBILE-QA-STABILIZATION-REPORT.html).
+
 ## v1.9.0 — 29 October 2026
 
 - Accept up to three ordered goals with distinct-value validation, Primary/Secondary/Supporting display, priority controls and synchronized legacy goal fallback.
