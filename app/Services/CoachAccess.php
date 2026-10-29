@@ -47,6 +47,7 @@ class CoachAccess
 
     public function futureSession(User $coach, User $trainee, ScheduleEntry $entry): void
     {
+        abort_if($entry->programRun?->holds($entry) ?? false, 403, 'Resume the program before managing its sessions.');
         abort_unless($entry->user_id === $trainee->id && $entry->scheduled_by_user_id === $coach->id, 403);
         abort_unless($entry->status === 'planned' && ! $entry->started_at && $entry->workout_snapshot === null && ! $entry->sessionExercises()->exists(), 403, 'Saved and active workouts are protected.');
         abort_unless($this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time), 403, 'Past sessions are protected.');

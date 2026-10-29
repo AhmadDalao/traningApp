@@ -1,5 +1,6 @@
+import { programStatus } from "./ProgramControlModal";
 import { Link } from "@inertiajs/react";
-import { ButtonLink, DateLabel, StatusBadge } from "../Components/UI";
+import { Button, ButtonLink, DateLabel, StatusBadge } from "../Components/UI";
 import { useTraining } from "./CoachingUI";
 
 export function ProgramContext({ entry }) {
@@ -38,7 +39,8 @@ export function ProgramStats({ position }) {
                 </strong>
                 <p>
                     {position.due_completed} / {position.due} due workouts
-                    completed. Future dates excluded.
+                    completed. Future dates and paused unresolved workouts
+                    excluded.
                 </p>
             </div>
             <div className="panel">
@@ -54,7 +56,12 @@ export function ProgramStats({ position }) {
         </section>
     );
 }
-export function ProgramSessions({ sessions }) {
+export function ProgramSessions({
+    sessions,
+    onReschedule,
+    onSkip,
+    busy = false,
+}) {
     const { url } = useTraining();
     return (
         <ul className="program-sessions">
@@ -74,16 +81,39 @@ export function ProgramSessions({ sessions }) {
                         </small>
                         {entry.reason && <small>{entry.reason}</small>}
                     </div>
+                    {entry.missed && onReschedule && (
+                        <div className="program-actions">
+                            {entry.can_reschedule && (
+                                <Button
+                                    variant="secondary"
+                                    disabled={busy}
+                                    onClick={() => onReschedule(entry)}
+                                >
+                                    Reschedule
+                                </Button>
+                            )}
+                            <Button
+                                variant="secondary"
+                                disabled={busy}
+                                onClick={() => onSkip(entry)}
+                            >
+                                Mark skipped
+                            </Button>
+                        </div>
+                    )}
                     {entry.id ? (
                         <ButtonLink
                             variant="secondary"
                             href={url(`/schedule-entries/${entry.id}`)}
                         >
-                            {entry.missed
-                                ? "Missed · Review"
-                                : entry.started_at && entry.status === "planned"
-                                  ? "In progress"
-                                  : entry.status || "View session"}
+                            {entry.held && entry.status === "planned"
+                                ? "On hold"
+                                : entry.missed
+                                  ? "Missed · Review"
+                                  : entry.started_at &&
+                                      entry.status === "planned"
+                                    ? "In progress"
+                                    : entry.status || "View session"}
                         </ButtonLink>
                     ) : (
                         <span>Week {entry.program_week}</span>
@@ -93,7 +123,7 @@ export function ProgramSessions({ sessions }) {
         </ul>
     );
 }
-export function ProgramWeeks({ sessions, initialWeek = 1 }) {
+export function ProgramWeeks({ sessions, initialWeek = 1, ...actions }) {
     const weeks = [...new Set(sessions.map((row) => row.program_week))].sort(
         (a, b) => a - b,
     );
@@ -113,6 +143,7 @@ export function ProgramWeeks({ sessions, initialWeek = 1 }) {
                         }
                     </summary>
                     <ProgramSessions
+                        {...actions}
                         sessions={sessions.filter(
                             (row) => row.program_week === week,
                         )}
@@ -174,6 +205,14 @@ export function ProgramRunCards({ runs = [] }) {
                         href={url(`/program-runs/${run.id}`)}
                     >
                         <strong>{run.name}</strong>
+                        <span className={`badge program-status-${run.status}`}>
+                            {programStatus(run.status)}
+                        </span>
+                        {run.status === "paused" && (
+                            <span>
+                                Paused from {run.paused_from} · Resume program →
+                            </span>
+                        )}
                         <span>
                             {run.current_week
                                 ? `Week ${run.current_week} / ${run.duration_weeks} · ${run.block}`

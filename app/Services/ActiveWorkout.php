@@ -20,7 +20,9 @@ class ActiveWorkout
             return DB::transaction(function () use ($entry, &$paths) {
                 // Serialize starts across different sessions belonging to the same user.
                 User::whereKey($entry->user_id)->lockForUpdate()->firstOrFail();
+                $run = $entry->lockRunForMutation();
                 $entry = ScheduleEntry::lockForUpdate()->findOrFail($entry->id);
+                $entry->ensureProgramAvailable($run);
                 if ($entry->entry_type !== 'training' || $entry->status !== 'planned') {
                     throw ValidationException::withMessages(['workout' => 'Only a planned training session can be started.']);
                 }
@@ -63,7 +65,9 @@ class ActiveWorkout
     {
         // Every logging/finish/discard action takes the same parent lock.
         return DB::transaction(function () use ($entry, $action) {
+            $run = $entry->lockRunForMutation();
             $entry = ScheduleEntry::lockForUpdate()->findOrFail($entry->id);
+            $entry->ensureProgramAvailable($run);
             if (! $entry->isActiveWorkout()) {
                 throw ValidationException::withMessages(['workout' => 'Resume an active workout before changing its set logs.']);
             }

@@ -228,7 +228,7 @@ class PlanSchedule
 
     public function canMove(ScheduleEntry $entry, User $owner, ?User $coach = null): bool
     {
-        if ($entry->user_id !== $owner->id || $entry->status !== 'planned' || $entry->started_at || $entry->workout_snapshot !== null ||
+        if (($entry->programRun?->holds($entry) ?? false) || $entry->user_id !== $owner->id || $entry->status !== 'planned' || $entry->started_at || $entry->workout_snapshot !== null ||
             ($entry->session_exercises_exists ?? $entry->sessionExercises()->exists()) || (! $entry->program_run_id && ! $this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time))) {
             return false;
         }

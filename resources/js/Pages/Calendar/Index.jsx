@@ -66,7 +66,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
         classNames: [`event-${e.entry_type}`, `event-${e.status}`],
         extendedProps: {
             program: e.program_run_id
-                ? `Week ${e.program_week} · ${e.program_context?.block_name}`
+                ? `Week ${e.program_week} · ${e.program_context?.block_name}${["paused", "ended"].includes(e.program_status) ? ` · ${e.program_status === "paused" ? "Paused" : "Ended early"}` : ""}`
                 : null,
             status: e.status,
             type: e.entry_type,

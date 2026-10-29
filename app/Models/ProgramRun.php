@@ -10,7 +10,12 @@ class ProgramRun extends Model
 
     protected function casts(): array
     {
-        return ['started_on' => 'date:Y-m-d', 'completed_at' => 'datetime', 'definition_snapshot' => 'array'];
+        return ['paused_from' => 'date:Y-m-d', 'resume_on' => 'date:Y-m-d', 'ended_at' => 'datetime', 'ended_position' => 'array', 'schedule_shifts' => 'array', 'started_on' => 'date:Y-m-d', 'completed_at' => 'datetime', 'definition_snapshot' => 'array'];
+    }
+
+    public function holds(ScheduleEntry $entry): bool
+    {
+        return $this->status === 'ended' || ($this->status === 'paused' && $this->paused_from && $entry->scheduled_date->gte($this->paused_from));
     }
 
     public function user()

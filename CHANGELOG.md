@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.1.0 — 29 October 2026 — source release, deployment held
+
+- Added signed Pause, Resume, Adjust Remaining Schedule and End Program previews for personal and authorized coach Program Runs.
+- Preserved logical weeks, block identity, occurrence keys, saved prescriptions, historical actuals and manually moved exceptions. Explicit future-definition review respects accepted schedule shifts.
+- Excluded paused unresolved workouts from missed/adherence and overview counts; added status cards, Calendar labels, missed recovery actions and a frozen ended summary.
+- Serialized controls with starts and status changes, validated return/subscription dates and retained source-deleted owner access. No coach performance logging or trainee self-upgrade.
+- Fixed long workout names overlapping status actions and added internal-overflow checks in both browser engines.
+- READY: 499 tests / 10,635 assertions per database; 46 concurrency, 28 JavaScript, 742 browser and 133 local HTTP checks; build/format checks pass. Original 19 tables and 44 media files unchanged after removing five QA accounts and 554 generated images.
+- **Production remains v2.0.1.** The v2.1 brief explicitly requires a later deployment request. [Full 45-section report](docs/V2.1-PROGRAM-CONTROL-FLEXIBILITY-REPORT.html).
+
 ## v2.0.1 — 29 October 2026 — deployed and verified
 
 - Close three coach program-lock gaps: reordered current-block days, blocks completed out of order, and newly added current/resolved-block sessions through schedule reconciliation.

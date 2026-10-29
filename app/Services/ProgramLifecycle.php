@@ -16,26 +16,26 @@ class ProgramLifecycle
 
             return ['id' => $run->id, 'name' => $run->definition_snapshot['name'], 'status' => $run->status,
                 'current_week' => $position['current_week'], 'duration_weeks' => $position['duration_weeks'],
-                'block' => $position['current_block']['name'] ?? null, 'adherence' => $position['adherence']];
+                'paused_from' => $run->paused_from?->toDateString(), 'block' => $position['current_block']['name'] ?? null, 'adherence' => $position['adherence']];
         })->all();
     }
 
     public function position(ProgramRun $run): array
     {
-        $sessions = $run->sessions()->when(DB::transactionLevel() > 0, fn ($q) => $q->lockForUpdate())->get();
+        $sessions = $run->sessions()->withExists('sessionExercises')->when(DB::transactionLevel() > 0, fn ($q) => $q->lockForUpdate())->get();
         $required = $sessions->where('entry_type', 'training');
         $unresolved = $required->filter(fn ($entry) => ! in_array($entry->status, ['completed', 'skipped'], true) || $entry->isActiveWorkout());
         $current = $unresolved->min('program_week');
         $duration = (int) $run->definition_snapshot['duration_weeks'];
         $resolvedWeeks = collect(range(1, $duration))->filter(fn ($week) => ! $unresolved->contains('program_week', $week))->count();
-        $due = $required->filter(fn ($entry) => ! app(CoachAccess::class)->future($entry->scheduled_date->toDateString(), $entry->scheduled_time));
+        $due = $required->filter(fn ($entry) => ! ($entry->status === 'planned' && $run->holds($entry)) && ! app(CoachAccess::class)->future($entry->scheduled_date->toDateString(), $entry->scheduled_time));
         $completed = $due->where('status', 'completed')->count();
         $missed = $due->filter(fn ($entry) => $entry->status === 'planned' && ! $entry->started_at)->count();
         $block = collect($run->definition_snapshot['blocks'])->first(fn ($block) => $current !== null && $block['start_week'] <= $current && $block['end_week'] >= $current);
 
         $next = $unresolved->first();
 
-        return ['current_week' => $current === null ? null : (int) $current, 'current_block' => $block,
+        $position = ['current_week' => $current === null ? null : (int) $current, 'current_block' => $block,
             'resolved_weeks' => $resolvedWeeks, 'duration_weeks' => $duration,
             'progress_percent' => round($resolvedWeeks / $duration * 100),
             'total_workouts' => $required->count(), 'completed_workouts' => $required->where('status', 'completed')->count(),
@@ -45,9 +45,12 @@ class ProgramLifecycle
             'all_resolved' => $required->isNotEmpty() && $unresolved->isEmpty() && ! $sessions->contains(fn ($entry) => $entry->isActiveWorkout()),
             'next_workout' => $next ? [...$next->only('id', 'title', 'scheduled_time', 'program_week', 'started_at'), 'scheduled_date' => $next->scheduled_date->toDateString()] : null,
             'sessions' => $sessions->map(fn ($entry) => [...$entry->only('id', 'title', 'entry_type', 'status', 'scheduled_date', 'scheduled_time', 'program_week', 'program_context', 'started_at'),
-                'scheduled_date' => $entry->scheduled_date->toDateString(),
-                'missed' => $entry->entry_type === 'training' && $entry->status === 'planned' && ! $entry->started_at && ! app(CoachAccess::class)->future($entry->scheduled_date->toDateString(), $entry->scheduled_time),
+                'scheduled_date' => $entry->scheduled_date->toDateString(), 'held' => $run->holds($entry),
+                'can_reschedule' => $entry->status === 'planned' && ! $entry->started_at && $entry->workout_snapshot === null && ! $entry->session_exercises_exists && ! $run->holds($entry),
+                'missed' => $entry->entry_type === 'training' && $entry->status === 'planned' && ! $entry->started_at && ! ($entry->status === 'planned' && $run->holds($entry)) && ! app(CoachAccess::class)->future($entry->scheduled_date->toDateString(), $entry->scheduled_time),
             ])->all()];
+
+        return $run->status === 'ended' && $run->ended_position ? [...$position, ...$run->ended_position, 'next_workout' => null] : $position;
     }
 
     public function sync(int $id): ?ProgramRun
@@ -59,7 +62,7 @@ class ProgramLifecycle
             }
             $run->sessions()->lockForUpdate()->get(['id']);
             $complete = $this->position($run)['all_resolved'];
-            $run->fill(['status' => $complete ? 'completed' : 'active', 'completed_at' => $complete ? ($run->completed_at ?? now()) : null]);
+            $run->fill(['status' => $complete ? 'completed' : ($run->status === 'paused' ? 'paused' : 'active'), 'completed_at' => $complete ? ($run->completed_at ?? now()) : null]);
             if ($run->isDirty()) {
                 $run->save();
             }

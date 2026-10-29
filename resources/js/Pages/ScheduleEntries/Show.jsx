@@ -38,6 +38,7 @@ export default function Show({
     progressSummary = null,
     canManageSession = true,
     scheduledBy = null,
+    programHeld = false,
     canMove = false,
     canMoveSeries = false,
 }) {
@@ -99,24 +100,37 @@ export default function Show({
                     </>
                 }
             >
-                {!coaching && <SessionStatusActions entry={entry} />}
+                {!coaching &&
+                    (!programHeld || entry.status !== "planned" || saved) && (
+                        <SessionStatusActions
+                            entry={entry}
+                            programHeld={programHeld}
+                        />
+                    )}
                 {canMove && (
                     <Button variant="secondary" onClick={() => setMoving(true)}>
                         <CalendarDays size={16} />
                         Change date
                     </Button>
                 )}
-                {canManageSession && (
-                    <ButtonLink
-                        href={url(`/schedule-entries/${entry.id}/edit`)}
-                        variant="secondary"
-                    >
-                        <Pencil size={16} />
-                        Edit
-                    </ButtonLink>
-                )}
+                {canManageSession &&
+                    !(programHeld && entry.status === "planned") && (
+                        <ButtonLink
+                            href={url(`/schedule-entries/${entry.id}/edit`)}
+                            variant="secondary"
+                        >
+                            <Pencil size={16} />
+                            Edit
+                        </ButtonLink>
+                    )}
             </PageHeader>
             <ProgramContext entry={entry} />
+            {programHeld && entry.status === "planned" && (
+                <p className="coach-callout">
+                    This program is paused or ended. Open the program above to
+                    review its status.
+                </p>
+            )}
             {entry.status !== "planned" && (
                 <div className={`status-banner ${entry.status}`}>
                     {entry.status === "completed" ? (

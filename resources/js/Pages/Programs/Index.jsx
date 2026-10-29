@@ -1,3 +1,4 @@
+import { programStatus } from "../../Features/ProgramControlModal";
 import { Head } from "@inertiajs/react";
 import {
     PageHeader,
@@ -24,7 +25,12 @@ export default function Index({ runs }) {
                     <section className="panel program-card" key={run.id}>
                         <h2>{run.definition_snapshot.name}</h2>
                         <p>
-                            Started {run.started_on} · {run.status}
+                            Started {run.started_on} ·{" "}
+                            <span
+                                className={`badge program-status-${run.status}`}
+                            >
+                                {programStatus(run.status)}
+                            </span>
                         </p>
                         <p>
                             {run.position.current_week

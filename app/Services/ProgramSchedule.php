@@ -107,6 +107,12 @@ class ProgramSchedule
         $result = ['add' => [], 'update' => [], 'remove' => [], 'keep' => [], 'protected' => []];
         $keys = [];
         foreach ($desired['sessions'] as $row) {
+            $originalDate = $row['scheduled_date'];
+            foreach ($run->schedule_shifts ?? [] as $shift) {
+                if ($originalDate >= $shift['from']) {
+                    $row['scheduled_date'] = Carbon::parse($row['scheduled_date'])->addDays($shift['days'])->toDateString();
+                }
+            }
             $keys[] = $row['key'];
             $entry = $byKey->get($row['key']);
             if ($entry) {

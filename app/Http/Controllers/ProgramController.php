@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProgramRun;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use App\Services\ProgramControl;
 use App\Services\ProgramDefinition;
 use App\Services\ProgramLifecycle;
 use App\Services\ProgramSchedule;
@@ -107,6 +108,44 @@ class ProgramController extends Controller
 
         return Inertia::render('Programs/Run', ['run' => $run, 'position' => $lifecycle->position($run),
             'summary' => $run->status === 'completed' ? $lifecycle->summary($run) : null]);
+    }
+
+    public function controlPreview(Request $request, ProgramRun $programRun, ProgramControl $control)
+    {
+        return $this->control($request, $programRun, $control, false);
+    }
+
+    public function controlApply(Request $request, ProgramRun $programRun, ProgramControl $control)
+    {
+        return $this->control($request, $programRun, $control, true);
+    }
+
+    private function control(Request $request, ProgramRun $run, ProgramControl $control, bool $apply)
+    {
+        $this->authorizeRun($run, true);
+        $data = $request->validate([
+            'action' => 'required|in:pause,resume,shift,end',
+            'pause_date' => 'required_if:action,pause|nullable|date_format:Y-m-d|after_or_equal:today',
+            'resume_date' => 'nullable|date_format:Y-m-d|after:pause_date',
+            'start_date' => 'required_if:action,resume,shift|nullable|date_format:Y-m-d|after_or_equal:today',
+            'signature' => ($apply ? 'required' : 'nullable').'|string|size:64',
+            'confirmed' => $apply ? 'required|accepted' : 'sometimes|boolean',
+        ]);
+        $signature = $data['signature'] ?? null;
+        unset($data['signature'], $data['confirmed']);
+
+        return $this->context->write(function () use ($run, $control, $apply, $data, $signature) {
+            User::whereKey($this->context->owner()->id)->lockForUpdate()->firstOrFail();
+            if ($run->training_plan_id) {
+                TrainingPlan::whereKey($run->training_plan_id)->lockForUpdate()->first();
+            }
+            $run = ProgramRun::lockForUpdate()->findOrFail($run->id);
+            $this->authorizeRun($run, true);
+            $coach = $this->context->coaching() ? $this->context->actor() : null;
+            $preview = $apply ? $control->apply($run, $data, $signature, $coach) : $control->preview($run, $data, $coach);
+
+            return response()->json(['preview' => $preview, 'saved' => $apply]);
+        });
     }
 
     public function changePreview(Request $request, ProgramRun $programRun, ProgramSchedule $schedule)

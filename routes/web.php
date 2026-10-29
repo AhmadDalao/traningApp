@@ -163,6 +163,8 @@ foreach (['' => ['auth'], '/coach' => ['auth', CoachWorkspace::class], '/coach/t
         Route::get('/program-runs', [ProgramController::class, 'index']);
         Route::get('/program-runs/{programRun}', [ProgramController::class, 'show']);
         Route::post('/program-runs/{programRun}/change-preview', [ProgramController::class, 'changePreview']);
+        Route::post('/program-runs/{programRun}/control-preview', [ProgramController::class, 'controlPreview']);
+        Route::post('/program-runs/{programRun}/control', [ProgramController::class, 'controlApply']);
         Route::post('/program-runs/{programRun}/changes', [ProgramController::class, 'changeApply']);
     });
 }

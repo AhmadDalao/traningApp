@@ -54,7 +54,7 @@ class CoachController extends Controller
     {
         $relations = CoachTraineeRelationship::where('coach_user_id', $request->user()->id);
         $ids = (clone $relations)->where('status', 'active')->pluck('trainee_user_id');
-        $sessions = ScheduleEntry::whereIn('user_id', $ids);
+        $sessions = ScheduleEntry::whereIn('user_id', $ids)->availableOnSchedule();
         $upcoming = (clone $sessions)->upcoming()->whereDate('scheduled_date', '<=', today()->addDays(7))->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')->limit(12)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'scheduled_date', 'scheduled_time']);
         $recent = (clone $sessions)->whereIn('status', ['completed', 'skipped'])->latest('updated_at')->limit(8)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'updated_at']);
         $names = User::whereIn('id', $ids)->pluck('name', 'id');
@@ -106,7 +106,7 @@ class CoachController extends Controller
     {
         $owner = $context->owner();
         $relationship = $access->relationship($context->actor(), $owner);
-        $month = $owner->scheduleEntries()->where('entry_type', 'training')->past()->whereBetween('scheduled_date', [today()->startOfMonth(), today()]);
+        $month = $owner->scheduleEntries()->availableOnSchedule()->where('entry_type', 'training')->past()->whereBetween('scheduled_date', [today()->startOfMonth(), today()]);
         $total = (clone $month)->count();
 
         return Inertia::render('Coach/Trainee', [

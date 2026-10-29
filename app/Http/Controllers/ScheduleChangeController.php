@@ -41,7 +41,11 @@ class ScheduleChangeController extends Controller
                 $plan = TrainingPlan::lockForUpdate()->findOrFail($plan->id);
                 $plan->setRelation('trainingDays', $plan->trainingDays()->lockForUpdate()->get());
             }
+            $run = $entry->lockRunForMutation();
             $entry = ScheduleEntry::lockForUpdate()->findOrFail($entry->id);
+            if ($run) {
+                $entry->setRelation('programRun', $run);
+            }
             if ($plan) {
                 $lockedDay = $plan->trainingDays->firstWhere('id', $entry->training_day_id);
                 abort_unless($lockedDay, 409, 'The session’s training day changed. Refresh and try again.');

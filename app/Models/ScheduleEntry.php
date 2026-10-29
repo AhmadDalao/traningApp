@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ScheduleEntry extends Model
 {
@@ -28,6 +29,31 @@ class ScheduleEntry extends Model
         });
     }
 
+    public function lockRunForMutation(): ?ProgramRun
+    {
+        if (! $this->program_run_id) {
+            return null;
+        }
+        User::whereKey($this->user_id)->lockForUpdate()->firstOrFail();
+
+        return ProgramRun::whereKey($this->program_run_id)->lockForUpdate()->first();
+    }
+
+    public function ensureProgramAvailable(?ProgramRun $run): void
+    {
+        if ($run && $run->holds($this)) {
+            throw ValidationException::withMessages(['program' => $run->status === 'paused'
+                ? 'Resume the program before changing this workout.' : 'This program ended. Its retained workouts are read-only.']);
+        }
+    }
+
+    public function scopeAvailableOnSchedule(Builder $query): void
+    {
+        $query->where(fn ($q) => $q->where('status', '!=', 'planned')->orWhereNull('program_run_id')
+            ->orWhereHas('programRun', fn ($run) => $run->whereNotIn('status', ['paused', 'ended'])
+                ->orWhere(fn ($paused) => $paused->where('status', 'paused')->whereColumn('schedule_entries.scheduled_date', '<', 'program_runs.paused_from'))));
+    }
+
     public function programRun()
     {
         return $this->belongsTo(ProgramRun::class);
@@ -45,7 +71,7 @@ class ScheduleEntry extends Model
 
     public function scopeUpcoming(Builder $query): void
     {
-        $query->where('status', 'planned')->where(function (Builder $dates) {
+        $query->availableOnSchedule()->where('status', 'planned')->where(function (Builder $dates) {
             $dates->whereDate('scheduled_date', '>', today()->toDateString())
                 ->orWhere(fn (Builder $today) => $today->whereDate('scheduled_date', today()->toDateString())
                     ->where(fn (Builder $time) => $time->whereNull('scheduled_time')->orWhere('scheduled_time', '>=', now()->format('H:i:s'))));

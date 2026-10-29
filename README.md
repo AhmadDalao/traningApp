@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v2.1.0 Program Control & Flexibility — source release, deployment held
+
+Pause with a known return date or indefinitely, explicitly resume on a chosen date, shift the remaining schedule, recover missed workouts and end a run early. Signed previews preserve completed/skipped/saved workouts, manual exceptions, logical weeks, block identity and frozen prescriptions. Coaches retain existing assignment/subscription boundaries; trainees cannot self-enable Coach Workspace.
+
+**READY — source only.** The v2.1 brief explicitly holds production deployment until a later request to deploy. Production remains v2.0.1. One additive migration extends `program_runs`; no rebuild or dependency changes. Verification: 499 tests / 10,635 assertions on each database, 46 concurrency checks, 28 JavaScript tests, 742 browser checks, build and formatting pass. Five local QA accounts and 554 generated images removed; 19 original table fingerprints and 44 media hashes match.
+
+[Full 45-section v2.1 report](docs/V2.1-PROGRAM-CONTROL-FLEXIBILITY-REPORT.html) · [Verification evidence](docs/v2.1.0-qa/verification.json). Run shared-account browser flows and the two database suites sequentially.
+
 ## v2.0.1 Program Lifecycle QA & Stabilization — deployed and verified
 
 Seven confirmed defects fixed: coach locks on current/resolved blocks and day ordering, protected-session preview accuracy, future edits into elapsed times, early-completed program History access, and repeated summary metadata queries. Existing architecture, simple plans, actual workout data and authentication are preserved. No migration or dependency changes.

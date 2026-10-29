@@ -2,7 +2,11 @@ import { useState } from "react";
 import { router } from "@inertiajs/react";
 import { Check, SkipForward, Play } from "lucide-react";
 import { Button, ButtonLink } from "../Components/UI";
-export default function SessionStatusActions({ entry, compact = false }) {
+export default function SessionStatusActions({
+    entry,
+    compact = false,
+    programHeld = false,
+}) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     function update(status) {
@@ -60,7 +64,9 @@ export default function SessionStatusActions({ entry, compact = false }) {
         );
     return (
         <div className="status-actions">
-            {entry.status === "planned" && entry.entry_type === "training" ? (
+            {!programHeld &&
+            entry.status === "planned" &&
+            entry.entry_type === "training" ? (
                 <>
                     <Button
                         disabled={busy}

@@ -23,7 +23,7 @@ class HandleInertiaRequests extends Middleware
                 $access = app(CoachAccess::class);
                 $coaching = $context->coaching();
                 $relationship = $coaching ? $access->relationship($context->actor(), $context->owner()) : null;
-                $plan = $request->route('trainingPlan') ?? $request->route('trainingDay')?->trainingPlan;
+                $plan = $request->route('trainingPlan') ?? $request->route('trainingDay')?->trainingPlan ?? $request->route('programRun')?->trainingPlan;
                 $manage = ! $coaching || ($access->subscription($relationship) && (! $plan || $plan->assignment?->status === 'active'));
 
                 return ['workspace' => $request->attributes->get('coach_workspace') ? 'coach' : 'personal', 'prefix' => $context->prefix(), 'templates' => $context->templates(), 'coaching' => $coaching, 'canManage' => (bool) $manage, 'trainee' => $coaching ? $context->owner()->only('id', 'name', 'training_code') : null];

@@ -40,9 +40,10 @@ class ScheduleEntryController extends Controller
         $end = $date->copy()->endOfMonth()->addWeek();
 
         return Inertia::render('Calendar/Index', [
-            'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan')->withExists('sessionExercises')->get()->map(fn ($entry) => [
+            'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan', 'programRun')->withExists('sessionExercises')->get()->map(fn ($entry) => [
                 ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key', 'program_run_id', 'program_week', 'program_context'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
+                'program_status' => $entry->programRun?->status,
                 'can_move' => $schedule->canMove($entry, $context->owner()) && $coachCanMove($entry),
                 'can_move_series' => $schedule->canMoveSeries($entry),
                 'source' => $entry->trainingDay?->trainingPlan?->workspace_type === 'coach_assigned' ? 'Coach assigned' : 'Personal',
@@ -107,7 +108,7 @@ class ScheduleEntryController extends Controller
 
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'canMove' => app(PlanSchedule::class)->canMove($scheduleEntry, $context->owner(), $context->coaching() ? $context->actor() : null), 'canMoveSeries' => app(PlanSchedule::class)->canMoveSeries($scheduleEntry), 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'canManageSession' => ! $context->coaching() || app(CoachAccess::class)->canManageSession($context->actor(), $context->owner(), $scheduleEntry)]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'programHeld' => $scheduleEntry->programRun?->holds($scheduleEntry) ?? false, 'canMove' => app(PlanSchedule::class)->canMove($scheduleEntry, $context->owner(), $context->coaching() ? $context->actor() : null), 'canMoveSeries' => app(PlanSchedule::class)->canMoveSeries($scheduleEntry), 'workout' => $scheduleEntry->workoutDetails(), 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'canManageSession' => ! $context->coaching() || app(CoachAccess::class)->canManageSession($context->actor(), $context->owner(), $scheduleEntry)]);
     }
 
     public function edit(Request $request, ScheduleEntry $scheduleEntry)
@@ -120,7 +121,11 @@ class ScheduleEntryController extends Controller
     public function update(UpdateScheduleEntryRequest $request, ScheduleEntry $scheduleEntry, WorkoutCalorieEstimator $estimator)
     {
         DB::transaction(function () use ($request, $scheduleEntry, $estimator) {
+            $run = $scheduleEntry->lockRunForMutation();
             $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
+            if ($entry->status === 'planned') {
+                $entry->ensureProgramAvailable($run);
+            }
             if ($request->boolean('details_only')) {
                 if ($entry->status !== 'completed' || $entry->entry_type !== 'training') {
                     throw ValidationException::withMessages(['details' => 'Workout details can only be recorded for a completed training session.']);
@@ -166,7 +171,11 @@ class ScheduleEntryController extends Controller
         $status = $request->validated('status');
         try {
             DB::transaction(function () use ($request, $scheduleEntry, $status, $estimator, &$paths) {
+                $run = $scheduleEntry->lockRunForMutation();
                 $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
+                if ($entry->status === 'planned' && $entry->workout_snapshot === null) {
+                    $entry->ensureProgramAvailable($run);
+                }
                 if ($entry->isActiveWorkout() && $status !== 'planned') {
                     throw ValidationException::withMessages(['status' => 'This workout is in progress. Finish or discard it from Active Workout.']);
                 }
@@ -203,7 +212,11 @@ class ScheduleEntryController extends Controller
     public function weights(UpdateWorkoutWeightsRequest $request, ScheduleEntry $scheduleEntry)
     {
         DB::transaction(function () use ($request, $scheduleEntry) {
+            $run = $scheduleEntry->lockRunForMutation();
             $entry = $request->user()->scheduleEntries()->lockForUpdate()->findOrFail($scheduleEntry->id);
+            if ($entry->status === 'planned') {
+                $entry->ensureProgramAvailable($run);
+            }
             if ($entry->status !== 'completed' || $entry->entry_type !== 'training' || $entry->workout_snapshot === null) {
                 throw ValidationException::withMessages(['weights' => 'Actual weights can only be recorded for a completed training session with a saved workout.']);
             }

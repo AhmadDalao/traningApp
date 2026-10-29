@@ -1,3 +1,7 @@
+import ProgramControlModal, {
+    programStatus,
+} from "../../Features/ProgramControlModal";
+import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import {
@@ -20,8 +24,27 @@ export default function Run({ run, position, summary }) {
     const [preview, setPreview] = useState(null),
         [busy, setBusy] = useState(false),
         [error, setError] = useState("");
+    const [control, setControl] = useState(null);
+    const [moving, setMoving] = useState(null);
     const definition = run.definition_snapshot,
         next = position.next_workout;
+    function skip(entry) {
+        router.patch(
+            `/schedule-entries/${entry.id}/status`,
+            { status: "skipped" },
+            {
+                preserveScroll: true,
+                onStart: () => setBusy(true),
+                onFinish: () => setBusy(false),
+                onError: (errors) =>
+                    setError(Object.values(errors).flat().join(" ")),
+            },
+        );
+    }
+    const recovery =
+        run.status === "active" && !coaching
+            ? { onReschedule: setMoving, onSkip: skip, busy }
+            : {};
     async function changes(apply = false) {
         setBusy(true);
         setError("");
@@ -56,7 +79,11 @@ export default function Run({ run, position, summary }) {
                 eyebrow={
                     run.status === "completed"
                         ? "PROGRAM COMPLETE 🎉"
-                        : `WEEK ${position.current_week || definition.duration_weeks} OF ${definition.duration_weeks}`
+                        : run.status === "ended"
+                          ? "PROGRAM ENDED EARLY"
+                          : run.status === "paused"
+                            ? "PROGRAM PAUSED"
+                            : `WEEK ${position.current_week || definition.duration_weeks} OF ${definition.duration_weeks}`
                 }
                 title={definition.name}
                 description={
@@ -73,7 +100,7 @@ export default function Run({ run, position, summary }) {
                         Program definition
                     </ButtonLink>
                 )}
-                {run.status === "completed" &&
+                {["completed", "ended"].includes(run.status) &&
                     canManage &&
                     run.training_plan_id && (
                         <ButtonLink
@@ -85,7 +112,90 @@ export default function Run({ run, position, summary }) {
                         </ButtonLink>
                     )}
             </PageHeader>
-            {next && (
+            <section className="panel program-card">
+                <span className={`badge program-status-${run.status}`}>
+                    {programStatus(run.status)}
+                </span>
+                {run.status === "paused" && (
+                    <p>
+                        Paused from <DateLabel date={run.paused_from} />
+                        {run.resume_on && (
+                            <>
+                                {" "}
+                                · Expected return{" "}
+                                <DateLabel date={run.resume_on} />
+                            </>
+                        )}
+                        . Resume explicitly when ready. Paused workouts do not
+                        become missed.
+                    </p>
+                )}
+                {run.status === "ended" && (
+                    <>
+                        <p>
+                            Ended at Week {position.current_week} of{" "}
+                            {position.duration_weeks} ·{" "}
+                            <DateLabel date={run.ended_at?.slice(0, 10)} />
+                        </p>
+                        <p>
+                            {position.completed_workouts} completed ·{" "}
+                            {position.skipped_workouts} skipped ·{" "}
+                            {position.total_workouts -
+                                position.completed_workouts -
+                                position.skipped_workouts}{" "}
+                            unresolved when ended. Your history and progress
+                            remain.
+                        </p>
+                    </>
+                )}
+                {canManage && ["active", "paused"].includes(run.status) && (
+                    <div className="program-actions">
+                        <Button
+                            variant="secondary"
+                            onClick={() =>
+                                setControl(
+                                    run.status === "paused"
+                                        ? "resume"
+                                        : "pause",
+                                )
+                            }
+                        >
+                            {run.status === "paused"
+                                ? "Resume program"
+                                : "Pause program"}
+                        </Button>
+                        {run.status === "active" && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => setControl("shift")}
+                            >
+                                Adjust remaining schedule
+                            </Button>
+                        )}
+                        <Button
+                            variant="danger"
+                            onClick={() => setControl("end")}
+                        >
+                            End program
+                        </Button>
+                    </div>
+                )}
+            </section>
+            {control && (
+                <ProgramControlModal
+                    run={run}
+                    position={position}
+                    action={control}
+                    onClose={() => setControl(null)}
+                />
+            )}
+            {moving && (
+                <ScheduleChangeModal
+                    entry={moving}
+                    onClose={() => setMoving(null)}
+                />
+            )}
+            {next && run.status === "active" && (
                 <section className="panel program-card program-next">
                     <small>
                         NEXT UNRESOLVED WORKOUT · WEEK {next.program_week}
@@ -128,6 +238,7 @@ export default function Run({ run, position, summary }) {
                 <section className="panel program-card">
                     <h2>This program week</h2>
                     <ProgramSessions
+                        {...recovery}
                         sessions={position.sessions.filter(
                             (row) => row.program_week === position.current_week,
                         )}
@@ -200,6 +311,7 @@ export default function Run({ run, position, summary }) {
             <section>
                 <h2>All program weeks</h2>
                 <ProgramWeeks
+                    {...recovery}
                     sessions={position.sessions}
                     initialWeek={position.current_week}
                 />
