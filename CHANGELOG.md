@@ -11,7 +11,7 @@
 - Add four complete catalog programs, combined Plans/Programs filtering, phone-friendly block editing and program context in workouts/Calendar.
 - Fix date-only serialization, deleted-day coach authorization fallback and committed template-media cleanup; test rollback and concurrent changes.
 - Verify 454 PHP tests / 9,715 assertions on SQLite and MySQL; 28 JS tests; 28 concurrency checks; 133 local HTTP checks; 300 program/coach browser checks across Chromium/WebKit plus 74 existing mobile regressions. Build, formatting and whitespace checks pass.
-- Remove 3 local QA accounts and 524 generated images; all 19 table fingerprints and 44 original media hashes match. [Full report](docs/V2.0-PROGRAMS-BLOCKS-LIFECYCLE-REPORT.html). Release/deployment verification pending.
+- Remove 3 local QA accounts and 524 generated images; all 19 table fingerprints and 44 original media hashes match. [Full report](docs/V2.0-PROGRAMS-BLOCKS-LIFECYCLE-REPORT.html). READY: deployed `464c07c`, tagged `v2.0.0`. All 112 file hashes, 133 live HTTP checks, 300 program/coach browser checks across Chromium/WebKit and 37 existing mobile regressions pass. The additive migration, backup and original-data integrity are verified; three live QA accounts and public deployment tools are removed.
 
 ## v1.9.1 — 29 October 2026
 

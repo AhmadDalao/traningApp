@@ -8,7 +8,7 @@ Finite programs now sit alongside existing simple plans: ordered normal/deload b
 
 Verification: **454 PHP tests / 9,715 assertions** on SQLite and isolated MySQL, **28 JS tests**, **28 concurrency checks**, **133 local HTTP checks**, **90 personal + 60 coach browser checks in each of Chromium and WebKit**, and **37 existing mobile regressions in each engine**. Seven widths from 320–1280px pass. Three local QA accounts and 524 QA images were removed; all 19 table fingerprints and 44 original media hashes match. One additive migration; existing simple plans and workout records are preserved. End Program Early is deferred under the brief's allowance.
 
-[Full v2.0 report, architecture and verification evidence](docs/V2.0-PROGRAMS-BLOCKS-LIFECYCLE-REPORT.html). Local implementation is verified; release/deployment verification is pending.
+[Full v2.0 report, architecture and verification evidence](docs/V2.0-PROGRAMS-BLOCKS-LIFECYCLE-REPORT.html). **READY — deployed and verified on Hostinger.** Tag `v2.0.0` identifies `464c07c`. All 112 runtime/build hashes, 133 live HTTP checks, 300 live program/coach browser checks and 37 existing mobile regressions pass. The additive migration is applied; original production data, uploads and settings are preserved. Three live QA accounts and temporary deployment files are removed.
 
 ## v1.9.1 Mobile QA & Stabilization
 
