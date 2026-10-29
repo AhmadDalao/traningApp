@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrainingDay extends Model
 {
-    protected $fillable = ['icon', 'title', 'type', 'focus_area', 'notes', 'position', 'weekdays', 'default_time'];
+    protected $fillable = ['icon', 'title', 'type', 'focus_area', 'notes', 'position', 'weekdays', 'default_time', 'training_block_id'];
 
     protected function casts(): array
     {
@@ -23,6 +23,11 @@ class TrainingDay extends Model
         }
 
         return array_map('intval', $weekdays);
+    }
+
+    public function trainingBlock()
+    {
+        return $this->belongsTo(TrainingBlock::class);
     }
 
     public function trainingPlan()

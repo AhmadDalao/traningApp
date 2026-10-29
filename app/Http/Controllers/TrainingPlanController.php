@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTrainingPlanRequest;
 use App\Http\Requests\UpdateTrainingPlanRequest;
 use App\Models\TrainingPlan;
+use App\Services\ProgramDefinition;
+use App\Services\ProgramLifecycle;
 use App\Services\TrainingContext;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
@@ -39,6 +41,9 @@ class TrainingPlanController extends Controller
             $plan = $this->context->owner()->trainingPlans()->make($request->validated());
             $plan->workspace_type = $this->context->templates() ? 'coach_template' : ($this->context->coaching() ? 'coach_assigned' : 'personal');
             $plan->save();
+            if ($plan->isProgram()) {
+                $plan->blocks()->create(['name' => 'Foundation', 'start_week' => 1, 'end_week' => $plan->duration_weeks, 'position' => 0, 'type' => 'normal']);
+            }
             if ($relationship) {
                 $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'assigned_training_plan_id' => $plan->id, 'assigned_at' => now(), 'status' => 'active']);
             }
@@ -53,8 +58,15 @@ class TrainingPlanController extends Controller
     {
         $this->context->plan($trainingPlan);
 
+        if ($trainingPlan->isProgram()) {
+            return Inertia::render('Programs/Show', ['plan' => $this->describe($trainingPlan),
+                'blocks' => $trainingPlan->blocks()->with('trainingDays.exercises')->get()->map(fn ($block) => [...$block->toArray(),
+                    'editable' => ! $this->context->coaching() || app(ProgramDefinition::class)->coachCanEditBlock($block)]),
+                'runs' => $trainingPlan->programRuns()->get()->map(fn ($run) => app(ProgramLifecycle::class)->sync($run->id))]);
+        }
+
         return Inertia::render('TrainingPlans/Show', ['plan' => [...$this->describe($trainingPlan), 'training_days' => $trainingPlan->trainingDays()->withCount('exercises')->get()],
-            'copyPlans' => $this->context->plans(true)->whereKeyNot($trainingPlan->id)->orderBy('name')->get(['id', 'name'])]);
+            'copyPlans' => $this->context->plans(true)->where('structure_type', 'simple')->whereKeyNot($trainingPlan->id)->orderBy('name')->get(['id', 'name'])]);
     }
 
     public function edit(TrainingPlan $trainingPlan)

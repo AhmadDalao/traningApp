@@ -16,12 +16,17 @@ class CoachAssignmentController extends Controller
     {
         $subscription = $access->subscription($access->relationship($context->actor(), $context->owner()));
 
-        return Inertia::render('Coach/Assign', ['templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description']), 'subscription' => $subscription?->summary()]);
+        return Inertia::render('Coach/Assign', ['templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
     }
 
     public function store(Request $request, TrainingContext $context, TrainingPlanDuplicator $duplicator)
     {
-        $data = $request->validate(['training_plan_id' => 'required|integer', 'start_date' => 'required|date_format:Y-m-d', 'schedule_mode' => 'sometimes|in:fixed,ongoing', 'end_date' => ($request->input('schedule_mode') === 'ongoing' ? 'nullable' : 'required').'|date_format:Y-m-d|after_or_equal:start_date', 'confirmed' => 'required|accepted']);
+        $request->validate(['training_plan_id' => 'required|integer']);
+        $source = TrainingPlan::where('user_id', $request->user()->id)->where('workspace_type', 'coach_template')->findOrFail($request->integer('training_plan_id'));
+        if ($source->isProgram()) {
+            $request->merge(['start_date' => null, 'end_date' => null, 'schedule_mode' => 'fixed']);
+        }
+        $data = $request->validate(['training_plan_id' => 'required|integer', 'start_date' => ($source->isProgram() ? 'nullable' : 'required').'|date_format:Y-m-d', 'schedule_mode' => 'sometimes|in:fixed,ongoing', 'end_date' => ($source->isProgram() || $request->input('schedule_mode') === 'ongoing' ? 'nullable' : 'required').'|date_format:Y-m-d|after_or_equal:start_date', 'confirmed' => 'required|accepted']);
         if (($data['schedule_mode'] ?? 'fixed') === 'ongoing') {
             $data['end_date'] = null;
         }

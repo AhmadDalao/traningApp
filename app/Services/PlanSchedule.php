@@ -17,6 +17,7 @@ class PlanSchedule
 {
     public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null, array $change = [], bool $rolling = false): array
     {
+        abort_if($plan->isProgram(), 422, 'Use Start Program or review the active run’s changes for a structured program.');
         $plan->loadMissing('trainingDays');
         $assignment = $coach ? app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true, $lock) : null;
         $subscription = $assignment ? app(CoachAccess::class)->subscription($assignment->relationship, $lock) : null;
@@ -228,7 +229,7 @@ class PlanSchedule
     public function canMove(ScheduleEntry $entry, User $owner, ?User $coach = null): bool
     {
         if ($entry->user_id !== $owner->id || $entry->status !== 'planned' || $entry->started_at || $entry->workout_snapshot !== null ||
-            ($entry->session_exercises_exists ?? $entry->sessionExercises()->exists()) || ! $this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time)) {
+            ($entry->session_exercises_exists ?? $entry->sessionExercises()->exists()) || (! $entry->program_run_id && ! $this->future($entry->scheduled_date->toDateString(), $entry->scheduled_time))) {
             return false;
         }
 
@@ -240,7 +241,7 @@ class PlanSchedule
         $day = $entry->trainingDay;
         $plan = $day?->trainingPlan;
 
-        return $plan && $plan->start_date && ($plan->schedule_mode === 'ongoing' || $plan->end_date) && $entry->schedule_managed &&
+        return ! $entry->program_run_id && $plan && ! $plan->isProgram() && $plan->start_date && ($plan->schedule_mode === 'ongoing' || $plan->end_date) && $entry->schedule_managed &&
             $entry->plan_occurrence_key === 'plan:'.$plan->id.':'.$day->id.':'.$entry->scheduled_date->toDateString() &&
             in_array($entry->scheduled_date->dayOfWeek, $day->weekdaysOn($entry->scheduled_date->toDateString()));
     }

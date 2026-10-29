@@ -1,4 +1,5 @@
 export const emptyPlanFilters = {
+    type: "",
     level: "",
     goal: "",
     days: "",
@@ -23,6 +24,8 @@ export function filterPlans(plans, filters, search = "") {
             .join(" ")
             .toLocaleLowerCase();
         return (
+            (!filters.type ||
+                (plan.structure_type || "simple") === filters.type) &&
             (!filters.level || plan.level === filters.level) &&
             (!filters.goal || plan.goals.includes(filters.goal)) &&
             (!filters.days || plan.days_per_week === Number(filters.days)) &&

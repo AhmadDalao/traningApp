@@ -2,10 +2,16 @@
 
 namespace App\Services;
 
+use App\Models\BodyWeightEntry;
 use App\Models\User;
 
 class BodyWeightHistory
 {
+    public function onOrBefore(User $user, string $date): ?BodyWeightEntry
+    {
+        return $user->bodyWeightEntries()->whereDate('recorded_date', '<=', $date)->orderByDesc('recorded_date')->orderByDesc('id')->first();
+    }
+
     // Call inside a transaction after locking the user, so profile and history agree.
     public function sync(User $user): void
     {

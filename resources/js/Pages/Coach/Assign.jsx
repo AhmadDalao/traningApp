@@ -70,7 +70,11 @@ export default function Assign({ templates, subscription }) {
                             for this trainee.
                         </p>
                     )}
-                    <PlanPeriodFields form={form} required />
+                    {templates.find(
+                        (p) => p.id === Number(form.data.training_plan_id),
+                    )?.structure_type !== "program" && (
+                        <PlanPeriodFields form={form} required />
+                    )}
                     <p>
                         Days, exercises, icons and prescriptions are copied.
                         Workouts and results are not. After assigning, review

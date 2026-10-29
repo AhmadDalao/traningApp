@@ -65,6 +65,9 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
         allDay: !e.scheduled_time,
         classNames: [`event-${e.entry_type}`, `event-${e.status}`],
         extendedProps: {
+            program: e.program_run_id
+                ? `Week ${e.program_week} · ${e.program_context?.block_name}`
+                : null,
             status: e.status,
             type: e.entry_type,
             icon: e.icon,
@@ -230,6 +233,11 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                                     />
                                 )}
                                 <span>
+                                    {event.extendedProps.program && (
+                                        <small className="calendar-program-label">
+                                            {event.extendedProps.program}
+                                        </small>
+                                    )}
                                     {event.extendedProps.time && (
                                         <small className="calendar-event-time">
                                             {event.extendedProps.time}{" "}

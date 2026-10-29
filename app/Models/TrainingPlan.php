@@ -6,7 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrainingPlan extends Model
 {
-    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'schedule_mode'];
+    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'schedule_mode', 'structure_type', 'duration_weeks'];
+
+    public function isProgram(): bool
+    {
+        return $this->structure_type === 'program';
+    }
+
+    public function blocks()
+    {
+        return $this->hasMany(TrainingBlock::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function programRuns()
+    {
+        return $this->hasMany(ProgramRun::class)->latest('id');
+    }
 
     public function assignment()
     {

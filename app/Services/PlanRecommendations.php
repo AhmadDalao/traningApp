@@ -9,23 +9,36 @@ class PlanRecommendations
     public function catalog(): array
     {
         $library = collect(json_decode(file_get_contents(resource_path('data/exercise-library.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('key');
-        $plans = require resource_path('data/training-plans.php');
+        $plans = [...require resource_path('data/training-plans.php'), ...require resource_path('data/training-programs.php')];
 
         return array_values(array_map(function ($plan) use ($library) {
+            $plan['structure_type'] ??= 'simple';
             $plan['days_per_week'] = count($plan['days']);
             $plan['level_label'] = UserProfile::LEVELS[$plan['level']];
             $plan['equipment_label'] = UserProfile::EQUIPMENT[$plan['equipment']];
             $plan['focus_label'] = UserProfile::GOALS[$plan['primary_focus']];
             $plan['goal_labels'] = array_map(fn ($goal) => UserProfile::GOALS[$goal], $plan['goals']);
             $plan['split'] = array_column($plan['days'], 'title');
-            foreach ($plan['days'] as &$day) {
-                foreach ($day['exercises'] as &$prescription) {
-                    $exercise = $library->get($prescription['key']);
-                    if (! $exercise) {
-                        throw new \LogicException('Catalog exercise is missing: '.$prescription['key']);
+            $resolve = function (array $days) use ($library) {
+                foreach ($days as &$day) {
+                    foreach ($day['exercises'] as &$prescription) {
+                        $exercise = $library->get($prescription['key']);
+                        if (! $exercise) {
+                            throw new \LogicException('Catalog exercise is missing: '.$prescription['key']);
+                        }
+                        $prescription = [...$exercise, ...$prescription];
                     }
-                    $prescription = [...$exercise, ...$prescription];
+                    unset($prescription);
                 }
+
+                return $days;
+            };
+            $plan['days'] = $resolve($plan['days']);
+            if (isset($plan['blocks'])) {
+                foreach ($plan['blocks'] as &$block) {
+                    $block['days'] = $resolve($block['days']);
+                }
+                unset($block);
             }
 
             return $plan;

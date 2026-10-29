@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExerciseProgressController;
 use App\Http\Controllers\PlanScheduleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ScheduleChangeController;
@@ -151,3 +152,23 @@ foreach (['' => ['auth'], '/coach/trainees/{trainee}' => ['auth', CoachWorkspace
         Route::post('/training-plans/{trainingPlan}/stop-schedule', [ScheduleChangeController::class, 'stopStore']);
     });
 }
+
+// Programs use the same actor/owner context as plans and coaching templates.
+foreach (['' => ['auth'], '/coach' => ['auth', CoachWorkspace::class], '/coach/trainees/{trainee}' => ['auth', CoachWorkspace::class]] as $prefix => $middleware) {
+    Route::middleware($middleware)->prefix($prefix)->group(function () {
+        Route::put('/training-plans/{trainingPlan}/blocks', [ProgramController::class, 'blocks']);
+        Route::get('/training-plans/{trainingPlan}/program-start', [ProgramController::class, 'startPage']);
+        Route::post('/training-plans/{trainingPlan}/program-preview', [ProgramController::class, 'preview']);
+        Route::post('/training-plans/{trainingPlan}/program-start', [ProgramController::class, 'start']);
+        Route::get('/program-runs', [ProgramController::class, 'index']);
+        Route::get('/program-runs/{programRun}', [ProgramController::class, 'show']);
+        Route::post('/program-runs/{programRun}/change-preview', [ProgramController::class, 'changePreview']);
+        Route::post('/program-runs/{programRun}/changes', [ProgramController::class, 'changeApply']);
+    });
+}
+
+Route::middleware(['auth', CoachWorkspace::class])->prefix('coach')->group(function () {
+    Route::get('/recommendations', [RecommendationController::class, 'index']);
+    Route::get('/recommendations/{preset}', [RecommendationController::class, 'show']);
+    Route::post('/recommendations', [RecommendationController::class, 'store']);
+});

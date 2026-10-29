@@ -18,6 +18,15 @@ class StoreTrainingPlanRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $type = $this->route('trainingPlan')?->structure_type ?? $this->input('structure_type', 'simple');
+        $this->merge(['structure_type' => $type]);
+        if ($type === 'program') {
+            $this->merge(['schedule_mode' => 'fixed', 'start_date' => null, 'end_date' => null,
+                'duration_weeks' => $this->route('trainingPlan')?->duration_weeks ?? $this->input('duration_weeks')]);
+        }
+        if ($type === 'simple') {
+            $this->merge(['duration_weeks' => null]);
+        }
         $mode = $this->input('schedule_mode', $this->route('trainingPlan')?->schedule_mode ?? 'fixed');
         $this->merge(['schedule_mode' => $mode]);
         if ($mode === 'ongoing') {
@@ -29,6 +38,8 @@ class StoreTrainingPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'structure_type' => 'required|in:simple,program',
+            'duration_weeks' => 'nullable|required_if:structure_type,program|integer|between:1,52',
             'name' => 'required|string|max:150', 'description' => 'nullable|string|max:5000',
             'schedule_mode' => 'required|in:fixed,ongoing',
             'start_date' => 'nullable|required_if:schedule_mode,ongoing|required_with:end_date|date_format:Y-m-d',

@@ -21,15 +21,13 @@ class TrainingPlanDuplicator
         return $this->copy($user, function (&$paths) use ($user, $source) {
             $source = TrainingPlan::where('user_id', $user->id)->lockForUpdate()->findOrFail($source->id);
             $copy = $user->trainingPlans()->create([
-                ...$source->only('description', 'start_date', 'end_date', 'schedule_mode'),
+                ...$source->only('description', 'start_date', 'end_date', 'schedule_mode', 'structure_type', 'duration_weeks'),
                 'name' => $this->name($source->name, $user->trainingPlans(), 'name'),
             ]);
             if ($source->workspace_type === 'coach_template') {
                 $copy->forceFill(['workspace_type' => 'coach_template'])->save();
             }
-            foreach ($source->trainingDays()->lockForUpdate()->get() as $day) {
-                $this->dayCopy($day, $copy, $day->title, $day->position, $paths);
-            }
+            $this->definitionCopy($source, $copy, $paths);
 
             return $copy;
         });
@@ -41,12 +39,10 @@ class TrainingPlanDuplicator
         try {
             return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, &$paths) {
                 $source = TrainingPlan::where('user_id', $coach->id)->where('workspace_type', 'coach_template')->lockForUpdate()->findOrFail($source->id);
-                $copy = $trainee->trainingPlans()->make([...$source->only('name', 'description'), ...$dates]);
+                $copy = $trainee->trainingPlans()->make([...$source->only('name', 'description', 'structure_type', 'duration_weeks'), ...($source->isProgram() ? [] : $dates)]);
                 $copy->workspace_type = 'coach_assigned';
                 $copy->save();
-                foreach ($source->trainingDays()->lockForUpdate()->get() as $day) {
-                    $this->dayCopy($day, $copy, $day->title, $day->position, $paths);
-                }
+                $this->definitionCopy($source, $copy, $paths);
                 $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
 
                 return $copy;
@@ -70,16 +66,29 @@ class TrainingPlanDuplicator
         };
         $authorize();
 
-        return $this->copy($user, function (&$paths) use ($user, $source, $destination, $authorize) {
+        return $this->copy($user, function (&$paths) use ($user, $source, $destination, $authorize, $coach) {
             TrainingPlan::where('user_id', $user->id)->whereIn('id', [$source->training_plan_id, $destination->id])->orderBy('id')->lockForUpdate()->get();
             $source = TrainingDay::lockForUpdate()->findOrFail($source->id);
             $authorize();
             $destination = TrainingPlan::where('user_id', $user->id)->findOrFail($destination->id);
 
+            abort_if($destination->isProgram() && $destination->id !== $source->training_plan_id, 422, 'Copy days into a program by duplicating a block.');
+            app(ProgramDefinition::class)->dayWritable($source, (bool) $coach);
             $destination->forceFill(['schedule_enabled' => false])->save();
 
-            return $this->dayCopy($source, $destination, $this->name($source->title, $destination->trainingDays(), 'title'), ($destination->trainingDays()->max('position') ?? -1) + 1, $paths);
+            return $this->dayCopy($source, $destination, $this->name($source->title, $destination->trainingDays(), 'title'), ($destination->trainingDays()->max('position') ?? -1) + 1, $paths, $destination->isProgram() ? $source->training_block_id : null);
         });
+    }
+
+    private function definitionCopy(TrainingPlan $source, TrainingPlan $copy, array &$paths): void
+    {
+        $blocks = [];
+        foreach ($source->blocks()->lockForUpdate()->get() as $block) {
+            $blocks[$block->id] = $copy->blocks()->create($block->only('name', 'start_week', 'end_week', 'position', 'type', 'description'))->id;
+        }
+        foreach ($source->trainingDays()->lockForUpdate()->get() as $day) {
+            $this->dayCopy($day, $copy, $day->title, $day->position, $paths, $blocks[$day->training_block_id] ?? null);
+        }
     }
 
     private function copy(User $user, callable $action): mixed
@@ -108,11 +117,11 @@ class TrainingPlanDuplicator
         }
     }
 
-    private function dayCopy(TrainingDay $source, TrainingPlan $destination, string $title, int $position, array &$paths): TrainingDay
+    public function dayCopy(TrainingDay $source, TrainingPlan $destination, string $title, int $position, array &$paths, ?int $blockId = null): TrainingDay
     {
         $copy = $destination->trainingDays()->create([
             ...$source->only('type', 'focus_area', 'icon', 'notes', 'weekdays', 'default_time'),
-            'title' => $title, 'position' => $position,
+            'title' => $title, 'position' => $position, 'training_block_id' => $blockId,
         ]);
         foreach ($source->exercises()->lockForUpdate()->get() as $exercise) {
             $fields = $exercise->only('icon', 'name', 'sets', 'reps', 'target_weight', 'superset_group', 'notes', 'position', 'library_key', 'tracking_mode');

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\CoachTraineeRelationship;
+use App\Models\ProgramRun;
 use App\Models\ScheduleEntry;
 use App\Models\User;
 use App\Services\BodyWeightHistory;
 use App\Services\CoachAccess;
 use App\Services\ExerciseProgress;
+use App\Services\ProgramLifecycle;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -108,6 +110,7 @@ class CoachController extends Controller
         $total = (clone $month)->count();
 
         return Inertia::render('Coach/Trainee', [
+            'programRuns' => app(ProgramLifecycle::class)->cards(ProgramRun::where('user_id', $owner->id)->whereIn('training_plan_id', $context->plans()->select('training_plans.id'))),
             'relationship' => $relationship->only('id', 'approved_at'),
             'profile' => $owner->profile?->only('training_goals', 'experience_level', 'training_days_per_week', 'session_duration_minutes', 'equipment_access', 'body_weight_goal'),
             'body' => $body->summary($owner), 'recentRecords' => $progress->overview($owner)['recentRecords'],

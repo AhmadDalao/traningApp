@@ -1,3 +1,4 @@
+import { ProgramRunCards } from "../../Features/ProgramUI";
 import { RecordList } from "../../Features/ExerciseRecords";
 import { Head } from "@inertiajs/react";
 import { PageHeader, ButtonLink, DateLabel } from "../../Components/UI";
@@ -7,6 +8,7 @@ import {
     useTraining,
 } from "../../Features/CoachingUI";
 export default function Trainee({
+    programRuns = [],
     relationship,
     profile,
     body,
@@ -29,6 +31,7 @@ export default function Trainee({
                     Manage subscription
                 </ButtonLink>
             </PageHeader>
+            <ProgramRunCards runs={programRuns} />
             <div className="coach-stats">
                 <div className="panel coach-stat">
                     <span>Current body weight</span>

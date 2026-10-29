@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ScheduleEntry;
 use App\Services\CoachAccess;
 use App\Services\ExerciseProgress;
+use App\Services\PlanSchedule;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -108,6 +109,6 @@ class TrainingHistoryController extends Controller
         abort_unless(app(TrainingContext::class)->owner()->scheduleEntries()->past()->whereKey($scheduleEntry->id)->exists(), 404);
         $scheduleEntry->load('trainingDay.exercises', 'trainingDay.trainingPlan', 'sessionExercises.sets');
 
-        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true, 'canManageSession' => ! $context->coaching(), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry)]);
+        return Inertia::render('ScheduleEntries/Show', ['entry' => $scheduleEntry, 'workout' => $scheduleEntry->workoutDetails(), 'history' => true, 'canMove' => $scheduleEntry->program_run_id && app(PlanSchedule::class)->canMove($scheduleEntry, $context->owner(), $context->coaching() ? $context->actor() : null), 'canManageSession' => ! $context->coaching(), 'scheduledBy' => $scheduleEntry->scheduledBy?->coachProfile?->display_name, 'progressSummary' => $progress->forSession($context->owner(), $scheduleEntry)]);
     }
 }

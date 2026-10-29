@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateTrainingDayRequest;
 use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
 use App\Services\ExerciseLibrary;
+use App\Services\ProgramDefinition;
 use App\Services\TrainingContext;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class TrainingDayController extends Controller
     {
         $this->context->plan($trainingPlan, 'update');
 
-        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
+        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan->load('blocks'), 'selectedBlock' => request()->integer('block'), 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
     }
 
     public function store(StoreTrainingDayRequest $request, TrainingPlan $trainingPlan)
@@ -31,7 +32,7 @@ class TrainingDayController extends Controller
         $day = $this->saveDay($request, $trainingPlan);
 
         return $this->context->redirect('/training-days/'.$day->id)->with('success', 'Training day created.')
-            ->with('schedule_review', $trainingPlan->only('id', 'name'));
+            ->with('schedule_review', $trainingPlan->isProgram() ? null : $trainingPlan->only('id', 'name'));
     }
 
     public function show(TrainingDay $trainingDay)
@@ -39,14 +40,15 @@ class TrainingDayController extends Controller
         $this->context->day($trainingDay);
 
         return Inertia::render('TrainingDays/Show', ['day' => $trainingDay->load('trainingPlan', 'exercises'),
-            'copyPlans' => $this->context->plans(true)->whereKeyNot($trainingDay->training_plan_id)->orderBy('name')->get(['id', 'name'])]);
+            'canEditDay' => ! $this->context->coaching() || ! $trainingDay->training_block_id || app(ProgramDefinition::class)->coachCanEditBlock($trainingDay->trainingBlock),
+            'copyPlans' => $this->context->plans(true)->where('structure_type', 'simple')->whereKeyNot($trainingDay->training_plan_id)->orderBy('name')->get(['id', 'name'])]);
     }
 
     public function edit(TrainingDay $trainingDay)
     {
         $this->context->day($trainingDay, 'update');
 
-        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan, 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
+        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan->load('blocks'), 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
     }
 
     public function update(UpdateTrainingDayRequest $request, TrainingDay $trainingDay)
@@ -56,7 +58,7 @@ class TrainingDayController extends Controller
         $this->saveDay($request, $trainingDay->trainingPlan, $trainingDay);
 
         return $this->context->redirect('/training-days/'.$trainingDay->id)->with('success', 'Training day updated.')
-            ->with('schedule_review', $before !== $trainingDay->fresh()->only($fields) ? $trainingDay->trainingPlan->only('id', 'name') : null);
+            ->with('schedule_review', ! $trainingDay->trainingPlan->isProgram() && $before !== $trainingDay->fresh()->only($fields) ? $trainingDay->trainingPlan->only('id', 'name') : null);
     }
 
     public function duplicate(Request $request, TrainingDay $trainingDay, TrainingPlanDuplicator $duplicator)
@@ -68,7 +70,7 @@ class TrainingDayController extends Controller
         $copy = $this->context->write(fn () => $duplicator->day($this->context->owner(), $trainingDay, $destination, $this->context->coaching() ? $request->user() : null));
 
         return $this->context->redirect('/training-days/'.$copy->id)->with('success', 'Training day copied independently. No Calendar sessions were copied.')
-            ->with('schedule_review', $destination->only('id', 'name'));
+            ->with('schedule_review', $destination->isProgram() ? null : $destination->only('id', 'name'));
     }
 
     private function saveDay(StoreTrainingDayRequest $request, TrainingPlan $plan, ?TrainingDay $day = null): TrainingDay
@@ -83,7 +85,21 @@ class TrainingDayController extends Controller
                 if ($day) {
                     $day = TrainingDay::lockForUpdate()->findOrFail($day->id);
                 }
-                $fields = collect($data)->only('title', 'type', 'focus_area', 'notes', 'icon', 'weekdays', 'default_time')->all();
+                if ($day) {
+                    app(ProgramDefinition::class)->dayWritable($day, $this->context->coaching());
+                }
+                if ($plan->isProgram()) {
+                    $blockId = $day?->training_block_id ?? ($data['training_block_id'] ?? null);
+                    $block = $plan->blocks()->find($blockId);
+                    if (! $block) {
+                        throw ValidationException::withMessages(['training_block_id' => 'Choose a block in this program.']);
+                    }
+                    abort_if($this->context->coaching() && ! app(ProgramDefinition::class)->coachCanEditBlock($block), 403, 'Only future program blocks can be edited.');
+                    $data['training_block_id'] = $block->id;
+                } else {
+                    $data['training_block_id'] = null;
+                }
+                $fields = collect($data)->only('title', 'type', 'focus_area', 'notes', 'icon', 'weekdays', 'default_time', 'training_block_id')->all();
                 if ($fields['type'] === 'rest') {
                     $fields['focus_area'] = null;
                 }
@@ -164,12 +180,13 @@ class TrainingDayController extends Controller
             $this->context->day($trainingDay, 'update');
             $plan = TrainingPlan::whereKey($trainingDay->training_plan_id)->lockForUpdate()->firstOrFail();
             $plan->forceFill(['schedule_enabled' => false])->save();
+            app(ProgramDefinition::class)->dayWritable($trainingDay, $this->context->coaching());
             $trainingDay->delete();
         });
         Storage::disk('public')->delete($paths);
 
         return $this->context->redirect('/training-plans/'.$plan)->with('success', 'Training day deleted. Calendar history is preserved.')
-            ->with('schedule_review', TrainingPlan::findOrFail($plan)->only('id', 'name'));
+            ->with('schedule_review', TrainingPlan::findOrFail($plan)->isProgram() ? null : TrainingPlan::findOrFail($plan)->only('id', 'name'));
     }
 
     public function reorderDays(Request $request, TrainingPlan $trainingPlan)
@@ -190,6 +207,7 @@ class TrainingDayController extends Controller
         $this->context->write(function () use ($request, $trainingDay) {
             $day = TrainingDay::lockForUpdate()->findOrFail($trainingDay->id);
             $this->context->day($day, 'update');
+            app(ProgramDefinition::class)->dayWritable($day, $this->context->coaching());
             $this->reorder($request, $day->exercises());
         });
 

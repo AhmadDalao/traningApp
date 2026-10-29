@@ -1,3 +1,4 @@
+import { useTraining } from "../../Features/CoachingUI";
 import { useRef, useState } from "react";
 import { Head, useRemember } from "@inertiajs/react";
 import { ArrowRight, Check, SlidersHorizontal, Search } from "lucide-react";
@@ -12,6 +13,7 @@ import {
 import { emptyPlanFilters, filterPlans } from "../../Features/planDiscovery";
 
 function PlanCard({ plan, recommended = false }) {
+    const { url } = useTraining();
     return (
         <article className="panel discovery-card">
             <div className="recommendation-tags">
@@ -23,6 +25,11 @@ function PlanCard({ plan, recommended = false }) {
                 <span className="discovery-focus">{plan.focus_label}</span>
             </div>
             <h3>{plan.name}</h3>
+            {plan.structure_type === "program" && (
+                <span className="badge training">
+                    Program · {plan.duration_weeks} weeks
+                </span>
+            )}
             <p className="discovery-meta">
                 {plan.days_per_week} days / week · About {plan.duration} min ·{" "}
                 {plan.equipment_label}
@@ -42,11 +49,14 @@ function PlanCard({ plan, recommended = false }) {
                 </div>
             )}
             <ButtonLink
-                href={`/recommendations/${plan.key}`}
+                href={url(`/recommendations/${plan.key}`)}
                 variant="secondary"
                 aria-label={`Preview ${plan.name}`}
             >
-                Preview plan <ArrowRight size={16} />
+                {plan.structure_type === "program"
+                    ? "Preview program"
+                    : "Preview plan"}{" "}
+                <ArrowRight size={16} />
             </ButtonLink>
         </article>
     );
@@ -58,6 +68,7 @@ export default function Index({
     options,
     hasPreferences,
 }) {
+    const { url } = useTraining();
     const [filters, setFilters] = useRemember(
         emptyPlanFilters,
         "discovery-filters",
@@ -71,6 +82,8 @@ export default function Index({
     }
     const filtered = filterPlans(plans, filters, search);
     const selected = [
+        filters.type &&
+            (filters.type === "program" ? "Programs" : "Simple plans"),
         options.levels[filters.level],
         options.goals[filters.goal],
         filters.days && `${filters.days} days / week`,
@@ -91,7 +104,7 @@ export default function Index({
                 <ButtonLink href="/training-preferences" variant="secondary">
                     Update preferences
                 </ButtonLink>
-                <ButtonLink href="/training-plans" variant="secondary">
+                <ButtonLink href={url("/training-plans")} variant="secondary">
                     My plans
                 </ButtonLink>
             </PageHeader>
@@ -196,6 +209,18 @@ export default function Index({
                             closeFilters();
                         }}
                     >
+                        <Field label="Type">
+                            <select
+                                value={draft.type || ""}
+                                onChange={(e) =>
+                                    setDraft({ ...draft, type: e.target.value })
+                                }
+                            >
+                                <option value="">All</option>
+                                <option value="simple">Plans</option>
+                                <option value="program">Programs</option>
+                            </select>
+                        </Field>
                         <Field label="Experience level">
                             <select
                                 value={draft.level}

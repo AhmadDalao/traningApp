@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.0.0 — 29 October 2026
+
+- Extend existing plans with optional finite structured programs, contiguous blocks and independent block prescriptions. Existing simple plans remain unchanged.
+- Add explicit ProgramRun ownership, confirmed finite schedule previews, idempotent generation, stable occurrence identity, logical week/block advancement and missed-workout review.
+- Reuse Calendar, Active Workout, structured sets, snapshots, History, Progress and PRs. Preserve unweighted reps without fabricating weighted metrics.
+- Protect saved, completed, skipped, active, past and individually moved sessions. Signed future-change previews reject stale edits; repeat runs retain previous history.
+- Add truthful completion/adherence summaries, historical body-weight changes and existing PR events. End Program Early remains deferred.
+- Support independent coach assignments, reviewed starts and future-block editing under existing relationship/subscription rules. Overload endpoints also enforce current/completed-block protection.
+- Add four complete catalog programs, combined Plans/Programs filtering, phone-friendly block editing and program context in workouts/Calendar.
+- Fix date-only serialization, deleted-day coach authorization fallback and committed template-media cleanup; test rollback and concurrent changes.
+- Verify 454 PHP tests / 9,715 assertions on SQLite and MySQL; 28 JS tests; 28 concurrency checks; 133 local HTTP checks; 300 program/coach browser checks across Chromium/WebKit plus 74 existing mobile regressions. Build, formatting and whitespace checks pass.
+- Remove 3 local QA accounts and 524 generated images; all 19 table fingerprints and 44 original media hashes match. [Full report](docs/V2.0-PROGRAMS-BLOCKS-LIFECYCLE-REPORT.html). Release/deployment verification pending.
+
 ## v1.9.1 — 29 October 2026
 
 - Audit the existing application at 320/360/375/390/430/768/1280px and fix eight reproducible defects without adding product features.

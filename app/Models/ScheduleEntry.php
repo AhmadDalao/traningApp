@@ -2,18 +2,35 @@
 
 namespace App\Models;
 
+use App\Services\ProgramLifecycle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ScheduleEntry extends Model
 {
-    protected $fillable = ['scheduled_by_user_id', 'icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'schedule_managed', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity', 'started_at'];
+    protected $fillable = ['scheduled_by_user_id', 'icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'schedule_managed', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity', 'started_at', 'program_run_id', 'program_week', 'program_context', 'program_prescription'];
 
     protected function casts(): array
     {
-        return ['schedule_managed' => 'boolean', 'scheduled_date' => 'date:Y-m-d', 'completed_at' => 'datetime', 'workout_snapshot' => 'array', 'started_at' => 'datetime'];
+        return ['program_context' => 'array', 'program_prescription' => 'array', 'schedule_managed' => 'boolean', 'scheduled_date' => 'date:Y-m-d', 'completed_at' => 'datetime', 'workout_snapshot' => 'array', 'started_at' => 'datetime'];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $entry) {
+            if ($entry->program_run_id && ! $entry->wasRecentlyCreated && $entry->wasChanged(['status', 'started_at'])) {
+                $runId = $entry->program_run_id;
+                DB::afterCommit(fn () => app(ProgramLifecycle::class)->sync($runId));
+            }
+        });
+    }
+
+    public function programRun()
+    {
+        return $this->belongsTo(ProgramRun::class);
     }
 
     public function scopeActiveWorkout(Builder $query): void
@@ -52,6 +69,23 @@ class ScheduleEntry extends Model
 
     public function captureWorkoutSnapshot(array &$copiedPaths): array
     {
+        if ($this->program_prescription !== null) {
+            $snapshot = $this->program_prescription;
+            foreach ($snapshot['exercises'] as &$exercise) {
+                foreach (['thumbnail_path', 'custom_icon_path'] as $field) {
+                    if (! empty($exercise[$field]) && Storage::disk('public')->exists($exercise[$field])) {
+                        $copy = 'workout-thumbnails/'.Str::uuid().'.'.pathinfo($exercise[$field], PATHINFO_EXTENSION);
+                        $copiedPaths[] = $copy;
+                        if (! Storage::disk('public')->copy($exercise[$field], $copy)) {
+                            throw new \RuntimeException('Could not preserve the exercise image.');
+                        }
+                        $exercise[$field] = $copy;
+                    }
+                }
+            }
+
+            return $snapshot;
+        }
         $this->load('trainingDay.exercises', 'trainingDay.trainingPlan');
         $day = $this->trainingDay;
         $exercises = [];
@@ -84,8 +118,8 @@ class ScheduleEntry extends Model
 
     public function workoutDetails(): ?array
     {
-        if ($this->workout_snapshot !== null) {
-            $snapshot = $this->workout_snapshot;
+        if ($this->workout_snapshot !== null || $this->program_prescription !== null) {
+            $snapshot = $this->workout_snapshot ?? $this->program_prescription;
             $snapshot['exercises'] = array_map(fn ($exercise) => [
                 ...$exercise,
                 'thumbnail_url' => ! empty($exercise['thumbnail_path']) ? Storage::disk('public')->url($exercise['thumbnail_path']) : null,
@@ -107,7 +141,7 @@ class ScheduleEntry extends Model
     {
         return $this->entry_type === 'rest' ? 0 : ($this->workout_snapshot !== null
             ? count($this->workout_snapshot['exercises'] ?? [])
-            : ($this->status === 'completed' ? 0 : ($this->trainingDay?->exercises_count ?? 0)));
+            : ($this->program_prescription !== null ? count($this->program_prescription['exercises'] ?? []) : ($this->status === 'completed' ? 0 : ($this->trainingDay?->exercises_count ?? 0))));
     }
 
     public function snapshotThumbnailPaths(): array

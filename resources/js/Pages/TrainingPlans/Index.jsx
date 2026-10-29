@@ -41,9 +41,17 @@ export default function Index({ plans }) {
                 }
                 description="Your goals, broken down into days you can show up for."
             >
-                {!coaching && !templates && (
-                    <ButtonLink href="/recommendations" variant="secondary">
+                {!coaching && (
+                    <ButtonLink
+                        href={url("/recommendations")}
+                        variant="secondary"
+                    >
                         Find a training plan
+                    </ButtonLink>
+                )}
+                {!templates && (
+                    <ButtonLink variant="secondary" href={url("/program-runs")}>
+                        Program runs
                     </ButtonLink>
                 )}
                 {canManage && (
@@ -72,7 +80,11 @@ export default function Index({ plans }) {
                                     className={`plan-cover cover-${index % 3}`}
                                 >
                                     <Layers size={38} strokeWidth={1.2} />
-                                    <span>YOUR TRAINING PLAN</span>
+                                    <span>
+                                        {plan.structure_type === "program"
+                                            ? `${plan.duration_weeks}-WEEK PROGRAM`
+                                            : "YOUR TRAINING PLAN"}
+                                    </span>
                                     <span className="plan-number">
                                         {String(index + 1).padStart(2, "0")}
                                     </span>

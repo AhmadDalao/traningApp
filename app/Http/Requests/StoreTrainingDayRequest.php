@@ -20,6 +20,7 @@ class StoreTrainingDayRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'training_block_id' => ['nullable', 'integer', Rule::exists('training_blocks', 'id')->where('training_plan_id', $this->route('trainingDay')?->training_plan_id ?? $this->route('trainingPlan')?->id ?? 0)],
             'icon' => ['nullable', Rule::in(config('training.icons'))],
             'exercises.*.icon' => ['nullable', Rule::in(config('training.icons'))],
             'title' => 'required|string|max:150', 'type' => ['required', Rule::in(['training', 'rest'])],

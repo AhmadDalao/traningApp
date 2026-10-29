@@ -1,3 +1,4 @@
+import { ProgramContext } from "../../Features/ProgramUI";
 import { useCallback, useEffect, useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
 import { Check, Clock3 } from "lucide-react";
@@ -85,6 +86,7 @@ export default function Show({ entry }) {
                     Finish workout
                 </Button>
             </PageHeader>
+            <ProgramContext entry={entry} />
             <section className="panel workout-progress">
                 <div>
                     <span className="badge workout-active">In progress</span>

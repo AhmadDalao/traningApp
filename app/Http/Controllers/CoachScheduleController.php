@@ -46,6 +46,10 @@ class CoachScheduleController extends Controller
             }
             $fields = ['training_day_id' => $day->id, 'title' => $data['title'] ?? $day->title, 'entry_type' => $day->type, 'focus_area' => $day->focus_area, 'icon' => $day->icon, 'scheduled_date' => $data['scheduled_date'], 'scheduled_time' => $data['scheduled_time'] ?? null, 'notes' => $data['notes'] ?? null];
             if ($entry) {
+                if ($entry->program_run_id) {
+                    abort_unless($entry->training_day_id === $day->id, 422, 'A program session must keep its original training day.');
+                    $fields = collect($fields)->only('title', 'scheduled_date', 'scheduled_time', 'notes')->all();
+                }
                 $entry->fill($fields);
                 if ($entry->isDirty() && $entry->plan_occurrence_key) {
                     $entry->schedule_managed = false;
@@ -78,6 +82,7 @@ class CoachScheduleController extends Controller
         $this->context->write(function () use ($scheduleEntry) {
             $entry = ScheduleEntry::lockForUpdate()->findOrFail($scheduleEntry->id);
             $this->access->futureSession($this->context->actor(), $this->context->owner(), $entry);
+            abort_if($entry->program_run_id, 422, 'Use the program change preview to remove future program sessions.');
             app(PlanSchedule::class)->rememberCancellation($entry);
             $entry->delete();
         });

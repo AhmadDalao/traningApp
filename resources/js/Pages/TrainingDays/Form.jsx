@@ -40,7 +40,12 @@ const focusAreas = [
     "Mobility",
     "Other",
 ];
-export default function Form({ plan, day, customExercises = [] }) {
+export default function Form({
+    plan,
+    day,
+    selectedBlock,
+    customExercises = [],
+}) {
     const { url } = useTraining();
     const [exercises, setExercises] = useState(
         (day?.exercises || []).map((e) => ({
@@ -54,6 +59,7 @@ export default function Form({ plan, day, customExercises = [] }) {
     );
     const [editor, setEditor] = useState(null);
     const form = useForm({
+        training_block_id: day?.training_block_id || selectedBlock || "",
         icon: day?.icon || "",
         title: day?.title || "",
         type: day?.type || "training",
@@ -154,6 +160,37 @@ export default function Form({ plan, day, customExercises = [] }) {
                     <div className="section-label">
                         01 <span>THE BASICS</span>
                     </div>
+                    {plan.structure_type === "program" && (
+                        <Field
+                            label="Program block"
+                            required
+                            error={form.errors.training_block_id}
+                        >
+                            <select
+                                required
+                                disabled={!!day}
+                                value={form.data.training_block_id}
+                                onChange={(e) =>
+                                    form.setData(
+                                        "training_block_id",
+                                        e.target.value,
+                                    )
+                                }
+                            >
+                                <option value="">Choose a block</option>
+                                {plan.blocks.map((block) => (
+                                    <option key={block.id} value={block.id}>
+                                        {block.name} · Weeks {block.start_week}–
+                                        {block.end_week}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="field-hint">
+                                Runs keep their saved prescriptions until you
+                                review and apply future changes.
+                            </p>
+                        </Field>
+                    )}
                     <div className="form-grid three">
                         <Field label="Title" required error={form.errors.title}>
                             <input

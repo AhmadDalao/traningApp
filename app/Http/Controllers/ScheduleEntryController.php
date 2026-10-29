@@ -41,7 +41,7 @@ class ScheduleEntryController extends Controller
 
         return Inertia::render('Calendar/Index', [
             'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan')->withExists('sessionExercises')->get()->map(fn ($entry) => [
-                ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key'),
+                ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key', 'program_run_id', 'program_week', 'program_context'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
                 'can_move' => $schedule->canMove($entry, $context->owner()) && $coachCanMove($entry),
                 'can_move_series' => $schedule->canMoveSeries($entry),
@@ -76,7 +76,7 @@ class ScheduleEntryController extends Controller
     private function entryData(StoreScheduleEntryRequest $request, ?ScheduleEntry $entry = null): array
     {
         $data = $request->validated();
-        if ($entry && $entry->workout_snapshot !== null) {
+        if ($entry && ($entry->workout_snapshot !== null || $entry->program_run_id !== null)) {
             if ((int) ($data['training_day_id'] ?? 0) !== (int) $entry->training_day_id || $data['entry_type'] !== $entry->entry_type) {
                 throw ValidationException::withMessages(['training_day_id' => 'This session has a saved workout. Create a new session to use a different training day.']);
             }
@@ -230,6 +230,7 @@ class ScheduleEntryController extends Controller
         $paths = DB::transaction(function () use ($scheduleEntry) {
             User::whereKey($scheduleEntry->user_id)->lockForUpdate()->firstOrFail();
             $entry = ScheduleEntry::lockForUpdate()->findOrFail($scheduleEntry->id);
+            abort_if($entry->program_run_id, 422, 'Program workouts are part of your run. Mark it skipped or reschedule it instead.');
             $paths = $entry->snapshotThumbnailPaths();
             app(PlanSchedule::class)->rememberCancellation($entry);
             $entry->delete();

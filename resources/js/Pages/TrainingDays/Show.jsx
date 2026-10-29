@@ -1,6 +1,6 @@
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { Pencil, CalendarPlus, Trash2 } from "lucide-react";
 import {
     PageHeader,
@@ -16,7 +16,7 @@ import { weekdaySummary } from "../../Components/WeekdayPicker";
 import ExerciseList from "../../Features/ExerciseList";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 import { CopyActions, DayCopyDialog } from "../../Features/TrainingCopyActions";
-export default function Show({ day, copyPlans = [] }) {
+export default function Show({ day, copyPlans = [], canEditDay = true }) {
     const { url, canManage, coaching, templates } = useTraining();
     const [copying, setCopying] = useState(null);
     const [schedule, setSchedule] = useState(false);
@@ -44,7 +44,7 @@ export default function Show({ day, copyPlans = [] }) {
                         : `${day.focus_area || "Training"} · ${day.exercises.length} exercises`
                 }
             >
-                {canManage && (
+                {canManage && canEditDay && (
                     <ButtonLink
                         href={url(`/training-days/${day.id}/edit`)}
                         variant="secondary"
@@ -53,13 +53,15 @@ export default function Show({ day, copyPlans = [] }) {
                         Edit day
                     </ButtonLink>
                 )}
-                {canManage && !templates && (
-                    <Button onClick={() => setSchedule(true)}>
-                        <CalendarPlus size={17} />
-                        Schedule day
-                    </Button>
-                )}
-                {canManage && (
+                {canManage &&
+                    !templates &&
+                    day.training_plan.structure_type !== "program" && (
+                        <Button onClick={() => setSchedule(true)}>
+                            <CalendarPlus size={17} />
+                            Schedule day
+                        </Button>
+                    )}
+                {canManage && canEditDay && (
                     <CopyActions
                         label="More day actions"
                         onDuplicate={() => setCopying("duplicate")}
@@ -67,6 +69,15 @@ export default function Show({ day, copyPlans = [] }) {
                     />
                 )}
             </PageHeader>
+            {day.training_plan.structure_type === "program" && (
+                <p className="program-context">
+                    This workout belongs to a program block.{" "}
+                    <Link href={url(`/training-plans/${day.training_plan.id}`)}>
+                        View program and review active run changes
+                    </Link>
+                    .
+                </p>
+            )}
             <div className="detail-meta">
                 <TypeBadge type={day.type} />
                 <span>
@@ -121,7 +132,7 @@ export default function Show({ day, copyPlans = [] }) {
                     <ExerciseList exercises={day.exercises} />
                 </section>
             )}
-            {canManage && (
+            {canManage && canEditDay && (
                 <div className="danger-zone">
                     <button
                         className="text-button danger-text"

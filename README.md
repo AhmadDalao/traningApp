@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v2.0.0 Structured Programs, Blocks & Lifecycle
+
+Finite programs now sit alongside existing simple plans: ordered normal/deload blocks, independent prescriptions, an explicit schedule preview, logical week advancement, missed-workout handling, completion summaries and separate repeat runs. Coaches can assign independent trainee programs, start reviewed schedules and edit eligible future blocks. Four authored programs join the existing plan catalog.
+
+Verification: **454 PHP tests / 9,715 assertions** on SQLite and isolated MySQL, **28 JS tests**, **28 concurrency checks**, **133 local HTTP checks**, **90 personal + 60 coach browser checks in each of Chromium and WebKit**, and **37 existing mobile regressions in each engine**. Seven widths from 320–1280px pass. Three local QA accounts and 524 QA images were removed; all 19 table fingerprints and 44 original media hashes match. One additive migration; existing simple plans and workout records are preserved. End Program Early is deferred under the brief's allowance.
+
+[Full v2.0 report, architecture and verification evidence](docs/V2.0-PROGRAMS-BLOCKS-LIFECYCLE-REPORT.html). Local implementation is verified; release/deployment verification is pending.
+
 ## v1.9.1 Mobile QA & Stabilization
 
 Eight confirmed UI defects fixed: mobile text and touch targets, crowded session actions, tablet History, long-name wrapping, modal focus, short-screen navigation and repeated workspace selection. Existing features, authentication, coaching ownership and stored results are preserved.

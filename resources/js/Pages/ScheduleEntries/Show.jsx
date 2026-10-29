@@ -1,3 +1,4 @@
+import { ProgramContext } from "../../Features/ProgramUI";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
@@ -115,6 +116,7 @@ export default function Show({
                     </ButtonLink>
                 )}
             </PageHeader>
+            <ProgramContext entry={entry} />
             {entry.status !== "planned" && (
                 <div className={`status-banner ${entry.status}`}>
                     {entry.status === "completed" ? (
@@ -351,7 +353,7 @@ export default function Show({
                     <CalendarDays size={16} />
                     {history ? "Back to Training History" : "Back to calendar"}
                 </ButtonLink>
-                {canManageSession && (
+                {canManageSession && !entry.program_run_id && (
                     <button
                         className="text-button danger-text"
                         onClick={() => setDeleting(true)}

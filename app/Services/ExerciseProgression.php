@@ -100,7 +100,9 @@ class ExerciseProgression
             $assignment = app(CoachAccess::class)->assignment($coach, $user, $template->trainingDay->trainingPlan, false, $lock);
             $relationship = app(CoachAccess::class)->relationship($coach, $user, $lock);
             $subscription = app(CoachAccess::class)->subscription($relationship, $lock);
-            $result['can_apply'] = $result['can_apply'] && $assignment->status === 'active' && $subscription !== null;
+            $block = $template->trainingDay->trainingBlock;
+            $result['can_apply'] = $result['can_apply'] && $assignment->status === 'active' && $subscription !== null
+                && (! $block || app(ProgramDefinition::class)->coachCanEditBlock($block));
             $result['token'] = $result['can_apply'] ? hash_hmac('sha256', json_encode([$result['token'], $coach->id, $assignment->getAttributes(), $relationship->getAttributes(), $subscription->getAttributes()], JSON_THROW_ON_ERROR), config('app.key')) : null;
         }
 
@@ -215,6 +217,7 @@ class ExerciseProgression
         $authorize = function ($day) use ($user, $coach) {
             if ($coach) {
                 app(CoachAccess::class)->assignment($coach, $user, $day->trainingPlan, true, true);
+                app(ProgramDefinition::class)->dayWritable($day, true);
             } else {
                 Gate::forUser($user)->authorize('update', $day);
             }

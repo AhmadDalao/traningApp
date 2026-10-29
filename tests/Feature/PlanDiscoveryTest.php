@@ -44,7 +44,7 @@ class PlanDiscoveryTest extends TestCase
 
     public function test_catalog_has_distinct_routines_canonical_metadata_and_real_exercise_identities(): void
     {
-        $catalog = app(PlanRecommendations::class)->catalog();
+        $catalog = array_values(array_filter(app(PlanRecommendations::class)->catalog(), fn ($plan) => $plan['structure_type'] === 'simple'));
         $this->assertCount(19, $catalog);
         $this->assertCount(19, array_unique(array_column($catalog, 'key')));
         $this->assertCount(19, array_unique(array_map(fn ($plan) => json_encode($plan['days']), $catalog)));
@@ -80,7 +80,7 @@ class PlanDiscoveryTest extends TestCase
     public function test_sparse_profiles_get_useful_fallbacks_and_reads_do_not_write(): void
     {
         $user = User::factory()->create();
-        $this->actingAs($user)->get('/recommendations')->assertInertia(fn (Assert $page) => $page->has('plans', 19)->has('recommendations', 3)->where('hasPreferences', false));
+        $this->actingAs($user)->get('/recommendations')->assertInertia(fn (Assert $page) => $page->has('plans', 23)->has('recommendations', 3)->where('hasPreferences', false));
         $this->get('/recommendations/bodyweight-foundations')->assertInertia(fn (Assert $page) => $page->has('plan.days', 3)->has('plan.days.0.exercises', 4));
         $this->assertDatabaseCount('user_profiles', 0);
         $this->assertDatabaseCount('training_plans', 0);
@@ -240,7 +240,7 @@ class PlanDiscoveryTest extends TestCase
         $user = User::where('email', $type.'@example.test')->firstOrFail();
         $this->post('/workspace', ['workspace' => 'personal'])->assertSessionHasNoErrors();
         $this->post('/onboarding', ['training_goals' => ['build_muscle', 'get_stronger', 'mobility'], 'current_weight_kg' => 80, 'experience_level' => 'beginner', 'training_days_per_week' => 3, 'equipment_access' => ['dumbbells'], 'session_duration_minutes' => 45])->assertRedirect('/recommendations');
-        $this->get('/recommendations')->assertInertia(fn (Assert $page) => $page->has('plans', 19));
+        $this->get('/recommendations')->assertInertia(fn (Assert $page) => $page->has('plans', 23));
         $this->get('/recommendations/full-body')->assertInertia(fn (Assert $page) => $page->has('plan.days', 3));
         $this->post('/recommendations', ['preset' => 'full-body'])->assertSessionHasNoErrors();
         $plan = $user->trainingPlans()->firstOrFail();

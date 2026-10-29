@@ -1,3 +1,4 @@
+import { ProgramRunCards } from "../Features/ProgramUI";
 import { useState } from "react";
 import { Head, Link, usePage, router } from "@inertiajs/react";
 import {
@@ -26,6 +27,7 @@ import ScheduleEntryForm from "../Features/ScheduleEntryForm";
 import SessionStatusActions from "../Features/SessionStatusActions";
 import BodyWeightForm from "../Features/BodyWeightForm";
 export default function Dashboard({
+    programRuns = [],
     stats,
     todayEntries,
     upcomingEntries,
@@ -83,6 +85,7 @@ export default function Dashboard({
                     Schedule session
                 </Button>
             </PageHeader>
+            <ProgramRunCards runs={programRuns} />
             {activeWorkout && (
                 <div className="profile-reminder workout-resume-banner">
                     <span>

@@ -1,3 +1,5 @@
+import { useTraining } from "../../Features/CoachingUI";
+import { BlockTimeline } from "../../Features/ProgramUI";
 import { Head, useForm } from "@inertiajs/react";
 import { ArrowRight, Check } from "lucide-react";
 import {
@@ -8,22 +10,31 @@ import {
 } from "../../Components/UI";
 
 export default function Show({ plan }) {
+    const { url } = useTraining();
+    const isProgram = plan.structure_type === "program";
     const form = useForm({ preset: plan.key });
     function usePlan() {
-        form.post("/recommendations");
+        form.post(url("/recommendations"));
     }
     return (
         <div className="discovery-page discovery-preview">
             <Head title={plan.name} />
             <Breadcrumbs
                 items={[
-                    { label: "Find a training plan", href: "/recommendations" },
+                    {
+                        label: "Find a training plan",
+                        href: url("/recommendations"),
+                    },
                     { label: plan.name },
                 ]}
             />
             <PageHeader title={plan.name} description={plan.description}>
                 <Button disabled={form.processing} onClick={usePlan}>
-                    {form.processing ? "Adding…" : "Use this plan"}
+                    {form.processing
+                        ? "Adding…"
+                        : isProgram
+                          ? "Use this program"
+                          : "Use this plan"}
                     <ArrowRight size={16} />
                 </Button>
             </PageHeader>
@@ -82,82 +93,128 @@ export default function Show({ plan }) {
                     adding sessions to Calendar.
                 </p>
             </section>
-            <section
-                aria-labelledby="weekly-split-title"
-                className="discovery-section"
-            >
-                <div className="discovery-section-heading">
-                    <h2 id="weekly-split-title">Your weekly split</h2>
-                    <p>
-                        Review each day’s exercises and starting prescriptions.
-                        Working weights are left for you to choose.
-                    </p>
-                </div>
-                <ol className="discovery-split">
-                    {plan.split.map((title, index) => (
-                        <li key={index}>
-                            <span>Day {index + 1}</span>
-                            <a href={`#plan-day-${index + 1}`}>{title}</a>
-                        </li>
-                    ))}
-                </ol>
-                {plan.days.map((day, index) => (
-                    <details
-                        className="panel discovery-day"
-                        key={index}
-                        id={`plan-day-${index + 1}`}
-                        open
-                    >
-                        <summary>
-                            <span>
-                                <small>
-                                    DAY {index + 1} · {day.focus_area}
-                                </small>
-                                <strong>{day.title}</strong>
-                            </span>
-                            <span>{day.exercises.length} exercises</span>
-                        </summary>
-                        <p className="discovery-day-note">{day.notes}</p>
-                        <ol className="discovery-exercises">
-                            {day.exercises.map((exercise, position) => (
-                                <li key={`${exercise.key}-${position}`}>
-                                    <img
-                                        src={exercise.thumbnail_url}
-                                        alt=""
-                                        width="56"
-                                        height="56"
-                                        loading="lazy"
-                                    />
-                                    <div>
-                                        <h3>{exercise.name}</h3>
-                                        <p>
-                                            {exercise.sets}{" "}
-                                            {exercise.sets === 1
-                                                ? "set"
-                                                : "sets"}{" "}
-                                            × {exercise.reps}
-                                            {exercise.tracking_mode === "reps"
-                                                ? " reps"
-                                                : ""}
-                                        </p>
-                                        {exercise.superset_group && (
-                                            <span className="badge training">
-                                                Superset{" "}
-                                                {exercise.superset_group}
-                                            </span>
-                                        )}
-                                        {exercise.notes && (
-                                            <p className="field-hint">
-                                                {exercise.notes}
-                                            </p>
-                                        )}
-                                    </div>
-                                </li>
+            {isProgram && (
+                <section>
+                    <h2>{plan.duration_weeks}-week program</h2>
+                    <BlockTimeline blocks={plan.blocks} />
+                    {plan.blocks.map((block, i) => (
+                        <details
+                            className="panel program-card"
+                            key={i}
+                            open={i === 0}
+                        >
+                            <summary>
+                                {block.name} · Weeks {block.start_week}–
+                                {block.end_week}
+                            </summary>
+                            {block.days.map((day, j) => (
+                                <div className="program-day" key={j}>
+                                    <h3>{day.title}</h3>
+                                    <ul className="program-prescriptions">
+                                        {day.exercises.map((ex, k) => (
+                                            <li key={k}>
+                                                <img
+                                                    src={ex.thumbnail_url}
+                                                    alt=""
+                                                    width="48"
+                                                    height="48"
+                                                    loading="lazy"
+                                                />
+                                                <span>
+                                                    <strong>{ex.name}</strong>
+                                                    <small>
+                                                        {ex.sets} × {ex.reps}
+                                                    </small>
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             ))}
-                        </ol>
-                    </details>
-                ))}
-            </section>
+                        </details>
+                    ))}
+                </section>
+            )}
+            {!isProgram && (
+                <section
+                    aria-labelledby="weekly-split-title"
+                    className="discovery-section"
+                >
+                    <div className="discovery-section-heading">
+                        <h2 id="weekly-split-title">Your weekly split</h2>
+                        <p>
+                            Review each day’s exercises and starting
+                            prescriptions. Working weights are left for you to
+                            choose.
+                        </p>
+                    </div>
+                    <ol className="discovery-split">
+                        {plan.split.map((title, index) => (
+                            <li key={index}>
+                                <span>Day {index + 1}</span>
+                                <a href={`#plan-day-${index + 1}`}>{title}</a>
+                            </li>
+                        ))}
+                    </ol>
+                    {plan.days.map((day, index) => (
+                        <details
+                            className="panel discovery-day"
+                            key={index}
+                            id={`plan-day-${index + 1}`}
+                            open
+                        >
+                            <summary>
+                                <span>
+                                    <small>
+                                        DAY {index + 1} · {day.focus_area}
+                                    </small>
+                                    <strong>{day.title}</strong>
+                                </span>
+                                <span>{day.exercises.length} exercises</span>
+                            </summary>
+                            <p className="discovery-day-note">{day.notes}</p>
+                            <ol className="discovery-exercises">
+                                {day.exercises.map((exercise, position) => (
+                                    <li key={`${exercise.key}-${position}`}>
+                                        <img
+                                            src={exercise.thumbnail_url}
+                                            alt=""
+                                            width="56"
+                                            height="56"
+                                            loading="lazy"
+                                        />
+                                        <div>
+                                            <h3>{exercise.name}</h3>
+                                            <p>
+                                                {exercise.sets}{" "}
+                                                {exercise.sets === 1
+                                                    ? "set"
+                                                    : "sets"}{" "}
+                                                × {exercise.reps}
+                                                {exercise.tracking_mode ===
+                                                "reps"
+                                                    ? " reps"
+                                                    : ""}
+                                            </p>
+                                            {exercise.superset_group && (
+                                                <span className="badge training">
+                                                    Superset{" "}
+                                                    {exercise.superset_group}
+                                                </span>
+                                            )}
+                                            {exercise.notes && (
+                                                <p className="field-hint">
+                                                    {exercise.notes}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ol>
+                        </details>
+                    ))}
+                </section>
+            )}
             <section className="panel discovery-use">
                 <div>
                     <h2>Make this plan yours</h2>
@@ -167,11 +224,18 @@ export default function Show({ plan }) {
                     </p>
                 </div>
                 <div>
-                    <ButtonLink href="/recommendations" variant="secondary">
+                    <ButtonLink
+                        href={url("/recommendations")}
+                        variant="secondary"
+                    >
                         Back to all plans
                     </ButtonLink>
                     <Button disabled={form.processing} onClick={usePlan}>
-                        {form.processing ? "Adding…" : "Use this plan"}
+                        {form.processing
+                            ? "Adding…"
+                            : isProgram
+                              ? "Use this program"
+                              : "Use this plan"}
                     </Button>
                 </div>
             </section>

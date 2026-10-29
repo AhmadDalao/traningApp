@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProgramRun;
 use App\Models\UserProfile;
+use App\Services\ProgramLifecycle;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -25,6 +27,7 @@ class DashboardController extends Controller
         $upcoming = (clone $entries)->upcoming()->whereBetween('scheduled_date', [today()->addDay()->toDateString(), today()->addDays(7)->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id');
 
         return Inertia::render('Dashboard', [
+            'programRuns' => app(ProgramLifecycle::class)->cards(ProgramRun::where('user_id', $request->user()->id)->where('status', 'active')),
             'checkIn' => $checkIn ? ['last_weight' => $latestWeight?->weight_kg ?? $profile->current_weight_kg, 'last_date' => $latestWeight?->recorded_date?->toDateString()] : null,
             'profileIncomplete' => ! $profile?->onboarding_completed_at,
             'stats' => ['completed' => (clone $week)->where('status', 'completed')->count(), 'planned' => (clone $week)->where('status', 'planned')->count(), 'today' => $today->count(), 'upcoming' => (clone $upcoming)->count()],
