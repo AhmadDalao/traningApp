@@ -2,13 +2,13 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
-## v2.0.1 Program Lifecycle QA & Stabilization — source release only
+## v2.0.1 Program Lifecycle QA & Stabilization — deployed and verified
 
 Seven confirmed defects fixed: coach locks on current/resolved blocks and day ordering, protected-session preview accuracy, future edits into elapsed times, early-completed program History access, and repeated summary metadata queries. Existing architecture, simple plans, actual workout data and authentication are preserved. No migration or dependency changes.
 
 Verification: **478 PHP tests / 10,265 assertions on each of SQLite and isolated MySQL**, **31 concurrency checks**, **28 JavaScript tests**, and **536 browser checks across Chromium/WebKit**. Build, Pint, scoped Prettier and whitespace checks pass. Four disposable accounts and 452 QA images were removed; all 19 original table fingerprints and 44 original media hashes match.
 
-[Full v2.0.1 lifecycle stabilization report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html). **READY — SOURCE RELEASE ONLY, NOT DEPLOYED.** The v2.0.1 brief explicitly holds deployment until Ahmad later says “deploy.” Tag `v2.0.1` identifies `5751231`. Production remains v2.0.0; its tag is unchanged. Browser scripts require disposable local fixtures and private credentials; run shared-account workout flows sequentially. End Program Early remains intentionally deferred.
+[Full v2.0.1 lifecycle stabilization report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html). **READY — deployed and verified on Hostinger** after the subsequent request to push the update. Tag `v2.0.1` remains on `5751231`. Six PHP files updated, all 112 release hashes verified, 141 live HTTP checks and 150 live browser checks passed. No migration; original production data, uploads and settings are preserved. Three live QA accounts and temporary deployment files are removed. The v2.0.0 tag is unchanged. Browser scripts require disposable local fixtures and private credentials; run shared-account workout flows sequentially. End Program Early remains intentionally deferred.
 
 ## v2.0.0 Structured Programs, Blocks & Lifecycle
 
