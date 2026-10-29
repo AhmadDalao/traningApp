@@ -68,5 +68,8 @@
   "pint": "passed",
   "scoped_prettier": "passed",
   "whitespace": "passed",
-  "production_writes": 0
+  "production_writes": 0,
+  "source_commit": "23f6941feaf68a10771cac3b7ccf0032b03e97cf",
+  "tag": "v2.1.0",
+  "release_scope": "GitHub source only"
 }
