@@ -23,6 +23,17 @@
 .user-menu .nav-item {
     width: 100%;
 }
+.profile-id-card {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.profile-id-card > h2 {
+    margin: 0;
+}
+.profile-id-card > .training-code {
+    justify-self: start;
+}
 .profile-columns {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
