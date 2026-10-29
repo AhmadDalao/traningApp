@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.1 — 29 October 2026 — SOURCE RELEASE ONLY
+
+- Close three coach program-lock gaps: reordered current-block days, blocks completed out of order, and newly added current/resolved-block sessions through schedule reconciliation.
+- Show saved protected-session titles, dates and block context in change previews. Keep an eligible session protected when the proposed time has already elapsed today.
+- Make early-completed program sessions readable in History and through Progress links, including after source deletion. Preserve scheduled-date filters and existing future simple-plan behavior.
+- Batch completion-summary exercise metadata into one query. Preserve the existing weighted-metric rules, PR engine and truthful first-to-last load-change label.
+- Add 24 lifecycle regressions / 550 assertions, three two-connection races, and 162 browser stress/drag checks across Chromium and WebKit.
+- Final verification: 478 PHP tests / 10,265 assertions on each database, 31 concurrency checks, 28 JS tests and 536 browser checks. Build, Pint, scoped Prettier and whitespace checks pass.
+- Remove four local QA accounts and 452 generated images. All 19 original table fingerprints and 44 original media hashes match. No schema, dependency, authentication or layout changes.
+- READY for source release; **NOT DEPLOYED** under the explicit v2.0.1 hold. Preserve v2.0.0 and stop at this patch. [Full 49-section report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html).
+
 ## v2.0.0 — 29 October 2026
 
 - Extend existing plans with optional finite structured programs, contiguous blocks and independent block prescriptions. Existing simple plans remain unchanged.

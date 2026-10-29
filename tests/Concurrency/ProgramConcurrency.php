@@ -97,6 +97,47 @@ try {
     $other->table('schedule_entries')->where('id', $entry->id)->update(['status' => 'planned', 'completed_at' => null]);
     $open = app(ProgramLifecycle::class)->sync($run->id);
     programCheck($open->status === 'active' && $open->completed_at === null, 'Reopened session reopens run using current status');
+
+    $preview = $schedule->changes($open, $plan->fresh());
+    DB::beginTransaction();
+    DB::table('users')->count();
+    $other->table('schedule_entries')->where('id', $entry->id)->update(['scheduled_date' => today()->addDays(30), 'schedule_managed' => false]);
+    $denied = false;
+    try {
+        $schedule->applyChanges(ProgramRun::lockForUpdate()->findOrFail($run->id), TrainingPlan::lockForUpdate()->findOrFail($plan->id), $preview['signature'], null, $paths);
+    } catch (ValidationException $error) {
+        $denied = true;
+    }
+    DB::rollBack();
+    programCheck($denied && $entry->fresh()->scheduled_date->isSameDay(today()->addDays(30)), 'Concurrent manual move invalidates review and preserves moved date');
+
+    $copy = $day->replicate();
+    $copy->position = 1;
+    $copy->save();
+    $copy->exercises()->create($exercise->fresh()->only('name', 'sets', 'reps', 'tracking_mode', 'library_key', 'position'));
+    $preview = $schedule->changes($open->fresh(), $plan->fresh());
+    DB::beginTransaction();
+    DB::table('users')->count();
+    DB::setDefaultConnection('program_race');
+    DB::transaction(function () use ($schedule, $run, $plan, $preview, &$paths) {
+        $schedule->applyChanges(ProgramRun::lockForUpdate()->findOrFail($run->id), TrainingPlan::lockForUpdate()->findOrFail($plan->id), $preview['signature'], null, $paths);
+    });
+    DB::setDefaultConnection('mysql');
+    $denied = false;
+    try {
+        $schedule->applyChanges(ProgramRun::lockForUpdate()->findOrFail($run->id), TrainingPlan::lockForUpdate()->findOrFail($plan->id), $preview['signature'], null, $paths);
+    } catch (ValidationException $error) {
+        $denied = true;
+    }
+    DB::rollBack();
+    programCheck($denied && $run->sessions()->count() === 14, 'Concurrent repeated apply rejects stale review without duplicate additions');
+
+    DB::beginTransaction();
+    DB::table('users')->count();
+    $other->table('schedule_entries')->where('program_run_id', $run->id)->update(['status' => 'completed', 'completed_at' => now()]);
+    $done = app(ProgramLifecycle::class)->sync($run->id);
+    DB::commit();
+    programCheck($done->status === 'completed' && $done->completed_at !== null && $plan->programRuns()->count() === 1, 'Concurrent recompletion resolves the same run without another history record');
     echo count($checks).' program concurrency checks passed.'.PHP_EOL;
 } finally {
     DB::setDefaultConnection('mysql');

@@ -73,6 +73,7 @@ class ProgramLifecycle
         $service = app(ExerciseProgress::class);
         $ids = $run->sessions()->where('status', 'completed')->pluck('id')->all();
         $groups = $service->workouts($run->user)->groupBy(fn ($row) => $row['source_exercise_key'].'|'.$row['tracking_mode']);
+        $metadata = SessionExercise::whereIn('id', $groups->map(fn ($rows) => $rows->whereIn('session_id', $ids)->whereNotNull('heaviest_weight')->last()['exercise_id'] ?? null)->filter())->get()->keyBy('id');
         $events = [];
         $gains = [];
         foreach ($groups as $rows) {
@@ -85,7 +86,7 @@ class ProgramLifecycle
             if ($during->count() > 1) {
                 $change = round($during->last()['heaviest_weight'] - $during->first()['heaviest_weight'], 2);
                 if ($change != 0) {
-                    $exercise = SessionExercise::find($during->last()['exercise_id']);
+                    $exercise = $metadata[$during->last()['exercise_id']];
                     $gains[] = ['name' => $exercise->name, 'change_kg' => $change, 'url' => $service->url($exercise->source_exercise_key, $exercise->tracking_mode, $run->user)];
                 }
             }

@@ -102,20 +102,31 @@ class ProgramSchedule
         $entries = $run->sessions()->withExists('sessionExercises')->lockForUpdate()->get();
         $byKey = $entries->keyBy('plan_occurrence_key');
         $currentWeek = $coach ? app(ProgramLifecycle::class)->position($run)['current_week'] : null;
+        $resolvedBlocks = $entries->where('entry_type', 'training')->groupBy('program_context.block_id')
+            ->filter(fn ($sessions) => $sessions->every(fn ($entry) => in_array($entry->status, ['completed', 'skipped'], true)))->keys();
         $result = ['add' => [], 'update' => [], 'remove' => [], 'keep' => [], 'protected' => []];
         $keys = [];
         foreach ($desired['sessions'] as $row) {
             $keys[] = $row['key'];
             $entry = $byKey->get($row['key']);
             if ($entry) {
-                if ($reason = $this->protection($entry, $coach, $currentWeek)) {
-                    $result['protected'][] = [...$row, 'id' => $entry->id, 'reason' => $reason];
+                $reason = $this->protection($entry, $coach, $currentWeek);
+                if (! $reason && ! app(CoachAccess::class)->future($row['scheduled_date'], $row['scheduled_time'])) {
+                    $reason = 'Proposed time is no longer in the future';
+                }
+                if ($reason) {
+                    $result['protected'][] = [...$entry->only('id', 'title', 'entry_type', 'program_week', 'scheduled_date', 'scheduled_time', 'program_context'), 'reason' => $reason];
                 } elseif ($entry->program_context != $row['program_context'] || substr($entry->scheduled_time ?? '', 0, 5) !== substr($row['scheduled_time'] ?? '', 0, 5)) {
                     $result['update'][] = [...$row, 'id' => $entry->id];
                 } else {
                     $result['keep'][] = [...$row, 'id' => $entry->id];
                 }
             } elseif (app(CoachAccess::class)->future($row['scheduled_date'], $row['scheduled_time'])) {
+                if ($coach && ($row['program_context']['start_week'] <= ($currentWeek ?? 52) || $resolvedBlocks->contains($row['program_context']['block_id']))) {
+                    $result['protected'][] = [...$row, 'reason' => 'Current or resolved program block'];
+
+                    continue;
+                }
                 if ($coach) {
                     app(CoachAccess::class)->scheduleDate(app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($coach, $plan->user)), $row['scheduled_date'], $row['scheduled_time']);
                 }

@@ -195,6 +195,15 @@ class TrainingDayController extends Controller
         $this->context->write(function () use ($request, $trainingPlan) {
             $plan = TrainingPlan::lockForUpdate()->findOrFail($trainingPlan->id);
             $this->context->plan($plan, 'update');
+            if ($this->context->coaching() && $plan->isProgram()) {
+                $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'required|integer|distinct'])['ids'];
+                foreach ($plan->trainingDays()->lockForUpdate()->get() as $day) {
+                    $position = array_search($day->id, $ids);
+                    if ($position !== false && (int) $position !== $day->position) {
+                        app(ProgramDefinition::class)->dayWritable($day, true);
+                    }
+                }
+            }
             $this->reorder($request, $plan->trainingDays());
         });
 

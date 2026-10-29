@@ -67,6 +67,14 @@ class ScheduleEntry extends Model
         });
     }
 
+    public function scopeHistoryVisible(Builder $query): void
+    {
+        // Programs can be completed out of order. Their saved Progress links must
+        // remain readable before the original scheduled date, including after source deletion.
+        $query->where(fn (Builder $history) => $history->past()
+            ->orWhere(fn (Builder $program) => $program->whereNotNull('program_run_id')->where('status', 'completed')));
+    }
+
     public function captureWorkoutSnapshot(array &$copiedPaths): array
     {
         if ($this->program_prescription !== null) {

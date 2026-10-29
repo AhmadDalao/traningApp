@@ -58,6 +58,10 @@ class ProgramDefinition
             if ($position['current_week'] === null || $block->start_week <= $position['current_week']) {
                 return false;
             }
+            $training = collect($position['sessions'])->where('entry_type', 'training')->where('program_context.block_id', $block->id);
+            if ($training->isNotEmpty() && $training->every(fn ($entry) => in_array($entry['status'], ['completed', 'skipped'], true))) {
+                return false;
+            }
         }
 
         return true;
