@@ -10,10 +10,12 @@ use App\Http\Controllers\CoachScheduleController;
 use App\Http\Controllers\CoachSubscriptionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExerciseProgressController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlanScheduleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ScheduleChangeController;
 use App\Http\Controllers\ScheduleEntryController;
@@ -25,6 +27,8 @@ use App\Http\Controllers\TrainingPlanController;
 use App\Http\Middleware\CoachWorkspace;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/sw.js', [PwaController::class, 'worker']);
+
 Route::get('/', fn () => redirect(auth()->check() ? '/dashboard' : '/login'));
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -33,6 +37,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'store'])->middleware('throttle:10,1');
 });
 Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::put('/notifications/preferences', [NotificationController::class, 'preferences'])->middleware('throttle:30,1,push-preferences:');
+    Route::post('/notifications/subscription', [NotificationController::class, 'subscribe'])->middleware('throttle:10,1,push-subscribe:');
+    Route::delete('/notifications/subscription', [NotificationController::class, 'unsubscribe'])->middleware('throttle:20,1,push-unsubscribe:');
+    Route::post('/notifications/test', [NotificationController::class, 'test'])->middleware('throttle:2,1,push-test:');
+    Route::get('/notifications/open/{kind}/{id}', [NotificationController::class, 'open'])->whereIn('kind', ['session', 'plan'])->whereNumber('id');
+
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -96,13 +96,28 @@ try {
         .getByRole("button", { name: "Preview changes", exact: true })
         .click();
     simulatingFailure = true;
-    await page.route("**/reschedule", (route) =>
-        route.fulfill({
-            status: 500,
-            contentType: "application/json",
-            body: JSON.stringify({ message: "QA simulated save failure" }),
-        }),
-    );
+    // WebKit's service-worker requests can bypass Playwright route interception.
+    // Inject the same one-shot HTTP failure at fetch, keeping the real SW active.
+    await page.evaluate(() => {
+        const original = window.fetch;
+        window.fetch = (input, options) => {
+            if (String(input).endsWith("/reschedule")) {
+                window.fetch = original;
+                return Promise.resolve(
+                    new Response(
+                        JSON.stringify({
+                            message: "QA simulated save failure",
+                        }),
+                        {
+                            status: 500,
+                            headers: { "Content-Type": "application/json" },
+                        },
+                    ),
+                );
+            }
+            return original(input, options);
+        };
+    });
     await page
         .getByRole("button", { name: "Apply changes", exact: true })
         .click();
@@ -112,7 +127,6 @@ try {
         .waitFor();
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
     await page.getByRole("dialog").waitFor({ state: "hidden" });
-    await page.unroute("**/reschedule");
     await page.reload();
     simulatingFailure = false;
     assert.equal(

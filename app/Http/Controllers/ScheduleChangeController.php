@@ -6,6 +6,7 @@ use App\Models\ScheduleEntry;
 use App\Models\TrainingPlan;
 use App\Models\User;
 use App\Services\CoachAccess;
+use App\Services\Notifications\CoachNotifications;
 use App\Services\PlanSchedule;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
@@ -100,6 +101,9 @@ class ScheduleChangeController extends Controller
                     }
                     $day->save();
                 }
+                if ($plan) {
+                    app(CoachNotifications::class)->plan($coach, $plan, 'schedule', $data['signature']);
+                }
             }
 
             return response()->json(['preview' => $preview, 'saved' => $apply]);
@@ -139,6 +143,7 @@ class ScheduleChangeController extends Controller
                 ScheduleEntry::where('user_id', $plan->user_id)->whereIn('id', array_column($preview['remove'], 'id'))->delete();
                 // Keep rolling until the chosen stop date, even when it is beyond today's horizon.
                 $plan->forceFill(['end_date' => $data['end_date']])->save();
+                app(CoachNotifications::class)->plan($this->context->coaching() ? $this->context->actor() : null, $plan, 'schedule', $data['signature']);
             }
 
             return response()->json(['preview' => $preview, 'saved' => $apply]);

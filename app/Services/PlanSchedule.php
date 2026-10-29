@@ -6,6 +6,7 @@ use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use App\Services\Notifications\CoachNotifications;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -217,6 +218,10 @@ class PlanSchedule
         }
 
         $plan->forceFill(['schedule_enabled' => $action !== 'remove' && $plan->schedule_mode === 'ongoing', 'schedule_actor_id' => $coach?->id ?? $plan->user_id])->save();
+
+        if ($added || $ids) {
+            app(CoachNotifications::class)->plan($coach, $plan, 'schedule', $signature);
+        }
 
         return ['added' => $added, 'removed' => count($ids)];
     }

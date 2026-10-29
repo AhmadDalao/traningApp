@@ -1,0 +1,114 @@
+.notification-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+.notification-grid > * {
+    min-width: 0;
+}
+.notification-panel {
+    padding: 24px;
+    margin-bottom: 24px;
+    overflow-wrap: anywhere;
+}
+.notification-panel h2 {
+    font-size: 18px;
+    margin: 0;
+}
+.notification-panel p {
+    line-height: 1.6;
+    color: var(--muted, #64748b);
+    margin: 14px 0;
+}
+.notification-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.notification-title svg {
+    flex-shrink: 0;
+    color: #1763ef;
+}
+.notification-state {
+    display: block;
+    margin: 12px 0;
+}
+.notification-help,
+.notification-feedback {
+    border-radius: 10px;
+    padding: 14px;
+    background: #f0f5ff;
+    line-height: 1.6;
+}
+.notification-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+.notification-toggle {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin: 22px 0;
+    cursor: pointer;
+}
+.notification-toggle input {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    margin-top: 2px;
+    accent-color: #1763ef;
+}
+.notification-toggle small {
+    display: block;
+    margin-top: 6px;
+    line-height: 1.6;
+    color: #64748b;
+}
+.notification-panel select {
+    width: 100%;
+}
+.notification-panel .btn {
+    white-space: normal;
+    min-height: 44px;
+}
+.pwa-notice {
+    padding: 16px;
+    background: #fff9e9;
+    border: 1px solid #efdba4;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.pwa-notice p {
+    margin: 5px 0 0;
+    line-height: 1.5;
+}
+@media (max-width: 767px) {
+    .notification-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+    .notification-panel {
+        padding: 18px;
+    }
+    .notification-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+@media (display-mode: standalone) {
+    .mobile-top {
+        padding-top: max(12px, env(safe-area-inset-top));
+    }
+    .app-footer {
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+}

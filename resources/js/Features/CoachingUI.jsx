@@ -92,12 +92,14 @@ export function TraineeNav() {
         </div>
     );
 }
-export async function coachingJson(path, data = {}) {
+export async function coachingJson(path, data = {}, method = "POST") {
+    if (!navigator.onLine)
+        throw new Error("You are offline. Reconnect before saving changes.");
     const cookie = document.cookie
         .split("; ")
         .find((value) => value.startsWith("XSRF-TOKEN="));
     const response = await fetch(path, {
-        method: "POST",
+        method,
         credentials: "same-origin",
         headers: {
             "Content-Type": "application/json",

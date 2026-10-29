@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\Notifications\PushDevices;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,6 +50,7 @@ class AuthController extends Controller
                 }
             }
         }
+        app(PushDevices::class)->forget($request);
         Auth::login($user);
         $request->session()->regenerate();
 
@@ -74,6 +76,7 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
         }
         RateLimiter::clear($key);
+        app(PushDevices::class)->forget($request);
         $request->session()->regenerate();
 
         if ($request->session()->has('url.intended')) {
@@ -94,6 +97,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        app(PushDevices::class)->forget($request);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

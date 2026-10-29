@@ -38,6 +38,10 @@ export default function ScheduleChangeModal({ entry, plan, date, onClose }) {
                 .split("; ")
                 .find((cookie) => cookie.startsWith("XSRF-TOKEN="))
                 ?.slice(11);
+            if (!navigator.onLine)
+                throw new Error(
+                    "You are offline. Reconnect before saving changes.",
+                );
             const response = await fetch(
                 url(base + (preview ? "" : "-preview")),
                 {

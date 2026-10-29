@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use App\Services\Notifications\CoachNotifications;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -44,6 +45,8 @@ class TrainingPlanDuplicator
                 $copy->save();
                 $this->definitionCopy($source, $copy, $paths);
                 $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
+
+                app(CoachNotifications::class)->plan($coach, $copy, 'assigned', (string) $copy->id);
 
                 return $copy;
             });

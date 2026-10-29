@@ -1,3 +1,4 @@
+import PwaStatus from "../Features/Notifications/PwaStatus";
 import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
@@ -220,6 +221,9 @@ export default function AppLayout({ children }) {
                                     </Link>
                                 </>
                             )}
+                            <Link href="/notifications" className="nav-item">
+                                Notifications & install
+                            </Link>
                             <Link href="/profile" className="nav-item">
                                 <UserRound size={17} />
                                 Profile
@@ -266,6 +270,7 @@ export default function AppLayout({ children }) {
                     </div>
                 </div>
                 <main id="main">
+                    <PwaStatus />
                     {flash.success && (
                         <div
                             key={`${url}-${flash.success}`}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTrainingPlanRequest;
 use App\Http\Requests\UpdateTrainingPlanRequest;
 use App\Models\TrainingPlan;
+use App\Services\Notifications\CoachNotifications;
 use App\Services\ProgramDefinition;
 use App\Services\ProgramLifecycle;
 use App\Services\TrainingContext;
@@ -46,6 +47,7 @@ class TrainingPlanController extends Controller
             }
             if ($relationship) {
                 $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'assigned_training_plan_id' => $plan->id, 'assigned_at' => now(), 'status' => 'active']);
+                app(CoachNotifications::class)->plan($request->user(), $plan, 'assigned', (string) $plan->id);
             }
 
             return $plan;

@@ -6,9 +6,11 @@ use App\Http\Requests\StoreScheduleEntryRequest;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingDay;
 use App\Services\CoachAccess;
+use App\Services\Notifications\CoachNotifications;
 use App\Services\PlanSchedule;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class CoachScheduleController extends Controller
@@ -55,11 +57,17 @@ class CoachScheduleController extends Controller
                     $entry->schedule_managed = false;
                 }
                 $entry->save();
+                if ($entry->wasChanged(['scheduled_date', 'scheduled_time'])) {
+                    app(CoachNotifications::class)->plan($request->user(), $plan, 'schedule', (string) Str::uuid());
+                }
 
                 return $entry;
             }
 
-            return $this->context->owner()->scheduleEntries()->create([...$fields, 'status' => 'planned', 'scheduled_by_user_id' => $request->user()->id]);
+            $created = $this->context->owner()->scheduleEntries()->create([...$fields, 'status' => 'planned', 'scheduled_by_user_id' => $request->user()->id]);
+            app(CoachNotifications::class)->plan($request->user(), $plan, 'schedule', 'created:'.$created->id);
+
+            return $created;
         });
     }
 
@@ -84,6 +92,7 @@ class CoachScheduleController extends Controller
             $this->access->futureSession($this->context->actor(), $this->context->owner(), $entry);
             abort_if($entry->program_run_id, 422, 'Use the program change preview to remove future program sessions.');
             app(PlanSchedule::class)->rememberCancellation($entry);
+            app(CoachNotifications::class)->plan($this->context->actor(), $entry->trainingDay->trainingPlan, 'schedule', 'deleted:'.$entry->id);
             $entry->delete();
         });
 

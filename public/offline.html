@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#152131" />
+        <title>Offline · Training Planner</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 24px;
+                min-height: 85vh;
+                display: grid;
+                place-items: center;
+                background: #f5f7fb;
+                color: #182637;
+                font:
+                    16px/1.6 system-ui,
+                    sans-serif;
+            }
+            main {
+                max-width: 420px;
+                background: white;
+                padding: 32px;
+                border: 1px solid #e2e8f0;
+                border-radius: 20px;
+            }
+            img {
+                width: 56px;
+                height: 56px;
+            }
+            h1 {
+                font-size: 28px;
+                line-height: 1.2;
+            }
+            p {
+                color: #526176;
+            }
+            a {
+                display: inline-block;
+                background: #1763ef;
+                color: white;
+                text-decoration: none;
+                border-radius: 10px;
+                padding: 12px 22px;
+                min-height: 24px;
+            }
+            a:focus-visible {
+                outline: 3px solid #152131;
+                outline-offset: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <img src="/pwa/icon-192.png" alt="" />
+            <h1>You're offline</h1>
+            <p>
+                Connect to the internet to view your training and save changes.
+                Workout logging and scheduling need a connection.
+            </p>
+            <p>
+                Your saved training stays safely on the server. Nothing is
+                queued to sync from this screen.
+            </p>
+            <a
+                href="/dashboard"
+                onclick="
+                    event.preventDefault();
+                    location.reload();
+                "
+                >Try again</a
+            >
+        </main>
+    </body>
+</html>

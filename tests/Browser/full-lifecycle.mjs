@@ -31,6 +31,7 @@ const date = (offset = 0) => {
 async function visit(p, url) {
     current = p;
     await p.goto(base + url);
+    await p.locator("#app > *").first().waitFor({ state: "visible" });
 }
 async function matrix(p, label) {
     for (const width of [320, 360, 375, 390, 430, 768, 1280]) {

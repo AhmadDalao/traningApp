@@ -8,6 +8,7 @@ use App\Models\ProgramRun;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use App\Services\Notifications\CoachNotifications;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\ValidationException;
@@ -94,6 +95,8 @@ class ProgramSchedule
         foreach ($desired['sessions'] as $session) {
             $this->createEntry($run, $session, $coach, $media, $paths);
         }
+
+        app(CoachNotifications::class)->plan($coach, $plan, 'schedule', 'start:'.$run->id);
 
         return $run;
     }
@@ -186,6 +189,9 @@ class ProgramSchedule
         }
         $definition['duration_weeks'] = max($definition['duration_weeks'], $run->sessions()->max('program_week') ?? 1);
         $run->update(['definition_snapshot' => $definition]);
+        if ($changes['add'] || $changes['update'] || $changes['remove']) {
+            app(CoachNotifications::class)->plan($coach, $plan, 'schedule', $signature);
+        }
     }
 
     private function protection(ScheduleEntry $entry, ?CoachPlanAssignment $assignment, ?CoachSubscription $subscription, ?int $currentWeek): ?string

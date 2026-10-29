@@ -1,0 +1,12 @@
+{
+  "original_data_and_media_unchanged": true,
+  "tables": 19,
+  "original_media_files": 44,
+  "qa_accounts_removed": 11,
+  "qa_images_removed": 688,
+  "notification_tables_remaining_rows": {
+    "notification_preferences": 0,
+    "web_push_subscriptions": 0,
+    "notification_deliveries": 0
+  }
+}

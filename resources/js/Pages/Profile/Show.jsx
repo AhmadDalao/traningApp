@@ -18,6 +18,9 @@ export default function Show({ profile, options }) {
                 title="Profile"
                 description="Your personal information and training preferences."
             >
+                <ButtonLink href="/notifications" variant="secondary">
+                    Notifications & install
+                </ButtonLink>
                 <ButtonLink href="/profile/edit">
                     <Pencil size={16} />
                     Edit profile

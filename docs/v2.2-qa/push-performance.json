@@ -1,0 +1,84 @@
+{
+    "users": 25,
+    "devices": 50,
+    "future_sessions": 5000,
+    "due_sessions": 25,
+    "batch_requested": 20,
+    "deliveries_queued": 20,
+    "elapsed_ms": 39.06,
+    "queries": 122,
+    "due_query_ms": 2.22,
+    "due_sql": "select `schedule_entries`.* from `schedule_entries` inner join `notification_preferences` as `prefs` on `prefs`.`user_id` = `schedule_entries`.`user_id` where (`status` != ? or `program_run_id` is null or exists (select * from `program_runs` where `schedule_entries`.`program_run_id` = `program_runs`.`id` and (`status` not in (?, ?) or (`status` = ? and `schedule_entries`.`scheduled_date` < `program_runs`.`paused_from`)))) and `entry_type` = ? and `status` = ? and `started_at` is null and `scheduled_time` is not null and `prefs`.`workout_reminders` = ? and ((`prefs`.`reminder_minutes` = ? and `scheduled_date` >= ? and `scheduled_date` < ? and (date(`scheduled_date`) > ? or `scheduled_time` >= ?) and (date(`scheduled_date`) < ? or `scheduled_time` <= ?)) or (`prefs`.`reminder_minutes` = ? and `scheduled_date` >= ? and `scheduled_date` < ? and (date(`scheduled_date`) > ? or `scheduled_time` >= ?) and (date(`scheduled_date`) < ? or `scheduled_time` <= ?)) or (`prefs`.`reminder_minutes` = ? and `scheduled_date` >= ? and `scheduled_date` < ? and (date(`scheduled_date`) > ? or `scheduled_time` >= ?) and (date(`scheduled_date`) < ? or `scheduled_time` <= ?)) or (`prefs`.`reminder_minutes` = ? and `scheduled_date` >= ? and `scheduled_date` < ? and (date(`scheduled_date`) > ? or `scheduled_time` >= ?) and (date(`scheduled_date`) < ? or `scheduled_time` <= ?))) and exists (select 1 from `web_push_subscriptions` where `web_push_subscriptions`.`user_id` = `schedule_entries`.`user_id`) order by `scheduled_date` asc, `scheduled_time` asc, `schedule_entries`.`id` asc limit 200",
+    "explain": [
+        {
+            "EXPLAIN": "-> Limit: 200 row(s)  (cost=11.3 rows=0.125)\n    -> Nested loop semijoin (FirstMatch)  (cost=11.3 rows=0.125)\n        -> Nested loop inner join  (cost=11.3 rows=0.0025)\n            -> Filter: (((schedule_entries.`status` <> 'planned') or (schedule_entries.program_run_id is null) or exists(select #2)) and (schedule_entries.entry_type = 'training') and (schedule_entries.`status` = 'planned') and (schedule_entries.started_at is null))  (cost=11.3 rows=0.05)\n                -> Index range scan on schedule_entries using schedule_reminder_due over ('2026-10-30' <= scheduled_date <= '2026-10-31' AND NULL < scheduled_time), with index condition: ((schedule_entries.scheduled_time is not null) and (((schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '02:17:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '02:22:24'))) or ((schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '02:32:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '02:37:24'))) or ((schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '03:02:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '03:07:24'))) or ((schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '04:02:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '04:07:24')))))  (cost=11.3 rows=25)\n                -> Select #2 (subquery in condition; dependent)\n                    -> Limit: 1 row(s)  (cost=0.35 rows=1)\n                        -> Filter: ((program_runs.`status` not in ('paused','ended')) or ((program_runs.`status` = 'paused') and (schedule_entries.scheduled_date < program_runs.paused_from)))  (cost=0.35 rows=1)\n                            -> Single-row index lookup on program_runs using PRIMARY (id = schedule_entries.program_run_id)  (cost=0.35 rows=1)\n            -> Filter: ((prefs.workout_reminders = 1) and (((prefs.reminder_minutes = 15) and (schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '02:17:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '02:22:24'))) or ((prefs.reminder_minutes = 30) and (schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '02:32:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '02:37:24'))) or ((prefs.reminder_minutes = 60) and (schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '03:02:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '03:07:24'))) or ((prefs.reminder_minutes = 120) and (schedule_entries.scheduled_date >= DATE'2026-10-30') and (schedule_entries.scheduled_date < DATE'2026-10-31') and ((cast(schedule_entries.scheduled_date as date) > '2026-10-30') or (schedule_entries.scheduled_time >= '04:02:24')) and ((cast(schedule_entries.scheduled_date as date) < '2026-10-30') or (schedule_entries.scheduled_time <= '04:07:24')))))  (cost=0.35 rows=0.05)\n                -> Single-row index lookup on prefs using PRIMARY (user_id = schedule_entries.user_id)  (cost=0.35 rows=1)\n        -> Covering index lookup on web_push_subscriptions using web_push_subscriptions_user_id_foreign (user_id = schedule_entries.user_id)  (cost=100014 rows=50)\n"
+        }
+    ],
+    "schedule_indexes": [
+        {
+            "name": "primary",
+            "columns": [
+                "id"
+            ],
+            "type": "btree",
+            "unique": true,
+            "primary": true
+        },
+        {
+            "name": "schedule_entries_plan_occurrence_key_unique",
+            "columns": [
+                "plan_occurrence_key"
+            ],
+            "type": "btree",
+            "unique": true,
+            "primary": false
+        },
+        {
+            "name": "schedule_entries_program_run_id_foreign",
+            "columns": [
+                "program_run_id"
+            ],
+            "type": "btree",
+            "unique": false,
+            "primary": false
+        },
+        {
+            "name": "schedule_entries_scheduled_by_user_id_foreign",
+            "columns": [
+                "scheduled_by_user_id"
+            ],
+            "type": "btree",
+            "unique": false,
+            "primary": false
+        },
+        {
+            "name": "schedule_entries_training_day_id_foreign",
+            "columns": [
+                "training_day_id"
+            ],
+            "type": "btree",
+            "unique": false,
+            "primary": false
+        },
+        {
+            "name": "schedule_entries_user_id_scheduled_date_index",
+            "columns": [
+                "user_id",
+                "scheduled_date"
+            ],
+            "type": "btree",
+            "unique": false,
+            "primary": false
+        },
+        {
+            "name": "schedule_reminder_due",
+            "columns": [
+                "scheduled_date",
+                "scheduled_time"
+            ],
+            "type": "btree",
+            "unique": false,
+            "primary": false
+        }
+    ]
+}

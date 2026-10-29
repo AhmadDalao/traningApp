@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ProgramRun;
 use App\Models\User;
+use App\Services\Notifications\CoachNotifications;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -110,6 +111,10 @@ class ProgramControl
                 $run->fill(['status' => 'active', 'paused_from' => null, 'resume_on' => null]);
             }
             $run->save();
+        }
+
+        if ($coach) {
+            app(CoachNotifications::class)->plan($coach, $run->trainingPlan, $data['action'], $signature);
         }
 
         return $preview;

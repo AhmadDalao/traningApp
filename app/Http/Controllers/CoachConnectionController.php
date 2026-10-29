@@ -6,6 +6,7 @@ use App\Models\CoachPairingToken;
 use App\Models\CoachTraineeRelationship;
 use App\Models\User;
 use App\Services\CoachAccess;
+use App\Services\Notifications\CoachNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -86,7 +87,8 @@ class CoachConnectionController extends Controller
             abort_if($token && $token->trainee_user_id !== $target->id, 403);
             $existing = CoachTraineeRelationship::where('coach_user_id', $request->user()->id)->where('trainee_user_id', $target->id)->whereIn('status', ['pending', 'active'])->lockForUpdate()->first();
             if (! $existing) {
-                CoachTraineeRelationship::create(['coach_user_id' => $request->user()->id, 'trainee_user_id' => $target->id, 'status' => 'pending', 'requested_by' => $request->user()->id, 'requested_at' => now()]);
+                $created = CoachTraineeRelationship::create(['coach_user_id' => $request->user()->id, 'trainee_user_id' => $target->id, 'status' => 'pending', 'requested_by' => $request->user()->id, 'requested_at' => now()]);
+                app(CoachNotifications::class)->connection($created);
             }
             $token?->update(['used_at' => now()]);
         });
@@ -106,6 +108,7 @@ class CoachConnectionController extends Controller
                 if ($data['action'] === 'accept') {
                     abort_unless($row->coach->isCoach(), 403);
                     $row->update(['status' => 'active', 'approved_at' => now()]);
+                    app(CoachNotifications::class)->connection($row, true);
 
                     return;
                 }
