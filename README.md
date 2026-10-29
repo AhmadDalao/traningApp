@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v1.9.0 Plan Discovery & Personalization
+
+Three ordered training goals, a 19-plan curated library, deterministic recommendations, combined filters/search, full exercise previews and independent personal-plan copies. Returning users can update the original preference steps without resetting onboarding or duplicating unchanged weight entries. Advanced plans remain selectable by every experience level. Existing Calendar, workouts, History, Progress and coaching ownership are preserved.
+
+**434 PHP tests / 8,778 assertions** pass on SQLite and isolated MySQL, plus **27 JS tests**, **21 concurrency checks**, **119 authenticated local workflow checks** and **20 responsive checks** at 320/360/390/430/1280px. Build and formatting pass. Four temporary accounts and 118 QA images are removed; all 17 original table fingerprints and 44 media hashes match. No schema or dependency changes.
+
+[Full v1.9 report](docs/V1.9-PLAN-DISCOVERY-PERSONALIZATION-REPORT.html). Deployment is authorized and follows this verified source release. The standing finish → verify → commit → tag → push → deploy rule is saved in [AGENTS.md](AGENTS.md).
+
 ## v1.8.0 Smart Calendar — deployed and verified
 
 Built on v1.7.2, preserving the calendar system already shipped in v1.7.0/v1.7.1. This release bounds automatic rolling-refresh queries without losing moved occurrences, removes the invalid standalone rest-day option from coach scheduling, and corrects stopped-schedule status text. Fixed/ongoing plans, date-click scheduling, confirmed drag/drop, mobile Change date, recurring exceptions, inclusive stop dates and coaching permissions are verified end to end.

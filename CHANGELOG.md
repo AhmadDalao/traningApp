@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.9.0 — 29 October 2026
+
+- Accept up to three ordered goals with distinct-value validation, Primary/Secondary/Supporting display, priority controls and synchronized legacy goal fallback.
+- Reuse the existing onboarding form for returning preference edits; preserve onboarding timestamps, unchanged weight history and all existing training data.
+- Add 19 curated plans across beginner/intermediate/advanced, deterministic preference ranking, honest match reasons, unrestricted browsing, search and four combined filters.
+- Add full plan previews with actual library exercises, prescriptions, supersets, notes, icons and images. Explicit selection creates independent personal copies without scheduling.
+- Preserve stable exercise IDs, duration tracking and independent thumbnails when copying. Reject unknown catalog keys and forged ownership fields.
+- Add Profile and Personal Training Plans entry points. Preserve Coach Personal functionality and deny trainee self-promotion.
+- Build mobile layouts from 320px, with 44px action targets, 16px mobile inputs, scrollable filters and explicit keyboard focus restoration.
+- Verification: 434 PHP tests / 8,778 assertions on SQLite and MySQL; 27 JS tests; 21 concurrency checks; 119 local HTTP workflow checks; 20 responsive checks. Build, formatting and whitespace checks pass.
+- Four QA accounts and 118 QA images removed; all original 17 table fingerprints and 44 media hashes preserved. No schema/dependency change.
+- Distinct v1.9.0 source release and authorized Hostinger deployment; earlier tags retained. [Full report](docs/V1.9-PLAN-DISCOVERY-PERSONALIZATION-REPORT.html).
+
 ## v1.8.0 — 29 October 2026
 
 Initially released as source only; deployed to Hostinger on 29 October 2026 after explicit authorization. The v1.8.0 tag remains on `0f88fc3`; prior tags are preserved.
