@@ -8,7 +8,7 @@ Seven confirmed defects fixed: coach locks on current/resolved blocks and day or
 
 Verification: **478 PHP tests / 10,265 assertions on each of SQLite and isolated MySQL**, **31 concurrency checks**, **28 JavaScript tests**, and **536 browser checks across Chromium/WebKit**. Build, Pint, scoped Prettier and whitespace checks pass. Four disposable accounts and 452 QA images were removed; all 19 original table fingerprints and 44 original media hashes match.
 
-[Full v2.0.1 lifecycle stabilization report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html). **READY — SOURCE RELEASE ONLY, NOT DEPLOYED.** The v2.0.1 brief explicitly holds deployment until Ahmad later says “deploy.” Production remains v2.0.0; its tag is unchanged. Browser scripts require disposable local fixtures and private credentials; run shared-account workout flows sequentially. End Program Early remains intentionally deferred.
+[Full v2.0.1 lifecycle stabilization report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html). **READY — SOURCE RELEASE ONLY, NOT DEPLOYED.** The v2.0.1 brief explicitly holds deployment until Ahmad later says “deploy.” Tag `v2.0.1` identifies `5751231`. Production remains v2.0.0; its tag is unchanged. Browser scripts require disposable local fixtures and private credentials; run shared-account workout flows sequentially. End Program Early remains intentionally deferred.
 
 ## v2.0.0 Structured Programs, Blocks & Lifecycle
 

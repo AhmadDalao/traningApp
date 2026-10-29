@@ -9,7 +9,7 @@
 - Add 24 lifecycle regressions / 550 assertions, three two-connection races, and 162 browser stress/drag checks across Chromium and WebKit.
 - Final verification: 478 PHP tests / 10,265 assertions on each database, 31 concurrency checks, 28 JS tests and 536 browser checks. Build, Pint, scoped Prettier and whitespace checks pass.
 - Remove four local QA accounts and 452 generated images. All 19 original table fingerprints and 44 original media hashes match. No schema, dependency, authentication or layout changes.
-- READY for source release; **NOT DEPLOYED** under the explicit v2.0.1 hold. Preserve v2.0.0 and stop at this patch. [Full 49-section report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html).
+- READY: source commit `5751231`, annotated tag `v2.0.1`; **NOT DEPLOYED** under the explicit v2.0.1 hold. Preserve v2.0.0 and stop at this patch. [Full 49-section report](docs/V2.0.1-PROGRAM-LIFECYCLE-STABILIZATION-REPORT.html).
 
 ## v2.0.0 — 29 October 2026
 
