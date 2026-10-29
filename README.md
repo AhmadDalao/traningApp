@@ -8,7 +8,7 @@ Three ordered training goals, a 19-plan curated library, deterministic recommend
 
 **434 PHP tests / 8,778 assertions** pass on SQLite and isolated MySQL, plus **27 JS tests**, **21 concurrency checks**, **119 authenticated local workflow checks** and **20 responsive checks** at 320/360/390/430/1280px. Build and formatting pass. Four temporary accounts and 118 QA images are removed; all 17 original table fingerprints and 44 media hashes match. No schema or dependency changes.
 
-[Full v1.9 report](docs/V1.9-PLAN-DISCOVERY-PERSONALIZATION-REPORT.html). Deployment is authorized and follows this verified source release. The standing finish → verify → commit → tag → push → deploy rule is saved in [AGENTS.md](AGENTS.md).
+[Full v1.9 report](docs/V1.9-PLAN-DISCOVERY-PERSONALIZATION-REPORT.html). **Deployed to Hostinger on 29 October 2026.** All 72 deployed file hashes, 119 live HTTP checks and 20 live responsive checks pass. Production data, uploads and settings match the private backup; temporary QA accounts and deployment files are removed. Tag `v1.9.0` identifies `cdbb856`. The standing finish → verify → commit → tag → push → deploy rule is saved in [AGENTS.md](AGENTS.md).
 
 ## v1.8.0 Smart Calendar — deployed and verified
 

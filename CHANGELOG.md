@@ -11,7 +11,7 @@
 - Build mobile layouts from 320px, with 44px action targets, 16px mobile inputs, scrollable filters and explicit keyboard focus restoration.
 - Verification: 434 PHP tests / 8,778 assertions on SQLite and MySQL; 27 JS tests; 21 concurrency checks; 119 local HTTP workflow checks; 20 responsive checks. Build, formatting and whitespace checks pass.
 - Four QA accounts and 118 QA images removed; all original 17 table fingerprints and 44 media hashes preserved. No schema/dependency change.
-- Distinct v1.9.0 source release and authorized Hostinger deployment; earlier tags retained. [Full report](docs/V1.9-PLAN-DISCOVERY-PERSONALIZATION-REPORT.html).
+- Deployed v1.9.0 (`cdbb856`) to Hostinger: all 72 runtime/build hashes, 119 live HTTP checks and 20 live responsive checks pass. Three production QA accounts and temporary deployment files removed; all 17 original data-table fingerprints, uploads and settings preserved. Earlier tags retained. [Full report](docs/V1.9-PLAN-DISCOVERY-PERSONALIZATION-REPORT.html).
 
 ## v1.8.0 — 29 October 2026
 
