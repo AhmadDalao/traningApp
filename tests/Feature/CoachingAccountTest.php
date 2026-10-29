@@ -56,21 +56,84 @@ class CoachingAccountTest extends TestCase
         $this->assertDatabaseCount('users', 0);
     }
 
-    public function test_enable_is_idempotent_and_keeps_personal_data_and_identity(): void
+    public function test_trainee_cannot_enable_coaching_even_with_forged_role_fields(): void
     {
         $user = User::factory()->create();
         $plan = $user->trainingPlans()->create(['name' => 'Personal']);
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user)->withSession(['workspace' => 'personal']);
+        $this->get('/profile/coach')->assertForbidden();
+        $this->post('/profile/coach', ['display_name' => 'Coaching'])->assertForbidden();
+        $this->postJson('/profile/coach', ['display_name' => 'Coaching', 'account_type' => 'coach', 'is_coach' => true, 'active' => true])->assertForbidden();
+        $this->post('/profile/coach', [])->assertForbidden();
+        $this->post('/workspace', ['workspace' => 'coach'])->assertForbidden()->assertSessionHas('workspace', 'personal');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+        $this->assertDatabaseCount('users', 1);
+        $this->assertDatabaseCount('coach_profiles', 0);
+        $this->assertEquals($user->id, $plan->fresh()->user_id);
+        $this->get('/dashboard')->assertOk();
+        $this->get('/profile')->assertOk();
+        $this->get('/my-coaching')->assertOk();
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_existing_coach_can_edit_profile_and_keeps_personal_data_and_identity(): void
+    {
+        $user = $this->coach();
+        $plan = $user->trainingPlans()->create(['name' => 'Personal']);
         $before = $user->only('id', 'email', 'password', 'training_code');
-        $this->actingAs($user)->post('/profile/coach', ['display_name' => 'Coaching'])->assertRedirect('/coach');
+        $profileId = $user->coachProfile->id;
+        $this->actingAs($user)->get('/profile/coach')->assertOk();
+        $this->post('/profile/coach', ['display_name' => 'Coaching', 'specialization' => 'Strength', 'bio' => 'Training together.', 'account_type' => 'trainee', 'active' => false])->assertRedirect('/coach')->assertSessionHas('success', 'Coach profile updated.');
+        $this->assertDatabaseHas('coach_profiles', ['id' => $profileId, 'display_name' => 'Coaching', 'specialization' => 'Strength', 'bio' => 'Training together.', 'active' => true]);
         $this->post('/profile/coach', ['display_name' => 'Updated'])->assertRedirect('/coach');
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('coach_profiles', 1);
+        $this->assertDatabaseHas('coach_profiles', ['id' => $profileId, 'display_name' => 'Updated']);
+        $this->assertTrue($user->fresh()->isCoach());
         $this->assertEquals($before, $user->fresh()->only(array_keys($before)));
         $this->assertEquals($user->id, $plan->fresh()->user_id);
         $user->refresh();
         $this->post('/workspace', ['workspace' => 'personal'])->assertRedirect('/dashboard');
         $this->post('/workspace', ['workspace' => 'coach'])->assertRedirect('/coach');
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_inactive_coach_cannot_reactivate_through_profile_editing(): void
+    {
+        $user = $this->coach();
+        $user->coachProfile()->update(['active' => false]);
+        $before = $user->coachProfile->getAttributes();
+        $this->actingAs($user)->get('/profile/coach')->assertForbidden();
+        $this->post('/profile/coach', ['display_name' => 'Reactivated', 'active' => true])->assertForbidden();
+        $this->assertSame($before, $user->coachProfile->fresh()->getAttributes());
+        $this->post('/workspace', ['workspace' => 'coach'])->assertForbidden();
+    }
+
+    public function test_coach_role_without_profile_cannot_create_one_through_profile_editing(): void
+    {
+        $user = User::factory()->create();
+        $user->forceFill(['account_type' => User::COACH])->save();
+        $this->actingAs($user)->get('/profile/coach')->assertForbidden();
+        $this->post('/profile/coach', ['display_name' => 'New profile'])->assertForbidden();
+        $this->assertDatabaseCount('coach_profiles', 0);
+    }
+
+    public function test_coach_profile_without_coach_role_cannot_enable_workspace(): void
+    {
+        $user = User::factory()->create();
+        $user->coachProfile()->create(['display_name' => 'Existing profile']);
+        $this->actingAs($user)->get('/profile/coach')->assertForbidden();
+        $this->post('/profile/coach', ['display_name' => 'Upgrade'])->assertForbidden();
+        $this->assertSame(User::TRAINEE, $user->fresh()->account_type);
+        $this->assertDatabaseHas('coach_profiles', ['user_id' => $user->id, 'display_name' => 'Existing profile']);
+    }
+
+    public function test_guest_cannot_open_or_submit_coach_profile(): void
+    {
+        $this->get('/profile/coach')->assertRedirect('/login');
+        $this->post('/profile/coach', ['display_name' => 'Guest'])->assertRedirect('/login');
+        $this->assertDatabaseCount('coach_profiles', 0);
     }
 
     public function test_normal_accounts_cannot_open_coach_routes_or_switch_workspace(): void

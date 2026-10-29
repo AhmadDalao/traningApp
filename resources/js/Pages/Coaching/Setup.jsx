@@ -8,12 +8,10 @@ export default function Setup({ coachProfile }) {
     });
     return (
         <>
-            <Head title="Coach setup" />
+            <Head title="Coach profile" />
             <PageHeader
-                title={
-                    coachProfile ? "Coach profile" : "Enable Coach Workspace"
-                }
-                description="One account for your personal training and the people you coach."
+                title="Coach profile"
+                description="Manage your coaching name and information."
             />
             <form
                 className="panel coach-form"
@@ -22,10 +20,6 @@ export default function Setup({ coachProfile }) {
                     form.post("/profile/coach");
                 }}
             >
-                <p className="coach-callout">
-                    Your existing plans, workouts and progress stay exactly
-                    where they are. Switch between workspaces anytime.
-                </p>
                 {[
                     ["display_name", "Coach display name", 100],
                     ["specialization", "Specialization (optional)", 150],
@@ -45,9 +39,7 @@ export default function Setup({ coachProfile }) {
                         Cancel
                     </ButtonLink>
                     <Button disabled={form.processing}>
-                        {coachProfile
-                            ? "Save coach profile"
-                            : "Enable Coach Workspace"}
+                        Save coach profile
                     </Button>
                 </div>
             </form>

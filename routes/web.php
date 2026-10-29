@@ -79,7 +79,7 @@ Route::middleware('auth')->group(function () {
 // Coaching capabilities are additional access, never a substituted authentication identity.
 Route::middleware('auth')->group(function () {
     Route::get('/profile/coach', [CoachController::class, 'setup']);
-    Route::post('/profile/coach', [CoachController::class, 'enable']);
+    Route::post('/profile/coach', [CoachController::class, 'updateProfile']);
     Route::post('/workspace', [CoachController::class, 'switch']);
     Route::get('/my-coaching', [CoachConnectionController::class, 'index']);
     Route::post('/my-coaching/qr', [CoachConnectionController::class, 'qr'])->middleware('throttle:coach-qr');

@@ -34,11 +34,11 @@ export default function Show({ profile, options }) {
                     <ButtonLink href="/my-coaching" variant="secondary">
                         Copy ID, show QR & My Coaching
                     </ButtonLink>
-                    <ButtonLink href="/profile/coach" variant="secondary">
-                        {auth.user.is_coach
-                            ? "Coach profile"
-                            : "Enable Coach Workspace"}
-                    </ButtonLink>
+                    {auth.user.is_coach && (
+                        <ButtonLink href="/profile/coach" variant="secondary">
+                            Coach profile
+                        </ButtonLink>
+                    )}
                 </div>
             </section>
             {!profile.onboarding_completed_at && (

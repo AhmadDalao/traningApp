@@ -127,11 +127,11 @@ export default function Coaching({ relationships }) {
                 title="My Coaching"
                 description="Choose who can support your training. You keep control of your data."
             >
-                <ButtonLink variant="secondary" href="/profile/coach">
-                    {auth.user.is_coach
-                        ? "Coach profile"
-                        : "Enable Coach Workspace"}
-                </ButtonLink>
+                {auth.user.is_coach && (
+                    <ButtonLink variant="secondary" href="/profile/coach">
+                        Coach profile
+                    </ButtonLink>
+                )}
             </PageHeader>
             <section className="panel coach-card">
                 <h2>Your Training Planner ID</h2>

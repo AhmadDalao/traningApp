@@ -17,20 +17,23 @@ class CoachController extends Controller
 {
     public function setup(Request $request)
     {
+        abort_unless($request->user()->isCoach(), 403);
+
         return Inertia::render('Coaching/Setup', ['coachProfile' => $request->user()->coachProfile]);
     }
 
-    public function enable(Request $request)
+    public function updateProfile(Request $request)
     {
+        abort_unless($request->user()->isCoach(), 403);
         $data = $request->validate(['display_name' => 'required|string|max:100', 'specialization' => 'nullable|string|max:150', 'bio' => 'nullable|string|max:2000']);
         DB::transaction(function () use ($request, $data) {
             $user = User::lockForUpdate()->findOrFail($request->user()->id);
-            $user->coachProfile()->updateOrCreate([], [...$data, 'active' => true]);
-            $user->forceFill(['account_type' => User::COACH])->save();
+            abort_unless($user->isCoach(), 403);
+            $user->coachProfile()->firstOrFail()->update($data);
         });
         $request->session()->put('workspace', 'coach');
 
-        return redirect('/coach')->with('success', 'Coach Workspace is ready. Your personal training is unchanged.');
+        return redirect('/coach')->with('success', 'Coach profile updated.');
     }
 
     public function switch(Request $request)

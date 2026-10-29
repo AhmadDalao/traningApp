@@ -11,7 +11,7 @@ class CoachWorkspace
 {
     public function handle(Request $request, Closure $next)
     {
-        abort_unless($request->user()?->isCoach(), 403, 'Enable Coach Workspace to use this page.');
+        abort_unless($request->user()?->isCoach(), 403, 'This page is available to active coach accounts only.');
         $request->attributes->set('coach_workspace', true);
         if ($id = $request->route('trainee')) {
             $trainee = $id instanceof User ? $id : User::findOrFail($id);

@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.7.1 — 29 October 2026
+
+GitHub source release; Hostinger is unchanged. Existing tags remain intact.
+
+- Remove trainee “Enable Coach Workspace” actions from Profile and My Coaching. Existing active coaches retain their Coach profile links and workspace switcher.
+- Restrict GET and POST `/profile/coach` to existing active coaches. Rename the write handler to `updateProfile`; it updates profile information only and never creates a profile, upgrades an account or reactivates access.
+- Reject direct and forged trainee requests with 403; preserve account identity, personal data and session workspace. Coach-route denial text no longer suggests enabling coaching.
+- Preserve coach registration, personal training, coaching connections and existing coach profile editing. No schema, dependency or account-data migration.
+- Verification: 414 PHP tests / 5,197 assertions on SQLite and isolated MySQL; 24 JavaScript tests; 15 responsive page checks plus coach profile saving and workspace switching. Build, Pint, changed-file Prettier and whitespace checks pass.
+- Temporary QA accounts removed; original 17 table hashes and 44 media hashes unchanged.
+- Full report: [v1.7.1 Coach Access](docs/V1.7.1-COACH-ACCESS-REPORT.html).
+
 ## v1.7.0 — 28 October 2026
 
 GitHub source release; Hostinger deployment is unchanged. Earlier v1.6.0 and v1.6.1 tags remain intact.

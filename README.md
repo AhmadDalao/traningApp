@@ -2,6 +2,14 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v1.7.1 Trainee Account Restrictions
+
+Trainees can no longer enable Coach Workspace. Profile and My Coaching show the coach-profile link only to active coaches. Both GET and POST `/profile/coach` reject trainee accounts with 403; POST now edits an existing active coach profile without creating profiles, changing roles or reactivating access. Existing coach registration, workspace switching and trainee coaching connections are preserved.
+
+Verification: **414 PHP tests / 5,197 assertions** on SQLite and isolated MySQL, **24 JS tests**, **15 responsive page checks** at 320/390/1280px, and browser profile-save/workspace-switch checks. Build, formatting and whitespace checks pass. Temporary QA accounts are removed; all 17 original data-table hashes and 44 media hashes match.
+
+[Full v1.7.1 report](docs/V1.7.1-COACH-ACCESS-REPORT.html). **GitHub source release only; Hostinger remains unchanged.** This patch adds no migration or dependency. Deploying the full v1.7.1 tree over the live v1.6 baseline also requires the existing v1.7.0 migration and rebuilt frontend.
+
 ## v1.7.0 Smart Calendar & Recurring Schedules
 
 Source release **v1.7.0** adds ongoing plans, confirmed rolling generation through today + 90 days, date-first scheduling, desktop drag/drop, mobile Change date, this-occurrence / this-and-future previews, persistent cancellation markers and Stop Schedule. Existing fixed schedules, manual sessions, saved workouts and coaching ownership remain protected.
@@ -30,7 +38,7 @@ The [full QA and stabilization report](docs/V1.6-FULL-QA-STABILIZATION-REPORT.ht
 
 **Deployed as v1.6.0.** See the [full 26-part implementation and release report](docs/V1.6.0-COACHING-REPORT.html).
 
-- One account keeps personal training and can enable Coach Workspace from Profile. Registration supports trainee and coach accounts; workspace switching never changes identity.
+- Registration supports trainee and coach accounts; coaches keep personal training and can switch workspaces without changing identity. The original v1.6 trainee upgrade option is removed as of v1.7.1.
 - Permanent Training Planner IDs, exact lookup and locally rendered, expiring single-use QR links. Trainees explicitly accept requests and can disconnect at any time.
 - Coaching packages and date-aware subscriptions control management. Accepted relationships retain read-only monitoring when service is paused or expired.
 - Reuse the existing plan/day builder for templates, independent trainee-owned assignments and custom plans. Reuse Calendar, History, body/exercise Progress, PRs and progression calculations.
