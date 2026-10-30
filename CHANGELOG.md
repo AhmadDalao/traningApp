@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.3.0 — 30 October 2026 — deployed and verified
+
+- Add the operational Coach trainee table/mobile cards, derived attention states, persistent trainee context and saved Coaching → Training → Schedule setup.
+- Reuse existing subscription, assignment, Calendar, History, Progress and Program services; preserve permissions and idempotent setup retries.
+- Deploy immutable `v2.3.0` (`d0ef293`) directly from v2.1.1, including the v2.2 PWA and additive notification migration. Push delivery stays disabled; VAPID and cron are unchanged.
+- Verify 570 tests per database during source QA, then 150 live HTTP checks, 739 live browser checks and 7,117 origin file hashes. Preserve all 19 original production table fingerprints, 141 media files and environment bytes after QA cleanup.
+- [Full Coach Workspace and deployment report](docs/V2.3-COACH-WORKSPACE-UX-REPORT.html).
+
 ## v2.1.1 — 29 October 2026; deployed 30 October 2026
 
 - Fix held History actions, paused-workout monthly completion rates, silent stale Start errors and 404 redirects after early program History status changes. Preserve existing History date/status visibility.

@@ -6,9 +6,9 @@
   "starting_main": "2c3fcc5c6665ae6728b98567f87f8e5a08db442a",
   "source_commit": "d0ef293aec2465922328469fea2a7d3013075b79",
   "tag_object": "22b2c5d3530f57f7b8f9114d47d58eb099ddfba9",
-  "production_deployed": false,
-  "production_version": "v2.1.1",
-  "production_source": "b8fad5e2940098633b6dafb367518c22828f45ac",
+  "production_deployed": true,
+  "production_version": "v2.3.0",
+  "production_source": "d0ef293aec2465922328469fea2a7d3013075b79",
   "sqlite": {
     "tests": 570,
     "assertions": 11612
@@ -1454,5 +1454,7 @@
     "final/pwa-notifications-chromium.log": "45e6f5ad590bcda67f0ca59e5345081c061e0c38a8e86d3d93de984e7cf43baa",
     "final/pwa-notifications-webkit.log": "45e6f5ad590bcda67f0ca59e5345081c061e0c38a8e86d3d93de984e7cf43baa",
     "final/regression-fixtures.log": "06eaa1345a4824fe0869b6b3eed7ee25108707dde45046acf20828b542078c2b"
-  }
+  },
+  "previous_production_version": "v2.1.1",
+  "deployment_evidence": "deployment.json"
 }

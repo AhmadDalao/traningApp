@@ -2,13 +2,15 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
-## v2.3.0 Coach Workspace — source release, deployment held
+## v2.3.0 Coach Workspace — deployed and verified
 
 Trainee-centered coaching adds an operational desktop table and mobile cards, derived attention states, persistent trainee context, and a saved three-step setup flow: Coaching → Training → Schedule. Shared subscription, assignment, calendar, workout, history, progress, and program services remain authoritative. Setup retries are idempotent; coaches still cannot write trainee performance.
 
-Built on accepted **v2.2.0**, including its installable PWA and opt-in notification source. **Do not deploy v2.2 separately or v2.3 automatically.** Production remains v2.1.1 until Ahmad explicitly requests deployment. v2.3 adds no migration or dependency; eventual deployment from v2.1.1 must also include v2.2’s notification migration, locked dependencies, and PWA assets.
+Built on accepted **v2.2.0**, including its installable PWA and opt-in notification source. **Deployed directly from v2.1.1 on 30 October 2026 after explicit authorization**, using immutable tag `v2.3.0` (`d0ef293`). The existing v2.2 notification migration, locked dependencies and PWA assets are included. Push delivery remains disabled; no VAPID or cron configuration changed.
 
 Source QA: **570 tests / 11,612 assertions on each database**, **1,178 Chromium/WebKit checks**, **63 concurrency checks**, **37 JavaScript tests**, and **133 HTTP workflow checks**. Original data/media fingerprints match after QA cleanup.
+
+Live QA: **150 HTTP checks, 739 browser checks and 7,117 origin file hashes verified.** Fresh backups and all 19 original production table fingerprints, 141 media hashes and environment bytes match. All 13 disposable accounts/media and temporary deployment files removed. [Deployment evidence](docs/v2.3-qa/deployment.json).
 
 [Full v2.3 Coach Workspace report](docs/V2.3-COACH-WORKSPACE-UX-REPORT.html) · [Verification evidence](docs/v2.3-qa/checks.json) · [v2.2 PWA report](docs/V2.2-PWA-NOTIFICATIONS-REPORT.html).
 
