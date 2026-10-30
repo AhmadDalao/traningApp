@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-10-30T08:54:26.855112+00:00",
+  "method": "Read-only public login asset comparison with deployed v2.1.1 archive",
+  "login_status": 200,
+  "assets": [
+    {
+      "asset": "/build/assets/app-CEL8dP5C.js",
+      "matches_v211": true
+    },
+    {
+      "asset": "/build/assets/app-r9Rp2_0f.css",
+      "matches_v211": true
+    }
+  ],
+  "all_match": true,
+  "production_mutations": false
+}

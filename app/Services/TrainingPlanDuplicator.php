@@ -34,19 +34,27 @@ class TrainingPlanDuplicator
         });
     }
 
-    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates): TrainingPlan
+    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates, bool $resumeSetup = false): TrainingPlan
     {
         $paths = [];
         try {
-            return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, &$paths) {
+            return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, $resumeSetup, &$paths) {
                 $source = TrainingPlan::where('user_id', $coach->id)->where('workspace_type', 'coach_template')->lockForUpdate()->findOrFail($source->id);
+                if ($resumeSetup) {
+                    $existing = $relationship->assignments()->where('status', 'active')->whereHas('plan')->latest('id')->lockForUpdate()->first();
+                    if ($existing) {
+                        return $existing->plan;
+                    }
+                }
                 $copy = $trainee->trainingPlans()->make([...$source->only('name', 'description', 'structure_type', 'duration_weeks'), ...($source->isProgram() ? [] : $dates)]);
                 $copy->workspace_type = 'coach_assigned';
                 $copy->save();
                 $this->definitionCopy($source, $copy, $paths);
                 $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
 
-                app(CoachNotifications::class)->plan($coach, $copy, 'assigned', (string) $copy->id);
+                if (! $resumeSetup) {
+                    app(CoachNotifications::class)->plan($coach, $copy, 'assigned', (string) $copy->id);
+                }
 
                 return $copy;
             });

@@ -102,6 +102,38 @@ class CoachNotificationsTest extends TestCase
         }
     }
 
+    public function test_guided_setup_coalesces_assignment_and_schedule_and_replays_do_not_notify_twice(): void
+    {
+        [$coach, $trainee] = $this->setupCoaching();
+        $relationship = $this->relationship($coach, $trainee);
+        $template = $this->program($coach);
+        $base = '/coach/trainees/'.$trainee->id.'/setup';
+        $this->actingAs($coach)->post($base.'/training', ['training_plan_id' => $template->id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('notification_deliveries', 0);
+        $copy = $relationship->assignments()->firstOrFail()->plan;
+        $data = ['training_plan_id' => $copy->id, 'start_date' => today()->addDay()->toDateString(), 'nonce' => (string) Str::uuid()];
+        $data['signature'] = $this->postJson($base.'/preview', $data)->assertOk()->json('preview.signature');
+        $data['confirmed'] = true;
+        $this->postJson($base.'/activate', $data)->assertOk();
+        $this->postJson($base.'/activate', $data)->assertOk();
+        $this->post($base.'/finish')->assertRedirect();
+        $this->assertDatabaseCount('notification_deliveries', 1);
+        $this->assertSame('coach_schedule', NotificationDelivery::first()->kind);
+    }
+
+    public function test_finish_later_notifies_about_saved_unscheduled_training_once(): void
+    {
+        [$coach, $trainee] = $this->setupCoaching();
+        $this->relationship($coach, $trainee);
+        $template = $this->program($coach);
+        $base = '/coach/trainees/'.$trainee->id.'/setup';
+        $this->actingAs($coach)->post($base.'/training', ['training_plan_id' => $template->id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertRedirect();
+        $this->post($base.'/finish')->assertRedirect();
+        $this->post($base.'/finish')->assertRedirect();
+        $this->assertDatabaseCount('notification_deliveries', 1);
+        $this->assertSame('coach_assigned', NotificationDelivery::first()->kind);
+    }
+
     public function test_after_commit_only_and_rollback_has_no_notification(): void
     {
         [$coach, $trainee] = $this->setupCoaching();

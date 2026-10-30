@@ -1,0 +1,30 @@
+[
+  {
+    "engine": "chromium",
+    "width": 1100,
+    "available": 59,
+    "wordWidth": 51.919921875,
+    "pass": true
+  },
+  {
+    "engine": "chromium",
+    "width": 1280,
+    "available": 77,
+    "wordWidth": 50.819915771484375,
+    "pass": true
+  },
+  {
+    "engine": "webkit",
+    "width": 1100,
+    "available": 59,
+    "wordWidth": 51.919921875,
+    "pass": true
+  },
+  {
+    "engine": "webkit",
+    "width": 1280,
+    "available": 77,
+    "wordWidth": 50.81999969482422,
+    "pass": true
+  }
+]

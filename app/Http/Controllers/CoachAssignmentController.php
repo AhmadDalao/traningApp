@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CoachPlanAssignment;
+use App\Models\CoachTraineeRelationship;
 use App\Models\TrainingPlan;
 use App\Services\CoachAccess;
 use App\Services\TrainingContext;
@@ -12,11 +13,23 @@ use Inertia\Inertia;
 
 class CoachAssignmentController extends Controller
 {
-    public function create(TrainingContext $context, CoachAccess $access)
+    public function choose(Request $request, TrainingPlan $trainingPlan, TrainingContext $context)
+    {
+        $context->plan($trainingPlan);
+        abort_unless($context->templates(), 403);
+        $data = $request->validate(['search' => 'nullable|string|max:100']);
+        $relationships = CoachTraineeRelationship::where('coach_user_id', $context->actor()->id)->where('status', 'active')->with('trainee:id,name,training_code')->withExists(['assignments as has_training' => fn ($q) => $q->where('status', 'active')->whereHas('plan')])
+            ->when(! empty($data['search']), fn ($q) => $q->whereHas('trainee', fn ($q) => $q->where(fn ($q) => $q->where('name', 'like', '%'.$data['search'].'%')->orWhere('training_code', 'like', '%'.$data['search'].'%'))))
+            ->latest('id')->paginate(25)->withQueryString();
+
+        return Inertia::render('Coach/ChooseTrainee', ['plan' => $trainingPlan->only('id', 'name', 'structure_type', 'duration_weeks'), 'relationships' => $relationships, 'search' => $data['search'] ?? '']);
+    }
+
+    public function create(Request $request, TrainingContext $context, CoachAccess $access)
     {
         $subscription = $access->subscription($access->relationship($context->actor(), $context->owner()));
 
-        return Inertia::render('Coach/Assign', ['templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
+        return Inertia::render('Coach/Assign', ['selectedTemplate' => $request->integer('template'), 'templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
     }
 
     public function store(Request $request, TrainingContext $context, TrainingPlanDuplicator $duplicator)

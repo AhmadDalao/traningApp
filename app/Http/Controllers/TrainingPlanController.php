@@ -20,10 +20,13 @@ class TrainingPlanController extends Controller
 
     public function index(Request $request)
     {
-        return Inertia::render('TrainingPlans/Index', ['plans' => $this->context->plans()->with('assignment.relationship.coach.coachProfile')->withCount([
+        $filters = $request->validate(['search' => 'nullable|string|max:100', 'type' => 'nullable|in:all,program,simple']);
+
+        return Inertia::render('TrainingPlans/Index', ['filters' => ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? 'all'], 'plans' => $this->context->plans()->when($this->context->templates() && ! empty($filters['search']), fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))->when($this->context->templates() && ($filters['type'] ?? 'all') !== 'all', fn ($q) => $q->where('structure_type', $filters['type']))->with('assignment.relationship.coach.coachProfile')->withCount([
+            'templateAssignments as assigned_trainees_count' => fn ($q) => $q->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active')),
             'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
             'trainingDays as rest_days_count' => fn ($q) => $q->where('type', 'rest'),
-        ])->latest()->paginate(12)->through(fn ($plan) => $this->describe($plan))]);
+        ])->latest()->paginate(12)->withQueryString()->through(fn ($plan) => $this->describe($plan))]);
     }
 
     private function describe(TrainingPlan $plan): array
@@ -59,6 +62,9 @@ class TrainingPlanController extends Controller
     public function show(TrainingPlan $trainingPlan)
     {
         $this->context->plan($trainingPlan);
+        if ($this->context->templates()) {
+            $trainingPlan->loadCount(['templateAssignments as assigned_trainees_count' => fn ($q) => $q->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active'))]);
+        }
 
         if ($trainingPlan->isProgram()) {
             return Inertia::render('Programs/Show', ['plan' => $this->describe($trainingPlan),

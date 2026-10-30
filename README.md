@@ -2,6 +2,16 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v2.3.0 Coach Workspace — source release, deployment held
+
+Trainee-centered coaching adds an operational desktop table and mobile cards, derived attention states, persistent trainee context, and a saved three-step setup flow: Coaching → Training → Schedule. Shared subscription, assignment, calendar, workout, history, progress, and program services remain authoritative. Setup retries are idempotent; coaches still cannot write trainee performance.
+
+Built on accepted **v2.2.0**, including its installable PWA and opt-in notification source. **Do not deploy v2.2 separately or v2.3 automatically.** Production remains v2.1.1 until Ahmad explicitly requests deployment. v2.3 adds no migration or dependency; eventual deployment from v2.1.1 must also include v2.2’s notification migration, locked dependencies, and PWA assets.
+
+Source QA: **570 tests / 11,612 assertions on each database**, **1,178 Chromium/WebKit checks**, **63 concurrency checks**, **37 JavaScript tests**, and **133 HTTP workflow checks**. Original data/media fingerprints match after QA cleanup.
+
+[Full v2.3 Coach Workspace report](docs/V2.3-COACH-WORKSPACE-UX-REPORT.html) · [Verification evidence](docs/v2.3-qa/checks.json) · [v2.2 PWA report](docs/V2.2-PWA-NOTIFICATIONS-REPORT.html).
+
 ## v2.1.1 Full Lifecycle Stabilization — deployed and verified
 
 Full personal and coach lifecycle QA fixes held History actions, paused-workout completion rates, silent stale Start errors and invalid History redirects after reopening early-completed sessions. Program pages put the next workout first, make Resume primary and keep End secondary. Coach schedule review now uses 34 queries for both 12 and 156 workouts, with shared authorization checks and unchanged ownership rules.

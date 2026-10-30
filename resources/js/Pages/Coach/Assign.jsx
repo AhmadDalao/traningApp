@@ -8,10 +8,12 @@ import {
     DateLabel,
 } from "../../Components/UI";
 import { useTraining, Errors } from "../../Features/CoachingUI";
-export default function Assign({ templates, subscription }) {
+export default function Assign({ templates, subscription, selectedTemplate }) {
     const ctx = useTraining();
     const form = useForm({
-        training_plan_id: "",
+        training_plan_id: templates.some((p) => p.id === selectedTemplate)
+            ? selectedTemplate
+            : "",
         start_date: subscription?.starts_on || "",
         end_date: subscription?.ends_on || "",
         confirmed: true,
@@ -27,8 +29,8 @@ export default function Assign({ templates, subscription }) {
             {!subscription ? (
                 <section className="panel coach-card">
                     <p>Start an active subscription before assigning a plan.</p>
-                    <ButtonLink href="/coach/subscriptions">
-                        Manage subscriptions
+                    <ButtonLink href={ctx.url("/coaching")}>
+                        Manage coaching
                     </ButtonLink>
                 </section>
             ) : (

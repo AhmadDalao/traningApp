@@ -1,6 +1,6 @@
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, useForm } from "@inertiajs/react";
 import { Plus, Pencil, Trash2, ArrowRight, Layers } from "lucide-react";
 import {
     PageHeader,
@@ -10,12 +10,17 @@ import {
     ConfirmDialog,
     EmptyState,
     Pagination,
+    Field,
 } from "../../Components/UI";
 import TrainingPlanForm from "../../Features/TrainingPlanForm";
 import { DuplicatePlanDialog } from "../../Features/TrainingCopyActions";
 import { Copy } from "lucide-react";
-export default function Index({ plans }) {
+export default function Index({
+    plans,
+    filters = { search: "", type: "all" },
+}) {
     const { url, canManage, coaching, templates } = useTraining();
+    const filter = useForm(filters);
     const [duplicating, setDuplicating] = useState(null);
     const [editing, setEditing] = useState(null);
     const [deleting, setDeleting] = useState(null);
@@ -24,7 +29,7 @@ export default function Index({ plans }) {
             <Head
                 title={
                     templates
-                        ? "Coach Plans"
+                        ? "Programs"
                         : coaching
                           ? "Assigned plans"
                           : "Training plans"
@@ -34,7 +39,7 @@ export default function Index({ plans }) {
                 eyebrow="BUILD YOUR ROUTINE"
                 title={
                     templates
-                        ? "Coach Plans"
+                        ? "Programs"
                         : coaching
                           ? "Assigned plans"
                           : "Training plans"
@@ -57,10 +62,44 @@ export default function Index({ plans }) {
                 {canManage && (
                     <Button onClick={() => setEditing({})}>
                         <Plus size={17} />
-                        Create training plan
+                        {templates
+                            ? "Create program or plan"
+                            : "Create training plan"}
                     </Button>
                 )}
             </PageHeader>
+            {templates && (
+                <form
+                    className="panel coach-card coach-actions"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        filter.get(url("/training-plans"));
+                    }}
+                >
+                    <Field label="Search templates">
+                        <input
+                            value={filter.data.search}
+                            maxLength={100}
+                            onChange={(e) =>
+                                filter.setData("search", e.target.value)
+                            }
+                        />
+                    </Field>
+                    <Field label="Training type">
+                        <select
+                            value={filter.data.type}
+                            onChange={(e) =>
+                                filter.setData("type", e.target.value)
+                            }
+                        >
+                            <option value="all">Programs & plans</option>
+                            <option value="program">Structured programs</option>
+                            <option value="simple">Simple plans</option>
+                        </select>
+                    </Field>
+                    <Button disabled={filter.processing}>Filter</Button>
+                </form>
+            )}
             {coaching && canManage && (
                 <div className="coach-actions" style={{ marginBottom: 20 }}>
                     <ButtonLink href={url("/assign")}>
@@ -91,6 +130,19 @@ export default function Index({ plans }) {
                                 </div>
                                 <div className="plan-body">
                                     <h2>{plan.name}</h2>
+                                    {templates && (
+                                        <p>
+                                            {plan.assigned_trainees_count}{" "}
+                                            assigned trainees ·{" "}
+                                            <a
+                                                href={url(
+                                                    `/training-plans/${plan.id}/assign`,
+                                                )}
+                                            >
+                                                Assign to trainee →
+                                            </a>
+                                        </p>
+                                    )}
                                     {plan.coach_name && (
                                         <p className="field-hint">
                                             Coach assigned · {plan.coach_name}

@@ -87,8 +87,8 @@ class ScheduleEntry extends Model
     {
         $now = now();
         $query->where(function (Builder $query) use ($now) {
-            $query->where('scheduled_date', '<', $now->toDateString())
-                ->orWhere(fn (Builder $today) => $today->where('scheduled_date', $now->toDateString())
+            $query->whereDate('scheduled_date', '<', $now->toDateString())
+                ->orWhere(fn (Builder $today) => $today->whereDate('scheduled_date', $now->toDateString())
                     ->where(fn (Builder $time) => $time->whereNull('scheduled_time')->orWhere('scheduled_time', '<=', $now->format('H:i:s'))));
         });
     }

@@ -58,7 +58,18 @@ export default function Show({ plan, blocks, runs }) {
                         Duplicate program
                     </Button>
                 )}
+                {templates && (
+                    <ButtonLink href={url(`/training-plans/${plan.id}/assign`)}>
+                        Assign to trainee
+                    </ButtonLink>
+                )}
             </PageHeader>
+            {templates && (
+                <p className="field-hint">
+                    Reusable template · {plan.assigned_trainees_count || 0}{" "}
+                    assigned trainees. Each assigned copy stays independent.
+                </p>
+            )}
             {plan.coach_name && (
                 <p className="coach-callout">Assigned by {plan.coach_name}</p>
             )}

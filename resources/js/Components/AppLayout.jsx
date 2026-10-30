@@ -15,7 +15,6 @@ import {
     UserRound,
     ChevronDown,
     Users,
-    BriefcaseBusiness,
 } from "lucide-react";
 import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
 import { TraineeNav } from "../Features/CoachingUI";
@@ -50,17 +49,11 @@ export default function AppLayout({ children }) {
               },
               {
                   href: "/coach/training-plans",
-                  label: "Coach Plans",
+                  label: "Programs",
                   icon: Layers,
                   active:
                       url.startsWith("/coach/training-plans") ||
                       url.startsWith("/coach/training-days"),
-              },
-              {
-                  href: "/coach/subscriptions",
-                  label: "Subscriptions",
-                  icon: BriefcaseBusiness,
-                  active: url.startsWith("/coach/subscriptions"),
               },
           ]
         : [
@@ -220,6 +213,14 @@ export default function AppLayout({ children }) {
                                         Coach profile
                                     </Link>
                                 </>
+                            )}
+                            {coach && (
+                                <Link
+                                    href="/coach/subscriptions"
+                                    onClick={closeNavigation}
+                                >
+                                    Coaching administration
+                                </Link>
                             )}
                             <Link href="/notifications" className="nav-item">
                                 Notifications & install

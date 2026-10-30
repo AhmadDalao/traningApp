@@ -10,6 +10,7 @@ use App\Models\CoachPairingToken;
 use App\Models\CoachTraineeRelationship;
 use App\Models\User;
 use App\Services\CoachAccess;
+use App\Services\CoachingSubscriptions;
 use App\Services\ExerciseProgression;
 use App\Services\PlanSchedule;
 use Illuminate\Contracts\Console\Kernel;
@@ -94,7 +95,7 @@ try {
     $relation = CoachTraineeRelationship::where('coach_user_id', $coach->id)->firstOrFail();
     $relation->update(['status' => 'active', 'approved_at' => now()]);
     $r = req(['relationship_id' => $relation->id, 'package_name' => 'New', 'starts_on' => today()->toDateString(), 'open_ended' => true]);
-    race(fn ($db) => $db->table('coach_subscriptions')->insert(['coach_trainee_relationship_id' => $relation->id, 'package_name' => 'Concurrent', 'starts_on' => today(), 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]), fn () => app(CoachSubscriptionController::class)->store($r, $access), 'Subscription uniqueness uses current locking read');
+    race(fn ($db) => $db->table('coach_subscriptions')->insert(['coach_trainee_relationship_id' => $relation->id, 'package_name' => 'Concurrent', 'starts_on' => today(), 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]), fn () => app(CoachSubscriptionController::class)->store($r, app(CoachingSubscriptions::class)), 'Subscription uniqueness uses current locking read');
     check($relation->subscriptions()->count() === 1, 'One open subscription');
     $sub = $relation->subscriptions()->firstOrFail();
     $raw = bin2hex(random_bytes(32));

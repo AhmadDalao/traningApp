@@ -23,6 +23,11 @@ class TrainingPlan extends Model
         return $this->hasMany(ProgramRun::class)->latest('id');
     }
 
+    public function templateAssignments()
+    {
+        return $this->hasMany(CoachPlanAssignment::class, 'source_training_plan_id');
+    }
+
     public function assignment()
     {
         return $this->hasOne(CoachPlanAssignment::class, 'assigned_training_plan_id');

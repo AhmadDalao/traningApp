@@ -89,7 +89,18 @@ export default function Show({ plan, copyPlans = [] }) {
                         onDuplicate={() => setDuplicating(true)}
                     />
                 )}
+                {templates && (
+                    <ButtonLink href={url(`/training-plans/${plan.id}/assign`)}>
+                        Assign to trainee
+                    </ButtonLink>
+                )}
             </PageHeader>
+            {templates && (
+                <p className="field-hint">
+                    Reusable template · {plan.assigned_trainees_count || 0}{" "}
+                    assigned trainees. Each assigned copy stays independent.
+                </p>
+            )}
             {!templates && (
                 <section className="panel plan-period-panel">
                     <div>

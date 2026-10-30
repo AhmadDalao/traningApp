@@ -1,6 +1,6 @@
-import { usePage, Link } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
 import { useState } from "react";
-import { Button, ConfirmDialog } from "../Components/UI";
+import { Button, ConfirmDialog, ButtonLink, DateLabel } from "../Components/UI";
 
 export function useTraining() {
     const { trainingContext } = usePage().props;
@@ -47,49 +47,117 @@ export function EndRelationship({ relationship, label = "Disconnect coach" }) {
         </>
     );
 }
+export const traineeStates = {
+    all: "All",
+    active: "Active",
+    setup: "Needs setup",
+    attention: "Needs attention",
+    paused: "Paused",
+    pending: "Pending",
+    ended: "Ended",
+};
+export function TraineeState({ state }) {
+    return (
+        <span className={`coach-status ${state}`}>
+            {traineeStates[state] || state}
+        </span>
+    );
+}
 export function TraineeNav() {
-    const context = useTraining();
-    const { url: current } = usePage();
-    if (!context.coaching) return null;
+    const ctx = useTraining(),
+        { url: current } = usePage();
+    if (!ctx.coaching) return null;
+    const state = ctx.summary,
+        plan = state?.plan;
     const tabs = [
         ["", "Overview"],
-        ["/training-plans", "Plans"],
+        ["/training-plans", "Program"],
         ["/calendar", "Calendar"],
-        ["/training-history", "Training History"],
+        ["/training-history", "History"],
         ["/progress", "Progress"],
     ];
+    const active =
+        current.includes("/program-runs") || current.includes("/training-days")
+            ? "/training-plans"
+            : current.includes("/schedule-entries")
+              ? "/calendar"
+              : [...tabs]
+                    .reverse()
+                    .find(
+                        ([path]) => path && current.startsWith(ctx.url(path)),
+                    )?.[0] || "";
     return (
-        <div className="trainee-context">
-            <div>
-                <strong>{context.trainee.name}</strong>
-                <small>{context.trainee.training_code} · Coaching view</small>
+        <section className="trainee-context" aria-label="Current trainee">
+            <Link className="trainee-back" href="/coach/trainees">
+                ← Trainees
+            </Link>
+            <div className="trainee-identity">
+                <div>
+                    <Link href={ctx.url("")}>
+                        <strong>{ctx.trainee.name}</strong>
+                    </Link>
+                    <small>{ctx.trainee.training_code} · Coaching view</small>
+                </div>
+                <div>
+                    <TraineeState state={state?.display_state} />
+                    <small>
+                        {state?.subscription?.package_name ||
+                            "Coaching not configured"}
+                        {state?.subscription?.ends_on
+                            ? ` · Ends ${state.subscription.ends_on}`
+                            : state?.subscription
+                              ? " · Ongoing"
+                              : ""}
+                    </small>
+                </div>
+                {plan && (
+                    <div>
+                        <strong>{plan.name}</strong>
+                        <small>
+                            {plan.current_week
+                                ? `Week ${plan.current_week} of ${plan.duration_weeks}`
+                                : plan.run_status || "Training assigned"}
+                        </small>
+                    </div>
+                )}
             </div>
-            <nav aria-label="Trainee sections">
+            <nav className="trainee-desktop-nav" aria-label="Trainee sections">
                 {tabs.map(([path, name]) => (
                     <Link
                         key={path}
-                        className={
-                            path
-                                ? current.startsWith(context.url(path))
-                                    ? "active"
-                                    : ""
-                                : current.split("?")[0] === context.prefix
-                                  ? "active"
-                                  : ""
-                        }
-                        href={context.url(path)}
+                        className={active === path ? "active" : ""}
+                        href={ctx.url(path)}
                     >
                         {name}
                     </Link>
                 ))}
             </nav>
-            {!context.canManage && (
+            <label className="trainee-mobile-nav">
+                Trainee section
+                <select
+                    value={active}
+                    onChange={(e) => router.visit(ctx.url(e.target.value))}
+                >
+                    {tabs.map(([path, name]) => (
+                        <option key={path} value={path}>
+                            {name}
+                        </option>
+                    ))}
+                </select>
+            </label>
+            {!ctx.canManage && (
                 <p className="field-hint">
-                    Read-only access. Management needs an active subscription
-                    and assignment.
+                    Read-only access. Management needs active coaching and an
+                    active assignment.
                 </p>
             )}
-        </div>
+            {current.includes("/training-plans") &&
+                state?.display_state === "setup" && (
+                    <Link className="trainee-back" href={ctx.url("/setup")}>
+                        Continue coaching setup →
+                    </Link>
+                )}
+        </section>
     );
 }
 export async function coachingJson(path, data = {}, method = "POST") {

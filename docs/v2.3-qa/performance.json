@@ -1,0 +1,40 @@
+{
+    "connected_trainees": 29,
+    "measurements": [
+        {
+            "path": "\/coach",
+            "queries": 16,
+            "sql_ms": 110.07,
+            "response_ms": 148.68,
+            "session_set_queries": 0
+        },
+        {
+            "path": "\/coach\/trainees",
+            "queries": 7,
+            "sql_ms": 91.54,
+            "response_ms": 104.17,
+            "session_set_queries": 0
+        },
+        {
+            "path": "\/coach\/trainees\/{id}",
+            "queries": 36,
+            "sql_ms": 7.86,
+            "response_ms": 17.43,
+            "session_set_queries": 1
+        },
+        {
+            "path": "\/coach\/trainees\/{id}\/calendar",
+            "queries": 30,
+            "sql_ms": 5.83,
+            "response_ms": 10.92,
+            "session_set_queries": 0
+        },
+        {
+            "path": "\/coach\/training-plans",
+            "queries": 5,
+            "sql_ms": 0.86,
+            "response_ms": 2.88,
+            "session_set_queries": 0
+        }
+    ]
+}

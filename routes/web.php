@@ -7,6 +7,7 @@ use App\Http\Controllers\CoachAssignmentController;
 use App\Http\Controllers\CoachConnectionController;
 use App\Http\Controllers\CoachController;
 use App\Http\Controllers\CoachScheduleController;
+use App\Http\Controllers\CoachSetupController;
 use App\Http\Controllers\CoachSubscriptionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExerciseProgressController;
@@ -127,7 +128,16 @@ Route::middleware(['auth', CoachWorkspace::class])->prefix('coach')->group(funct
             Route::patch('/training-days/{trainingDay}/exercises/reorder', [TrainingDayController::class, 'reorderExercises']);
         });
     }
+    Route::get('/training-plans/{trainingPlan}/assign', [CoachAssignmentController::class, 'choose']);
     Route::prefix('/trainees/{trainee}')->group(function () {
+        Route::get('/setup', [CoachSetupController::class, 'show']);
+        Route::post('/setup/coaching', [CoachSetupController::class, 'coaching']);
+        Route::post('/setup/training', [CoachSetupController::class, 'training']);
+        Route::post('/setup/preview', [CoachSetupController::class, 'preview']);
+        Route::post('/setup/activate', [CoachSetupController::class, 'activate']);
+        Route::post('/setup/finish', [CoachSetupController::class, 'finish']);
+        Route::get('/coaching', [CoachSetupController::class, 'manage']);
+
         Route::get('/assign', [CoachAssignmentController::class, 'create']);
         Route::post('/assign', [CoachAssignmentController::class, 'store']);
         Route::post('/assignments/{assignment}/end', [CoachAssignmentController::class, 'end']);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Head, useForm, Link } from "@inertiajs/react";
+import { Head, useForm, Link, router } from "@inertiajs/react";
 import {
     PageHeader,
     Button,
@@ -8,182 +8,267 @@ import {
     DateLabel,
 } from "../../Components/UI";
 import {
-    CoachStatus,
     EndRelationship,
-    Errors,
-    coachingJson,
+    TraineeState,
+    traineeStates,
 } from "../../Features/CoachingUI";
-export default function Trainees({ relationships, filters }) {
-    const search = useForm(filters),
-        request = useForm({ training_code: "" });
-    const [member, setMember] = useState(null),
-        [error, setError] = useState(""),
-        [busy, setBusy] = useState(false);
-    async function lookup(e) {
-        e.preventDefault();
-        setBusy(true);
-        setError("");
-        setMember(null);
-        try {
-            const result = await coachingJson("/coach/lookup", request.data);
-            setMember(result.member);
-            if (!result.member) setError("No other member found with that ID.");
-        } catch (e) {
-            setError(e.message);
-        } finally {
-            setBusy(false);
-        }
-    }
+import AddTrainee from "../../Features/AddTrainee";
+function Identity({ row }) {
+    return (
+        <div className="trainee-cell">
+            <strong>
+                {row.trainee.id ? (
+                    <Link
+                        href={`/coach/trainees/${row.trainee.id}`}
+                        aria-label={`View trainee ${row.trainee.name}`}
+                    >
+                        {row.trainee.name}
+                    </Link>
+                ) : (
+                    row.trainee.name
+                )}
+            </strong>
+            <small>{row.trainee.training_code}</small>
+        </div>
+    );
+}
+function Program({ row }) {
+    return (
+        <div className="trainee-cell">
+            <span title={row.plan?.name}>
+                {row.plan?.name || "Not assigned"}
+            </span>
+            <small>
+                {row.plan?.current_week
+                    ? `Week ${row.plan.current_week} of ${row.plan.duration_weeks}`
+                    : row.plan?.run_status?.replaceAll("_", " ")}
+            </small>
+        </div>
+    );
+}
+function Next({ entry }) {
+    return entry ? (
+        <div className="trainee-cell">
+            <span>{entry.title}</span>
+            <small>
+                <DateLabel date={entry.scheduled_date} />
+                {entry.scheduled_time &&
+                    ` · ${entry.scheduled_time.slice(0, 5)}`}
+            </small>
+        </div>
+    ) : (
+        "Not scheduled"
+    );
+}
+function Actions({ row }) {
+    return row.action ? (
+        <Link className="btn btn-secondary" href={row.action.url}>
+            {row.action.label} →
+        </Link>
+    ) : row.status === "pending" ? (
+        <EndRelationship relationship={row} label="Cancel request" />
+    ) : (
+        <span>Access ended</span>
+    );
+}
+export default function Trainees({ relationships, filters, counts = {} }) {
+    const form = useForm(filters),
+        [adding, setAdding] = useState(false);
     return (
         <>
             <Head title="Trainees" />
             <PageHeader
                 title="Trainees"
-                description="Connections begin with a request and the trainee's approval."
-            />
-            <section className="panel coach-card">
-                <h2>Add trainee</h2>
-                <form onSubmit={lookup} className="coach-actions">
-                    <Field label="Training Planner ID">
-                        <input
-                            required
-                            maxLength={11}
-                            placeholder="TP-7F4K9M2Q"
-                            value={request.data.training_code}
-                            onChange={(e) => {
-                                request.setData(
-                                    "training_code",
-                                    e.target.value.toUpperCase(),
-                                );
-                                setMember(null);
-                            }}
-                        />
-                    </Field>
-                    <Button disabled={busy}>Find member</Button>
-                </form>
-                <p className="field-hint">
-                    Or scan their temporary QR with your phone camera. Search
-                    uses an exact ID, never an email address.
-                </p>
-                {error && (
-                    <p className="field-error" role="alert">
-                        {error}
-                    </p>
-                )}
-                <Errors errors={request.errors} />
-                {member && (
-                    <div className="coach-member">
-                        <strong>{member.name}</strong>
-                        <span>Training Planner member</span>
-                        <Button
-                            disabled={request.processing}
-                            onClick={() =>
-                                request.post("/coach/requests", {
-                                    onSuccess: () => {
-                                        setMember(null);
-                                        request.reset();
-                                    },
-                                })
-                            }
-                        >
-                            Send request
-                        </Button>
-                    </div>
-                )}
-            </section>
+                description="Your people, their training, and the next useful action."
+            >
+                <Button onClick={() => setAdding(true)}>Add trainee</Button>
+            </PageHeader>
             <form
                 className="panel coach-card coach-actions"
                 onSubmit={(e) => {
                     e.preventDefault();
-                    search.get("/coach/trainees", { preserveState: true });
+                    form.get("/coach/trainees", { preserveState: true });
                 }}
             >
                 <Field label="Search connected trainees">
                     <input
-                        value={search.data.search}
-                        onChange={(e) =>
-                            search.setData("search", e.target.value)
-                        }
+                        value={form.data.search}
+                        maxLength={100}
+                        onChange={(e) => form.setData("search", e.target.value)}
                         placeholder="Name or Training Planner ID"
                     />
                 </Field>
-                <Field label="Connection status">
-                    <select
-                        value={search.data.status}
-                        onChange={(e) =>
-                            search.setData("status", e.target.value)
-                        }
-                    >
-                        {["active", "pending", "ended", "all"].map((s) => (
-                            <option key={s} value={s}>
-                                {s}
-                            </option>
-                        ))}
-                    </select>
-                </Field>
-                <Button>Apply filters</Button>
+                <Button disabled={form.processing}>Search</Button>
             </form>
-            <div className="coach-grid">
-                {relationships.data.map((row) => (
-                    <section key={row.id} className="panel coach-card">
-                        <div className="coach-card-title">
-                            <h2>{row.trainee.name}</h2>
-                            <CoachStatus status={row.status} />
-                        </div>
-                        <p>{row.trainee.training_code}</p>
-                        {row.subscription && (
-                            <p>
-                                {row.subscription.package_name} ·{" "}
-                                <CoachStatus
-                                    status={row.subscription.effective_status}
-                                />
-                            </p>
-                        )}
-                        {row.next_session && (
-                            <p>
-                                Next: {row.next_session.title} ·{" "}
-                                <DateLabel
-                                    date={row.next_session.scheduled_date}
-                                />
-                            </p>
-                        )}
-                        {row.last_workout && (
-                            <p>
-                                Last workout:{" "}
-                                <DateLabel
-                                    date={row.last_workout.scheduled_date}
-                                />
-                            </p>
-                        )}
-                        <div className="coach-actions">
-                            {row.status === "active" && (
-                                <Link
-                                    className="btn btn-primary"
-                                    href={`/coach/trainees/${row.trainee.id}`}
-                                >
-                                    View trainee →
-                                </Link>
-                            )}
-                            {row.status !== "ended" && (
-                                <EndRelationship
-                                    relationship={row}
-                                    label={
-                                        row.status === "pending"
-                                            ? "Cancel request"
-                                            : "End relationship"
-                                    }
-                                />
-                            )}
-                        </div>
-                    </section>
+            <nav className="trainee-filters" aria-label="Trainee filters">
+                {Object.entries(traineeStates).map(([key, label]) => (
+                    <button
+                        key={key}
+                        type="button"
+                        aria-pressed={filters.status === key}
+                        onClick={() => {
+                            form.setData("status", key);
+                            router.get(
+                                "/coach/trainees",
+                                { ...form.data, status: key },
+                                { preserveState: true },
+                            );
+                        }}
+                    >
+                        {label}{" "}
+                        <span>
+                            {key === "all"
+                                ? Object.values(counts).reduce(
+                                      (a, b) => a + Number(b),
+                                      0,
+                                  )
+                                : counts[key] || 0}
+                        </span>
+                    </button>
                 ))}
-            </div>
-            {!relationships.data.length && (
-                <p className="panel coach-card">
-                    No connections match these filters.
-                </p>
+            </nav>
+            {relationships.data.length ? (
+                <>
+                    <div className="panel trainee-table">
+                        <table>
+                            <caption className="sr-only">
+                                Trainees and next actions
+                            </caption>
+                            <thead>
+                                <tr>
+                                    {[
+                                        "Trainee",
+                                        "Coaching",
+                                        "Program",
+                                        "Assigned this week",
+                                        "Next workout",
+                                        "Last workout",
+                                        "Status",
+                                        "Next action",
+                                    ].map((h) => (
+                                        <th key={h} scope="col">
+                                            {h}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {relationships.data.map((row) => (
+                                    <tr key={row.id}>
+                                        <th scope="row">
+                                            <Identity row={row} />
+                                        </th>
+                                        <td>
+                                            <div className="trainee-cell">
+                                                <span>
+                                                    {row.subscription
+                                                        ?.package_name ||
+                                                        "Not configured"}
+                                                </span>
+                                                <small>
+                                                    {
+                                                        row.subscription
+                                                            ?.effective_status
+                                                    }
+                                                    {row.subscription?.ends_on
+                                                        ? ` · Ends ${row.subscription.ends_on}`
+                                                        : row.subscription
+                                                          ? " · Ongoing"
+                                                          : ""}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <Program row={row} />
+                                        </td>
+                                        <td>
+                                            {row.status === "active"
+                                                ? `${row.week.completed} / ${row.week.total}`
+                                                : "—"}
+                                        </td>
+                                        <td>
+                                            <Next entry={row.next_session} />
+                                        </td>
+                                        <td>
+                                            {row.last_workout ? (
+                                                <DateLabel
+                                                    date={
+                                                        row.last_workout
+                                                            .scheduled_date
+                                                    }
+                                                />
+                                            ) : (
+                                                "No completed workout"
+                                            )}
+                                        </td>
+                                        <td>
+                                            <TraineeState
+                                                state={row.display_state}
+                                            />
+                                            <small className="trainee-reason">
+                                                {row.reason}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <Actions row={row} />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="trainee-mobile-cards">
+                        {relationships.data.map((row) => (
+                            <article className="panel coach-card" key={row.id}>
+                                <div className="coach-card-title">
+                                    <Identity row={row} />
+                                    <TraineeState state={row.display_state} />
+                                </div>
+                                <p>
+                                    {row.subscription?.package_name ||
+                                        "Coaching not configured"}
+                                </p>
+                                <Program row={row} />
+                                <dl>
+                                    <div>
+                                        <dt>Next workout</dt>
+                                        <dd>
+                                            <Next entry={row.next_session} />
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt>Assigned week</dt>
+                                        <dd>
+                                            {row.week.completed} /{" "}
+                                            {row.week.total} completed
+                                        </dd>
+                                    </div>
+                                </dl>
+                                <p>{row.reason}</p>
+                                <Actions row={row} />
+                            </article>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <section className="panel coach-card">
+                    <h2>
+                        {filters.search || filters.status !== "all"
+                            ? "No matching trainees"
+                            : "No trainees yet"}
+                    </h2>
+                    <p>
+                        {filters.search
+                            ? "Try a different name or Training Planner ID."
+                            : "Connect using their Training Planner ID or temporary QR code."}
+                    </p>
+                    <Button variant="secondary" onClick={() => setAdding(true)}>
+                        Add trainee
+                    </Button>
+                </section>
             )}
             <Pagination links={relationships.links} />
+            {adding && <AddTrainee close={() => setAdding(false)} />}
         </>
     );
 }

@@ -306,3 +306,332 @@
         width: 100%;
     }
 }
+
+/* Operational coaching shares the existing palette, forms and schedule components. */
+.coach-operational {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
+}
+.coach-operational .coach-stats {
+    margin: 0;
+}
+.coach-attention {
+    order: 1;
+}
+.coach-today {
+    order: 2;
+}
+.coach-pending {
+    order: 3;
+}
+.coach-summary {
+    order: 4;
+}
+.coach-recent {
+    order: 5;
+}
+.trainee-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+.trainee-filters button {
+    border: 1px solid #dce5f0;
+    border-radius: 9px;
+    background: white;
+    padding: 10px 13px;
+    min-height: 44px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+.trainee-filters button[aria-pressed="true"] {
+    background: #edf4ff;
+    color: #1557cc;
+    border-color: #7faafa;
+}
+.trainee-filters span {
+    color: #66758b;
+    margin-left: 4px;
+}
+.trainee-table {
+    display: none;
+}
+.trainee-mobile-cards {
+    display: grid;
+    gap: 16px;
+}
+.trainee-mobile-cards dl > div {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+}
+.trainee-mobile-cards dd {
+    margin: 0;
+}
+.trainee-mobile-cards dt,
+.trainee-cell small,
+.trainee-reason {
+    color: #6b7b91;
+    font-size: 12px;
+    font-weight: 400;
+}
+.trainee-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow-wrap: anywhere;
+    min-width: 0;
+}
+.trainee-reason {
+    display: block;
+    margin-top: 7px;
+}
+.coach-status.setup {
+    background: #fff5df;
+    color: #85590d;
+    border-color: #f6e3b9;
+}
+.coach-status.attention {
+    background: #fff0f1;
+    color: #a7394c;
+    border-color: #f6dce2;
+}
+.trainee-back {
+    display: inline-block;
+    padding: 6px 0;
+    margin-bottom: 12px;
+}
+.trainee-context .trainee-identity {
+    display: grid;
+    gap: 16px;
+}
+.trainee-identity > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+}
+.trainee-identity > div:first-child strong {
+    font-size: 20px;
+    color: #172b48;
+}
+.trainee-context .trainee-desktop-nav {
+    display: none;
+}
+.trainee-mobile-nav {
+    display: block;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #607086;
+}
+.trainee-mobile-nav select {
+    display: block;
+    margin-top: 6px;
+    width: 100%;
+    font-size: 16px;
+    min-height: 44px;
+    height: 48px;
+    padding: 8px 12px;
+    border: 1px solid #dce5f0;
+    border-radius: 8px;
+    background-color: #fff;
+}
+.trainee-more {
+    position: relative;
+}
+.trainee-more summary {
+    border: 1px solid #dce5f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-height: 44px;
+    cursor: pointer;
+    background: #fff;
+}
+.trainee-more > div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #dce5f0;
+    border-radius: 8px;
+    background: #fff;
+    min-width: 220px;
+}
+.trainee-more > div a {
+    padding: 8px 0;
+}
+.trainee-more hr {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid #e6eaf0;
+}
+.coach-setup {
+    max-width: 1000px;
+}
+.coach-setup h2 {
+    font-size: 20px;
+    margin: 24px 0 16px;
+}
+.coach-setup .panel {
+    margin-bottom: 20px;
+}
+.setup-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    list-style: none;
+    padding: 0;
+    gap: 8px;
+    margin: 24px 0;
+}
+.setup-steps button {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    align-items: flex-start;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dde6f0;
+    border-radius: 10px;
+    background: #fff;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.setup-steps button span {
+    display: grid;
+    place-items: center;
+    background: #edf4ff;
+    color: #1763ef;
+    height: 26px;
+    width: 26px;
+    border-radius: 50%;
+}
+.setup-steps button[aria-current="step"] {
+    border-color: #1763ef;
+    background: #f3f7ff;
+}
+.setup-steps button:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+.setup-steps small {
+    color: #6b7b91;
+}
+.setup-schedule {
+    padding: 0;
+    list-style: none;
+    max-height: 430px;
+    overflow-y: auto;
+}
+.setup-schedule li {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 0;
+    border-bottom: 1px solid #e9edf3;
+    overflow-wrap: anywhere;
+}
+.setup-checklist {
+    margin-bottom: 20px;
+}
+.setup-checklist ol {
+    padding-left: 22px;
+    line-height: 2;
+}
+.coach-setup .form-actions {
+    flex-wrap: wrap;
+}
+.coach-setup .btn {
+    white-space: normal;
+}
+@media (min-width: 768px) {
+    .trainee-context .trainee-identity {
+        grid-template-columns: 1.2fr 1fr 1fr;
+    }
+    .trainee-context .trainee-desktop-nav {
+        display: flex;
+    }
+    .trainee-mobile-nav {
+        display: none;
+    }
+    .setup-steps button {
+        font-size: 14px;
+        padding: 18px;
+    }
+    .setup-schedule li {
+        grid-template-columns: 150px minmax(0, 1fr) auto;
+        align-items: center;
+    }
+    .trainee-more[open] > div {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        z-index: 10;
+        box-shadow: 0 12px 30px #172b481a;
+    }
+}
+@media (min-width: 1100px) {
+    .coach-operational {
+        grid-template-columns: 1fr 1fr;
+    }
+    .coach-summary {
+        order: 0;
+        grid-column: 1/-1;
+    }
+    .trainee-table {
+        display: block;
+        padding: 8px 16px;
+    }
+    .trainee-table table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 12px;
+    }
+    .trainee-table th,
+    .trainee-table td {
+        padding: 16px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid #edf0f5;
+        overflow-wrap: anywhere;
+    }
+    .trainee-table thead th {
+        color: #6b7b91;
+        font-weight: 500;
+    }
+    .trainee-table th:first-child {
+        width: 16%;
+    }
+    .trainee-table th:nth-child(4) {
+        width: 10%;
+    }
+    .trainee-table th:last-child {
+        width: 13%;
+    }
+    .trainee-table .btn {
+        font-size: 12px;
+        padding: 9px;
+        white-space: normal;
+    }
+    .trainee-table .coach-status {
+        white-space: normal;
+    }
+    .trainee-mobile-cards {
+        display: none;
+    }
+}
+@media (min-width: 1100px) {
+    .trainee-table .trainee-cell > span:first-child,
+    .trainee-table .trainee-cell > strong {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}

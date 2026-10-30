@@ -3,7 +3,7 @@ import { Head, router } from "@inertiajs/react";
 import { Breadcrumbs, PageHeader } from "../../Components/UI";
 import ScheduleEntryForm from "../../Features/ScheduleEntryForm";
 export default function Form({ plans, entry, selectedDay, selectedDate }) {
-    const { url } = useTraining();
+    const { url, coaching, trainee } = useTraining();
     return (
         <>
             <Head title={entry ? "Edit session" : "Schedule session"} />
@@ -14,8 +14,18 @@ export default function Form({ plans, entry, selectedDay, selectedDate }) {
                 ]}
             />
             <PageHeader
-                title={entry ? "Edit your session" : "Schedule a session"}
-                description="A small commitment to yourself."
+                title={
+                    coaching
+                        ? `${entry ? "Edit workout for" : "Schedule"} ${trainee.name}`
+                        : entry
+                          ? "Edit your session"
+                          : "Schedule a session"
+                }
+                description={
+                    coaching
+                        ? "Add a one-off workout within the active coaching period."
+                        : "A small commitment to yourself."
+                }
             />
             <div className="panel form-panel">
                 <ScheduleEntryForm

@@ -168,7 +168,10 @@ async function addExercise(p, name, mode = "reps", partner = false) {
 }
 async function makeProgram(p, prefix = "", rich = false) {
     await visit(p, prefix + "/training-plans");
-    await button(p, "Create training plan").click();
+    await button(
+        p,
+        prefix === "/coach" ? "Create program or plan" : "Create training plan",
+    ).click();
     const d = p.getByRole("dialog");
     await d.getByLabel("Create").selectOption("program");
     await d
@@ -425,6 +428,7 @@ try {
     assert.ok(await trainee.getByRole("dialog").locator("svg").count());
     await button(trainee.getByRole("dialog"), "Close dialog").click();
     await visit(coach, "/coach/trainees");
+    await button(coach, "Add trainee").first().click();
     await coach.getByLabel("Training Planner ID").fill(code);
     await button(coach, "Find member").click();
     await coach.locator(".coach-member").waitFor();
@@ -446,7 +450,7 @@ try {
         .selectOption({ label: account.name });
     await d.getByLabel("Custom package name").fill("QA lifecycle service");
     await d.getByLabel("Ends on").fill(date(180));
-    await button(d, "Start subscription").click();
+    await button(d, "Start coaching").click();
     await d.waitFor({ state: "hidden" });
     const template = await makeProgram(coach, "/coach");
     await visit(coach, "/coach/trainees");

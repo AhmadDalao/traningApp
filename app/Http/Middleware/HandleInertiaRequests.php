@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\CoachAccess;
+use App\Services\CoachWorkspaceSummary;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -26,7 +27,7 @@ class HandleInertiaRequests extends Middleware
                 $plan = $request->route('trainingPlan') ?? $request->route('trainingDay')?->trainingPlan ?? $request->route('programRun')?->trainingPlan;
                 $manage = ! $coaching || ($access->subscription($relationship) && (! $plan || $plan->assignment?->status === 'active'));
 
-                return ['workspace' => $request->attributes->get('coach_workspace') ? 'coach' : 'personal', 'prefix' => $context->prefix(), 'templates' => $context->templates(), 'coaching' => $coaching, 'canManage' => (bool) $manage, 'trainee' => $coaching ? $context->owner()->only('id', 'name', 'training_code') : null];
+                return ['workspace' => $request->attributes->get('coach_workspace') ? 'coach' : 'personal', 'prefix' => $context->prefix(), 'templates' => $context->templates(), 'coaching' => $coaching, 'canManage' => (bool) $manage, 'summary' => $coaching ? app(CoachWorkspaceSummary::class)->one($context->actor(), $context->owner()) : null, 'trainee' => $coaching ? $context->owner()->only('id', 'name', 'training_code') : null];
             },
             'flash' => ['success' => fn () => $request->session()->get('success'), 'schedule_review' => fn () => $request->session()->get('schedule_review')],
             'today' => now()->toDateString(),
