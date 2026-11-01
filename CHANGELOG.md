@@ -1,11 +1,13 @@
 # Changelog
 
-## v2.3.2 — 1 November 2026 — source verified, deployment pending
+## v2.3.2 — 1 November 2026 — deployed and verified
 
 - Align all setup sections and step cards with the trainee header.
 - Fix stretched radio inputs and training titles; make the card body selectable with a separate preview.
 - Add visible category counts, empty states, selection feedback and assigned-copy context.
 - Verify desktop/mobile layouts and preserve the existing atomic activation flow; no migration.
+
+- Deploy immutable `v2.3.2` (`15aa663`) after fresh backups; pass 125 live browser checks, preserve all original records/media/settings and concurrent user additions, and clean four QA accounts plus temporary endpoints. [Report](docs/V2.3.2-COACH-SETUP-LAYOUT-REPORT.html).
 
 ## v2.3.1 — 1 November 2026 — deployed and verified
 

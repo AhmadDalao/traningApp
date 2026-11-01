@@ -1,6 +1,6 @@
 {
   "version": "v2.3.2",
-  "status": "SOURCE VERIFIED; DEPLOYMENT PENDING",
+  "status": "SOURCE VERIFIED; DEPLOYED AND VERIFIED",
   "changes": [
     "Setup panels and steps match the trainee header width, including review.",
     "Training categories are visible buttons with counts and an empty state.",

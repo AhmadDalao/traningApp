@@ -1,0 +1,181 @@
+{
+  "version": "v2.3.2",
+  "status": "READY \u2014 DEPLOYED AND VERIFIED",
+  "date": "2026-11-01",
+  "commit": "15aa66390243c4551d9c1e1f6a9e8afad7095680",
+  "previous_release": "v2.3.1",
+  "production_url": "https://training.ahmaddalao.com",
+  "summary": "Immutable v2.3.2 (15aa663) deployed directly from v2.3.1 after fresh verified database, runtime, uploads and environment backups. The 70-file patch needs no migration. All 7,250 origin file hashes, 203 public assets and 125 live Chromium/WebKit layout, activation and PWA checks pass. Temporary deployment files and four disposable QA accounts are removed.",
+  "integrity": "All 615 original rows across 22 tables, 461 original upload hashes and environment bytes are preserved. Whole-table equality changed because original users added training during live QA; a read-only comparison with the fresh SQL backup found no missing or changed original row. All 20 additional rows belong to original users, and both new media files remain referenced and preserved. No test accounts remain.",
+  "backups": {
+    "created_at_utc": "2026-11-01T07:05:08+00:00",
+    "runtime_bytes": 64648107,
+    "runtime_sha256": "29b66e75eedb3695515d128c64a861594722e79a38a24f3fe58243fa6acaa703",
+    "database_bytes": 37568,
+    "database_uncompressed_bytes": 501385,
+    "database_sha256": "66bb30bf5f683a8ab3d93e936f0d9078fca70b13586c9025523133bee18648db",
+    "uploads_bytes": 28962606,
+    "uploads_sha256": "992c950c193b2c84569f644fe04711f23a5b02b1b4ad32ec85adc1f4d34ba19d",
+    "original_upload_files": 461,
+    "source_file_backups": 7,
+    "environment_backed_up": true,
+    "archives_verified": true
+  },
+  "release_files_verified": 7250,
+  "runtime": {
+    "php": "8.3.36",
+    "database": "11.8.9-MariaDB-log"
+  },
+  "live_browser_checks": [
+    {
+      "script": "coach-setup-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 6.02,
+      "checks": 43
+    },
+    {
+      "script": "coach-setup-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 5.43,
+      "checks": 43
+    },
+    {
+      "script": "pwa-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 12.2,
+      "checks": 20
+    },
+    {
+      "script": "pwa-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 15.67,
+      "checks": 19
+    }
+  ],
+  "public_assets": {
+    "public_assets_verified": 203,
+    "exact_hash_matches": 199,
+    "cdn_png_reencodings": 4
+  },
+  "production_integrity": {
+    "tables_compared": 22,
+    "original_rows_unchanged": 615,
+    "original_rows_missing": 0,
+    "original_rows_changed": 0,
+    "original_uploads_unchanged": 461,
+    "environment_preserved": true,
+    "whole_table_equality": false,
+    "reason": "Original users created additional training records while QA was running. All new rows resolve to pre-existing users; all original rows are unchanged.",
+    "concurrent_rows_by_table": {
+      "training_plans": 2,
+      "training_days": 2,
+      "training_exercises": 2,
+      "schedule_entries": 13,
+      "coach_plan_assignments": 1
+    },
+    "concurrent_referenced_media_preserved": 2,
+    "counts_before": {
+      "users": 3,
+      "training_plans": 10,
+      "training_days": 93,
+      "training_exercises": 355,
+      "schedule_entries": 106,
+      "exercise_library_items": 1,
+      "user_profiles": 2,
+      "body_weight_entries": 3,
+      "session_exercises": 4,
+      "session_sets": 12,
+      "coach_profiles": 1,
+      "coach_trainee_relationships": 1,
+      "coach_subscription_plans": 1,
+      "coach_subscriptions": 1,
+      "coach_plan_assignments": 3,
+      "coach_pairing_tokens": 1,
+      "schedule_occurrence_cancellations": 0,
+      "training_blocks": 17,
+      "program_runs": 1,
+      "notification_preferences": 0,
+      "web_push_subscriptions": 0,
+      "notification_deliveries": 0
+    },
+    "counts_at_final_verification": {
+      "users": 3,
+      "training_plans": 12,
+      "training_days": 95,
+      "training_exercises": 357,
+      "schedule_entries": 119,
+      "exercise_library_items": 1,
+      "user_profiles": 2,
+      "body_weight_entries": 3,
+      "session_exercises": 4,
+      "session_sets": 12,
+      "coach_profiles": 1,
+      "coach_trainee_relationships": 1,
+      "coach_subscription_plans": 1,
+      "coach_subscriptions": 1,
+      "coach_plan_assignments": 4,
+      "coach_pairing_tokens": 1,
+      "schedule_occurrence_cancellations": 0,
+      "training_blocks": 17,
+      "program_runs": 1,
+      "notification_preferences": 0,
+      "web_push_subscriptions": 0,
+      "notification_deliveries": 0
+    }
+  },
+  "cleanup": {
+    "ok": true,
+    "removed": 4,
+    "remaining_qa_users": 0,
+    "original_rows_preserved": true,
+    "original_media_preserved": true,
+    "concurrent_original_user_records_preserved": 20,
+    "concurrent_referenced_uploads_preserved": 2,
+    "note": "Guarded account cleanup removed the four disposable users, then stopped on whole-table fingerprint differences. Read-only row comparison against the fresh SQL backup verified all original rows unchanged and every addition belongs to original users; no unrelated data or referenced upload was deleted."
+  },
+  "public_endpoint_checks": [
+    {
+      "check": "Temporary deployment endpoint removed",
+      "status": 404
+    },
+    {
+      "check": "Temporary release archive removed",
+      "status": 404
+    },
+    {
+      "check": "/login",
+      "status": 200
+    },
+    {
+      "check": "/up",
+      "status": 200
+    },
+    {
+      "check": "/.env",
+      "status": 403
+    },
+    {
+      "check": "/storage/app/private/deploy-backups/",
+      "status": 404
+    }
+  ],
+  "migrations": {
+    "run": [],
+    "history_unchanged": true
+  },
+  "pwa_push": {
+    "pwa_live_checks_passed": true,
+    "push_delivery_enabled": false,
+    "configuration_changed": false,
+    "cron_changed": false
+  },
+  "limitations": [
+    "Responsive browser emulation, no physical-phone test.",
+    "Real Push delivery not tested because production Push remains disabled.",
+    "Existing concurrency suites were not rerun for this UI-only patch; activation algorithms are unchanged."
+  ]
+}
