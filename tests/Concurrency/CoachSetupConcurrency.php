@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\CoachTraineeRelationship;
+use App\Models\TrainingPlan;
 use App\Models\User;
 use App\Services\CoachSetup;
+use App\Services\TrainingPlanDuplicator;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,9 @@ if (($argv[1] ?? '') === 'worker') {
         usleep(1000);
     }
     try {
-        $result = app(CoachSetup::class)->{$job['mode']}(User::findOrFail($job['coach']), User::findOrFail($job['trainee']), $job['input']);
+        $result = $job['mode'] === 'assign'
+            ? app(TrainingPlanDuplicator::class)->assign(User::findOrFail($job['coach']), User::findOrFail($job['trainee']), TrainingPlan::findOrFail($job['input']['template']), [], resumeSetup: true)->id
+            : app(CoachSetup::class)->{$job['mode']}(User::findOrFail($job['coach']), User::findOrFail($job['trainee']), $job['input']);
         echo json_encode(['status' => 'ok', 'result' => $result]);
     } catch (ValidationException|HttpExceptionInterface|ModelNotFoundException $error) {
         echo json_encode(['status' => 'rejected', 'code' => $error instanceof ValidationException ? 422 : ($error instanceof HttpExceptionInterface ? $error->getStatusCode() : 404)]);
@@ -91,6 +95,10 @@ $race = function ($f, array $jobs) use (&$files) {
     }, $processes);
 };
 try {
+    $f = $fixture();
+    $f[2]->subscriptions()->create(['package_name' => 'Ongoing', 'starts_on' => today(), 'status' => 'active']);
+    $results = $race($f, [['assign', ['template' => $f[3]->id]], ['assign', ['template' => $f[3]->id]]]);
+    checkSetup($results[0]['status'] === 'ok' && $results[0] === $results[1] && $f[2]->assignments()->count() === 1 && $f[1]->trainingPlans()->count() === 1, 'Concurrent default Assign reuses exactly one independent copy');
     $f = $fixture();
     $input = $review($f);
     $results = $race($f, [['activate', $input], ['activate', $input]]);

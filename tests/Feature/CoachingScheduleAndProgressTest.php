@@ -135,7 +135,11 @@ class CoachingScheduleAndProgressTest extends TestCase
         $this->put($this->base.'/schedule-entries/'.$entry->id, ['entry_type' => 'training', 'training_day_id' => $this->day->id, 'scheduled_date' => today()->addDays(2)->toDateString()])->assertForbidden();
         $this->delete($this->base.'/schedule-entries/'.$entry->id)->assertForbidden();
         $this->assertSame($before, $entry->fresh()->getAttributes());
-        $this->get($this->base.'/schedule-entries/'.$entry->id)->assertInertia(fn (Assert $p) => $p->where('canManageSession', false));
+        if ($state === 'detached') {
+            $this->get($this->base.'/schedule-entries/'.$entry->id)->assertNotFound();
+        } else {
+            $this->get($this->base.'/schedule-entries/'.$entry->id)->assertInertia(fn (Assert $p) => $p->where('canManageSession', false));
+        }
     }
 
     public function test_single_session_and_manual_edit_do_not_expose_actual_fields_or_bulk_control(): void

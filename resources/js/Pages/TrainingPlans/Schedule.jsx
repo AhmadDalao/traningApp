@@ -2,7 +2,14 @@ import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm, router, usePage } from "@inertiajs/react";
-import { CalendarPlus, RefreshCw, Trash2 } from "lucide-react";
+import {
+    CalendarPlus,
+    RefreshCw,
+    Trash2,
+    CheckCircle2,
+    ShieldCheck,
+    CalendarX,
+} from "lucide-react";
 import {
     PageHeader,
     Breadcrumbs,
@@ -45,7 +52,7 @@ function Sessions({ rows, label }) {
                             {session.scheduled_time ? (
                                 <TimeLabel time={session.scheduled_time} />
                             ) : (
-                                "No set time"
+                                "Anytime"
                             )}
                         </small>
                     </div>
@@ -80,12 +87,39 @@ export default function Schedule({ plan, preview }) {
     const [removeObsolete, setRemoveObsolete] = useState(false);
     const form = useForm({});
     const groups = [
-        { key: "add", name: "Add" },
-        { key: "keep", name: "Keep" },
-        { key: "remove", name: "Remove" },
-        { key: "protected", name: "Protected" },
+        {
+            key: "add",
+            name: "Add",
+            icon: CalendarPlus,
+            description: "New sessions",
+        },
+        {
+            key: "keep",
+            name: "Keep",
+            icon: CheckCircle2,
+            description: "As planned",
+        },
+        {
+            key: "remove",
+            name: "Remove",
+            icon: Trash2,
+            description: "No longer included",
+        },
+        {
+            key: "protected",
+            name: "Protected",
+            icon: ShieldCheck,
+            description: "Will not change",
+        },
         ...(preview.excluded?.length
-            ? [{ key: "excluded", name: "Outside service dates" }]
+            ? [
+                  {
+                      key: "excluded",
+                      name: "Outside service dates",
+                      icon: CalendarX,
+                      description: "Cannot be added",
+                  },
+              ]
             : []),
     ];
     const adding =
@@ -247,7 +281,7 @@ export default function Schedule({ plan, preview }) {
                     className="schedule-diff-tabs"
                     aria-label="Schedule change categories"
                 >
-                    {groups.map(({ key, name }) => (
+                    {groups.map(({ key, name, icon: Icon, description }) => (
                         <button
                             type="button"
                             key={key}
@@ -255,8 +289,10 @@ export default function Schedule({ plan, preview }) {
                             onClick={() => setGroup(key)}
                             className={group === key ? "active" : ""}
                         >
+                            <Icon size={18} aria-hidden="true" />
                             <strong>{preview[key].length}</strong>
                             <span>{name}</span>
+                            <small>{description}</small>
                         </button>
                     ))}
                 </div>

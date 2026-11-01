@@ -23,7 +23,9 @@ class ExerciseProgress
         return DB::table('session_exercises as exercise')
             ->join('schedule_entries as session', 'session.id', '=', 'exercise.schedule_entry_id')
             ->join('session_sets as actual', 'actual.session_exercise_id', '=', 'exercise.id')
-            ->where('session.user_id', $user->id)->where('session.entry_type', 'training')->where('session.status', 'completed')
+            ->where('session.user_id', $user->id)
+            ->when(app(TrainingContext::class)->coaching(), fn ($q) => $q->whereIn('session.id', app(CoachAccess::class)->sessions(app(TrainingContext::class)->actor(), $user)->select('schedule_entries.id')))
+            ->where('session.entry_type', 'training')->where('session.status', 'completed')
             ->where('exercise.status', '!=', 'skipped')->whereNotNull('exercise.source_exercise_key')
             ->where('exercise.source_exercise_key', '!=', '')
             ->when($key !== null, fn ($query) => $query->where('exercise.source_exercise_key', $key))
@@ -119,8 +121,12 @@ class ExerciseProgress
         return ['records' => array_values($records), 'events' => $events, 'first_session_id' => $first, 'weighted' => $weighted];
     }
 
-    public function overview(User $user, string $search = ''): array
+    public function overview(User $user, string $search = '', string $range = 'all'): array
     {
+        $cutoff = match ($range) {
+            '30' => today()->subDays(29)->toDateString(), '90' => today()->subDays(89)->toDateString(),
+            '6m' => today()->subMonthsNoOverflow(6)->toDateString(), '1y' => today()->subYearNoOverflow()->toDateString(), default => null,
+        };
         $groups = $this->workouts($user)->groupBy(fn ($row) => $this->identity($row));
         $metadata = SessionExercise::whereIn('id', $groups->map(fn ($rows) => $rows->last()['exercise_id']))->get()->keyBy('id');
         $recent = [];
@@ -133,14 +139,14 @@ class ExerciseProgress
             foreach ($records['events'] as $event) {
                 $recent[] = [...$event, 'name' => $exercise->name, 'url' => $item['url']];
             }
-            if ($search === '' || mb_stripos($exercise->name, $search) !== false) {
+            if (($cutoff === null || ($latest['scheduled_date'] >= $cutoff && $latest['scheduled_date'] <= today()->toDateString())) && ($search === '' || mb_stripos($exercise->name, $search) !== false)) {
                 $items[] = $item;
             }
         }
         $items = collect($items)->sortByDesc(fn ($item) => [$item['last_performed'], $item['last_session_id']])->values();
-        $recent = collect($recent)->sortByDesc(fn ($event) => [$event['date'], $event['time'] ?? '00:00:00', $event['session_id']])->take(8)->values();
+        $recent = collect($recent)->filter(fn ($event) => $cutoff === null || ($event['date'] >= $cutoff && $event['date'] <= today()->toDateString()))->sortByDesc(fn ($event) => [$event['date'], $event['time'] ?? '00:00:00', $event['session_id']])->values();
 
-        return ['exercises' => $this->paginate($items, 12), 'recentRecords' => $recent, 'trackedCount' => $groups->count()];
+        return ['exercises' => $this->paginate($items, 12), 'highlights' => $items->take(4)->values(), 'recentRecords' => $recent->take(8)->values(), 'recentRecordCount' => $recent->count(), 'trackedCount' => $groups->count()];
     }
 
     public function detail(User $user, string $key, string $mode, string $range): array
@@ -217,7 +223,8 @@ class ExerciseProgress
             'key' => $exercise->source_exercise_key, 'name' => $exercise->name, 'tracking_mode' => $exercise->tracking_mode,
             'icon' => $exercise->icon, 'thumbnail_url' => $exercise->thumbnail_url, 'custom_icon_url' => $exercise->custom_icon_url,
             'workouts' => $workouts->count(), 'last_performed' => $latest['scheduled_date'], 'last_session_id' => $latest['session_id'],
-            'latest_weight' => $latest['heaviest_weight'], 'weighted' => $records['weighted'], 'records' => $records['records'],
+            'latest_weight' => $latest['heaviest_weight'], 'latest_reps' => $latest['max_reps'], 'latest_duration' => $latest['longest_duration'],
+            'weight_change' => $latest['heaviest_weight'] !== null && $workouts->first()['heaviest_weight'] !== null && $workouts->count() > 1 ? round($latest['heaviest_weight'] - $workouts->first()['heaviest_weight'], 2) : null, 'weighted' => $records['weighted'], 'records' => $records['records'],
             'url' => $this->url($exercise->source_exercise_key, $exercise->tracking_mode, $user),
         ];
     }

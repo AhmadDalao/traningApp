@@ -22,7 +22,7 @@ class TrainingPlanController extends Controller
     {
         $filters = $request->validate(['search' => 'nullable|string|max:100', 'type' => 'nullable|in:all,program,simple']);
 
-        return Inertia::render('TrainingPlans/Index', ['filters' => ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? 'all'], 'plans' => $this->context->plans()->when($this->context->templates() && ! empty($filters['search']), fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))->when($this->context->templates() && ($filters['type'] ?? 'all') !== 'all', fn ($q) => $q->where('structure_type', $filters['type']))->with('assignment.relationship.coach.coachProfile')->withCount([
+        return Inertia::render('TrainingPlans/Index', ['filters' => ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? 'all'], 'plans' => $this->context->plans()->when($this->context->templates() && ! empty($filters['search']), fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))->when($this->context->templates() && ($filters['type'] ?? 'all') !== 'all', fn ($q) => $q->where('structure_type', $filters['type']))->with('assignment.relationship.coach.coachProfile', 'programRuns')->withCount([
             'templateAssignments as assigned_trainees_count' => fn ($q) => $q->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active')),
             'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
             'trainingDays as rest_days_count' => fn ($q) => $q->where('type', 'rest'),
@@ -31,7 +31,7 @@ class TrainingPlanController extends Controller
 
     private function describe(TrainingPlan $plan): array
     {
-        return [...$plan->attributesToArray(), 'assignment_id' => $plan->assignment?->id, 'assignment_status' => $plan->assignment?->status, 'coach_name' => $plan->workspace_type === 'coach_assigned' ? $plan->assignment?->relationship?->coach?->coachProfile?->display_name : null];
+        return [...$plan->attributesToArray(), 'assignment_id' => $plan->assignment?->id, 'assignment_status' => $plan->assignment?->status, 'assigned_at' => $plan->assignment?->assigned_at, 'run_status' => $plan->relationLoaded('programRuns') ? $plan->programRuns->sortByDesc('id')->first()?->status : null, 'coach_name' => $plan->workspace_type === 'coach_assigned' ? $plan->assignment?->relationship?->coach?->coachProfile?->display_name : null];
     }
 
     public function create()

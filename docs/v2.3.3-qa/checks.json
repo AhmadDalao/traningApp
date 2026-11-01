@@ -1,0 +1,303 @@
+{
+  "version": "v2.3.3",
+  "baseline": "v2.3.2",
+  "source_status": "READY",
+  "sqlite": {
+    "passed": 610,
+    "assertions": 11976
+  },
+  "mysql": {
+    "passed": 610,
+    "assertions": 11976
+  },
+  "javascript_passed": 38,
+  "concurrency": [
+    {
+      "suite": "CoachSetupConcurrency",
+      "exit": 0,
+      "seconds": 8.07,
+      "checks": 32
+    },
+    {
+      "suite": "CoachingConcurrency",
+      "exit": 0,
+      "seconds": 0.65,
+      "checks": 17
+    },
+    {
+      "suite": "NotificationConcurrency",
+      "exit": 0,
+      "seconds": 1.33,
+      "checks": 10
+    },
+    {
+      "suite": "ProgramConcurrency",
+      "exit": 0,
+      "seconds": 0.46,
+      "checks": 10
+    },
+    {
+      "suite": "ProgramControlConcurrency",
+      "exit": 0,
+      "seconds": 1.56,
+      "checks": 15
+    },
+    {
+      "suite": "RecurringScheduleConcurrency",
+      "exit": 0,
+      "seconds": 0.61,
+      "checks": 4
+    }
+  ],
+  "browser_runs": [
+    {
+      "suite": "programs",
+      "engine": "chromium",
+      "passed_checks": 90,
+      "log_sha256": "fe36dc9fcb09f2bedfaeaf669ae070eeacf0fadb95f86a3de1d29e44c1132434"
+    },
+    {
+      "suite": "programs",
+      "engine": "webkit",
+      "passed_checks": 90,
+      "log_sha256": "fe36dc9fcb09f2bedfaeaf669ae070eeacf0fadb95f86a3de1d29e44c1132434"
+    },
+    {
+      "suite": "coach-programs",
+      "engine": "chromium",
+      "passed_checks": 60,
+      "log_sha256": "8ad7fb1f59b6b5b852bb258bf30dee1fd4530873c4f3298827853a99c4404810"
+    },
+    {
+      "suite": "coach-programs",
+      "engine": "webkit",
+      "passed_checks": 60,
+      "log_sha256": "8ad7fb1f59b6b5b852bb258bf30dee1fd4530873c4f3298827853a99c4404810"
+    },
+    {
+      "suite": "program-stabilization",
+      "engine": "chromium",
+      "passed_checks": 75,
+      "log_sha256": "692f13cf1a96ba4e5de7a14c789eed6f08e184bf12d67b77f4a49431cef5251d"
+    },
+    {
+      "suite": "program-stabilization",
+      "engine": "webkit",
+      "passed_checks": 75,
+      "log_sha256": "692f13cf1a96ba4e5de7a14c789eed6f08e184bf12d67b77f4a49431cef5251d"
+    },
+    {
+      "suite": "program-calendar-stabilization",
+      "engine": "chromium",
+      "passed_checks": 6,
+      "log_sha256": "39dc266c2fe65fa493e1e56fdb89d9e2aca91ba6c8b1a50845b2887c47935724"
+    },
+    {
+      "suite": "program-calendar-stabilization",
+      "engine": "webkit",
+      "passed_checks": 6,
+      "log_sha256": "39dc266c2fe65fa493e1e56fdb89d9e2aca91ba6c8b1a50845b2887c47935724"
+    },
+    {
+      "suite": "program-controls",
+      "engine": "chromium",
+      "passed_checks": 99,
+      "log_sha256": "bd3756a124bffa5ae3453b7c1ef5ec61d544db32d39e3f7414627ce579be68e0"
+    },
+    {
+      "suite": "program-controls",
+      "engine": "webkit",
+      "passed_checks": 99,
+      "log_sha256": "bd3756a124bffa5ae3453b7c1ef5ec61d544db32d39e3f7414627ce579be68e0"
+    },
+    {
+      "suite": "mobile-stabilization",
+      "engine": "chromium",
+      "passed_checks": 37,
+      "log_sha256": "a541d07b30d3e26ab082ba6d5cc15a2b9d1c45b57f770ca62e5e142845cecaa6"
+    },
+    {
+      "suite": "mobile-stabilization",
+      "engine": "webkit",
+      "passed_checks": 37,
+      "log_sha256": "d13c4ff2de8d637b471c560380d3a71ac7447dea519cf68ebd233302329713b8"
+    },
+    {
+      "suite": "full-lifecycle",
+      "engine": "chromium",
+      "passed_checks": 27,
+      "log_sha256": "e693ae67e0fefd0204282823bbff42085f199e72a4df4f345d36c0630d511916"
+    },
+    {
+      "suite": "full-lifecycle",
+      "engine": "webkit",
+      "passed_checks": 27,
+      "log_sha256": "e693ae67e0fefd0204282823bbff42085f199e72a4df4f345d36c0630d511916"
+    },
+    {
+      "suite": "lifecycle-regressions",
+      "engine": "chromium",
+      "passed_checks": 37,
+      "log_sha256": "5543e922f25cbb5eb84a7763506f39bb225e1d1a4a4bc0e86a17ceb9728023e3"
+    },
+    {
+      "suite": "lifecycle-regressions",
+      "engine": "webkit",
+      "passed_checks": 37,
+      "log_sha256": "5543e922f25cbb5eb84a7763506f39bb225e1d1a4a4bc0e86a17ceb9728023e3"
+    },
+    {
+      "suite": "pwa-notifications",
+      "engine": "chromium",
+      "passed_checks": 22,
+      "log_sha256": "45e6f5ad590bcda67f0ca59e5345081c061e0c38a8e86d3d93de984e7cf43baa"
+    },
+    {
+      "suite": "pwa-notifications",
+      "engine": "webkit",
+      "passed_checks": 22,
+      "log_sha256": "45e6f5ad590bcda67f0ca59e5345081c061e0c38a8e86d3d93de984e7cf43baa"
+    },
+    {
+      "suite": "coach-workspace",
+      "engine": "chromium",
+      "passed_checks": 134,
+      "log_sha256": "8dffc8c9cd05b12d364cf3557e33198588c38500081757e001874b2bc629ee73"
+    },
+    {
+      "suite": "coach-workspace",
+      "engine": "webkit",
+      "passed_checks": 134,
+      "log_sha256": "8dffc8c9cd05b12d364cf3557e33198588c38500081757e001874b2bc629ee73"
+    },
+    {
+      "suite": "atomic-coach-setup",
+      "engine": "chromium",
+      "passed_checks": 36,
+      "log_sha256": "1fcb59fb7ec0a12cde64ec52e91f9df09cf6b8f494b8b2e84f0900e758c4c48f"
+    },
+    {
+      "suite": "atomic-coach-setup",
+      "engine": "webkit",
+      "passed_checks": 36,
+      "log_sha256": "1fcb59fb7ec0a12cde64ec52e91f9df09cf6b8f494b8b2e84f0900e758c4c48f"
+    },
+    {
+      "suite": "coach-setup-layout",
+      "engine": "chromium",
+      "passed_checks": 43,
+      "log_sha256": "4998e23cd97ee64468658c6dcfa2360d7d5ff8e26f55184485f9a0e20a9afa31"
+    },
+    {
+      "suite": "coach-setup-layout",
+      "engine": "webkit",
+      "passed_checks": 43,
+      "log_sha256": "4998e23cd97ee64468658c6dcfa2360d7d5ff8e26f55184485f9a0e20a9afa31"
+    },
+    {
+      "suite": "privacy-polish",
+      "engine": "chromium",
+      "passed_checks": 104,
+      "log_sha256": "279b98a414be8c1ea191d02b02678c86829aeec7e1f717d736e7d19a132e73f4"
+    },
+    {
+      "suite": "privacy-polish",
+      "engine": "webkit",
+      "passed_checks": 104,
+      "log_sha256": "279b98a414be8c1ea191d02b02678c86829aeec7e1f717d736e7d19a132e73f4"
+    }
+  ],
+  "browser_checks": 1540,
+  "http_workflows": {
+    "program-http": 14,
+    "control-http": 17,
+    "atomic-http": 27,
+    "polish-http": 8
+  },
+  "http_baseline_checks": 119,
+  "integrity": {
+    "original_data_and_media_unchanged": true,
+    "tables": 22,
+    "original_media_files": 44,
+    "qa_accounts_removed": 67,
+    "ledger_entries": 67,
+    "qa_images_removed": 724
+  },
+  "performance": {
+    "connected_trainees": 47,
+    "measurements": [
+      {
+        "path": "/coach",
+        "queries": 20,
+        "sql_ms": 77.95,
+        "response_ms": 128.06,
+        "response_kb": 20.7,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/coach/trainees?search=QA",
+        "queries": 10,
+        "sql_ms": 59.76,
+        "response_ms": 75.46,
+        "response_kb": 26.7,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/coach/training-plans/506/assign?search=QA",
+        "queries": 12,
+        "sql_ms": 39.27,
+        "response_ms": 49.25,
+        "response_kb": 27.7,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/coach/recommendations?level=beginner",
+        "queries": 3,
+        "sql_ms": 0.92,
+        "response_ms": 9.3,
+        "response_kb": 27.5,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/coach/trainees/{id}",
+        "queries": 38,
+        "sql_ms": 14.02,
+        "response_ms": 27.85,
+        "response_kb": 12.7,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/coach/trainees/{id}/progress",
+        "queries": 33,
+        "sql_ms": 13.25,
+        "response_ms": 24.32,
+        "response_kb": 16,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/progress",
+        "queries": 15,
+        "sql_ms": 3.71,
+        "response_ms": 8.44,
+        "response_kb": 14.1,
+        "raw_set_reads": 0
+      },
+      {
+        "path": "/recommendations?level=beginner",
+        "queries": 1,
+        "sql_ms": 0.3,
+        "response_ms": 5.8,
+        "response_kb": 28.1,
+        "raw_set_reads": 0
+      }
+    ]
+  },
+  "build": "passed",
+  "pint": "passed",
+  "prettier": "passed",
+  "composer_validate": "passed",
+  "composer_audit": "no advisories",
+  "diff_check": "passed",
+  "schema_changes": false,
+  "physical_phone_tested": false
+}

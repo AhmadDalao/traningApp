@@ -1,3 +1,15 @@
+import {
+    CheckCircle2,
+    PauseCircle,
+    AlertTriangle,
+    ClipboardList,
+    Clock,
+    LayoutDashboard,
+    Layers,
+    CalendarDays,
+    History,
+    TrendingUp,
+} from "lucide-react";
 import { usePage, Link, router } from "@inertiajs/react";
 import { useState } from "react";
 import { Button, ConfirmDialog, ButtonLink, DateLabel } from "../Components/UI";
@@ -20,8 +32,14 @@ export function Errors({ errors }) {
     ));
 }
 export function CoachStatus({ status }) {
+    const Icon = ["active", "completed"].includes(status)
+        ? CheckCircle2
+        : status === "paused"
+          ? PauseCircle
+          : Clock;
     return (
         <span className={`coach-status ${status || ""}`}>
+            <Icon size={13} aria-hidden="true" />
             {(status || "No subscription").replaceAll("_", " ")}
         </span>
     );
@@ -57,8 +75,19 @@ export const traineeStates = {
     ended: "Ended",
 };
 export function TraineeState({ state }) {
+    const Icon =
+        state === "attention"
+            ? AlertTriangle
+            : state === "setup"
+              ? ClipboardList
+              : state === "paused"
+                ? PauseCircle
+                : state === "active"
+                  ? CheckCircle2
+                  : Clock;
     return (
         <span className={`coach-status ${state}`}>
+            <Icon size={13} aria-hidden="true" />
             {traineeStates[state] || state}
         </span>
     );
@@ -70,11 +99,11 @@ export function TraineeNav() {
     const state = ctx.summary,
         plan = state?.plan;
     const tabs = [
-        ["", "Overview"],
-        ["/training-plans", "Program"],
-        ["/calendar", "Calendar"],
-        ["/training-history", "History"],
-        ["/progress", "Progress"],
+        ["", "Overview", LayoutDashboard],
+        ["/training-plans", "Program", Layers],
+        ["/calendar", "Calendar", CalendarDays],
+        ["/training-history", "History", History],
+        ["/progress", "Progress", TrendingUp],
     ];
     const active =
         current.includes("/program-runs") || current.includes("/training-days")
@@ -122,13 +151,13 @@ export function TraineeNav() {
                 )}
             </div>
             <nav className="trainee-desktop-nav" aria-label="Trainee sections">
-                {tabs.map(([path, name]) => (
+                {tabs.map(([path, name, Icon]) => (
                     <Link
                         key={path}
                         className={active === path ? "active" : ""}
                         href={ctx.url(path)}
                     >
-                        {name}
+                        <Icon size={15} aria-hidden="true" /> {name}
                     </Link>
                 ))}
             </nav>
@@ -186,4 +215,4 @@ export async function coachingJson(path, data = {}, method = "POST") {
     return result;
 }
 export const consentText =
-    "Your coach can view your training goals, body-weight progress, Calendar, workout history, exercise progress and personal records, including personal workouts and sessions from other coaches. With an active coaching subscription, they can create and manage their own assigned plans and future sessions. They cannot record results or complete workouts for you. You can disconnect at any time.";
+    "Your coach can view your training goals, body-weight progress, Calendar, workout history, exercise progress and personal records, for training assigned by this coach. Your personal training and other coaches’ assignments remain private. With an active coaching subscription, they can create and manage their own assigned plans and future sessions. They cannot record results or complete workouts for you. You can disconnect at any time.";

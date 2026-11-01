@@ -18,7 +18,7 @@ class CoachWorkspaceSummary
     public function query(User $coach)
     {
         $subscriptions = CoachSubscription::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->latest('id')->limit(1);
-        $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->latest('id')->limit(1);
+        $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused']))->latest('id')->limit(1);
         $base = CoachTraineeRelationship::where('coach_user_id', $coach->id)->select('coach_trainee_relationships.id', 'coach_trainee_relationships.coach_user_id', 'coach_trainee_relationships.trainee_user_id', 'coach_trainee_relationships.status')
             ->selectSub($subscriptions, 'subscription_id')->selectSub($assignments, 'assignment_id');
         $facts = DB::query()->fromSub($base, 'r')
@@ -28,15 +28,14 @@ class CoachWorkspaceSummary
             ->select('r.*', 'p.id as plan_id', 'p.name as plan_name', 'p.structure_type', 'p.duration_weeks', 's.package_name', 's.status as subscription_status')
             ->selectRaw('DATE(s.starts_on) as starts_on, DATE(s.ends_on) as ends_on')
             ->selectSub(ProgramRun::select('id')->whereColumn('training_plan_id', 'p.id')->latest('id')->limit(1), 'run_id');
-        $sessions = ScheduleEntry::whereColumn('schedule_entries.user_id', 'f.trainee_user_id')->where('scheduled_by_user_id', $coach->id)
-            ->whereHas('trainingDay', fn ($q) => $q->whereColumn('training_plan_id', 'f.plan_id'));
+        $sessions = app(CoachAccess::class)->sessions($coach)->whereColumn('schedule_entries.user_id', 'f.trainee_user_id')->where('scheduled_by_user_id', $coach->id);
         $available = (clone $sessions)->availableOnSchedule();
         $flags = DB::query()->fromSub($facts, 'f')->leftJoin('program_runs as run', 'run.id', '=', 'f.run_id')->select('f.*', 'run.status as run_status')
             ->selectSub((clone $sessions)->selectRaw('COUNT(*)'), 'schedule_count')
             ->selectSub((clone $available)->upcoming()->whereNull('started_at')->selectRaw('COUNT(*)'), 'upcoming_count')
             ->selectSub((clone $available)->where('entry_type', 'training')->where('status', 'planned')->whereNull('started_at')->past()->selectRaw('COUNT(*)'), 'missed_count')
-            ->selectSub(ScheduleEntry::whereColumn('user_id', 'f.trainee_user_id')->upcoming()->whereNull('started_at')->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')->select('id')->limit(1), 'next_id')
-            ->selectSub(ScheduleEntry::whereColumn('user_id', 'f.trainee_user_id')->where('entry_type', 'training')->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->latest('id')->select('id')->limit(1), 'last_id')
+            ->selectSub(app(CoachAccess::class)->sessions($coach)->whereColumn('user_id', 'f.trainee_user_id')->upcoming()->whereNull('started_at')->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')->select('id')->limit(1), 'next_id')
+            ->selectSub(app(CoachAccess::class)->sessions($coach)->whereColumn('user_id', 'f.trainee_user_id')->where('entry_type', 'training')->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->latest('id')->select('id')->limit(1), 'last_id')
             ->selectSub((clone $available)->where('entry_type', 'training')->whereDate('scheduled_date', '>=', today()->startOfWeek())->whereDate('scheduled_date', '<=', today()->endOfWeek())->selectRaw('COUNT(*)'), 'week_total')
             ->selectSub((clone $available)->where('entry_type', 'training')->where('status', 'completed')->whereDate('scheduled_date', '>=', today()->startOfWeek())->whereDate('scheduled_date', '<=', today()->endOfWeek())->selectRaw('COUNT(*)'), 'week_completed')
             ->selectSub(ScheduleEntry::whereColumn('program_run_id', 'f.run_id')->where('entry_type', 'training')->whereNotIn('status', ['completed', 'skipped'])->selectRaw('MIN(program_week)'), 'current_week');

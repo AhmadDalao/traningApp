@@ -1,3 +1,10 @@
+import {
+    Users,
+    CalendarDays,
+    CheckCircle2,
+    AlertTriangle,
+    Clock,
+} from "lucide-react";
 import { Head, Link } from "@inertiajs/react";
 import {
     PageHeader,
@@ -8,8 +15,8 @@ import {
 import { CoachStatus, TraineeState } from "../../Features/CoachingUI";
 function SessionList({ entries, empty }) {
     return (
-        <div className="coach-scroll">
-            {entries.map((entry) => (
+        <div className="coach-bounded-list">
+            {entries.slice(0, 6).map((entry) => (
                 <Link
                     className="coach-session"
                     href={`/coach/trainees/${entry.user_id}/schedule-entries/${entry.id}`}
@@ -21,8 +28,10 @@ function SessionList({ entries, empty }) {
                         {entry.scheduled_date && (
                             <small>
                                 <DateLabel date={entry.scheduled_date} />{" "}
-                                {entry.scheduled_time && (
+                                {entry.scheduled_time ? (
                                     <TimeLabel time={entry.scheduled_time} />
+                                ) : (
+                                    " · Anytime"
                                 )}
                             </small>
                         )}
@@ -53,13 +62,16 @@ export default function Overview({
             <div className="coach-operational">
                 <section className="panel coach-card coach-attention">
                     <div className="coach-card-title">
-                        <h2>Needs attention</h2>
+                        <h2>
+                            <AlertTriangle size={20} aria-hidden="true" /> Needs
+                            attention
+                        </h2>
                         <Link href="/coach/trainees?status=attention">
                             View trainees →
                         </Link>
                     </div>
-                    <div className="coach-scroll">
-                        {attention.map((row) => (
+                    <div className="coach-bounded-list">
+                        {attention.slice(0, 5).map((row) => (
                             <Link
                                 className="coach-session"
                                 key={row.id}
@@ -73,16 +85,14 @@ export default function Overview({
                                 <TraineeState state={row.display_state} />
                             </Link>
                         ))}
-                        {!attention.length && (
-                            <p>
-                                No outstanding coaching actions. Your trainees
-                                are on track.
-                            </p>
-                        )}
+                        {!attention.length && <p>Everyone is on track.</p>}
                     </div>
                 </section>
                 <section className="panel coach-card coach-today">
-                    <h2>Today & coming up</h2>
+                    <h2>
+                        <CalendarDays size={20} aria-hidden="true" /> Today &
+                        coming up
+                    </h2>
                     <p>Upcoming sessions over the next seven days.</p>
                     <SessionList
                         entries={upcoming}
@@ -106,19 +116,24 @@ export default function Overview({
                 </section>
                 <div className="coach-stats coach-summary">
                     {[
-                        ["Active trainees", stats.trainees],
-                        ["Training today", stats.today],
-                        ["Completed today", stats.completed],
-                        ["Need attention", stats.attention],
-                    ].map(([label, count]) => (
+                        ["Active trainees", stats.trainees, Users],
+                        ["Training today", stats.today, CalendarDays],
+                        ["Completed today", stats.completed, CheckCircle2],
+                        ["Need attention", stats.attention, AlertTriangle],
+                    ].map(([label, count, Icon]) => (
                         <div className="panel coach-stat" key={label}>
-                            <span>{label}</span>
+                            <span className="metric-label">
+                                <Icon size={18} aria-hidden="true" />
+                                {label}
+                            </span>
                             <strong>{count}</strong>
                         </div>
                     ))}
                 </div>
                 <section className="panel coach-card coach-recent">
-                    <h2>Recent activity</h2>
+                    <h2>
+                        <Clock size={20} aria-hidden="true" /> Recent activity
+                    </h2>
                     <SessionList
                         entries={recent}
                         empty="Activity appears when trainees record their workouts."

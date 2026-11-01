@@ -4,6 +4,7 @@ export const emptyPlanFilters = {
     goal: "",
     days: "",
     equipment: "",
+    duration: "",
 };
 
 export function filterPlans(plans, filters, search = "") {
@@ -30,6 +31,7 @@ export function filterPlans(plans, filters, search = "") {
             (!filters.goal || plan.goals.includes(filters.goal)) &&
             (!filters.days || plan.days_per_week === Number(filters.days)) &&
             (!filters.equipment || plan.equipment === filters.equipment) &&
+            (!filters.duration || plan.duration <= Number(filters.duration)) &&
             words.every((word) => text.includes(word))
         );
     });

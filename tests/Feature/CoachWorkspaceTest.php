@@ -278,7 +278,7 @@ class CoachWorkspaceTest extends TestCase
     public function test_assign_from_template_and_package_creation_keep_the_same_setup_context(): void
     {
         $template = $this->template();
-        $this->get('/coach/training-plans/'.$template->id.'/assign')->assertInertia(fn (Assert $p) => $p->has('relationships.data', 1)->where('relationships.data.0.has_training', false));
+        $this->get('/coach/training-plans/'.$template->id.'/assign')->assertInertia(fn (Assert $p) => $p->has('relationships.data', 1)->where('relationships.data.0.existing_plan_id', null));
         $this->get($this->base.'/assign?template='.$template->id)->assertInertia(fn (Assert $p) => $p->where('selectedTemplate', $template->id));
         $this->get($this->base.'/setup?template='.$template->id)->assertInertia(fn (Assert $p) => $p->where('draft.choices.training_plan_id', $template->id));
         $this->from($this->base.'/setup')->post('/coach/subscription-plans', ['name' => '12 weeks', 'duration_days' => 84, 'active' => true])->assertRedirect($this->base.'/setup');

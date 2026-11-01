@@ -1,7 +1,20 @@
-import { ProgramRunCards } from "../../Features/ProgramUI";
 import { RecordList } from "../../Features/ExerciseRecords";
 import { Head, Link } from "@inertiajs/react";
-import { PageHeader, ButtonLink, DateLabel } from "../../Components/UI";
+import {
+    CalendarPlus,
+    Layers,
+    CalendarDays,
+    TrendingUp,
+    AlertTriangle,
+    CheckCircle2,
+    Settings,
+} from "lucide-react";
+import {
+    PageHeader,
+    ButtonLink,
+    DateLabel,
+    StatusBadge,
+} from "../../Components/UI";
 import {
     CoachStatus,
     TraineeState,
@@ -22,37 +35,37 @@ export default function Trainee({
     completion,
     recentRecords = [],
 }) {
-    const ctx = useTraining();
+    const ctx = useTraining(),
+        current = state?.plan,
+        others = plans.filter((p) => p.id !== current?.id),
+        run = programRuns.find((r) => r.id === current?.run_id);
+    const incomplete =
+        !state?.plan || !state?.has_schedule || !!state?.subscription_action;
     return (
         <>
             <Head title={ctx.trainee.name} />
             <PageHeader
                 title="Training overview"
-                description="Training, coaching, and the next step for this trainee."
+                description="Training assigned by you, and the next useful step."
             >
                 {state?.subscription_action && (
                     <ButtonLink href={state.subscription_action.url}>
                         {state.subscription_action.label}
                     </ButtonLink>
                 )}
-                {ctx.canManage && state?.plan && (
+                {ctx.canManage && current && (
                     <ButtonLink href={ctx.url("/schedule-entries/create")}>
-                        Schedule workout
-                    </ButtonLink>
-                )}
-                {ctx.canManage && state?.plan && (
-                    <ButtonLink
-                        variant="secondary"
-                        href={ctx.url(`/training-plans/${state.plan.id}`)}
-                    >
-                        Adjust program
+                        <CalendarPlus size={17} aria-hidden="true" /> Schedule
+                        workout
                     </ButtonLink>
                 )}
                 <details className="trainee-more">
                     <summary>More</summary>
                     <div>
                         <Link href={ctx.url("/coaching")}>Manage coaching</Link>
-                        <Link href={ctx.url("/setup")}>Review setup</Link>
+                        {incomplete && (
+                            <Link href={ctx.url("/setup")}>Continue setup</Link>
+                        )}
                         <hr />
                         <EndRelationship
                             relationship={relationship}
@@ -61,188 +74,288 @@ export default function Trainee({
                     </div>
                 </details>
             </PageHeader>
-            {state?.display_state === "setup" && (
+            {incomplete && (
                 <section className="panel coach-card setup-checklist">
                     <h2>Finish coaching setup</h2>
-                    <p>{state.reason}</p>
-                    <ol>
-                        <li>
-                            Coaching{" "}
-                            {state.subscription?.effective_status === "active"
-                                ? "✓ Saved"
-                                : "· Not active"}
-                        </li>
-                        <li>
-                            Training{" "}
-                            {state.plan ? "✓ Assigned" : "· Not assigned"}
-                        </li>
-                        <li>
-                            Schedule{" "}
-                            {state.has_schedule ? "✓ Saved" : "· Needs review"}
-                        </li>
-                    </ol>
+                    <p>{state?.reason}</p>
                     <ButtonLink href={ctx.url("/setup")}>
                         Continue setup
                     </ButtonLink>
                 </section>
             )}
-            {state && ["paused", "attention"].includes(state.display_state) && (
-                <section className="panel coach-card">
-                    <TraineeState state={state.display_state} />
-                    <h2>{state.reason}</h2>
-                    <ButtonLink
-                        variant="secondary"
-                        href={
-                            state.display_state === "paused"
-                                ? state.action.url
-                                : ctx.url("/coaching")
-                        }
-                    >
-                        {state.display_state === "paused"
-                            ? state.action.label
-                            : "Review coaching"}
-                    </ButtonLink>
-                </section>
-            )}
-            <div className="coach-grid">
-                {[
-                    ["Next session", nextSession],
-                    ["Recent workout", recentWorkout],
-                ].map(([label, entry]) => (
-                    <section className="panel coach-card" key={label}>
-                        <h2>{label}</h2>
-                        {entry ? (
-                            <>
-                                <p>
-                                    {entry.title} ·{" "}
-                                    <DateLabel date={entry.scheduled_date} />
+            <section className="panel coach-card assigned-training">
+                <div className="coach-card-title">
+                    <h2>
+                        <Layers size={20} aria-hidden="true" /> Training
+                        assigned by you
+                    </h2>
+                    {ctx.canManage && (
+                        <ButtonLink
+                            variant="secondary"
+                            href={ctx.url("/assign")}
+                        >
+                            Assign training
+                        </ButtonLink>
+                    )}
+                </div>
+                {current ? (
+                    <div className="current-training">
+                        <div>
+                            <span className="field-hint">Current training</span>
+                            <h3>{current.name}</h3>
+                            <p>
+                                {current.current_week
+                                    ? `Week ${current.current_week} of ${current.duration_weeks}`
+                                    : current.structure_type === "program"
+                                      ? `${current.duration_weeks}-week program`
+                                      : "Simple plan"}
+                                {current.run_status
+                                    ? ` · ${current.run_status}`
+                                    : ""}
+                            </p>
+                            {run?.block && (
+                                <p className="field-hint">
+                                    {run.block}
+                                    {run.adherence !== null
+                                        ? ` · ${run.adherence}% adherence`
+                                        : ""}
                                 </p>
-                                <ButtonLink
-                                    href={ctx.url(
-                                        `/schedule-entries/${entry.id}`,
-                                    )}
-                                    variant="secondary"
-                                >
-                                    View session
-                                </ButtonLink>
-                            </>
-                        ) : (
-                            <>
-                                <p>No session yet.</p>
-                                {label === "Next session" &&
-                                    ctx.canManage &&
-                                    state?.plan && (
-                                        <ButtonLink
+                            )}
+                        </div>
+                        <ButtonLink
+                            variant="secondary"
+                            href={ctx.url(`/training-plans/${current.id}`)}
+                        >
+                            View program
+                        </ButtonLink>
+                    </div>
+                ) : (
+                    <p>No training assigned yet.</p>
+                )}
+                {others.length > 0 && (
+                    <details className="other-assignments">
+                        <summary>
+                            Other assignments by you ({others.length})
+                        </summary>
+                        <ul className="compact-activity">
+                            {others.map((plan) => (
+                                <li key={plan.id}>
+                                    <div>
+                                        <Link
                                             href={ctx.url(
-                                                "/schedule-entries/create",
+                                                `/training-plans/${plan.id}`,
                                             )}
                                         >
-                                            Schedule workout
-                                        </ButtonLink>
-                                    )}
-                            </>
-                        )}
-                    </section>
-                ))}
-            </div>
-            <section className="panel coach-card">
-                <div className="coach-card-title">
-                    <h2>This week</h2>
-                    <ButtonLink variant="secondary" href={ctx.url("/calendar")}>
-                        View calendar
-                    </ButtonLink>
-                </div>
-                <p>
-                    {
-                        thisWeek.filter(
-                            (s) =>
-                                s.entry_type === "training" &&
-                                s.status === "completed",
-                        ).length
-                    }{" "}
-                    /{" "}
-                    {thisWeek.filter((s) => s.entry_type === "training").length}{" "}
-                    workouts completed across all shared training
-                </p>
-                <ul className="setup-schedule">
-                    {thisWeek.map((s) => (
-                        <li key={s.id}>
-                            <DateLabel date={s.scheduled_date} />
-                            <strong>{s.title}</strong>
-                            <Link href={ctx.url(`/schedule-entries/${s.id}`)}>
-                                {s.missed
-                                    ? "Missed · Review"
-                                    : s.started_at && s.status === "planned"
-                                      ? "In progress"
-                                      : s.status}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-                {!thisWeek.length && <p>No workouts scheduled this week.</p>}
+                                            {plan.name}
+                                        </Link>
+                                        <small>
+                                            Assigned{" "}
+                                            <DateLabel
+                                                date={
+                                                    plan.assignment?.assigned_at
+                                                }
+                                            />
+                                            {plan.program_runs?.[0]?.status
+                                                ? ` · ${plan.program_runs[0].status}`
+                                                : ""}
+                                        </small>
+                                    </div>
+                                    <CoachStatus
+                                        status={plan.assignment?.status}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    </details>
+                )}
             </section>
-            <ProgramRunCards runs={programRuns} />
-            <div className="coach-stats">
-                <div className="panel coach-stat">
-                    <span>Current body weight</span>
-                    <strong>
-                        {body.current === null ? "—" : `${body.current} kg`}
-                    </strong>
-                </div>
-                <div className="panel coach-stat">
-                    <span>Completion this month</span>
-                    <strong>
-                        {completion === null ? "—" : `${completion}%`}
-                    </strong>
-                </div>
-                <div className="panel coach-stat">
-                    <span>Coaching</span>
-                    <strong className="coach-small-value">
-                        {subscription?.package_name || "None yet"}
-                    </strong>
-                    <CoachStatus status={subscription?.effective_status} />
+            <div className="coach-grid trainee-primary-grid">
+                <section className="panel coach-card">
+                    <div className="coach-card-title">
+                        <h2>
+                            <CalendarDays size={20} aria-hidden="true" /> This
+                            week
+                        </h2>
+                        <ButtonLink
+                            variant="secondary"
+                            href={ctx.url("/calendar")}
+                        >
+                            View all
+                        </ButtonLink>
+                    </div>
+                    <p>
+                        {
+                            thisWeek.filter(
+                                (s) =>
+                                    s.entry_type === "training" &&
+                                    s.status === "completed",
+                            ).length
+                        }{" "}
+                        /{" "}
+                        {
+                            thisWeek.filter((s) => s.entry_type === "training")
+                                .length
+                        }{" "}
+                        assigned workouts completed
+                    </p>
+                    <ul className="compact-activity">
+                        {thisWeek.slice(0, 5).map((s) => (
+                            <li key={s.id}>
+                                <div>
+                                    <Link
+                                        href={ctx.url(
+                                            `/schedule-entries/${s.id}`,
+                                        )}
+                                    >
+                                        {s.title}
+                                    </Link>
+                                    <small>
+                                        <DateLabel date={s.scheduled_date} />
+                                    </small>
+                                </div>
+                                {s.missed ? (
+                                    <span className="badge skipped">
+                                        Missed
+                                    </span>
+                                ) : s.started_at && s.status === "planned" ? (
+                                    <span className="badge training">
+                                        In progress
+                                    </span>
+                                ) : (
+                                    <StatusBadge status={s.status} />
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                    {!thisWeek.length && (
+                        <p className="field-hint">
+                            No workouts scheduled this week.
+                        </p>
+                    )}
+                </section>
+                <section className="panel coach-card">
+                    <h2>
+                        <CalendarPlus size={20} aria-hidden="true" /> Next
+                        workout
+                    </h2>
+                    {nextSession ? (
+                        <>
+                            <h3>{nextSession.title}</h3>
+                            <p>
+                                <DateLabel date={nextSession.scheduled_date} />{" "}
+                                ·{" "}
+                                {nextSession.scheduled_time?.slice(0, 5) ||
+                                    "Anytime"}
+                            </p>
+                            <ButtonLink
+                                variant="secondary"
+                                href={ctx.url(
+                                    `/schedule-entries/${nextSession.id}`,
+                                )}
+                            >
+                                View session
+                            </ButtonLink>
+                        </>
+                    ) : (
+                        <p className="field-hint">
+                            No upcoming assigned workout.
+                        </p>
+                    )}
+                    {state &&
+                        ["paused", "attention"].includes(
+                            state.display_state,
+                        ) && (
+                            <div className="attention-note">
+                                <h3>
+                                    <AlertTriangle
+                                        size={17}
+                                        aria-hidden="true"
+                                    />{" "}
+                                    Needs attention
+                                </h3>
+                                <p>{state.reason}</p>
+                                <ButtonLink
+                                    variant="secondary"
+                                    href={
+                                        state.action.url === ctx.url("")
+                                            ? ctx.url("/calendar")
+                                            : state.action.url
+                                    }
+                                >
+                                    {state.display_state === "paused"
+                                        ? state.action.label
+                                        : "Review schedule"}
+                                </ButtonLink>
+                            </div>
+                        )}
+                </section>
+            </div>
+            <div className="coach-grid">
+                <section className="panel coach-card">
+                    <h2>
+                        <TrendingUp size={20} aria-hidden="true" /> Progress
+                    </h2>
+                    <p>
+                        {completion === null
+                            ? "No workouts due this month yet."
+                            : `${completion}% completion this month`}
+                    </p>
+                    {body.current !== null && (
+                        <p>
+                            Current body weight ·{" "}
+                            <strong>{body.current} kg</strong>
+                        </p>
+                    )}
+                    {recentWorkout && (
+                        <p>
+                            <CheckCircle2 size={16} aria-hidden="true" /> Last
+                            completed:{" "}
+                            <Link
+                                href={ctx.url(
+                                    `/training-history/${recentWorkout.id}`,
+                                )}
+                            >
+                                {recentWorkout.title}
+                            </Link>{" "}
+                            · <DateLabel date={recentWorkout.scheduled_date} />
+                        </p>
+                    )}
+                    <ButtonLink variant="secondary" href={ctx.url("/progress")}>
+                        View progress
+                    </ButtonLink>
+                </section>
+                <section className="panel coach-card">
+                    <div className="coach-card-title">
+                        <h2>
+                            <Settings size={20} aria-hidden="true" /> Coaching
+                        </h2>
+                        <CoachStatus status={subscription?.effective_status} />
+                    </div>
+                    <h3>{subscription?.package_name || "Not configured"}</h3>
+                    <p>
+                        {subscription?.ends_on
+                            ? `Ends ${subscription.ends_on}`
+                            : subscription
+                              ? "Ongoing coaching"
+                              : "Activate coaching to begin."}
+                    </p>
                     <ButtonLink variant="secondary" href={ctx.url("/coaching")}>
                         Manage coaching
                     </ButtonLink>
-                </div>
-                <div className="panel coach-stat">
-                    <span>Training goals</span>
-                    <strong className="coach-small-value">
-                        {profile?.training_goals
-                            ?.map((g) => g.replaceAll("_", " "))
-                            .join(", ") || "Not set"}
-                    </strong>
-                </div>
+                    {profile?.training_goals?.length > 0 && (
+                        <p className="field-hint">
+                            Goals ·{" "}
+                            {profile.training_goals
+                                .map((g) => g.replaceAll("_", " "))
+                                .join(", ")}
+                        </p>
+                    )}
+                </section>
             </div>
-            <section className="panel coach-card">
-                <h2>Your assigned plans</h2>
-                {plans.map((plan) => (
-                    <p key={plan.id}>
-                        <ButtonLink
-                            href={ctx.url(`/training-plans/${plan.id}`)}
-                            variant="secondary"
-                        >
-                            {plan.name}
-                        </ButtonLink>
-                    </p>
-                ))}
-                {!plans.length && <p>No assigned plans yet.</p>}
-                <div className="coach-actions">
-                    <ButtonLink href={ctx.url("/training-plans")}>
-                        View plans
-                    </ButtonLink>
-                    <ButtonLink
-                        href={ctx.url("/progress/exercises")}
-                        variant="secondary"
-                    >
-                        Exercise progress & records
-                    </ButtonLink>
-                </div>
-            </section>
             {recentRecords.length > 0 && (
                 <section className="panel coach-card">
                     <h2>Recent personal records</h2>
-                    <RecordList records={recentRecords} />
+                    <RecordList records={recentRecords.slice(0, 3)} compact />
                 </section>
             )}
         </>

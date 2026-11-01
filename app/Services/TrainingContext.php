@@ -46,12 +46,17 @@ class TrainingContext
     {
         $query = $this->owner()->trainingPlans();
         if ($this->coaching()) {
-            $relationship = app(CoachAccess::class)->relationship($this->actor(), $this->owner());
-
-            return $query->where('workspace_type', 'coach_assigned')->whereHas('assignment', fn ($q) => $q->where('coach_trainee_relationship_id', $relationship->id)->when($manage, fn ($q) => $q->where('status', 'active')));
+            return app(CoachAccess::class)->plans($this->actor(), $this->owner(), $manage);
         }
 
         return $query->whereIn('workspace_type', $this->templates() ? ['coach_template'] : ['personal', 'coach_assigned']);
+    }
+
+    public function sessions()
+    {
+        return $this->coaching()
+            ? app(CoachAccess::class)->sessions($this->actor(), $this->owner())
+            : $this->owner()->scheduleEntries();
     }
 
     public function plan(TrainingPlan $plan, string $ability = 'view'): void

@@ -69,7 +69,7 @@ let coach;
 try {
     coach = await login(fixture.coach_index);
     const prefix = `/coach/trainees/${fixture.trainee}`;
-    await coach.goto(base + prefix + "/assign");
+    await coach.goto(base + prefix + "/assign?another=1");
     await coach
         .getByLabel("Coach template")
         .selectOption(String(fixture.template));

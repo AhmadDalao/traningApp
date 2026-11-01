@@ -1,3 +1,5 @@
+import useLiveFilters from "../../Features/useLiveFilters";
+import { Search, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Head, useForm, Link, router } from "@inertiajs/react";
 import {
@@ -72,7 +74,11 @@ function Actions({ row }) {
     );
 }
 export default function Trainees({ relationships, filters, counts = {} }) {
-    const form = useForm(filters),
+    const form = useLiveFilters("/coach/trainees", filters, [
+            "relationships",
+            "filters",
+            "counts",
+        ]),
         [adding, setAdding] = useState(false);
     return (
         <>
@@ -81,39 +87,51 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                 title="Trainees"
                 description="Your people, their training, and the next useful action."
             >
-                <Button onClick={() => setAdding(true)}>Add trainee</Button>
+                <Button onClick={() => setAdding(true)}>
+                    <UserPlus size={17} aria-hidden="true" /> Add trainee
+                </Button>
             </PageHeader>
-            <form
-                className="panel coach-card coach-actions"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    form.get("/coach/trainees", { preserveState: true });
-                }}
+            <div
+                className="panel coach-card live-filter-bar"
+                aria-busy={form.processing}
             >
                 <Field label="Search connected trainees">
-                    <input
-                        value={form.data.search}
-                        maxLength={100}
-                        onChange={(e) => form.setData("search", e.target.value)}
-                        placeholder="Name or Training Planner ID"
-                    />
+                    <div className="search-input">
+                        <Search size={18} aria-hidden="true" />
+                        <input
+                            type="search"
+                            value={form.data.search}
+                            maxLength={100}
+                            onChange={(e) =>
+                                form.setData("search", e.target.value)
+                            }
+                            placeholder="Name or Training Planner ID"
+                        />
+                    </div>
                 </Field>
-                <Button disabled={form.processing}>Search</Button>
-            </form>
+                {(form.data.search || form.data.status !== "all") && (
+                    <Button
+                        variant="secondary"
+                        onClick={() =>
+                            form.setData({ search: "", status: "all" })
+                        }
+                    >
+                        Clear all
+                    </Button>
+                )}
+                <p className="filter-feedback" role="status">
+                    {form.processing
+                        ? "Updating…"
+                        : `${relationships.total} trainees found`}
+                </p>
+            </div>
             <nav className="trainee-filters" aria-label="Trainee filters">
                 {Object.entries(traineeStates).map(([key, label]) => (
                     <button
                         key={key}
                         type="button"
-                        aria-pressed={filters.status === key}
-                        onClick={() => {
-                            form.setData("status", key);
-                            router.get(
-                                "/coach/trainees",
-                                { ...form.data, status: key },
-                                { preserveState: true },
-                            );
-                        }}
+                        aria-pressed={form.data.status === key}
+                        onClick={() => form.setData("status", key)}
                     >
                         {label}{" "}
                         <span>

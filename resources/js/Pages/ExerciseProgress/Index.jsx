@@ -1,3 +1,4 @@
+import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link, router } from "@inertiajs/react";
@@ -25,15 +26,14 @@ export default function Index({
     errors,
 }) {
     const { url } = useTraining();
-    const [query, setQuery] = useState(search);
-    function submit(event) {
-        event.preventDefault();
-        router.get(
-            url("/progress/exercises"),
-            { search: query },
-            { preserveState: true, preserveScroll: true },
-        );
-    }
+    const live = useLiveFilters(url("/progress/exercises"), { search }, [
+        "exercises",
+        "recentRecords",
+        "trackedCount",
+        "search",
+    ]);
+    const query = live.data.search;
+    const setQuery = (value) => live.setData("search", value);
     return (
         <>
             <Head title="Exercise Progress" />
@@ -84,7 +84,8 @@ export default function Index({
                                 </p>
                             </div>
                             <form
-                                onSubmit={submit}
+                                onSubmit={(e) => e.preventDefault()}
+                                aria-busy={live.processing}
                                 className="exercise-progress-search"
                             >
                                 <label
@@ -103,10 +104,11 @@ export default function Index({
                                     }
                                     maxLength={150}
                                 />
-                                <Button type="submit" variant="secondary">
-                                    <Search size={16} />
-                                    Search
-                                </Button>
+                                <span role="status" className="filter-feedback">
+                                    {live.processing
+                                        ? "Updating…"
+                                        : `${exercises.total} exercises`}
+                                </span>
                             </form>
                         </div>
                         {exercises.data.length ? (

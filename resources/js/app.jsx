@@ -8,6 +8,7 @@ import "../css/discovery.css";
 import "../css/programs.css";
 import "../css/mobile.css";
 import "../css/notifications.css";
+import "../css/polish.css";
 import { startPwa } from "./Features/Notifications/pwa";
 import { createInertiaApp } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";

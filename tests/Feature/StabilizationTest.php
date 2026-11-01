@@ -95,6 +95,8 @@ class StabilizationTest extends TestCase
         $today = $this->entry($this->trainee, ['scheduled_date' => today(), 'scheduled_time' => null]);
         $this->entry($this->stranger);
         $this->entry($this->coach);
+        $assignedDay = $this->assigned()->trainingDays->first();
+        $this->trainee->scheduleEntries()->update(['training_day_id' => $assignedDay->id]);
         $this->actingAs($this->coach);
         $props = $this->props('/coach');
         $this->assertSame([$today->id, $future->id], array_column($props['upcoming'], 'id'));
@@ -122,6 +124,8 @@ class StabilizationTest extends TestCase
         $this->entry($this->trainee, ['scheduled_time' => '18:00']);
         $last = $this->entry($this->trainee, ['status' => 'completed', 'scheduled_date' => today()->subDay()]);
         $this->entry($this->trainee, ['status' => 'completed', 'entry_type' => 'rest', 'scheduled_date' => today()]);
+        $assignedDay = $this->assigned()->trainingDays->first();
+        $this->trainee->scheduleEntries()->update(['training_day_id' => $assignedDay->id]);
         $this->actingAs($this->coach);
         $measure = function () {
             DB::enableQueryLog();
@@ -188,7 +192,7 @@ class StabilizationTest extends TestCase
         $foreign = $this->entry($this->stranger);
         $this->actingAs($this->coach);
         $this->get('/coach/trainees/'.$this->stranger->id.'/calendar')->assertNotFound();
-        $this->get($this->base.'/schedule-entries/'.$foreign->id)->assertForbidden();
+        $this->get($this->base.'/schedule-entries/'.$foreign->id)->assertNotFound();
         $this->delete($this->base.'/schedule-entries/'.$entry->id)->assertForbidden();
         $this->get($this->base.'/training-plans/'.$other->id)->assertNotFound();
         $this->get($this->base.'/training-days/'.$day->id)->assertNotFound();
@@ -286,6 +290,8 @@ class StabilizationTest extends TestCase
     public function test_coaching_date_only_fields_do_not_shift_to_the_previous_day_when_serialized(): void
     {
         $next = $this->entry($this->trainee);
+        $assignedDay = $this->assigned()->trainingDays->first();
+        $this->trainee->scheduleEntries()->update(['training_day_id' => $assignedDay->id]);
         $this->actingAs($this->coach);
         foreach (['/coach/trainees', $this->base, $this->base.'/assign'] as $path) {
             $props = json_decode(json_encode($this->props($path)), true);

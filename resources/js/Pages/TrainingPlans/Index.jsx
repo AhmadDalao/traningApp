@@ -1,3 +1,4 @@
+import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
@@ -11,6 +12,7 @@ import {
     EmptyState,
     Pagination,
     Field,
+    DateLabel,
 } from "../../Components/UI";
 import TrainingPlanForm from "../../Features/TrainingPlanForm";
 import { DuplicatePlanDialog } from "../../Features/TrainingCopyActions";
@@ -20,7 +22,10 @@ export default function Index({
     filters = { search: "", type: "all" },
 }) {
     const { url, canManage, coaching, templates } = useTraining();
-    const filter = useForm(filters);
+    const filter = useLiveFilters(url("/training-plans"), filters, [
+        "plans",
+        "filters",
+    ]);
     const [duplicating, setDuplicating] = useState(null);
     const [editing, setEditing] = useState(null);
     const [deleting, setDeleting] = useState(null);
@@ -31,7 +36,7 @@ export default function Index({
                     templates
                         ? "Programs"
                         : coaching
-                          ? "Assigned plans"
+                          ? "Training assigned by you"
                           : "Training plans"
                 }
             />
@@ -41,7 +46,7 @@ export default function Index({
                     templates
                         ? "Programs"
                         : coaching
-                          ? "Assigned plans"
+                          ? "Training assigned by you"
                           : "Training plans"
                 }
                 description="Your goals, broken down into days you can show up for."
@@ -69,12 +74,9 @@ export default function Index({
                 )}
             </PageHeader>
             {templates && (
-                <form
-                    className="panel coach-card coach-actions"
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        filter.get(url("/training-plans"));
-                    }}
+                <div
+                    className="panel coach-card live-filter-bar"
+                    aria-busy={filter.processing}
                 >
                     <Field label="Search templates">
                         <input
@@ -97,8 +99,22 @@ export default function Index({
                             <option value="simple">Simple plans</option>
                         </select>
                     </Field>
-                    <Button disabled={filter.processing}>Filter</Button>
-                </form>
+                    <span className="filter-feedback" role="status">
+                        {filter.processing
+                            ? "Updating…"
+                            : `${plans.total} plans found`}
+                    </span>
+                    {(filter.data.search || filter.data.type !== "all") && (
+                        <Button
+                            variant="secondary"
+                            onClick={() =>
+                                filter.setData({ search: "", type: "all" })
+                            }
+                        >
+                            Clear all
+                        </Button>
+                    )}
+                </div>
             )}
             {coaching && canManage && (
                 <div className="coach-actions" style={{ marginBottom: 20 }}>
@@ -130,6 +146,24 @@ export default function Index({
                                 </div>
                                 <div className="plan-body">
                                     <h2>{plan.name}</h2>
+                                    {coaching && plan.assigned_at && (
+                                        <p className="field-hint">
+                                            Assigned{" "}
+                                            <DateLabel
+                                                date={plan.assigned_at.slice(
+                                                    0,
+                                                    10,
+                                                )}
+                                            />{" "}
+                                            ·{" "}
+                                            {plan.run_status
+                                                ? `Run ${plan.run_status}`
+                                                : plan.assignment_status ===
+                                                    "ended"
+                                                  ? "Ended assignment"
+                                                  : "Not started"}
+                                        </p>
+                                    )}
                                     {templates && (
                                         <p>
                                             {plan.assigned_trainees_count}{" "}

@@ -16,7 +16,9 @@ export default function Form({ plans, entry, selectedDay, selectedDate }) {
             <PageHeader
                 title={
                     coaching
-                        ? `${entry ? "Edit workout for" : "Schedule"} ${trainee.name}`
+                        ? entry
+                            ? "Edit workout"
+                            : "Schedule workout"
                         : entry
                           ? "Edit your session"
                           : "Schedule a session"
@@ -27,7 +29,7 @@ export default function Form({ plans, entry, selectedDay, selectedDate }) {
                         : "A small commitment to yourself."
                 }
             />
-            <div className="panel form-panel">
+            <div className="panel form-panel schedule-workout-panel">
                 <ScheduleEntryForm
                     plans={plans}
                     entry={entry}

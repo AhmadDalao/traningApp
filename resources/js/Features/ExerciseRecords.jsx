@@ -9,16 +9,10 @@ export function ExerciseProgressTabs() {
     return (
         <nav className="progress-tabs" aria-label="Progress view">
             <ButtonLink variant="secondary" href={url("/progress")}>
-                Body weight
+                Progress overview
             </ButtonLink>
             <ButtonLink href={url("/progress/exercises")} aria-current="page">
                 Exercise Progress
-            </ButtonLink>
-            <ButtonLink
-                variant="secondary"
-                href={url("/progress?tab=training")}
-            >
-                Training stats
             </ButtonLink>
         </nav>
     );
@@ -35,10 +29,12 @@ export function RecordValue({ record }) {
     );
 }
 
-export function RecordList({ records }) {
+export function RecordList({ records, compact = false }) {
     const { url } = useTraining();
     return (
-        <ul className="exercise-record-list">
+        <ul
+            className={`exercise-record-list${compact ? " compact-records" : ""}`}
+        >
             {records.map((record) => (
                 <li
                     key={`${record.source_exercise_key}-${record.tracking_mode}-${record.session_id}-${record.metric}`}
@@ -52,15 +48,17 @@ export function RecordList({ records }) {
                             New {record.label} · <RecordValue record={record} />
                         </p>
                         <small>
-                            <DateLabel date={record.date} long />
+                            <DateLabel date={record.date} long={!compact} />
                         </small>
                     </div>
-                    <Link
-                        href={url(`/schedule-entries/${record.session_id}`)}
-                        className="inline-link"
-                    >
-                        View workout
-                    </Link>
+                    {!compact && (
+                        <Link
+                            href={url(`/schedule-entries/${record.session_id}`)}
+                            className="inline-link"
+                        >
+                            View workout
+                        </Link>
+                    )}
                 </li>
             ))}
         </ul>

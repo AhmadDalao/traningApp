@@ -74,8 +74,8 @@ try {
     await page.waitForURL("**/dashboard");
     await page.goto(base + "/recommendations");
     await page.getByRole("button", { name: /^Filters/ }).click();
-    await page.getByLabel("Type").selectOption("program");
-    await page.getByRole("button", { name: "Show 4 plans" }).click();
+    await page.getByRole("dialog").getByLabel("Type").selectOption("program");
+    await page.getByRole("button", { name: "Done" }).click();
     assert.equal(
         await page
             .locator('[aria-labelledby="all-plans-title"] .discovery-card')

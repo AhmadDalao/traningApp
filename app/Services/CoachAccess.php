@@ -17,6 +17,34 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class CoachAccess
 {
+    /** The trainee owns the copy; the accepted assignment determines Coach visibility. */
+    public function plans(User $coach, ?User $trainee = null, bool $manage = false)
+    {
+        abort_unless($coach->isCoach(), 403);
+
+        return TrainingPlan::where('workspace_type', 'coach_assigned')
+            ->when($trainee, fn ($q) => $q->where('user_id', $trainee->id))
+            ->whereHas('assignment', fn ($q) => $q
+                ->when($manage, fn ($q) => $q->where('status', 'active'))
+                ->whereHas('relationship', fn ($q) => $q->where('status', 'active')
+                    ->where('coach_user_id', $coach->id)
+                    ->whereColumn('trainee_user_id', 'training_plans.user_id')));
+    }
+
+    /** Include owner-scheduled sessions of an assigned copy, never unrelated workouts. */
+    public function sessions(User $coach, ?User $trainee = null)
+    {
+        $plans = $this->plans($coach, $trainee)->select('training_plans.id');
+
+        return ScheduleEntry::query()->when($trainee, fn ($q) => $q->where('user_id', $trainee->id))
+            ->where(fn ($q) => $q
+                ->whereHas('trainingDay', fn ($q) => $q->whereIn('training_plan_id', clone $plans)
+                    ->whereHas('trainingPlan', fn ($q) => $q->whereColumn('training_plans.user_id', 'schedule_entries.user_id')))
+                ->orWhereHas('programRun', fn ($q) => $q->whereIn('training_plan_id', clone $plans)->whereColumn('user_id', 'schedule_entries.user_id'))
+                ->orWhere(fn ($q) => $q->whereNull('training_day_id')->whereNull('program_run_id')
+                    ->whereIn('workout_snapshot->training_plan_id', (clone $plans)->whereColumn('training_plans.user_id', 'schedule_entries.user_id'))));
+    }
+
     public function relationship(User $coach, User $trainee, bool $lock = false): CoachTraineeRelationship
     {
         abort_unless($coach->isCoach() && $coach->id !== $trainee->id, 403);

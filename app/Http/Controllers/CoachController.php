@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CoachTraineeRelationship;
 use App\Models\ProgramRun;
-use App\Models\ScheduleEntry;
 use App\Models\User;
 use App\Services\BodyWeightHistory;
 use App\Services\CoachAccess;
@@ -55,8 +53,7 @@ class CoachController extends Controller
     {
         $query = $summary->query($request->user());
         $counts = (clone $query)->select('display_state')->selectRaw('COUNT(*) as total')->groupBy('display_state')->pluck('total', 'display_state');
-        $ids = CoachTraineeRelationship::where('coach_user_id', $request->user()->id)->where('status', 'active')->select('trainee_user_id');
-        $sessions = ScheduleEntry::whereIn('user_id', $ids)->availableOnSchedule();
+        $sessions = app(CoachAccess::class)->sessions($request->user())->availableOnSchedule();
         $describe = fn ($entry) => [...$entry->toArray(), 'trainee_name' => $entry->user->name];
         $upcoming = (clone $sessions)->upcoming()->whereNull('started_at')->whereDate('scheduled_date', '<=', today()->addDays(7))->with('user:id,name')->orderBy('scheduled_date')->orderBy('scheduled_time')->orderBy('id')->limit(12)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'scheduled_date', 'scheduled_time']);
         $recent = (clone $sessions)->whereIn('status', ['completed', 'skipped'])->with('user:id,name')->latest('updated_at')->limit(8)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'updated_at']);
@@ -91,20 +88,20 @@ class CoachController extends Controller
     {
         $owner = $context->owner();
         $relationship = $access->relationship($context->actor(), $owner);
-        $month = $owner->scheduleEntries()->availableOnSchedule()->where('entry_type', 'training')->due()->whereDate('scheduled_date', '>=', today()->startOfMonth())->whereDate('scheduled_date', '<=', today());
+        $month = $context->sessions()->availableOnSchedule()->where('entry_type', 'training')->due()->whereDate('scheduled_date', '>=', today()->startOfMonth())->whereDate('scheduled_date', '<=', today());
         $total = (clone $month)->count();
 
         return Inertia::render('Coach/Trainee', [
             'state' => app(CoachWorkspaceSummary::class)->one($context->actor(), $owner),
-            'thisWeek' => $owner->scheduleEntries()->availableOnSchedule()->whereBetween('scheduled_date', [today()->startOfWeek(), today()->endOfWeek()])->orderBy('scheduled_date')->orderBy('scheduled_time')->get(['id', 'title', 'entry_type', 'status', 'started_at', 'scheduled_date', 'scheduled_time'])->map(fn ($entry) => [...$entry->toArray(), 'missed' => $entry->entry_type === 'training' && $entry->status === 'planned' && ! $entry->started_at && ! $access->future($entry->scheduled_date->toDateString(), $entry->scheduled_time)]),
+            'thisWeek' => $context->sessions()->availableOnSchedule()->whereBetween('scheduled_date', [today()->startOfWeek(), today()->endOfWeek()])->orderBy('scheduled_date')->orderBy('scheduled_time')->get(['id', 'title', 'entry_type', 'status', 'started_at', 'scheduled_date', 'scheduled_time'])->map(fn ($entry) => [...$entry->toArray(), 'missed' => $entry->entry_type === 'training' && $entry->status === 'planned' && ! $entry->started_at && ! $access->future($entry->scheduled_date->toDateString(), $entry->scheduled_time)]),
             'programRuns' => app(ProgramLifecycle::class)->cards(ProgramRun::where('user_id', $owner->id)->whereIn('training_plan_id', $context->plans()->select('training_plans.id'))),
             'relationship' => $relationship->only('id', 'approved_at'),
             'profile' => $owner->profile?->only('training_goals', 'experience_level', 'training_days_per_week', 'session_duration_minutes', 'equipment_access', 'body_weight_goal'),
             'body' => $body->summary($owner), 'recentRecords' => $progress->overview($owner)['recentRecords'],
             'subscription' => $relationship->subscriptions()->latest()->first()?->summary(),
-            'plans' => $context->plans()->latest()->get(['id', 'name', 'start_date', 'end_date']),
-            'nextSession' => $owner->nextPlannedSessions()->whereNull('started_at')->first(['id', 'title', 'scheduled_date', 'scheduled_time']),
-            'recentWorkout' => $owner->latestCompletedWorkouts()->first(['id', 'title', 'scheduled_date']),
+            'plans' => $context->plans()->with('assignment', 'programRuns')->latest()->get(['id', 'name', 'structure_type', 'duration_weeks', 'start_date', 'end_date']),
+            'nextSession' => $context->sessions()->upcoming()->orderBy('scheduled_date')->orderBy('scheduled_time')->whereNull('started_at')->first(['id', 'title', 'scheduled_date', 'scheduled_time']),
+            'recentWorkout' => $context->sessions()->where('entry_type', 'training')->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->first(['id', 'title', 'scheduled_date']),
             'completion' => $total ? round((clone $month)->where('status', 'completed')->count() / $total * 100) : null,
         ]);
     }

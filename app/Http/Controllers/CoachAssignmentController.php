@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\CoachPlanAssignment;
-use App\Models\CoachTraineeRelationship;
 use App\Models\TrainingPlan;
+use App\Models\User;
 use App\Services\CoachAccess;
+use App\Services\CoachWorkspaceSummary;
 use App\Services\TrainingContext;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
@@ -18,9 +19,16 @@ class CoachAssignmentController extends Controller
         $context->plan($trainingPlan);
         abort_unless($context->templates(), 403);
         $data = $request->validate(['search' => 'nullable|string|max:100']);
-        $relationships = CoachTraineeRelationship::where('coach_user_id', $context->actor()->id)->where('status', 'active')->with('trainee:id,name,training_code')->withExists(['assignments as has_training' => fn ($q) => $q->where('status', 'active')->whereHas('plan')])
-            ->when(! empty($data['search']), fn ($q) => $q->whereHas('trainee', fn ($q) => $q->where(fn ($q) => $q->where('name', 'like', '%'.$data['search'].'%')->orWhere('training_code', 'like', '%'.$data['search'].'%'))))
-            ->latest('id')->paginate(25)->withQueryString();
+        $summary = app(CoachWorkspaceSummary::class);
+        $query = $summary->query($context->actor())->where('status', 'active')
+            ->when(! empty($data['search']), fn ($q) => $q->whereIn('trainee_user_id', User::select('id')->where(fn ($q) => $q->where('name', 'like', '%'.$data['search'].'%')->orWhere('training_code', 'like', '%'.$data['search'].'%'))));
+        $relationships = $query->orderByDesc('id')->paginate(25)->withQueryString();
+        $existing = CoachPlanAssignment::whereIn('coach_trainee_relationship_id', collect($relationships->items())->pluck('id'))
+            ->where('source_training_plan_id', $trainingPlan->id)->where('status', 'active')->whereHas('plan')
+            ->latest('id')->get()->unique('coach_trainee_relationship_id')->keyBy('coach_trainee_relationship_id');
+        $relationships->setCollection(collect($summary->rows($relationships->items()))->map(fn ($row) => [...$row,
+            'existing_plan_id' => $existing[$row['id']]->assigned_training_plan_id ?? null,
+        ]));
 
         return Inertia::render('Coach/ChooseTrainee', ['plan' => $trainingPlan->only('id', 'name', 'structure_type', 'duration_weeks'), 'relationships' => $relationships, 'search' => $data['search'] ?? '']);
     }
@@ -29,7 +37,7 @@ class CoachAssignmentController extends Controller
     {
         $subscription = $access->subscription($access->relationship($context->actor(), $context->owner()));
 
-        return Inertia::render('Coach/Assign', ['selectedTemplate' => $request->integer('template'), 'templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
+        return Inertia::render('Coach/Assign', ['selectedTemplate' => $request->integer('template'), 'anotherCopy' => $request->boolean('another'), 'templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
     }
 
     public function store(Request $request, TrainingContext $context, TrainingPlanDuplicator $duplicator)
@@ -39,12 +47,12 @@ class CoachAssignmentController extends Controller
         if ($source->isProgram()) {
             $request->merge(['start_date' => null, 'end_date' => null, 'schedule_mode' => 'fixed']);
         }
-        $data = $request->validate(['training_plan_id' => 'required|integer', 'start_date' => ($source->isProgram() ? 'nullable' : 'required').'|date_format:Y-m-d', 'schedule_mode' => 'sometimes|in:fixed,ongoing', 'end_date' => ($source->isProgram() || $request->input('schedule_mode') === 'ongoing' ? 'nullable' : 'required').'|date_format:Y-m-d|after_or_equal:start_date', 'confirmed' => 'required|accepted']);
+        $data = $request->validate(['another_copy' => 'sometimes|boolean', 'training_plan_id' => 'required|integer', 'start_date' => ($source->isProgram() ? 'nullable' : 'required').'|date_format:Y-m-d', 'schedule_mode' => 'sometimes|in:fixed,ongoing', 'end_date' => ($source->isProgram() || $request->input('schedule_mode') === 'ongoing' ? 'nullable' : 'required').'|date_format:Y-m-d|after_or_equal:start_date', 'confirmed' => 'required|accepted']);
         if (($data['schedule_mode'] ?? 'fixed') === 'ongoing') {
             $data['end_date'] = null;
         }
         $source = TrainingPlan::where('user_id', $request->user()->id)->where('workspace_type', 'coach_template')->findOrFail($data['training_plan_id']);
-        $copy = $duplicator->assign($request->user(), $context->owner(), $source, collect($data)->only('start_date', 'end_date', 'schedule_mode')->all());
+        $copy = $duplicator->assign($request->user(), $context->owner(), $source, collect($data)->only('start_date', 'end_date', 'schedule_mode')->all(), resumeSetup: ! $request->boolean('another_copy'));
 
         return $context->redirect('/training-plans/'.$copy->id)->with('success', 'Plan assigned as an independent trainee-owned copy. Review its schedule to add sessions.');
     }

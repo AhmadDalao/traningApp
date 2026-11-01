@@ -40,7 +40,7 @@ class ScheduleEntryController extends Controller
         $end = $date->copy()->endOfMonth()->addWeek();
 
         return Inertia::render('Calendar/Index', [
-            'entries' => app(TrainingContext::class)->owner()->scheduleEntries()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan', 'programRun')->withExists('sessionExercises')->get()->map(fn ($entry) => [
+            'entries' => app(TrainingContext::class)->sessions()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan', 'programRun')->withExists('sessionExercises')->get()->map(fn ($entry) => [
                 ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key', 'program_run_id', 'program_week', 'program_context'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
                 'program_status' => $entry->programRun?->status,
@@ -100,8 +100,7 @@ class ScheduleEntryController extends Controller
     {
         $context = app(TrainingContext::class);
         if ($context->coaching()) {
-            app(CoachAccess::class)->relationship($context->actor(), $context->owner());
-            abort_unless($scheduleEntry->user_id === $context->owner()->id, 403);
+            abort_unless($context->sessions()->whereKey($scheduleEntry->id)->exists(), 404);
         } else {
             Gate::authorize('view', $scheduleEntry);
         }

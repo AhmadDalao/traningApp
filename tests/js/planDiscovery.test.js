@@ -82,3 +82,30 @@ test("search covers case-insensitive names, goals, descriptions, and weekly spli
         [],
     );
 });
+
+test("duration combines with type and keeps the cutoff inclusive", () => {
+    const choices = [
+        { ...plans[0], duration: 30, structure_type: "simple" },
+        { ...plans[1], duration: 60, structure_type: "program" },
+    ];
+    assert.deepEqual(
+        filterPlans(choices, { ...emptyPlanFilters, duration: "30" }),
+        [choices[0]],
+    );
+    assert.deepEqual(
+        filterPlans(choices, {
+            ...emptyPlanFilters,
+            duration: "30",
+            type: "program",
+        }),
+        [],
+    );
+    assert.deepEqual(
+        filterPlans(choices, {
+            ...emptyPlanFilters,
+            duration: "60",
+            type: "program",
+        }),
+        [choices[1]],
+    );
+});

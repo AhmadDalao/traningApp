@@ -5,7 +5,7 @@ import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button, Field, Modal } from "../Components/UI";
 
 export default function ExerciseProgression({ progression, exercise, range }) {
-    const { url } = useTraining();
+    const { url, coaching } = useTraining();
     const [open, setOpen] = useState(false);
     const { errors } = usePage().props;
     const { templates, selected_id, suggestion } = progression;
@@ -107,13 +107,13 @@ export default function ExerciseProgression({ progression, exercise, range }) {
                             </div>
                             <p>{suggestion.reason}</p>
                         </div>
-                        {suggestion.can_apply && (
+                        {suggestion.can_apply && !coaching && (
                             <Button onClick={() => setOpen(true)}>
                                 Apply suggestion
                             </Button>
                         )}
                     </div>
-                    {suggestion.can_apply && (
+                    {suggestion.can_apply && !coaching && (
                         <p className="field-hint">
                             Your plan changes only when you apply a target. You
                             can edit the suggestion first.
@@ -141,7 +141,7 @@ export default function ExerciseProgression({ progression, exercise, range }) {
 }
 
 function ApplyProgression({ suggestion, template, exercise, onClose }) {
-    const { url } = useTraining();
+    const { url, coaching } = useTraining();
     const form = useForm({
         token: suggestion.token,
         value: suggestion.proposed_value,

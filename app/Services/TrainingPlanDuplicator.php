@@ -41,7 +41,7 @@ class TrainingPlanDuplicator
             $result = app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, $resumeSetup, $notify, &$paths, &$dayMap) {
                 $source = TrainingPlan::where('user_id', $coach->id)->where('workspace_type', 'coach_template')->lockForUpdate()->findOrFail($source->id);
                 if ($resumeSetup) {
-                    $existing = $relationship->assignments()->where('status', 'active')->whereHas('plan')->latest('id')->lockForUpdate()->first();
+                    $existing = $relationship->assignments()->where('source_training_plan_id', $source->id)->where('status', 'active')->whereHas('plan')->latest('id')->lockForUpdate()->first();
                     if ($existing) {
                         return $existing->plan;
                     }

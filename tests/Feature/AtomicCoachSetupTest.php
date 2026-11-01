@@ -261,7 +261,7 @@ class AtomicCoachSetupTest extends TestCase
         $this->trainee->scheduleEntries()->create(['title' => 'Skipped', 'scheduled_date' => today(), 'scheduled_time' => null, 'entry_type' => 'training', 'status' => 'skipped']);
         $this->trainee->scheduleEntries()->create(['title' => 'Still available', 'scheduled_date' => today(), 'scheduled_time' => null, 'entry_type' => 'training', 'status' => 'planned']);
         $this->actingAs($this->trainee)->get('/progress')->assertInertia(fn (AssertableInertia $p) => $p->where('training.completed', 1)->where('training.skipped', 1)->where('training.due', 2)->where('training.completion_rate', 50));
-        $this->actingAs($this->coach)->get('/coach/trainees/'.$this->trainee->id)->assertInertia(fn (AssertableInertia $p) => $p->where('completion', 50));
+        $this->actingAs($this->coach)->get('/coach/trainees/'.$this->trainee->id)->assertInertia(fn (AssertableInertia $p) => $p->where('completion', 100));
         $position = app(ProgramLifecycle::class)->position($run->fresh());
         $this->assertSame(1, $position['due_completed']);
         $this->assertEquals(100, $position['adherence']);

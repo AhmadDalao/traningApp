@@ -69,7 +69,9 @@ class ExerciseProgression
             ->when($templateId !== null, fn ($q) => $q->where('source_training_exercise_id', $templateId))
             ->where('session_exercises.status', '!=', 'skipped')
             ->join('schedule_entries as session', 'session.id', '=', 'session_exercises.schedule_entry_id')
-            ->where('session.user_id', $user->id)->where('session.entry_type', 'training')->where('session.status', 'completed')
+            ->where('session.user_id', $user->id)
+            ->when(app(TrainingContext::class)->coaching(), fn ($q) => $q->whereIn('session.id', app(CoachAccess::class)->sessions(app(TrainingContext::class)->actor(), $user)->select('schedule_entries.id')))
+            ->where('session.entry_type', 'training')->where('session.status', 'completed')
             ->select('session_exercises.*', 'session.scheduled_date', 'session.scheduled_time', 'session.updated_at as session_updated_at', 'session.completed_at as session_completed_at')
             ->orderByDesc('session.scheduled_date')->orderByRaw("COALESCE(session.scheduled_time, '00:00:00') DESC")
             ->orderByDesc('session.id')->orderByDesc('session_exercises.id');

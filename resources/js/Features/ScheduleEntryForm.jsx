@@ -12,10 +12,19 @@ export default function ScheduleEntryForm({
 }) {
     const { url, coaching } = useTraining();
     const { today } = usePage().props;
-    const initialDay = plans
-        .flatMap((p) => p.training_days)
-        .find((d) => d.id === Number(entry?.training_day_id || selectedDay));
-    const [planId, setPlanId] = useState(initialDay?.training_plan_id || "");
+    const singlePlan = !entry && plans.length === 1 ? plans[0] : null;
+    const initialDay =
+        plans
+            .flatMap((p) => p.training_days)
+            .find(
+                (d) => d.id === Number(entry?.training_day_id || selectedDay),
+            ) ||
+        (singlePlan?.training_days.length === 1
+            ? singlePlan.training_days[0]
+            : null);
+    const [planId, setPlanId] = useState(
+        initialDay?.training_plan_id || singlePlan?.id || "",
+    );
     const [directRest, setDirectRest] = useState(
         entry?.entry_type === "rest" && !entry?.training_day_id,
     );
@@ -95,11 +104,20 @@ export default function ScheduleEntryForm({
                                 disabled={recorded}
                                 onChange={(e) => {
                                     setPlanId(e.target.value);
+                                    const nextDays =
+                                        plans.find(
+                                            (p) =>
+                                                p.id === Number(e.target.value),
+                                        )?.training_days || [];
+                                    const single =
+                                        nextDays.length === 1
+                                            ? nextDays[0]
+                                            : null;
                                     form.setData({
                                         ...form.data,
-                                        training_day_id: "",
-                                        title: "",
-                                        entry_type: "training",
+                                        training_day_id: single?.id || "",
+                                        title: single?.title || "",
+                                        entry_type: single?.type || "training",
                                     });
                                 }}
                                 required={!historical && !recorded}
@@ -188,11 +206,24 @@ export default function ScheduleEntryForm({
                 >
                     <input
                         type="time"
+                        aria-label="Time (Optional)"
                         value={form.data.scheduled_time}
                         onInput={(event) =>
                             form.setData("scheduled_time", event.target.value)
                         }
                     />
+                    <small className="field-hint">
+                        Leave blank for Anytime on the selected day.
+                    </small>
+                    {form.data.scheduled_time && (
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => form.setData("scheduled_time", "")}
+                        >
+                            Anytime
+                        </Button>
+                    )}
                 </Field>
             </div>
             <Field label="Session title" error={form.errors.title}>

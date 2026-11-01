@@ -8,7 +8,12 @@ import {
     DateLabel,
 } from "../../Components/UI";
 import { useTraining, Errors } from "../../Features/CoachingUI";
-export default function Assign({ templates, subscription, selectedTemplate }) {
+export default function Assign({
+    templates,
+    subscription,
+    selectedTemplate,
+    anotherCopy = false,
+}) {
     const ctx = useTraining();
     const form = useForm({
         training_plan_id: templates.some((p) => p.id === selectedTemplate)
@@ -17,13 +22,18 @@ export default function Assign({ templates, subscription, selectedTemplate }) {
         start_date: subscription?.starts_on || "",
         end_date: subscription?.ends_on || "",
         confirmed: true,
+        another_copy: anotherCopy,
         schedule_mode: "fixed",
     });
     return (
         <>
             <Head title="Assign a training plan" />
             <PageHeader
-                title="Assign plan to trainee"
+                title={
+                    anotherCopy
+                        ? "Assign another independent copy"
+                        : "Assign plan to trainee"
+                }
                 description="Create an independent copy. The trainee owns the assigned plan."
             />
             {!subscription ? (

@@ -1,3 +1,4 @@
+import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { calorieDisplay } from "../../Features/calories";
 import { useEffect, useState } from "react";
@@ -24,14 +25,18 @@ import {
 export default function Index({ entries, summary, filters, plans }) {
     const { url } = useTraining();
     const { errors } = usePage().props;
-    const [draft, setDraft] = useState(filters);
-    const [busy, setBusy] = useState(false);
-    useEffect(() => {
-        setDraft(filters);
-    }, [filters]);
-    function change(name, value) {
-        setDraft((current) => ({ ...current, [name]: value }));
-    }
+    const live = useLiveFilters(
+        url("/training-history"),
+        filters,
+        ["entries", "summary", "filters", "plans"],
+        (next) =>
+            next.period !== "custom" ||
+            (next.from && next.to && next.from <= next.to),
+    );
+    const draft = live.data,
+        busy = live.processing,
+        change = live.setData,
+        apply = live.setData;
     const cards = [
         {
             label: "Completed",
@@ -62,26 +67,6 @@ export default function Index({ entries, summary, filters, plans }) {
             note: "past scheduled sessions",
         },
     ];
-    function apply(next) {
-        setBusy(true);
-        router.get(
-            url("/training-history"),
-            Object.fromEntries(
-                Object.entries(next).filter(
-                    ([key, value]) =>
-                        value !== "" &&
-                        (next.period === "custom" ||
-                            !["from", "to"].includes(key)),
-                ),
-            ),
-            {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-                onFinish: () => setBusy(false),
-            },
-        );
-    }
     return (
         <>
             <Head title="Training History" />
@@ -119,8 +104,8 @@ export default function Index({ entries, summary, filters, plans }) {
                             </span>
                         </h2>
                         <p>
-                            Date presets filter immediately. For custom dates,
-                            choose From and To, then apply filters.
+                            Filters update automatically. Custom dates update
+                            when both dates are valid.
                         </p>
                     </div>
                 </div>
@@ -134,15 +119,10 @@ export default function Index({ entries, summary, filters, plans }) {
                     <Field label="Period" error={errors.period}>
                         <select
                             value={draft.period}
-                            disabled={busy}
-                            onChange={(event) => {
-                                const next = {
-                                    ...draft,
-                                    period: event.target.value,
-                                };
-                                setDraft(next);
-                                if (next.period !== "custom") apply(next);
-                            }}
+
+                            onChange={(event) =>
+                                change("period", event.target.value)
+                            }
                         >
                             <option value="all">All time</option>
                             <option value="today">Today</option>
@@ -207,16 +187,28 @@ export default function Index({ entries, summary, filters, plans }) {
                         </select>
                     </Field>
                     <div className="history-filter-actions">
-                        <Button disabled={busy}>Apply filters</Button>
+                        <span role="status">
+                            {busy
+                                ? "Updating…"
+                                : `${entries.total} sessions found`}
+                        </span>
                         <Button
                             type="button"
                             variant="secondary"
-                            disabled={busy}
+
                             onClick={() => {
-                                apply({ per_page: filters.per_page });
+                                apply({
+                                    status: "all",
+                                    type: "all",
+                                    period: "all",
+                                    from: "",
+                                    to: "",
+                                    per_page: "10",
+                                    plan: "",
+                                });
                             }}
                         >
-                            Reset
+                            Clear all
                         </Button>
                     </div>
                 </form>
@@ -236,10 +228,10 @@ export default function Index({ entries, summary, filters, plans }) {
                                 type="button"
                                 className={`filter-chip ${filters.status === value ? "active" : ""}`}
                                 aria-pressed={filters.status === value}
-                                disabled={busy}
+
                                 key={value}
                                 onClick={() =>
-                                    apply({ ...filters, status: value })
+                                    apply({ ...draft, status: value })
                                 }
                             >
                                 {value !== "all" && (
@@ -254,10 +246,10 @@ export default function Index({ entries, summary, filters, plans }) {
                     <Field label="Items per page">
                         <select
                             value={filters.per_page}
-                            disabled={busy}
+
                             onChange={(event) =>
                                 apply({
-                                    ...filters,
+                                    ...draft,
                                     per_page: event.target.value,
                                 })
                             }

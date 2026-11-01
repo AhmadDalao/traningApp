@@ -279,7 +279,6 @@ try {
     await page
         .getByLabel("Search templates", { exact: true })
         .fill("QA Guided strength " + engine);
-    await page.getByRole("button", { name: "Filter", exact: true }).click();
     await page.waitForURL(/search=QA/);
     await page
         .getByRole("link", { name: "Assign to trainee →", exact: true })

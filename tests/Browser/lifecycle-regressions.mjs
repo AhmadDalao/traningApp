@@ -140,7 +140,6 @@ try {
     await p.getByLabel("From", { exact: true }).fill(fixture.past_date);
     await p.getByLabel("To", { exact: true }).fill(fixture.saved_date);
     await p.getByLabel("Session type").selectOption("training");
-    await button(p, "Apply filters").click();
     await p.waitForURL(
         (u) =>
             u.searchParams.get("period") === "custom" &&

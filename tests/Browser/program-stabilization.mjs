@@ -183,6 +183,10 @@ try {
     );
     await matrix("paginated-run-history", true);
     await page.goto(base + "/program-runs?page=2");
+    await page
+        .getByRole("link", { name: "View program run", exact: true })
+        .first()
+        .waitFor();
     assert.ok(
         (await page
             .getByRole("link", { name: "View program run", exact: true })
