@@ -1,0 +1,137 @@
+{
+    "release": "v2.3.4",
+    "status": "READY \u2014 DEPLOYED AND VERIFIED",
+    "commit": "e4b3be7a6c5458abb246a64ea518dd2a4aa88784",
+    "baseline": "v2.3.3",
+    "baseline_commit": "61a7286a9e213e3776cc8c18cdeb4f05f418c62c",
+    "authorization": "User explicitly requested: deploy all",
+    "php": "8.3.36",
+    "database": "11.8.9-MariaDB-log",
+    "backup_evidence": {
+        "created_at_utc": "2026-11-01T09:43:38+00:00",
+        "runtime_bytes": 65424207,
+        "runtime_sha256": "85a354233b796c06f96b8c4a29549895de5a7f2061e2e79e52294525785ed126",
+        "database_bytes": 44862,
+        "database_uncompressed_bytes": 682686,
+        "database_sha256": "74ad0404b6fd59228fff363b4b8c5a85021ca338f6554f8076bca18cab50b2d4",
+        "uploads_bytes": 28995731,
+        "uploads_sha256": "1010ff8f6e9d5775bdd09bc1f0d4bc48d04415e7c616506766e7b1f12e612fef",
+        "original_upload_files": 462,
+        "source_file_backups": 20,
+        "environment_backed_up": true,
+        "archives_verified": true
+    },
+    "patch_files": 87,
+    "origin_files_verified": 7387,
+    "public_assets_verified": 336,
+    "exact_public_hashes": 332,
+    "cdn_png_pixels_identical": 4,
+    "migrations_changed": false,
+    "push_enabled": false,
+    "cron_changed": false,
+    "browser_runs": [
+        {
+            "script": "privacy-polish",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 17.75,
+            "checks": 104
+        },
+        {
+            "script": "privacy-polish",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 18.26,
+            "checks": 104
+        },
+        {
+            "script": "coach-setup-layout",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 6.57,
+            "checks": 45
+        },
+        {
+            "script": "coach-setup-layout",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 5.3,
+            "checks": 45
+        },
+        {
+            "script": "journey-live",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 12.51,
+            "checks": 58
+        },
+        {
+            "script": "journey-live",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 12.76,
+            "checks": 58
+        },
+        {
+            "script": "pwa-live",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 12.07,
+            "checks": 20
+        },
+        {
+            "script": "pwa-live",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 11.98,
+            "checks": 19
+        }
+    ],
+    "browser_checks": 453,
+    "atomic_lifecycle_checks": 27,
+    "privacy_http_checks": 8,
+    "qa_accounts_removed": 11,
+    "original_tables": 22,
+    "original_rows_verified": 612,
+    "original_media_verified": 462,
+    "original_table_fingerprints_equal": true,
+    "environment_preserved": true,
+    "cleanup": {
+        "ok": true,
+        "qa_removed": true,
+        "removed": 11,
+        "unreferenced_qa_media_removed": 1,
+        "original_data_unchanged": true,
+        "uploads_preserved": true
+    },
+    "final_public_checks": {
+        "checks": [
+            {
+                "check": "Temporary deployment endpoint removed",
+                "status": 404
+            },
+            {
+                "check": "Temporary release archive removed",
+                "status": 404
+            },
+            {
+                "check": "/login",
+                "status": 200
+            },
+            {
+                "check": "/up",
+                "status": 200
+            },
+            {
+                "check": "/.env",
+                "status": 403
+            },
+            {
+                "check": "/storage/app/private/deploy-backups/",
+                "status": 404
+            }
+        ],
+        "count": 6
+    },
+    "physical_phone_tested": false
+}

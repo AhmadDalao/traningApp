@@ -375,15 +375,13 @@
                     Personal workspaces: lighter navigation, compact cards,
                     clear setup and one consistent view of training.
                 </p>
-                <span class="status"
-                    >READY — SOURCE VERIFIED · NOT DEPLOYED</span
-                >
+                <span class="status">READY — DEPLOYED AND VERIFIED</span>
                 <div class="release-links">
                     <a href="#screens">Explore 16 implemented screens</a
                     ><a href="#s33">Verification results</a
                     ><a href="v2.3.4-qa/checks.json"
                         >Machine-readable evidence</a
-                    ><a href="#s44">Deployment hold</a>
+                    ><a href="#s44">Deployment evidence</a>
                 </div>
             </header>
             <div class="metrics">
@@ -1483,10 +1481,12 @@
                 <div>
                     <h2>Production build</h2>
                     <p>
-                        <code>npm run build</code> passed. The existing
-                        runtime-resolved gym image warning remains; no new build
-                        errors or dependencies. No production deployment was
-                        performed.
+                        The immutable v2.3.4 tag was exported to a separate
+                        release directory, dependencies installed from the
+                        unchanged lockfile and the production build regenerated
+                        successfully. The reviewed source and built assets were
+                        then deployed. No dependency or migration changes were
+                        required.
                     </p>
                 </div>
             </section>
@@ -1506,14 +1506,14 @@
                 <div>
                     <h2>Data and media integrity</h2>
                     <p>
-                        All <strong>72 disposable QA accounts</strong> and
-                        <strong>772 generated media files</strong> were removed.
-                        Exact pre/post fingerprints match for
-                        <strong>22 original tables</strong> and hashes match for
-                        <strong>44 original media files</strong>. Credential
-                        ledgers were removed. No environment configuration was
-                        edited; a local pre/post environment hash was not
-                        collected.
+                        Local QA preserved 22 original tables and 44 media files
+                        after removing 72 disposable accounts and 772 generated
+                        images. Live QA then removed 11 disposable accounts and
+                        their records. All 612 original production rows across
+                        22 tables and all 462 original upload hashes match the
+                        fresh production backup. Production environment bytes
+                        also match exactly. Temporary deployment files and
+                        credential ledgers were removed.
                     </p>
                 </div>
             </section>
@@ -1613,14 +1613,11 @@
                 <div>
                     <h2>Source commit</h2>
                     <p>
-                        The immutable source commit is the commit resolved by
-                        <a
-                            href="https://github.com/AhmadDalao/traningApp/tree/v2.3.4"
-                            >the v2.3.4 tag</a
-                        >
-                        (<code>git rev-parse v2.3.4^{}</code>). The report is
-                        included in that same commit, avoiding a
-                        self-referential hard-coded commit hash.
+                        Immutable deployed application commit:
+                        <code>e4b3be7a6c5458abb246a64ea518dd2a4aa88784</code>,
+                        resolved by tag v2.3.4. This deployment evidence is
+                        recorded in a subsequent documentation-only commit; the
+                        release tag is unchanged.
                     </p>
                 </div>
             </section>
@@ -1640,12 +1637,38 @@
                 <div>
                     <h2>Deployment status</h2>
                     <p>
-                        <strong>NOT DEPLOYED.</strong> Section 94 of the latest
-                        supplied brief explicitly holds automatic deployment
-                        until Ahmad says “deploy”. No production backups,
-                        uploads, migrations, credentials, Push configuration or
-                        cron were changed in this task. The last recorded
-                        verified production release remains v2.3.3.
+                        READY — DEPLOYED AND VERIFIED. Ahmad’s subsequent
+                        “deploy all” instruction explicitly authorized
+                        deployment, lifting the brief’s hold. Production moved
+                        directly from verified v2.3.3 to immutable v2.3.4
+                        through the existing Hostinger procedure. Fresh
+                        database, runtime, uploads and environment backups were
+                        verified before replacement. The patch contains 87
+                        files; all 7,387 origin hashes and 336 public assets
+                        verify (332 exact HTTP hashes and 4 PNGs with identical
+                        decoded pixels after CDN re-encoding). No migration ran.
+                        PHP 8.3.36; MariaDB 11.8.9-MariaDB-log. Chromium and
+                        WebKit passed 453 live checks covering mockup routes,
+                        setup activation, responsive layouts, privacy, live
+                        filters and PWA behavior; HTTP checks additionally cover
+                        27 atomic lifecycle/authorization cases and 8 privacy
+                        cases. Cleanup and original-data verification passed.
+                        Push remains disabled; VAPID and cron are unchanged.
+                    </p>
+                    <p class="release-links">
+                        <a href="v2.3.4-qa/deployment.json"
+                            >Deployment evidence JSON</a
+                        ><a href="v2.3.4-qa/live-coach-desktop.png"
+                            >Live Coach desktop</a
+                        ><a href="v2.3.4-qa/live-setup-mobile.png"
+                            >Live mobile setup</a
+                        ><a href="v2.3.4-qa/live-review-desktop.png"
+                            >Live activation review</a
+                        ><a href="v2.3.4-qa/live-personal-mobile.png"
+                            >Live Personal mobile</a
+                        ><a href="https://training.ahmaddalao.com"
+                            >Open live application</a
+                        >
                     </p>
                 </div>
             </section>
@@ -1671,16 +1694,18 @@
                 <div>
                     <h2>Final status</h2>
                     <p>
-                        <strong>READY — SOURCE VERIFIED; NOT DEPLOYED.</strong>
-                        The mockup UI is implemented, full regression is green,
-                        QA data is cleaned and source is ready for the
-                        separately requested deployment.
+                        READY — DEPLOYED AND VERIFIED. v2.3.4 is live, the
+                        mockup UI and retained workflows passed live
+                        verification, disposable QA data is removed and
+                        production data/media/environment match the fresh
+                        backups. No known BLOCKER or HIGH issue remains in the
+                        tested scope.
                     </p>
                 </div>
             </section>
             <footer>
-                Source-only follow-up to deployed v2.3.3. Production remains
-                unchanged pending an explicit deployment request.
+                v2.3.4 is deployed and verified. Earlier immutable release tags
+                are preserved.
             </footer>
         </main>
         <script>
