@@ -1,0 +1,108 @@
+{
+    "release": "v2.3.3",
+    "status": "READY \u2014 DEPLOYED AND VERIFIED",
+    "commit": "61a7286a9e213e3776cc8c18cdeb4f05f418c62c",
+    "baseline": "v2.3.2",
+    "baseline_commit": "15aa66390243c4551d9c1e1f6a9e8afad7095680",
+    "php": "8.3.36",
+    "database": "11.8.9-MariaDB-log",
+    "backup_evidence": {
+        "created_at_utc": "2026-11-01T08:21:36+00:00",
+        "runtime_bytes": 65028612,
+        "runtime_sha256": "18cd0dd1ebbf429c720f02bfdf23ed5bc1cbc592c74e2b4f01d21e47317f9f8b",
+        "database_bytes": 38229,
+        "database_uncompressed_bytes": 512915,
+        "database_sha256": "d69e4e3ce859344f07704bc72ed0ca2c4d8f5c714267b1ad78176b88cdea7518",
+        "uploads_bytes": 29030776,
+        "uploads_sha256": "781d32a2242158d692d172853817bdd44b762f7882d370c9d422dcba73b85a0a",
+        "original_upload_files": 463,
+        "source_file_backups": 34,
+        "environment_backed_up": true,
+        "archives_verified": true
+    },
+    "patch_files": 100,
+    "origin_files_verified": 7318,
+    "public_assets_verified": 269,
+    "exact_public_hashes": 265,
+    "cdn_png_pixels_identical": 4,
+    "migrations_changed": false,
+    "push_enabled": false,
+    "cron_changed": false,
+    "browser_runs": [
+        {
+            "script": "privacy-polish",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 19.95,
+            "checks": 104
+        },
+        {
+            "script": "privacy-polish",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 18.34,
+            "checks": 104
+        },
+        {
+            "script": "pwa-live",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 15.14,
+            "checks": 20
+        },
+        {
+            "script": "pwa-live",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 13.08,
+            "checks": 19
+        }
+    ],
+    "browser_checks": 247,
+    "atomic_lifecycle_checks": 27,
+    "privacy_http_checks": 8,
+    "qa_accounts_removed": 7,
+    "original_tables": 22,
+    "original_rows_verified": 635,
+    "original_media_verified": 463,
+    "original_table_fingerprints_equal": true,
+    "environment_preserved": true,
+    "cleanup": {
+        "ok": true,
+        "qa_removed": true,
+        "removed": 7,
+        "unreferenced_qa_media_removed": 1,
+        "original_data_unchanged": true,
+        "uploads_preserved": true
+    },
+    "final_public_checks": {
+        "checks": [
+            {
+                "check": "Temporary deployment endpoint removed",
+                "status": 404
+            },
+            {
+                "check": "Temporary release archive removed",
+                "status": 404
+            },
+            {
+                "check": "/login",
+                "status": 200
+            },
+            {
+                "check": "/up",
+                "status": 200
+            },
+            {
+                "check": "/.env",
+                "status": 403
+            },
+            {
+                "check": "/storage/app/private/deploy-backups/",
+                "status": 404
+            }
+        ],
+        "count": 6
+    },
+    "physical_phone_tested": false
+}
