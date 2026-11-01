@@ -34,6 +34,7 @@ class PlanRecommendations
                 return $days;
             };
             $plan['days'] = $resolve($plan['days']);
+            $plan['thumbnail_url'] = collect($plan['days'])->pluck('exercises')->flatten(1)->pluck('thumbnail_url')->first(fn ($url) => filled($url));
             if (isset($plan['blocks'])) {
                 foreach ($plan['blocks'] as &$block) {
                     $block['days'] = $resolve($block['days']);

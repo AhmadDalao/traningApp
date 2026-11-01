@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.3.5 — Plan thumbnails</title>
+    <style>
+        body {
+            font: 16px/1.65 system-ui;
+            color: #162b49;
+            background: #f4f7fc;
+            margin: 0;
+        }
+        main {
+            max-width: 1040px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+        header,
+        section {
+            background: white;
+            border: 1px solid #dce5f2;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        h2 {
+            font-size: 22px;
+        }
+        a {
+            color: #1763ef;
+        }
+        .status {
+            font-weight: 700;
+            color: #1763ef;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .mobile {
+            max-width: 390px;
+        }
+        .muted {
+            color: #667790;
+        }
+    </style>
+    <main>
+        <header>
+            <p class="muted">Training Planner · 1 November 2026</p>
+            <h1>v2.3.5 — Plan thumbnails</h1>
+            <p class="status" id="status">
+                SOURCE VERIFIED — DEPLOYMENT PENDING
+            </p>
+            <p>
+                Photos make training plans easier to recognize across personal
+                and Coach plan lists, recommendations and the complete catalog.
+            </p>
+        </header>
+        <section>
+            <h2>What changed</h2>
+            <p>
+                My Plans, Coach templates, assigned training lists, Recommended
+                cards and all catalog rows now show thumbnails. Existing plans
+                use the first available exercise image in training-day/exercise
+                order; catalog plans use their first exercise image. Empty plans
+                and failed image requests use the existing gym photo.
+            </p>
+            <p>
+                Cards retain their labels, actions and responsive layout. The
+                mobile View plan button also remains readable instead of
+                collapsing into wrapped letters.
+            </p>
+            <p>
+                This update automatically selects covers from existing media. It
+                does not add a custom plan-cover upload field. Some plans share
+                a cover when their first exercise is the same.
+            </p>
+        </section>
+        <section>
+            <h2>Implementation and privacy</h2>
+            <p>
+                One shared React thumbnail component handles lazy loading,
+                sizing and missing-image fallback. Plan lists obtain one image
+                path through a correlated subquery, without loading every
+                exercise or adding one query per card. Existing Coach ownership
+                and trainee-assignment scopes remain authoritative.
+            </p>
+            <p>
+                No migration, dependency, authentication, scheduling or workout
+                changes. Existing media attribution is preserved.
+            </p>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <p>
+                613 tests and 12,052 assertions passed on both SQLite and
+                isolated MySQL; 38 JavaScript tests passed. Chromium and WebKit
+                passed 122 checks covering thumbnails, image failures, privacy
+                and the existing full workout/program lifecycle. Twelve HTTP
+                checks verified catalog and scoped cover data.
+            </p>
+            <p>
+                Responsive checks covered 320 × 480, 360, 375, 390, 430, 768 and
+                1280 widths. No physical phone test is claimed. Production
+                build, Pint, Prettier, Composer validation/audit and diff checks
+                passed.
+            </p>
+            <p>
+                Local cleanup removed eight disposable accounts and 238
+                generated images. All original fingerprints across 22 tables and
+                44 media files matched.
+            </p>
+            <p>
+                <a href="v2.3.5-qa/checks.json"
+                    >Machine-readable verification</a
+                >
+            </p>
+        </section>
+        <section>
+            <h2>Desktop discovery</h2>
+            <img
+                src="v2.3.5-qa/discovery-desktop.png"
+                alt="Recommended photo cards and catalog thumbnails"
+            />
+        </section>
+        <section>
+            <h2>Mobile plans</h2>
+            <img
+                class="mobile"
+                src="v2.3.5-qa/plans-mobile.png"
+                alt="Mobile training plan thumbnails and readable plan actions"
+            />
+        </section>
+        <section id="deployment">
+            <h2>Release and deployment</h2>
+            <p>
+                Source verification is complete. Production backup, immutable
+                v2.3.5 deployment, live browser checks and cleanup evidence will
+                be recorded here before declaring deployment complete.
+            </p>
+        </section>
+    </main>
+</html>

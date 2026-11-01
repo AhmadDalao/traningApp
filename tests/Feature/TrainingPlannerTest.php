@@ -56,6 +56,29 @@ class TrainingPlannerTest extends TestCase
         return [...['name' => 'Leg Extension', 'sets' => 3, 'reps' => '12', 'superset_group' => 'A', 'notes' => 'Slow tempo'], ...$attributes];
     }
 
+    public function test_plan_cards_use_the_first_available_own_exercise_thumbnail(): void
+    {
+        $plan = $this->plan();
+        $late = $this->day($plan, ['position' => 2]);
+        $this->exercise($late, ['thumbnail_path' => 'exercise-thumbnails/later.jpg']);
+        $first = $this->day($plan, ['position' => 0]);
+        $this->exercise($first, ['position' => 0]);
+        $this->exercise($first, ['position' => 3, 'thumbnail_path' => 'exercise-thumbnails/third.jpg']);
+        $cover = $this->exercise($first, ['position' => 1, 'thumbnail_path' => 'exercise-thumbnails/first.jpg']);
+        $empty = $this->plan($plan->user);
+        $this->exercise($this->day(), ['thumbnail_path' => 'exercise-thumbnails/private.jpg']);
+
+        $cards = fn () => collect($this->get('/training-plans')->assertOk()->viewData('page')['props']['plans']['data'])->keyBy('id');
+        $this->actingAs($plan->user);
+        $rows = $cards();
+        $this->assertCount(2, $rows);
+        $this->assertSame(Storage::disk('public')->url($cover->thumbnail_path), $rows[$plan->id]['thumbnail_url']);
+        $this->assertNull($rows[$empty->id]['thumbnail_url']);
+        $this->assertArrayNotHasKey('cover_thumbnail_path', $rows[$plan->id]);
+        $cover->update(['thumbnail_path' => null]);
+        $this->assertSame(Storage::disk('public')->url('exercise-thumbnails/third.jpg'), $cards()[$plan->id]['thumbnail_url']);
+    }
+
     public function test_guests_are_redirected_to_login(): void
     {
         foreach (['/dashboard', '/training-plans', '/calendar', '/schedule-entries/create'] as $url) {

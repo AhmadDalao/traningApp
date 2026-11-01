@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTrainingPlanRequest;
 use App\Http\Requests\UpdateTrainingPlanRequest;
+use App\Models\TrainingExercise;
 use App\Models\TrainingPlan;
 use App\Services\Notifications\CoachNotifications;
 use App\Services\ProgramDefinition;
@@ -26,7 +27,16 @@ class TrainingPlanController extends Controller
             'templateAssignments as assigned_trainees_count' => fn ($q) => $q->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active')),
             'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
             'trainingDays as rest_days_count' => fn ($q) => $q->where('type', 'rest'),
-        ])->latest()->paginate(12)->withQueryString()->through(fn ($plan) => $this->describe($plan))]);
+        ])->addSelect(['cover_thumbnail_path' => TrainingExercise::select('thumbnail_path')
+            ->join('training_days', 'training_days.id', '=', 'training_exercises.training_day_id')
+            ->whereColumn('training_days.training_plan_id', 'training_plans.id')
+            ->where('training_days.type', 'training')->whereNotNull('thumbnail_path')->where('thumbnail_path', '!=', '')
+            ->orderBy('training_days.position')->orderBy('training_days.id')
+            ->orderBy('training_exercises.position')->orderBy('training_exercises.id')->limit(1),
+        ])->latest()->paginate(12)->withQueryString()->through(fn ($plan) => [
+            ...$this->describe($plan->makeHidden('cover_thumbnail_path')),
+            'thumbnail_url' => $plan->cover_thumbnail_path ? Storage::disk('public')->url($plan->cover_thumbnail_path) : null,
+        ])]);
     }
 
     private function describe(TrainingPlan $plan): array

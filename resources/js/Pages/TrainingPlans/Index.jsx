@@ -2,7 +2,8 @@ import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
-import { Plus, Pencil, Trash2, ArrowRight, Layers } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
+import PlanThumbnail from "../../Components/PlanThumbnail";
 import {
     PageHeader,
     Button,
@@ -131,10 +132,8 @@ export default function Index({
                     <div className="plan-grid">
                         {plans.data.map((plan, index) => (
                             <article className="panel plan-card" key={plan.id}>
-                                <div
-                                    className={`plan-cover cover-${index % 3}`}
-                                >
-                                    <Layers size={38} strokeWidth={1.2} />
+                                <div className="plan-cover plan-cover-photo">
+                                    <PlanThumbnail src={plan.thumbnail_url} />
                                     <span>
                                         {plan.structure_type === "program"
                                             ? `${plan.duration_weeks}-WEEK PROGRAM`

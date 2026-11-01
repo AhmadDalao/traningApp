@@ -118,6 +118,18 @@ class CoachPrivacyPolishTest extends TestCase
         $this->assertDatabaseCount('schedule_entries', 3);
     }
 
+    public function test_plan_thumbnail_is_limited_to_this_coachs_assignment(): void
+    {
+        foreach ($this->plans as $kind => $plan) {
+            $plan->trainingDays()->first()->exercises()->update(['thumbnail_path' => 'exercise-thumbnails/'.$kind.'.jpg']);
+        }
+        $rows = $this->props($this->base.'/training-plans')['plans']['data'];
+        $this->assertCount(1, $rows);
+        $this->assertSame(Storage::disk('public')->url('exercise-thumbnails/own.jpg'), $rows[0]['thumbnail_url']);
+        $this->assertStringNotContainsString('private.jpg', json_encode($rows));
+        $this->assertStringNotContainsString('other.jpg', json_encode($rows));
+    }
+
     public function test_progress_uses_only_owned_assignments_and_personal_scope_keeps_all_results(): void
     {
         $props = $this->props($this->base.'/progress');

@@ -1,0 +1,79 @@
+{
+  "release": "v2.3.5",
+  "baseline": "v2.3.4",
+  "sqlite": {
+    "passed": 613,
+    "assertions": 12052
+  },
+  "mysql": {
+    "passed": 613,
+    "assertions": 12052
+  },
+  "javascript": {
+    "passed": 38
+  },
+  "browser_runs": [
+    {
+      "script": "plan-thumbnails",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 3.7,
+      "checks": 34
+    },
+    {
+      "script": "plan-thumbnails",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 3.9,
+      "checks": 34
+    },
+    {
+      "script": "full-lifecycle",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 13.92,
+      "checks": 27
+    },
+    {
+      "script": "full-lifecycle",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 17.14,
+      "checks": 27
+    }
+  ],
+  "browser_checks": 122,
+  "http_checks": {
+    "checks": [
+      "chromium: catalog exposes real exercise thumbnails",
+      "chromium: top recommendations have thumbnails",
+      "chromium: catalog exposes real exercise thumbnails",
+      "chromium: top recommendations have thumbnails",
+      "chromium: own/assigned covers and empty-plan fallback",
+      "chromium: Coach cover stays assignment-scoped",
+      "webkit: catalog exposes real exercise thumbnails",
+      "webkit: top recommendations have thumbnails",
+      "webkit: catalog exposes real exercise thumbnails",
+      "webkit: top recommendations have thumbnails",
+      "webkit: own/assigned covers and empty-plan fallback",
+      "webkit: Coach cover stays assignment-scoped"
+    ],
+    "count": 12
+  },
+  "integrity": {
+    "original_data_and_media_unchanged": true,
+    "tables": 22,
+    "original_media_files": 44,
+    "qa_accounts_removed": 8,
+    "ledger_entries": 8,
+    "qa_images_removed": 238
+  },
+  "production_build": "passed",
+  "pint": "passed",
+  "prettier": "passed",
+  "composer_validate": "passed",
+  "composer_audit": "passed",
+  "migrations": 0,
+  "dependencies_changed": false,
+  "physical_phone_tested": false
+}

@@ -56,6 +56,8 @@ class PlanDiscoveryTest extends TestCase
             $this->assertContains($plan['primary_focus'], $plan['goals']);
             $this->assertSame($plan['days_per_week'], count($plan['days']));
             $this->assertSame($plan['split'], array_column($plan['days'], 'title'));
+            $this->assertSame($plan['days'][0]['exercises'][0]['thumbnail_url'], $plan['thumbnail_url']);
+            $this->assertFileExists(public_path(ltrim($plan['thumbnail_url'], '/')));
             foreach ($plan['days'] as $day) {
                 $this->assertNotEmpty($day['notes']);
                 foreach ($day['exercises'] as $exercise) {

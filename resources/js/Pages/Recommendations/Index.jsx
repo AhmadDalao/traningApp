@@ -1,4 +1,5 @@
 import { useTraining } from "../../Features/CoachingUI";
+import PlanThumbnail from "../../Components/PlanThumbnail";
 import { useEffect, useRef, useState } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
 import {
@@ -27,6 +28,7 @@ function PlanCard({ plan, recommended = false }) {
         <article
             className={`panel discovery-card ${recommended ? "recommended-card" : "catalog-row"}`}
         >
+            <PlanThumbnail src={plan.thumbnail_url} />
             <div className="recommendation-tags">
                 {recommended && (
                     <span className="badge completed">
@@ -40,11 +42,6 @@ function PlanCard({ plan, recommended = false }) {
                 </span>
                 <span className="discovery-focus">{plan.focus_label}</span>
             </div>
-            {!recommended && (
-                <span className="feature-icon catalog-icon">
-                    <Dumbbell size={23} aria-hidden="true" />
-                </span>
-            )}
             <h3>{plan.name}</h3>
             {plan.structure_type === "program" && (
                 <span className="badge training">

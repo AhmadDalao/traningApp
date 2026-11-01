@@ -738,19 +738,71 @@
     border-color: #edf4ff;
     color: #1763ef;
 }
+.plan-thumbnail {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #eaf0f9;
+}
+.recommended-card > .plan-thumbnail {
+    height: 144px;
+    margin-bottom: 6px;
+}
+.plan-cover-photo {
+    height: 170px;
+    align-items: flex-end;
+    color: white;
+    overflow: hidden;
+}
+.plan-cover-photo > .plan-thumbnail {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    border-radius: 0;
+}
+.plan-cover-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 20%, #11213ddb);
+}
+.plan-cover-photo > span {
+    position: relative;
+    z-index: 1;
+}
+.plan-cover-photo > .plan-number {
+    position: absolute;
+    opacity: 0.7;
+}
+.journey-app .plan-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.journey-app .plan-actions > .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.journey-app .plan-actions > div {
+    display: flex;
+    margin-left: auto;
+}
 .discovery-catalog {
     display: grid;
     gap: 10px;
 }
 .journey-app .catalog-row {
     display: grid;
-    grid-template-columns: 46px minmax(0, 1fr) auto;
+    grid-template-columns: 112px minmax(0, 1fr) auto;
     gap: 4px 14px;
     align-items: center;
 }
-.catalog-row .catalog-icon {
+.catalog-row > .plan-thumbnail {
     grid-column: 1;
-    grid-row: 1/5;
+    grid-row: 1/6;
+    height: 88px;
 }
 .catalog-row > .recommendation-tags,
 .catalog-row > h3,
@@ -1151,14 +1203,15 @@
         margin-left: 54px;
     }
     .journey-app .catalog-row {
-        grid-template-columns: 40px minmax(0, 1fr);
+        grid-template-columns: 72px minmax(0, 1fr);
         padding: 14px;
         gap: 5px 10px;
     }
-    .catalog-icon {
-        width: 38px;
-        height: 38px;
-        flex-basis: 38px;
+    .catalog-row > .plan-thumbnail {
+        height: 72px;
+    }
+    .plan-cover-photo {
+        height: 160px;
     }
     .catalog-row > .btn {
         grid-column: 1/-1;
