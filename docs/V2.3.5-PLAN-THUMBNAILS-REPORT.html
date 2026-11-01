@@ -54,9 +54,7 @@
         <header>
             <p class="muted">Training Planner · 1 November 2026</p>
             <h1>v2.3.5 — Plan thumbnails</h1>
-            <p class="status" id="status">
-                SOURCE VERIFIED — DEPLOYMENT PENDING
-            </p>
+            <p class="status" id="status">READY — DEPLOYED AND VERIFIED</p>
             <p>
                 Photos make training plans easier to recognize across personal
                 and Coach plan lists, recommendations and the complete catalog.
@@ -140,10 +138,53 @@
         <section id="deployment">
             <h2>Release and deployment</h2>
             <p>
-                Source verification is complete. Production backup, immutable
-                v2.3.5 deployment, live browser checks and cleanup evidence will
-                be recorded here before declaring deployment complete.
+                READY — DEPLOYED AND VERIFIED. Production moved from verified
+                v2.3.4 to immutable v2.3.5 commit
+                <code>f5d7a1ae7bd6096eb73f56f193c62221d1b1c1d3</code>. The
+                source and annotated tag were pushed without changing earlier
+                tags. This evidence is recorded in a documentation-only
+                follow-up commit.
             </p>
+            <p>
+                Fresh database, runtime, uploads and environment backups were
+                verified before replacement. The immutable tag was exported and
+                rebuilt in a separate release directory. 76 patch files were
+                deployed; all 7,456 origin file hashes verified. All 404 public
+                assets verified: 400 exact HTTP hashes and 4 CDN-reencoded PNGs
+                with identical decoded pixels.
+            </p>
+            <p>
+                Live Chromium and WebKit passed 107 checks across plan
+                thumbnails, responsive layouts, failed-image fallback and PWA
+                behavior. Twelve HTTP checks verified catalog and
+                assignment-scoped cover data. No migration ran. Push remains
+                disabled; cron and environment settings are unchanged.
+            </p>
+            <p>
+                All 4 disposable live accounts and generated media were removed.
+                All 650 original rows across 22 tables and 490 original media
+                files match the fresh backup. Environment bytes match exactly.
+                Temporary deployment endpoints, archives and credential ledgers
+                were removed. No known BLOCKER or HIGH issue remains in the
+                tested scope.
+            </p>
+            <p>
+                <a href="v2.3.5-qa/deployment.json">Deployment evidence</a> ·
+                <a href="https://training.ahmaddalao.com/training-plans"
+                    >Open live training plans</a
+                >
+            </p>
+            <h2>Live desktop discovery</h2>
+            <img
+                src="v2.3.5-qa/live-discovery-desktop.png"
+                alt="Verified production recommended and catalog thumbnails"
+            />
+            <h2>Live mobile plans</h2>
+            <img
+                class="mobile"
+                src="v2.3.5-qa/live-plans-mobile.png"
+                alt="Verified production mobile plan thumbnails"
+            />
         </section>
     </main>
 </html>
