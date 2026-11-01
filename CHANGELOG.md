@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.3.1 — 1 November 2026 — source verified, deployment pending
+## v2.3.1 — 1 November 2026 — deployed and verified
 
 - Replace subscription-first setup with training selection, dates, combined review and atomic activation.
 - Save only a versioned relationship JSON draft; lock and revalidate signed previews, replay completed tokens safely, and clean copied media on rollback.
@@ -9,6 +9,7 @@
 - Centralize application-local workout date semantics: untimed today remains available until midnight; completed/skipped History remains visible.
 - Preserve the existing shared domain engines, Personal/Coach UI and PWA infrastructure. No dependency upgrade or additional index/table.
 - Pass complete SQLite/MySQL, concurrency, Chromium/WebKit, JavaScript, build, formatting, audit and local integrity gates. See the v2.3.1 report for deployment evidence.
+- Deploy immutable `v2.3.1` (`6eddece`) with fresh private backups and one additive migration. Pass 177 live HTTP and 759 browser checks, preserve 22 original table fingerprints, 381 media hashes and environment bytes, and remove all QA data and temporary deployment endpoints. Push/cron remain unchanged.
 
 ## v2.3.0 — 30 October 2026 — deployed and verified
 

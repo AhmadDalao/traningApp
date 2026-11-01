@@ -3,7 +3,7 @@
   "baseline_tag": "v2.3.0",
   "baseline_commit": "d0ef293aec2465922328469fea2a7d3013075b79",
   "application_timezone": "Asia/Riyadh",
-  "status": "SOURCE GATES PASSED; DEPLOYMENT PENDING",
+  "status": "SOURCE GATES PASSED; DEPLOYED AND VERIFIED",
   "databases": {
     "sqlite": {
       "tests": 601,
