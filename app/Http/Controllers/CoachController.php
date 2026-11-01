@@ -91,7 +91,7 @@ class CoachController extends Controller
     {
         $owner = $context->owner();
         $relationship = $access->relationship($context->actor(), $owner);
-        $month = $owner->scheduleEntries()->availableOnSchedule()->where('entry_type', 'training')->past()->whereBetween('scheduled_date', [today()->startOfMonth(), today()]);
+        $month = $owner->scheduleEntries()->availableOnSchedule()->where('entry_type', 'training')->due()->whereDate('scheduled_date', '>=', today()->startOfMonth())->whereDate('scheduled_date', '<=', today());
         $total = (clone $month)->count();
 
         return Inertia::render('Coach/Trainee', [

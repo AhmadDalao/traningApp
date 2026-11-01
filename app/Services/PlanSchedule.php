@@ -16,13 +16,13 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class PlanSchedule
 {
-    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null, array $change = [], bool $rolling = false): array
+    public function preview(TrainingPlan $plan, bool $lock = false, ?User $coach = null, array $change = [], bool $rolling = false, array $timeOverrides = []): array
     {
         abort_if($plan->isProgram(), 422, 'Use Start Program or review the active run’s changes for a structured program.');
         $plan->loadMissing('trainingDays');
         $assignment = $coach ? app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true, $lock) : null;
         $subscription = $assignment ? app(CoachAccess::class)->subscription($assignment->relationship, $lock) : null;
-        $desired = $this->desired($plan);
+        $desired = $this->desired($plan, timeOverrides: $timeOverrides);
         $keys = array_column($desired, 'key');
         $entries = ScheduleEntry::where('user_id', $plan->user_id)
             ->where(fn ($q) => $q->whereIn('training_day_id', $plan->trainingDays->modelKeys())
@@ -120,7 +120,7 @@ class PlanSchedule
         return $result;
     }
 
-    private function desired(TrainingPlan $plan): array
+    public function desired(TrainingPlan $plan, bool $includeElapsed = false, array $timeOverrides = []): array
     {
         if (! $plan->start_date || ($plan->schedule_mode !== 'ongoing' && ! $plan->end_date)) {
             return [];
@@ -134,13 +134,14 @@ class PlanSchedule
         if ($start->lte($end)) {
             foreach (CarbonPeriod::create($start, $end) as $date) {
                 foreach ($plan->trainingDays as $day) {
-                    if (! in_array($date->dayOfWeek, $day->weekdaysOn($date->toDateString()), false) || ! $this->future($date->toDateString(), $day->default_time)) {
+                    $time = array_key_exists($day->id.':'.$date->toDateString(), $timeOverrides) ? $timeOverrides[$day->id.':'.$date->toDateString()] : $day->default_time;
+                    if (! in_array($date->dayOfWeek, $day->weekdaysOn($date->toDateString()), false) || (! $includeElapsed && ! $this->future($date->toDateString(), $time))) {
                         continue;
                     }
                     $sessions[] = [
                         'key' => 'plan:'.$plan->id.':'.$day->id.':'.$date->toDateString(), 'training_day_id' => $day->id,
                         'title' => $day->title, 'entry_type' => $day->type, 'focus_area' => $day->focus_area,
-                        'icon' => $day->icon, 'scheduled_date' => $date->toDateString(), 'scheduled_time' => $day->default_time, 'notes' => $day->notes,
+                        'icon' => $day->icon, 'scheduled_date' => $date->toDateString(), 'scheduled_time' => $time, 'notes' => $day->notes,
                     ];
                     if (count($sessions) > 1000) {
                         throw ValidationException::withMessages(['schedule' => 'This preview exceeds 1,000 sessions. Shorten the plan dates to continue.']);
@@ -159,8 +160,7 @@ class PlanSchedule
 
     private function future(string $date, ?string $time): bool
     {
-        // Match History: today's untimed and already-started times are historical.
-        return $date > today()->toDateString() || ($date === today()->toDateString() && $time !== null && substr($time, 0, 5) > now()->format('H:i'));
+        return ! app(WorkoutDate::class)->elapsed($date, $time);
     }
 
     private function protection(ScheduleEntry $entry, TrainingPlan $plan): ?string
@@ -190,10 +190,10 @@ class PlanSchedule
         return null;
     }
 
-    public function apply(TrainingPlan $plan, string $signature, string $action, bool $removeObsolete, ?User $coach = null): array
+    public function apply(TrainingPlan $plan, string $signature, string $action, bool $removeObsolete, ?User $coach = null, bool $notify = true, array $timeOverrides = []): array
     {
         // Called inside a transaction holding the user, plan and training-day locks.
-        $preview = $this->preview($plan, lock: true, coach: $coach);
+        $preview = $this->preview($plan, lock: true, coach: $coach, timeOverrides: $timeOverrides);
         if (! hash_equals($preview['signature'], $signature)) {
             throw ValidationException::withMessages(['schedule' => 'The plan or Calendar changed. Review the refreshed preview before confirming.']);
         }
@@ -219,7 +219,7 @@ class PlanSchedule
 
         $plan->forceFill(['schedule_enabled' => $action !== 'remove' && $plan->schedule_mode === 'ongoing', 'schedule_actor_id' => $coach?->id ?? $plan->user_id])->save();
 
-        if ($added || $ids) {
+        if ($notify && ($added || $ids)) {
             app(CoachNotifications::class)->plan($coach, $plan, 'schedule', $signature);
         }
 

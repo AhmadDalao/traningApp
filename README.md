@@ -2,6 +2,16 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v2.3.1 Simpler Coach Setup — source verified, deployment pending
+
+Setup now follows **Training → Dates & Schedule → Review → Activate Coaching**. Drafts create no active records; one atomic, idempotent activation handles the subscription, independent training copy and reviewed schedule. Coverage extensions are explicit, existing periods and runs are reused, and Resume/Renew are available directly on the trainee overview.
+
+Untimed workouts stay available throughout the application-local day. Completed/skipped History remains visible. The existing Personal, Coach, Calendar, workout, program and PWA engines are retained.
+
+Source gates: **601 tests / 11,887 assertions on SQLite and MySQL**, **1,246 Chromium/WebKit checks**, **85 real-process concurrency checks**, **177 HTTP checks**, **37 JavaScript tests**. Build, formatting and Composer checks pass. All 22 original local table fingerprints and 44 original media hashes match after removing 81 disposable QA accounts and 852 unreferenced QA images. One nullable JSON relationship column is the only schema change.
+
+[Full 60-section report](docs/V2.3.1-SIMPLER-COACH-SETUP-REPORT.html) · [Verification evidence](docs/v2.3.1-qa/checks.json).
+
 ## v2.3.0 Coach Workspace — deployed and verified
 
 Trainee-centered coaching adds an operational desktop table and mobile cards, derived attention states, persistent trainee context, and a saved three-step setup flow: Coaching → Training → Schedule. Shared subscription, assignment, calendar, workout, history, progress, and program services remain authoritative. Setup retries are idempotent; coaches still cannot write trainee performance.

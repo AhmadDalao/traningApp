@@ -19,7 +19,7 @@ class CoachWorkspaceSummary
     {
         $subscriptions = CoachSubscription::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->latest('id')->limit(1);
         $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->latest('id')->limit(1);
-        $base = CoachTraineeRelationship::where('coach_user_id', $coach->id)->select('coach_trainee_relationships.*')
+        $base = CoachTraineeRelationship::where('coach_user_id', $coach->id)->select('coach_trainee_relationships.id', 'coach_trainee_relationships.coach_user_id', 'coach_trainee_relationships.trainee_user_id', 'coach_trainee_relationships.status')
             ->selectSub($subscriptions, 'subscription_id')->selectSub($assignments, 'assignment_id');
         $facts = DB::query()->fromSub($base, 'r')
             ->leftJoin('coach_subscriptions as s', 's.id', '=', 'r.subscription_id')
@@ -85,11 +85,14 @@ class CoachWorkspaceSummary
             };
             $subscription = $active && $r->subscription_id ? ['id' => $r->subscription_id, 'package_name' => $r->package_name, 'status' => $r->subscription_status, 'effective_status' => $r->subscription_status !== 'active' ? $r->subscription_status : ($r->starts_on > today()->toDateString() ? 'upcoming' : ($r->ends_on && $r->ends_on < today()->toDateString() ? 'expired' : 'active')), 'starts_on' => $r->starts_on, 'ends_on' => $r->ends_on] : null;
 
+            $subscriptionAction = ! $active || ($subscription && $subscription['effective_status'] === 'active') ? null :
+                ['label' => ! $subscription ? 'Activate Coaching' : (($subscription['effective_status'] === 'expired' || $subscription['effective_status'] === 'ended' || ($subscription['ends_on'] && $subscription['ends_on'] < today()->toDateString())) ? 'Renew Coaching' : ($subscription['effective_status'] === 'paused' ? 'Resume Coaching' : 'Activate Coaching')), 'url' => $prefix.'/setup'];
+
             return ['id' => $r->id, 'status' => $r->status, 'display_state' => $r->display_state,
                 'trainee' => ['id' => $active ? $user->id : null, 'name' => $active ? $user->name : preg_split('/\s+/u', $user->name)[0], 'training_code' => $user->training_code],
                 'subscription' => $subscription, 'plan' => $active && $r->plan_id ? ['id' => $r->plan_id, 'name' => $r->plan_name, 'structure_type' => $r->structure_type, 'duration_weeks' => $r->duration_weeks, 'run_id' => $r->run_id, 'run_status' => $r->run_status, 'current_week' => $r->current_week] : null,
                 'has_schedule' => $active && ($r->run_id || $r->schedule_count > 0),
-                'reason' => $reason, 'action' => $active ? $action : null,
+                'subscription_action' => $subscriptionAction, 'reason' => $reason, 'action' => $active ? $action : null,
                 'next_session' => $active ? ($entries[$r->next_id] ?? null)?->toArray() : null,
                 'last_workout' => $active ? ($entries[$r->last_id] ?? null)?->toArray() : null,
                 'week' => ['completed' => $active ? (int) $r->week_completed : 0, 'total' => $active ? (int) $r->week_total : 0]];

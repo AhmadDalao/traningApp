@@ -321,7 +321,7 @@ class PlanManagementTest extends TestCase
         $this->day->update(['weekdays' => [3], 'default_time' => '12:01']);
         $this->assertSame(['2026-10-28', '2026-11-04'], array_column($this->preview()['sessions'], 'scheduled_date'));
         $this->day->update(['default_time' => null]);
-        $this->assertSame(['2026-11-04'], array_column($this->preview()['sessions'], 'scheduled_date'));
+        $this->assertSame(['2026-10-28', '2026-11-04'], array_column($this->preview()['sessions'], 'scheduled_date'));
         $entry = $this->entry();
         $this->delete('/training-days/'.$this->day->id)->assertRedirect();
         $this->assertSame([$entry->id], array_column($this->preview()['remove'], 'id'));

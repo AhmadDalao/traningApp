@@ -131,11 +131,12 @@ Route::middleware(['auth', CoachWorkspace::class])->prefix('coach')->group(funct
     Route::get('/training-plans/{trainingPlan}/assign', [CoachAssignmentController::class, 'choose']);
     Route::prefix('/trainees/{trainee}')->group(function () {
         Route::get('/setup', [CoachSetupController::class, 'show']);
-        Route::post('/setup/coaching', [CoachSetupController::class, 'coaching']);
-        Route::post('/setup/training', [CoachSetupController::class, 'training']);
+        Route::patch('/setup/draft', [CoachSetupController::class, 'save']);
+        Route::post('/setup/coaching', [CoachSetupController::class, 'legacy']);
+        Route::post('/setup/training', [CoachSetupController::class, 'legacy']);
         Route::post('/setup/preview', [CoachSetupController::class, 'preview']);
         Route::post('/setup/activate', [CoachSetupController::class, 'activate']);
-        Route::post('/setup/finish', [CoachSetupController::class, 'finish']);
+        Route::post('/setup/finish', [CoachSetupController::class, 'legacy']);
         Route::get('/coaching', [CoachSetupController::class, 'manage']);
 
         Route::get('/assign', [CoachAssignmentController::class, 'create']);

@@ -201,7 +201,7 @@ class ProfileProgressTest extends TestCase
         $this->assertNull(app(BodyWeightHistory::class)->summary($this->user->fresh())['progress']);
     }
 
-    public function test_training_progress_counts_due_workouts_only(): void
+    public function test_training_progress_counts_elapsed_and_resolved_workouts_in_the_period(): void
     {
         $this->workoutSession(['status' => 'completed']);
         $this->workoutSession(['status' => 'skipped']);
@@ -210,7 +210,7 @@ class ProfileProgressTest extends TestCase
         $this->workoutSession(['status' => 'completed', 'scheduled_date' => '2026-10-28']);
         $this->workoutSession(['status' => 'completed', 'scheduled_date' => '2026-10-27', 'scheduled_time' => '20:00']);
         $this->workoutSession(['status' => 'completed', 'scheduled_date' => '2026-09-27']);
-        $this->actingAs($this->user)->get('/progress')->assertInertia(fn (Assert $page) => $page->where('training.completed', 1)->where('training.skipped', 1)->where('training.due', 3)->where('training.completion_rate', 33));
+        $this->actingAs($this->user)->get('/progress')->assertInertia(fn (Assert $page) => $page->where('training.completed', 2)->where('training.skipped', 1)->where('training.due', 4)->where('training.completion_rate', 50));
     }
 
     public function test_weekly_check_in_is_optional_and_dismissal_survives_reload(): void

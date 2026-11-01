@@ -72,7 +72,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
             type: e.entry_type,
             icon: e.icon,
             focus: e.focus_area,
-            time: e.scheduled_time?.slice(0, 5),
+            time: e.scheduled_time?.slice(0, 5) || "Anytime",
         },
     }));
     return (
@@ -179,6 +179,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                 </div>
                 <div className="calendar-container">
                     <FullCalendar
+                        allDayText="Anytime"
                         ref={ref}
                         plugins={[dayGridPlugin, listPlugin, interactionPlugin]}
                         initialView={calendarView}
@@ -297,7 +298,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                                                         }
                                                     />
                                                 ) : (
-                                                    "No set time"
+                                                    "Anytime"
                                                 )}{" "}
                                                 ·{" "}
                                                 <StatusBadge

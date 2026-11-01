@@ -30,6 +30,11 @@ export default function Trainee({
                 title="Training overview"
                 description="Training, coaching, and the next step for this trainee."
             >
+                {state?.subscription_action && (
+                    <ButtonLink href={state.subscription_action.url}>
+                        {state.subscription_action.label}
+                    </ButtonLink>
+                )}
                 {ctx.canManage && state?.plan && (
                     <ButtonLink href={ctx.url("/schedule-entries/create")}>
                         Schedule workout

@@ -7,7 +7,10 @@ use App\Models\ProgramRun;
 use App\Models\ScheduleEntry;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use App\Services\CoachingSubscriptions;
+use App\Services\CoachSetup;
 use App\Services\CoachWorkspaceSummary;
+use App\Services\TrainingPlanDuplicator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -63,16 +66,17 @@ class CoachWorkspaceTest extends TestCase
 
     private function assign(bool $program = true): TrainingPlan
     {
-        $this->post($this->base.'/setup/coaching', $this->coaching())->assertRedirect()->assertSessionHasNoErrors();
-        $source = $this->template($program);
-        $this->post($this->base.'/setup/training', ['training_plan_id' => $source->id, 'confirmed' => true, 'schedule_mode' => 'fixed', 'start_date' => today()->addDay()->toDateString(), 'end_date' => today()->addDays(14)->toDateString()])->assertRedirect()->assertSessionHasNoErrors();
+        app(CoachingSubscriptions::class)->start($this->coach, $this->trainee, $this->coaching());
 
-        return $this->relationship->assignments()->firstOrFail()->plan;
+        return app(TrainingPlanDuplicator::class)->assign($this->coach, $this->trainee, $this->template($program),
+            ['start_date' => today()->addDay()->toDateString(), 'end_date' => today()->addDays(14)->toDateString(), 'schedule_mode' => 'fixed']);
     }
 
     private function preview(TrainingPlan $plan): array
     {
-        $data = ['training_plan_id' => $plan->id, 'start_date' => today()->addDay()->toDateString(), 'nonce' => (string) Str::uuid()];
+        $choices = [...app(CoachSetup::class)->defaults($this->relationship), 'selection_type' => 'assigned', 'training_plan_id' => $plan->id];
+        $draft = $this->patchJson($this->base.'/setup/draft', ['revision' => $this->relationship->fresh()->setup_draft['revision'] ?? 0, 'choices' => $choices])->assertOk()->json('draft');
+        $data = ['revision' => $draft['revision'], 'token' => $draft['token']];
         $preview = $this->postJson($this->base.'/setup/preview', $data)->assertOk()->json('preview');
 
         return [...$data, 'signature' => $preview['signature'], 'confirmed' => true];
@@ -83,23 +87,22 @@ class CoachWorkspaceTest extends TestCase
         $this->get($this->base.'/setup')->assertInertia(fn (Assert $p) => $p->where('state.display_state', $state));
     }
 
-    public function test_new_connection_has_checklist_and_partial_setup_resumes_without_duplicate_coaching(): void
+    public function test_new_connection_has_program_first_draft_without_subscription(): void
     {
-        $this->get('/coach/trainees')->assertInertia(fn (Assert $p) => $p->where('relationships.per_page', 25)->where('relationships.data.0.display_state', 'setup')->where('relationships.data.0.action.url', $this->base.'/setup'));
+        $this->get('/coach/trainees')->assertInertia(fn (Assert $p) => $p->where('relationships.per_page', 25)->where('relationships.data.0.display_state', 'setup'));
         $this->state('setup');
-        for ($i = 0; $i < 2; $i++) {
-            $this->post($this->base.'/setup/coaching', $this->coaching())->assertRedirect()->assertSessionHasNoErrors();
-        }
-        $this->assertDatabaseCount('coach_subscriptions', 1);
-        $this->post($this->base.'/setup/finish')->assertRedirect($this->base);
-        $this->get($this->base.'/setup')->assertInertia(fn (Assert $p) => $p->where('state.subscription.effective_status', 'active')->where('plan', null));
+        $choices = app(CoachSetup::class)->defaults($this->relationship);
+        $draft = $this->patchJson($this->base.'/setup/draft', ['revision' => 0, 'choices' => $choices])->assertOk()->json('draft');
+        $this->patchJson($this->base.'/setup/draft', ['revision' => $draft['revision'], 'choices' => $choices])->assertOk();
+        $this->assertDatabaseCount('coach_subscriptions', 0);
+        $this->get($this->base.'/setup')->assertInertia(fn (Assert $p) => $p->where('draft.choices', $choices)->where('state.subscription', null));
     }
 
     public function test_program_assignment_resume_preserves_independent_copy_and_activation_is_idempotent(): void
     {
         $copy = $this->assign();
         $assignment = $copy->assignment;
-        $this->post($this->base.'/setup/training', ['training_plan_id' => $assignment->source_training_plan_id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post($this->base.'/setup/training', ['training_plan_id' => $assignment->source_training_plan_id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertStatus(409);
         $this->assertDatabaseCount('coach_plan_assignments', 1);
         $this->assertSame($this->trainee->id, $copy->user_id);
         $assignment->source->update(['name' => 'Changed template']);
@@ -139,7 +142,7 @@ class CoachWorkspaceTest extends TestCase
         $this->assertDatabaseCount('schedule_entries', 0);
         $this->assertDatabaseCount('coach_plan_assignments', 1);
         $this->assertDatabaseCount('coach_subscriptions', 1);
-        $this->post($this->base.'/setup/coaching', ['starts_on' => 'not-a-date'])->assertSessionHasErrors();
+        $this->post($this->base.'/setup/coaching', ['starts_on' => 'not-a-date'])->assertStatus(409);
         $this->assertDatabaseCount('coach_subscriptions', 1);
     }
 
@@ -147,12 +150,12 @@ class CoachWorkspaceTest extends TestCase
     {
         $copy = $this->assign();
         $personal = $this->trainee->trainingPlans()->create(['name' => 'Personal']);
-        $this->postJson($this->base.'/setup/preview', ['training_plan_id' => $personal->id])->assertNotFound();
+        $this->patchJson($this->base.'/setup/draft', ['revision' => 0, 'choices' => [...app(CoachSetup::class)->defaults($this->relationship), 'selection_type' => 'assigned', 'training_plan_id' => $personal->id]])->assertNotFound();
         $other = User::factory()->create(['account_type' => 'coach']);
         $other->coachProfile()->create(['display_name' => 'Coach B']);
         $foreign = $other->trainingPlans()->create(['name' => 'Foreign']);
         $foreign->forceFill(['workspace_type' => 'coach_template'])->save();
-        $this->post($this->base.'/setup/training', ['training_plan_id' => $foreign->id, 'confirmed' => true])->assertNotFound();
+        $this->patchJson($this->base.'/setup/draft', ['revision' => 0, 'choices' => [...app(CoachSetup::class)->defaults($this->relationship), 'selection_type' => 'template', 'training_plan_id' => $foreign->id]])->assertNotFound();
         $this->actingAs($other)->get($this->base.'/setup')->assertNotFound();
         $this->postJson($this->base.'/setup/activate', ['training_plan_id' => $copy->id])->assertNotFound();
         $this->actingAs($this->coach);
@@ -179,9 +182,9 @@ class CoachWorkspaceTest extends TestCase
         $data = $this->preview($copy);
         $this->relationship->subscriptions()->update(['status' => 'paused']);
         $this->state('paused');
-        $this->postJson($this->base.'/setup/preview', $data)->assertForbidden();
-        $this->postJson($this->base.'/setup/activate', $data)->assertForbidden();
-        $this->post($this->base.'/setup/training', ['training_plan_id' => $copy->assignment->source_training_plan_id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertForbidden();
+        $this->postJson($this->base.'/setup/preview', $data)->assertOk()->assertJsonPath('preview.subscription.operation', 'resume');
+        $this->postJson($this->base.'/setup/activate', $data)->assertUnprocessable();
+        $this->post($this->base.'/setup/training', ['training_plan_id' => $copy->assignment->source_training_plan_id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertStatus(409);
         $this->get($this->base.'/coaching')->assertOk();
     }
 
@@ -277,7 +280,7 @@ class CoachWorkspaceTest extends TestCase
         $template = $this->template();
         $this->get('/coach/training-plans/'.$template->id.'/assign')->assertInertia(fn (Assert $p) => $p->has('relationships.data', 1)->where('relationships.data.0.has_training', false));
         $this->get($this->base.'/assign?template='.$template->id)->assertInertia(fn (Assert $p) => $p->where('selectedTemplate', $template->id));
-        $this->get($this->base.'/setup?template='.$template->id)->assertInertia(fn (Assert $p) => $p->where('selectedTemplate', $template->id));
+        $this->get($this->base.'/setup?template='.$template->id)->assertInertia(fn (Assert $p) => $p->where('draft.choices.training_plan_id', $template->id));
         $this->from($this->base.'/setup')->post('/coach/subscription-plans', ['name' => '12 weeks', 'duration_days' => 84, 'active' => true])->assertRedirect($this->base.'/setup');
     }
 

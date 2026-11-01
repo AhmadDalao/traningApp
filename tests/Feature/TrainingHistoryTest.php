@@ -174,7 +174,7 @@ class TrainingHistoryTest extends TestCase
         }
     }
 
-    public function test_history_includes_past_statuses_and_rest_but_excludes_future_dates_and_times(): void
+    public function test_history_includes_recorded_outcomes_and_past_sessions_but_excludes_upcoming_planned(): void
     {
         foreach (['planned', 'completed', 'skipped'] as $status) {
             $this->entry(['status' => $status, 'scheduled_date' => '2026-10-25']);
@@ -185,7 +185,7 @@ class TrainingHistoryTest extends TestCase
         $this->entry(['status' => 'completed', 'scheduled_date' => '2026-10-27']);
         $other = User::factory()->create();
         $other->scheduleEntries()->create(['title' => 'Other user', 'entry_type' => 'rest', 'scheduled_date' => '2026-10-25', 'status' => 'completed']);
-        $this->actingAs($this->user)->get('/training-history')->assertInertia(fn (Assert $page) => $page->component('TrainingHistory/Index')->has('entries.data', 5)->where('summary', ['completed' => 1, 'skipped' => 1, 'rest' => 1, 'total' => 5]));
+        $this->actingAs($this->user)->get('/training-history')->assertInertia(fn (Assert $page) => $page->component('TrainingHistory/Index')->has('entries.data', 6)->where('summary', ['completed' => 2, 'skipped' => 1, 'rest' => 1, 'total' => 6]));
         $this->get("/training-history/{$future->id}")->assertNotFound();
     }
 
@@ -217,25 +217,25 @@ class TrainingHistoryTest extends TestCase
         $this->get('/training-history?'.$query.'&page=3')->assertInertia(fn (Assert $page) => $page->has('entries.data', 5));
     }
 
-    public function test_history_date_presets_include_both_boundaries_and_exclude_future_sessions(): void
+    public function test_history_date_presets_use_scheduled_dates_and_all_includes_early_completions(): void
     {
         foreach (['2026-09-26', '2026-09-27', '2026-09-30', '2026-10-01', '2026-10-19', '2026-10-20', '2026-10-25', '2026-10-26', '2026-10-27'] as $date) {
             $this->entry(['scheduled_date' => $date, 'status' => 'completed']);
         }
         $this->entry(['scheduled_time' => '12:01', 'status' => 'completed']);
         $this->actingAs($this->user);
-        foreach (['today' => 1, 'yesterday' => 1, 'last_7_days' => 3, 'last_30_days' => 7, 'this_month' => 5, 'all' => 8] as $period => $count) {
+        foreach (['today' => 2, 'yesterday' => 1, 'last_7_days' => 4, 'last_30_days' => 8, 'this_month' => 6, 'all' => 10] as $period => $count) {
             $this->get('/training-history?period='.$period)->assertInertia(fn (Assert $page) => $page->has('entries.data', $count)->where('summary.total', $count));
         }
         $this->get('/training-history?period=custom&from=2026-10-20&to=2026-10-25')->assertInertia(fn (Assert $page) => $page->has('entries.data', 2)->where('entries.data.0.scheduled_date', '2026-10-25')->where('entries.data.1.scheduled_date', '2026-10-20'));
-        $this->get('/training-history?period=custom&from=2026-10-26&to=2026-11-01')->assertInertia(fn (Assert $page) => $page->has('entries.data', 1));
-        $this->get('/training-history?period=today&from=bad&to=bad')->assertSessionHasNoErrors()->assertInertia(fn (Assert $page) => $page->has('entries.data', 1));
+        $this->get('/training-history?period=custom&from=2026-10-26&to=2026-11-01')->assertInertia(fn (Assert $page) => $page->has('entries.data', 3));
+        $this->get('/training-history?period=today&from=bad&to=bad')->assertSessionHasNoErrors()->assertInertia(fn (Assert $page) => $page->has('entries.data', 2));
     }
 
     public function test_history_supports_every_page_size_and_all_including_empty_results(): void
     {
         for ($i = 0; $i < 105; $i++) {
-            $this->entry();
+            $this->entry(['scheduled_date' => '2026-10-25']);
         }
         $this->actingAs($this->user)->get('/training-history')->assertInertia(fn (Assert $page) => $page->has('entries.data', 10)->where('filters.per_page', '10'));
         foreach ([10, 25, 50, 100] as $size) {

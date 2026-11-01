@@ -139,63 +139,55 @@ try {
     const prefix = `/coach/trainees/${f.trainee}`;
     await visit(prefix);
     await page
-        .getByRole("link", { name: "Continue setup", exact: true })
+        .getByRole("link", { name: "Activate Coaching", exact: true })
         .click();
     await page.waitForURL(new RegExp(prefix + "/setup"));
     await page
-        .getByRole("button", { name: "Create coaching plan", exact: true })
-        .click();
+        .getByRole("heading", {
+            name: "1. Choose Training Program",
+            exact: true,
+        })
+        .waitFor();
     await page
-        .getByRole("dialog")
-        .getByLabel("Package name")
-        .fill("QA Wizard package " + engine);
-    await page
-        .getByLabel("Duration in days (optional)", { exact: true })
-        .fill("90");
-    await page
-        .getByRole("button", { name: "Save package", exact: true })
-        .click();
-    await page.getByRole("dialog").waitFor({ state: "hidden" });
-    pass("Create coaching plan returns to setup");
-    await page
-        .getByLabel(/^Coaching plan/)
-        .selectOption({ label: "QA Wizard package " + engine + " · 90 days" });
-    await matrix("Setup coaching");
+        .getByRole("radio", {
+            name: "QA Guided strength " + engine,
+            exact: true,
+        })
+        .check();
+    await matrix("Program-first selection");
     await screenshot("step1");
     await page
-        .getByRole("button", { name: "Save coaching & continue", exact: true })
-        .click();
-    await page
-        .getByRole("heading", { name: "2. Choose training", exact: true })
-        .waitFor();
-    await page
         .getByRole("button", { name: "Save & finish later", exact: true })
-        .first()
         .click();
     await page.waitForURL(base + prefix);
-    pass("Coaching-only setup is saved");
+    pass("Selection saves only a resumable draft");
     await visit(prefix + "/setup");
+    assert.ok(
+        await page
+            .getByRole("radio", {
+                name: "QA Guided strength " + engine,
+                exact: true,
+            })
+            .isChecked(),
+    );
     await page
-        .getByRole("heading", { name: "2. Choose training", exact: true })
-        .waitFor();
-    pass("Continue setup resumes at missing training");
-    await page.getByLabel("Coach template").selectOption(String(f.template));
-    await matrix("Setup training");
+        .getByRole("button", { name: "Next: Dates & Schedule", exact: true })
+        .click();
+    await page
+        .getByLabel("Training starts", { exact: false })
+        .fill(fixtures.tomorrow);
+    await matrix("Dates and optional times");
     await screenshot("step2");
     await page
-        .getByRole("button", { name: "Save training & continue", exact: true })
+        .getByRole("button", {
+            name: "Review subscription & calendar",
+            exact: true,
+        })
         .click();
     await page
-        .getByRole("heading", { name: "3. Preview the schedule", exact: true })
+        .getByRole("heading", { name: "Coaching Subscription", exact: true })
         .waitFor();
-    await page.getByLabel("Start program on").fill(fixtures.tomorrow);
-    await page
-        .getByRole("button", { name: "Preview schedule", exact: true })
-        .click();
-    await page
-        .getByRole("button", { name: "Activate coaching", exact: true })
-        .waitFor();
-    await matrix("Human schedule preview");
+    await matrix("Subscription and schedule review");
     await screenshot("step3");
     assert.equal(
         await page
@@ -203,9 +195,12 @@ try {
             .count(),
         0,
     );
-    pass("New setup shows workouts instead of reconciliation jargon");
+    pass(
+        "Review leads with training and coverage rather than reconciliation codes",
+    );
     await page
-        .getByRole("button", { name: "Activate coaching", exact: true })
+        .getByRole("button", { name: "Activate Coaching", exact: true })
+        .locator("visible=true")
         .click();
     await page.waitForURL(base + prefix);
     pass("Activation returns to trainee console");

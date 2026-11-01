@@ -126,7 +126,7 @@ export function StartSubscription({
                         </select>
                     </Field>
                 )}
-                <Field label="Coaching plan">
+                <Field label="Coaching Package">
                     <select
                         value={form.data.package_id}
                         onChange={(e) =>

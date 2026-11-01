@@ -85,7 +85,7 @@ class CoachAccess
 
     public function future(string $date, ?string $time): bool
     {
-        return $date > today()->toDateString() || ($date === today()->toDateString() && $time !== null && substr($time, 0, 5) > now()->format('H:i'));
+        return ! app(WorkoutDate::class)->elapsed($date, $time);
     }
 
     public function scheduleDate(CoachSubscription $subscription, string $date, ?string $time): void

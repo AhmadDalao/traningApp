@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\ProgramLifecycle;
+use App\Services\WorkoutDate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -51,7 +52,7 @@ class ScheduleEntry extends Model
     {
         $query->where(fn ($q) => $q->where('status', '!=', 'planned')->orWhereNull('program_run_id')
             ->orWhereHas('programRun', fn ($run) => $run->whereNotIn('status', ['paused', 'ended'])
-                ->orWhere(fn ($paused) => $paused->where('status', 'paused')->whereColumn('schedule_entries.scheduled_date', '<', 'program_runs.paused_from'))));
+                ->orWhere(fn ($paused) => $paused->where('status', 'paused')->whereColumn(DB::raw('DATE(schedule_entries.scheduled_date)'), '<', DB::raw('DATE(program_runs.paused_from)')))));
     }
 
     public function programRun()
@@ -71,11 +72,8 @@ class ScheduleEntry extends Model
 
     public function scopeUpcoming(Builder $query): void
     {
-        $query->availableOnSchedule()->where('status', 'planned')->where(function (Builder $dates) {
-            $dates->whereDate('scheduled_date', '>', today()->toDateString())
-                ->orWhere(fn (Builder $today) => $today->whereDate('scheduled_date', today()->toDateString())
-                    ->where(fn (Builder $time) => $time->whereNull('scheduled_time')->orWhere('scheduled_time', '>=', now()->format('H:i:s'))));
-        });
+        $query->availableOnSchedule()->where('status', 'planned');
+        app(WorkoutDate::class)->whereElapsed($query, false);
     }
 
     public function sessionExercises()
@@ -85,20 +83,18 @@ class ScheduleEntry extends Model
 
     public function scopePast(Builder $query): void
     {
-        $now = now();
-        $query->where(function (Builder $query) use ($now) {
-            $query->whereDate('scheduled_date', '<', $now->toDateString())
-                ->orWhere(fn (Builder $today) => $today->whereDate('scheduled_date', $now->toDateString())
-                    ->where(fn (Builder $time) => $time->whereNull('scheduled_time')->orWhere('scheduled_time', '<=', $now->format('H:i:s'))));
-        });
+        app(WorkoutDate::class)->whereElapsed($query);
+    }
+
+    public function scopeDue(Builder $query): void
+    {
+        app(WorkoutDate::class)->whereDue($query);
     }
 
     public function scopeHistoryVisible(Builder $query): void
     {
-        // Programs can be completed out of order. Their saved Progress links must
-        // remain readable before the original scheduled date, including after source deletion.
-        $query->where(fn (Builder $history) => $history->past()
-            ->orWhere(fn (Builder $program) => $program->whereNotNull('program_run_id')->where('status', 'completed')));
+        // Recorded outcomes remain readable even when completed early or rescheduled.
+        $query->due();
     }
 
     public function captureWorkoutSnapshot(array &$copiedPaths): array

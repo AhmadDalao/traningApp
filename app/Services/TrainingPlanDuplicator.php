@@ -34,11 +34,11 @@ class TrainingPlanDuplicator
         });
     }
 
-    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates, bool $resumeSetup = false): TrainingPlan
+    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates, bool $resumeSetup = false, bool $notify = true, ?array &$sharedPaths = null, ?array &$dayMap = null): TrainingPlan
     {
         $paths = [];
         try {
-            return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, $resumeSetup, &$paths) {
+            $result = app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, $resumeSetup, $notify, &$paths, &$dayMap) {
                 $source = TrainingPlan::where('user_id', $coach->id)->where('workspace_type', 'coach_template')->lockForUpdate()->findOrFail($source->id);
                 if ($resumeSetup) {
                     $existing = $relationship->assignments()->where('status', 'active')->whereHas('plan')->latest('id')->lockForUpdate()->first();
@@ -49,15 +49,20 @@ class TrainingPlanDuplicator
                 $copy = $trainee->trainingPlans()->make([...$source->only('name', 'description', 'structure_type', 'duration_weeks'), ...($source->isProgram() ? [] : $dates)]);
                 $copy->workspace_type = 'coach_assigned';
                 $copy->save();
-                $this->definitionCopy($source, $copy, $paths);
+                $this->definitionCopy($source, $copy, $paths, $dayMap);
                 $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
 
-                if (! $resumeSetup) {
+                if (! $resumeSetup && $notify) {
                     app(CoachNotifications::class)->plan($coach, $copy, 'assigned', (string) $copy->id);
                 }
 
                 return $copy;
             });
+            if ($sharedPaths !== null) {
+                array_push($sharedPaths, ...$paths);
+            }
+
+            return $result;
         } catch (\Throwable $error) {
             Storage::disk('public')->delete($paths);
             throw $error;
@@ -91,14 +96,15 @@ class TrainingPlanDuplicator
         });
     }
 
-    private function definitionCopy(TrainingPlan $source, TrainingPlan $copy, array &$paths): void
+    private function definitionCopy(TrainingPlan $source, TrainingPlan $copy, array &$paths, ?array &$dayMap = null): void
     {
         $blocks = [];
         foreach ($source->blocks()->lockForUpdate()->get() as $block) {
             $blocks[$block->id] = $copy->blocks()->create($block->only('name', 'start_week', 'end_week', 'position', 'type', 'description'))->id;
         }
         foreach ($source->trainingDays()->lockForUpdate()->get() as $day) {
-            $this->dayCopy($day, $copy, $day->title, $day->position, $paths, $blocks[$day->training_block_id] ?? null);
+            $copied = $this->dayCopy($day, $copy, $day->title, $day->position, $paths, $blocks[$day->training_block_id] ?? null);
+            $dayMap[$day->id] = $copied->id;
         }
     }
 

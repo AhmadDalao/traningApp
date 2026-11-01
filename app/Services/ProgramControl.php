@@ -61,7 +61,7 @@ class ProgramControl
                 $result['remove'][] = $row;
             } else {
                 $to = $entry->scheduled_date->copy()->addDays($result['days'])->toDateString();
-                if (($result['days'] !== 0 || in_array($action, ['resume', 'shift'], true)) && ($to < today()->toDateString() || ($to === today()->toDateString() && $entry->scheduled_time && ! $access->future($to, $entry->scheduled_time)))) {
+                if (($result['days'] !== 0 || in_array($action, ['resume', 'shift'], true)) && ! $access->future($to, $entry->scheduled_time)) {
                     throw ValidationException::withMessages(['start_date' => 'A workout would remain in the past. Choose a later start date.']);
                 }
                 if ($coach && ($result['days'] !== 0 || in_array($action, ['resume', 'shift'], true))) {

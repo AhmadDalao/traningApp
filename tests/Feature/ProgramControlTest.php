@@ -97,6 +97,22 @@ class ProgramControlTest extends TestCase
         return $preview;
     }
 
+    public function test_untimed_today_is_available_to_pause_resume_shift_and_end_until_midnight(): void
+    {
+        $run = $this->start($this->program());
+        $entry = $run->sessions()->first();
+        $entry->update(['scheduled_date' => today(), 'scheduled_time' => null]);
+        $this->travelTo(today()->setTime(23, 59));
+        $position = app(ProgramLifecycle::class)->position($run);
+        $this->assertSame(0, $position['missed']);
+        $this->control($run, ['action' => 'pause', 'pause_date' => today()->toDateString()]);
+        $this->control($run->fresh(), ['action' => 'resume', 'start_date' => today()->toDateString()]);
+        $this->control($run->fresh(), ['action' => 'shift', 'start_date' => today()->toDateString()]);
+        $preview = $this->control($run->fresh(), ['action' => 'end']);
+        $this->assertContains($entry->id, array_column($preview['remove'], 'id'));
+        $this->assertDatabaseMissing('schedule_entries', ['id' => $entry->id]);
+    }
+
     public function test_known_pause_moves_only_unresolved_and_preserves_every_frozen_field(): void
     {
         $run = $this->start($this->program());
@@ -482,7 +498,7 @@ class ProgramControlTest extends TestCase
         $this->record($entry);
         $actuals = $entry->sessionExercises()->with('sets')->get()->toArray();
         foreach (['planned', 'skipped', 'completed'] as $status) {
-            $destination = ($status === 'completed' ? '/training-history/' : '/schedule-entries/').$entry->id;
+            $destination = (in_array($status, ['completed', 'skipped']) ? '/training-history/' : '/schedule-entries/').$entry->id;
             $this->from('/training-history/'.$entry->id)->patch('/schedule-entries/'.$entry->id.'/status', ['status' => $status])->assertSessionHasNoErrors()->assertRedirect($destination);
             $this->get($destination)->assertInertia(fn (Assert $page) => $page->where('entry.status', $status));
         }

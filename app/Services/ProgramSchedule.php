@@ -17,10 +17,10 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 /** Finite schedules share Calendar entries, occurrence keys and protection rules with simple plans. */
 class ProgramSchedule
 {
-    public function desired(TrainingPlan $plan, string $start, string $identity): array
+    public function desired(TrainingPlan $plan, string $start, string $identity, ?array $definition = null, array $timeOverrides = []): array
     {
         abort_unless($plan->isProgram(), 422, 'Choose a structured program.');
-        $definition = app(ProgramDefinition::class)->snapshot($plan);
+        $definition ??= app(ProgramDefinition::class)->snapshot($plan);
         app(ProgramDefinition::class)->validate($definition['blocks'], $definition['duration_weeks']);
         $sessions = [];
         foreach ($definition['blocks'] as $block) {
@@ -47,7 +47,7 @@ class ProgramSchedule
                         $sessions[] = ['key' => 'program:'.$identity.':'.$week.':'.$day['id'].':'.$date->toDateString(),
                             'training_day_id' => $day['id'], 'program_week' => $week, 'program_context' => $context,
                             'title' => $day['title'], 'entry_type' => $day['type'], 'focus_area' => $day['focus_area'], 'icon' => $day['icon'],
-                            'scheduled_date' => $date->toDateString(), 'scheduled_time' => $day['default_time'], 'notes' => $day['notes'],
+                            'scheduled_date' => $date->toDateString(), 'scheduled_time' => array_key_exists($day['id'].':'.$date->toDateString(), $timeOverrides) ? $timeOverrides[$day['id'].':'.$date->toDateString()] : $day['default_time'], 'notes' => $day['notes'],
                             'program_prescription' => ['version' => 1, 'title' => $day['title'], 'focus_area' => $day['focus_area'], 'icon' => $day['icon'],
                                 'training_day_title' => $day['title'], 'training_plan_id' => $plan->id, 'training_plan_name' => $plan->name, 'template_available' => true,
                                 'exercises' => $day['type'] === 'training' ? $day['exercises'] : []],
@@ -63,9 +63,9 @@ class ProgramSchedule
         return ['definition' => $definition, 'sessions' => $sessions];
     }
 
-    public function preview(TrainingPlan $plan, string $start, string $nonce, ?User $coach = null): array
+    public function preview(TrainingPlan $plan, string $start, string $nonce, ?User $coach = null, array $timeOverrides = []): array
     {
-        $desired = $this->desired($plan, $start, 'preview');
+        $desired = $this->desired($plan, $start, 'preview', timeOverrides: $timeOverrides);
         $subscription = $coach ? app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($coach, $plan->user)) : null;
         if ($coach) {
             app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true);
@@ -79,24 +79,26 @@ class ProgramSchedule
             'start_date' => $start, 'ends_on' => Carbon::parse($start)->addDays($plan->duration_weeks * 7 - 1)->toDateString()];
     }
 
-    public function start(TrainingPlan $plan, array $data, ?User $coach, array &$paths): ProgramRun
+    public function start(TrainingPlan $plan, array $data, ?User $coach, array &$paths, bool $notify = true, array $timeOverrides = []): ProgramRun
     {
         // Controller holds user -> plan locks, including the coach relationship lock when needed.
         $token = $this->sign([$plan->user_id, $plan->id, $coach?->id, $data['nonce']]);
         if ($existing = ProgramRun::where('start_token', $token)->lockForUpdate()->first()) {
             return $existing;
         }
-        $preview = $this->preview($plan, $data['start_date'], $data['nonce'], $coach);
+        $preview = $this->preview($plan, $data['start_date'], $data['nonce'], $coach, $timeOverrides);
         $this->check($data['signature'], $preview['signature']);
         $run = ProgramRun::create(['user_id' => $plan->user_id, 'training_plan_id' => $plan->id, 'started_by_user_id' => $coach?->id ?? $plan->user_id,
             'start_token' => $token, 'started_on' => $data['start_date'], 'definition_snapshot' => app(ProgramDefinition::class)->snapshot($plan)]);
-        $desired = $this->desired($plan, $data['start_date'], (string) $run->id);
+        $desired = $this->desired($plan, $data['start_date'], (string) $run->id, timeOverrides: $timeOverrides);
         $media = [];
         foreach ($desired['sessions'] as $session) {
             $this->createEntry($run, $session, $coach, $media, $paths);
         }
 
-        app(CoachNotifications::class)->plan($coach, $plan, 'schedule', 'start:'.$run->id);
+        if ($notify) {
+            app(CoachNotifications::class)->plan($coach, $plan, 'schedule', 'start:'.$run->id);
+        }
 
         return $run;
     }

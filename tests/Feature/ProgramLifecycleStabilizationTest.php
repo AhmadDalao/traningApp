@@ -512,13 +512,13 @@ class ProgramLifecycleStabilizationTest extends TestCase
         $entry = $run->sessions()->where('program_week', 4)->first();
         $this->record($entry);
         $simple = $plan->user->scheduleEntries()->create(['title' => 'Future simple completion', 'entry_type' => 'training', 'scheduled_date' => '2027-01-01', 'status' => 'completed']);
-        $this->get('/training-history')->assertInertia(fn (Assert $p) => $p->has('entries.data', 1)->where('entries.data.0.id', $entry->id));
+        $this->get('/training-history')->assertInertia(fn (Assert $p) => $p->has('entries.data', 2));
         $this->get('/training-history/'.$entry->id)->assertOk();
-        $this->get('/training-history/'.$simple->id)->assertNotFound();
+        $this->get('/training-history/'.$simple->id)->assertOk();
         $this->get('/training-history?period=today')->assertInertia(fn (Assert $p) => $p->has('entries.data', 0));
         $this->assertSame(1, app(ProgramLifecycle::class)->position($run)['current_week']);
         $this->patch('/schedule-entries/'.$entry->id.'/status', ['status' => 'planned'])->assertSessionHasNoErrors();
-        $this->get('/training-history')->assertInertia(fn (Assert $p) => $p->has('entries.data', 0));
+        $this->get('/training-history')->assertInertia(fn (Assert $p) => $p->has('entries.data', 1)->where('entries.data.0.id', $simple->id));
         $this->get('/training-history/'.$entry->id)->assertNotFound();
     }
 

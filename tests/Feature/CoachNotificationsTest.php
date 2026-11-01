@@ -8,6 +8,7 @@ use App\Models\NotificationPreference;
 use App\Models\TrainingPlan;
 use App\Models\User;
 use App\Models\WebPushSubscription;
+use App\Services\CoachSetup;
 use App\Services\Notifications\CoachNotifications;
 use App\Services\Notifications\PushDeliveries;
 use App\Services\ProgramControl;
@@ -108,30 +109,47 @@ class CoachNotificationsTest extends TestCase
         $relationship = $this->relationship($coach, $trainee);
         $template = $this->program($coach);
         $base = '/coach/trainees/'.$trainee->id.'/setup';
-        $this->actingAs($coach)->post($base.'/training', ['training_plan_id' => $template->id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertRedirect()->assertSessionHasNoErrors();
+        $choices = [...app(CoachSetup::class)->defaults($relationship), 'selection_type' => 'template', 'training_plan_id' => $template->id, 'start_date' => today()->addDay()->toDateString()];
+        $draft = $this->actingAs($coach)->patchJson($base.'/draft', ['revision' => 0, 'choices' => $choices])->assertOk()->json('draft');
         $this->assertDatabaseCount('notification_deliveries', 0);
-        $copy = $relationship->assignments()->firstOrFail()->plan;
-        $data = ['training_plan_id' => $copy->id, 'start_date' => today()->addDay()->toDateString(), 'nonce' => (string) Str::uuid()];
+        $data = ['revision' => $draft['revision'], 'token' => $draft['token']];
         $data['signature'] = $this->postJson($base.'/preview', $data)->assertOk()->json('preview.signature');
+        $this->assertDatabaseCount('notification_deliveries', 0);
         $data['confirmed'] = true;
         $this->postJson($base.'/activate', $data)->assertOk();
         $this->postJson($base.'/activate', $data)->assertOk();
-        $this->post($base.'/finish')->assertRedirect();
         $this->assertDatabaseCount('notification_deliveries', 1);
-        $this->assertSame('coach_schedule', NotificationDelivery::first()->kind);
+        $this->assertSame('coach_setup', NotificationDelivery::first()->kind);
     }
 
-    public function test_finish_later_notifies_about_saved_unscheduled_training_once(): void
+    public function test_notification_failure_does_not_undo_committed_atomic_activation(): void
     {
         [$coach, $trainee] = $this->setupCoaching();
-        $this->relationship($coach, $trainee);
+        $relationship = $this->relationship($coach, $trainee);
+        $template = $this->program($coach);
+        $service = app(CoachSetup::class);
+        $draft = $service->save($coach, $trainee, ['revision' => 0, 'choices' => [...$service->defaults($relationship), 'selection_type' => 'template', 'training_plan_id' => $template->id, 'start_date' => today()->addDay()->toDateString()]]);
+        $preview = $service->preview($coach, $trainee, $draft['revision'], $draft['token']);
+        $this->mock(PushDeliveries::class, fn ($mock) => $mock->shouldReceive('enqueue')->once()->andThrow(new \RuntimeException('QA push failure')));
+        $result = $service->activate($coach, $trainee, ['revision' => $draft['revision'], 'token' => $draft['token'], 'signature' => $preview['signature']]);
+        $this->assertSame(12, $result['added']);
+        $this->assertDatabaseCount('coach_plan_assignments', 1);
+        $this->assertDatabaseCount('program_runs', 1);
+        $this->assertDatabaseCount('schedule_entries', 12);
+        $this->assertArrayHasKey('result', $relationship->fresh()->setup_draft);
+    }
+
+    public function test_finish_later_draft_never_notifies_or_assigns(): void
+    {
+        [$coach, $trainee] = $this->setupCoaching();
+        $relationship = $this->relationship($coach, $trainee);
         $template = $this->program($coach);
         $base = '/coach/trainees/'.$trainee->id.'/setup';
-        $this->actingAs($coach)->post($base.'/training', ['training_plan_id' => $template->id, 'confirmed' => true, 'schedule_mode' => 'fixed'])->assertRedirect();
-        $this->post($base.'/finish')->assertRedirect();
-        $this->post($base.'/finish')->assertRedirect();
-        $this->assertDatabaseCount('notification_deliveries', 1);
-        $this->assertSame('coach_assigned', NotificationDelivery::first()->kind);
+        $choices = [...app(CoachSetup::class)->defaults($relationship), 'training_plan_id' => $template->id];
+        $draft = $this->actingAs($coach)->patchJson($base.'/draft', ['revision' => 0, 'choices' => $choices])->assertOk()->json('draft');
+        $this->patchJson($base.'/draft', ['revision' => $draft['revision'], 'choices' => $choices])->assertOk();
+        $this->assertDatabaseCount('notification_deliveries', 0);
+        $this->assertDatabaseCount('coach_plan_assignments', 0);
     }
 
     public function test_after_commit_only_and_rollback_has_no_notification(): void

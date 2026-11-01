@@ -30,7 +30,7 @@ class CoachNotifications
         if (! $relationship) {
             return;
         }
-        $titles = ['assigned' => 'New training plan', 'schedule' => 'Training schedule updated', 'pause' => 'Program paused', 'resume' => 'Program resumed', 'shift' => 'Program schedule shifted', 'end' => 'Program ended'];
+        $titles = ['setup' => 'Your coaching is ready', 'assigned' => 'New training plan', 'schedule' => 'Training schedule updated', 'pause' => 'Program paused', 'resume' => 'Program resumed', 'shift' => 'Program schedule shifted', 'end' => 'Program ended'];
         $this->queue($plan->user_id, 'coach_'.$kind, $kind.':'.$plan->id.':'.$eventKey, $relationship->id,
             $titles[$kind], 'Your coach updated your training. Open Training Planner to review the details.', '/notifications/open/plan/'.$plan->id);
     }

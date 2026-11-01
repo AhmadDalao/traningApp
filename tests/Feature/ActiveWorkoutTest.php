@@ -111,7 +111,7 @@ class ActiveWorkoutTest extends TestCase
 
     public function test_resume_and_history_render_saved_logs_after_navigation(): void
     {
-        $entry = $this->start();
+        $entry = $this->start($this->entry(['scheduled_date' => today()->subDay()->toDateString()]));
         $set = $entry->sessionExercises->first()->sets->first();
         $this->saveSet($set, ['actual_reps' => 10, 'actual_weight_kg' => '82.50', 'completed' => true]);
         $this->get('/calendar')->assertOk();

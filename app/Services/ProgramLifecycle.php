@@ -28,7 +28,7 @@ class ProgramLifecycle
         $current = $unresolved->min('program_week');
         $duration = (int) $run->definition_snapshot['duration_weeks'];
         $resolvedWeeks = collect(range(1, $duration))->filter(fn ($week) => ! $unresolved->contains('program_week', $week))->count();
-        $due = $required->filter(fn ($entry) => ! ($entry->status === 'planned' && $run->holds($entry)) && ! app(CoachAccess::class)->future($entry->scheduled_date->toDateString(), $entry->scheduled_time));
+        $due = $required->filter(fn ($entry) => ! ($entry->status === 'planned' && $run->holds($entry)) && app(WorkoutDate::class)->due($entry->scheduled_date->toDateString(), $entry->scheduled_time, $entry->status));
         $completed = $due->where('status', 'completed')->count();
         $missed = $due->filter(fn ($entry) => $entry->status === 'planned' && ! $entry->started_at)->count();
         $block = collect($run->definition_snapshot['blocks'])->first(fn ($block) => $current !== null && $block['start_week'] <= $current && $block['end_week'] >= $current);

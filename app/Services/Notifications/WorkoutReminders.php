@@ -4,6 +4,7 @@ namespace App\Services\Notifications;
 
 use App\Models\NotificationPreference;
 use App\Models\ScheduleEntry;
+use App\Services\WorkoutDate;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -24,7 +25,8 @@ class WorkoutReminders
         $start = CarbonImmutable::parse($this->stamp($entry), config('app.timezone'));
         $due = $start->subMinutes($minutes);
 
-        return $start->isFuture() && $due->lte(now()) && $due->gte(now()->subMinutes(config('webpush.lookback_minutes')));
+        return ! app(WorkoutDate::class)->elapsed($entry->scheduled_date->toDateString(), $entry->scheduled_time)
+            && $due->lte(now()) && $due->gte(now()->subMinutes(config('webpush.lookback_minutes')));
     }
 
     public function enqueue(int $limit): int

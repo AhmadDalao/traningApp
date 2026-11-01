@@ -64,6 +64,15 @@ class RecurringScheduleTest extends TestCase
         return $preview;
     }
 
+    public function test_untimed_today_can_be_rescheduled_before_local_midnight(): void
+    {
+        $this->travelTo(today()->setTime(23, 59));
+        $entry = $this->user->scheduleEntries()->create(['title' => 'Anytime', 'entry_type' => 'training', 'status' => 'planned', 'scheduled_date' => today(), 'scheduled_time' => null, 'training_day_id' => $this->day->id]);
+        $this->move($entry, today()->addDay()->toDateString());
+        $this->assertTrue($entry->fresh()->scheduled_date->isSameDay(today()->addDay()));
+        $this->assertNull($entry->fresh()->scheduled_time);
+    }
+
     public function test_ongoing_is_explicit_requires_start_and_never_uses_a_fake_end_date(): void
     {
         $this->post('/training-plans', ['name' => 'Ongoing', 'schedule_mode' => 'ongoing', 'start_date' => '2026-11-01', 'end_date' => '2099-12-31'])->assertSessionHasNoErrors();
@@ -269,7 +278,7 @@ class RecurringScheduleTest extends TestCase
 
     public static function protectedStates(): array
     {
-        return [['completed'], ['skipped'], ['started'], ['snapshot'], ['structured'], ['past'], ['untimed_today']];
+        return [['completed'], ['skipped'], ['started'], ['snapshot'], ['structured'], ['past']];
     }
 
     #[DataProvider('protectedStates')]
@@ -316,7 +325,7 @@ class RecurringScheduleTest extends TestCase
         $this->move($entry, '2026-11-04');
         $this->assertNull($entry->fresh()->plan_occurrence_key);
         $this->assertSame([1], $this->day->fresh()->weekdays);
-        $this->postJson('/schedule-entries/'.$entry->id.'/reschedule-preview', ['scheduled_date' => '2026-10-28', 'scope' => 'one'])->assertUnprocessable();
+        $this->postJson('/schedule-entries/'.$entry->id.'/reschedule-preview', ['scheduled_date' => '2026-10-28', 'scope' => 'one'])->assertOk();
         $this->postJson('/schedule-entries/'.$entry->id.'/reschedule-preview', ['scheduled_date' => '2026-10-28', 'scheduled_time' => '19:00', 'scope' => 'one'])->assertOk();
     }
 

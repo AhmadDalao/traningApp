@@ -37,7 +37,7 @@ export default function ManageCoaching({
             {!subscriptions.length && (
                 <section className="panel coach-card">
                     <h2>No coaching period yet</h2>
-                    <p>Choose a coaching plan and dates to get started.</p>
+                    <p>Choose a Coaching Package and dates to get started.</p>
                 </section>
             )}
             <div className="coach-grid">
@@ -46,10 +46,10 @@ export default function ManageCoaching({
                 ))}
             </div>
             <section className="panel coach-card">
-                <h2>Coaching plans</h2>
+                <h2>Coaching Packages</h2>
                 <p>Use a reusable package or a custom coaching period.</p>
                 <Button variant="secondary" onClick={() => setCreating(true)}>
-                    Create coaching plan
+                    Create Coaching Package
                 </Button>
             </section>
             <details className="panel coach-card">

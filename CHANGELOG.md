@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.3.1 — 1 November 2026 — source verified, deployment pending
+
+- Replace subscription-first setup with training selection, dates, combined review and atomic activation.
+- Save only a versioned relationship JSON draft; lock and revalidate signed previews, replay completed tokens safely, and clean copied media on rollback.
+- Start new coaching today, preserve existing/ongoing coverage, explicitly extend short packages, and provide direct Resume/Renew actions.
+- Reuse matching assignments, existing runs and configured/cancelled simple schedules; never silently move or omit an occurrence.
+- Centralize application-local workout date semantics: untimed today remains available until midnight; completed/skipped History remains visible.
+- Preserve the existing shared domain engines, Personal/Coach UI and PWA infrastructure. No dependency upgrade or additional index/table.
+- Pass complete SQLite/MySQL, concurrency, Chromium/WebKit, JavaScript, build, formatting, audit and local integrity gates. See the v2.3.1 report for deployment evidence.
+
 ## v2.3.0 — 30 October 2026 — deployed and verified
 
 - Add the operational Coach trainee table/mobile cards, derived attention states, persistent trainee context and saved Coaching → Training → Schedule setup.

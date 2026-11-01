@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class CoachTraineeRelationship extends Model
 {
+    protected $hidden = ['setup_draft'];
+
     protected $fillable = ['coach_user_id', 'trainee_user_id', 'status', 'requested_by', 'requested_at', 'approved_at', 'ended_at', 'ended_reason'];
 
     protected function casts(): array
     {
-        return ['requested_at' => 'datetime', 'approved_at' => 'datetime', 'ended_at' => 'datetime'];
+        return ['setup_draft' => 'array', 'requested_at' => 'datetime', 'approved_at' => 'datetime', 'ended_at' => 'datetime'];
     }
 
     public function coach()
