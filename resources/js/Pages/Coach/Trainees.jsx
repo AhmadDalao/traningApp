@@ -1,3 +1,4 @@
+import PersonAvatar from "../../Components/PersonAvatar";
 import useLiveFilters from "../../Features/useLiveFilters";
 import { Search, UserPlus } from "lucide-react";
 import { useState } from "react";
@@ -17,20 +18,23 @@ import {
 import AddTrainee from "../../Features/AddTrainee";
 function Identity({ row }) {
     return (
-        <div className="trainee-cell">
-            <strong>
-                {row.trainee.id ? (
-                    <Link
-                        href={`/coach/trainees/${row.trainee.id}`}
-                        aria-label={`View trainee ${row.trainee.name}`}
-                    >
-                        {row.trainee.name}
-                    </Link>
-                ) : (
-                    row.trainee.name
-                )}
-            </strong>
-            <small>{row.trainee.training_code}</small>
+        <div className="person-identity">
+            <PersonAvatar name={row.trainee.name} />
+            <div className="trainee-cell">
+                <strong>
+                    {row.trainee.id ? (
+                        <Link
+                            href={`/coach/trainees/${row.trainee.id}`}
+                            aria-label={`View trainee ${row.trainee.name}`}
+                        >
+                            {row.trainee.name}
+                        </Link>
+                    ) : (
+                        row.trainee.name
+                    )}
+                </strong>
+                <small>{row.trainee.training_code}</small>
+            </div>
         </div>
     );
 }
@@ -160,7 +164,6 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                         "Program",
                                         "Assigned this week",
                                         "Next workout",
-                                        "Last workout",
                                         "Status",
                                         "Next action",
                                     ].map((h) => (
@@ -203,29 +206,22 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                             {row.status === "active"
                                                 ? `${row.week.completed} / ${row.week.total}`
                                                 : "—"}
+                                            {row.week.total > 0 && (
+                                                <progress
+                                                    className="roster-progress"
+                                                    max={row.week.total}
+                                                    value={row.week.completed}
+                                                    aria-label="Assigned workouts completed this week"
+                                                />
+                                            )}
                                         </td>
                                         <td>
                                             <Next entry={row.next_session} />
                                         </td>
                                         <td>
-                                            {row.last_workout ? (
-                                                <DateLabel
-                                                    date={
-                                                        row.last_workout
-                                                            .scheduled_date
-                                                    }
-                                                />
-                                            ) : (
-                                                "No completed workout"
-                                            )}
-                                        </td>
-                                        <td>
                                             <TraineeState
                                                 state={row.display_state}
                                             />
-                                            <small className="trainee-reason">
-                                                {row.reason}
-                                            </small>
                                         </td>
                                         <td>
                                             <Actions row={row} />

@@ -49,6 +49,20 @@ class ProfileProgressTest extends TestCase
         return $this->user->scheduleEntries()->create([...['training_day_id' => $day->id, 'title' => 'Strength', 'entry_type' => 'training', 'scheduled_date' => '2026-10-26', 'status' => 'planned'], ...$attributes]);
     }
 
+    public function test_dashboard_recent_workout_uses_owned_completed_history_and_completion_time(): void
+    {
+        $completed = $this->workoutSession(['status' => 'completed', 'completed_at' => now()->subMinute(), 'scheduled_date' => '2026-11-10']);
+        $this->workoutSession(['status' => 'completed', 'completed_at' => now()->subDay()]);
+        $this->workoutSession(['status' => 'planned']);
+        $this->workoutSession(['status' => 'skipped']);
+        User::factory()->create()->scheduleEntries()->create(['title' => 'Private workout', 'entry_type' => 'training', 'scheduled_date' => '2026-10-27', 'status' => 'completed', 'completed_at' => now()]);
+        $this->actingAs($this->user)->get('/dashboard')->assertInertia(fn (Assert $page) => $page
+            ->where('recentWorkout.id', $completed->id)
+            ->where('recentWorkout.title', 'Strength'));
+        $completed->update(['status' => 'planned']);
+        $this->get('/dashboard')->assertInertia(fn (Assert $page) => $page->where('recentWorkout.id', fn ($id) => $id !== $completed->id));
+    }
+
     public function test_new_pages_require_authentication(): void
     {
         foreach (['/profile', '/profile/edit', '/onboarding', '/progress', '/recommendations'] as $url) {

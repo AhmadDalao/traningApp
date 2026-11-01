@@ -1,3 +1,4 @@
+import PersonAvatar from "../../Components/PersonAvatar";
 import { Head } from "@inertiajs/react";
 import { Search, Users, ArrowRight } from "lucide-react";
 import {
@@ -123,13 +124,21 @@ export default function ChooseTrainee({ plan, relationships, search }) {
                                 {relationships.data.map((row) => (
                                     <tr key={row.id}>
                                         <th scope="row">
-                                            <div className="trainee-cell">
-                                                <strong>
-                                                    {row.trainee.name}
-                                                </strong>
-                                                <small>
-                                                    {row.trainee.training_code}
-                                                </small>
+                                            <div className="person-identity">
+                                                <PersonAvatar
+                                                    name={row.trainee.name}
+                                                />
+                                                <div className="trainee-cell">
+                                                    <strong>
+                                                        {row.trainee.name}
+                                                    </strong>
+                                                    <small>
+                                                        {
+                                                            row.trainee
+                                                                .training_code
+                                                        }
+                                                    </small>
+                                                </div>
                                             </div>
                                         </th>
                                         <td>
@@ -154,8 +163,10 @@ export default function ChooseTrainee({ plan, relationships, search }) {
                         {relationships.data.map((row) => (
                             <article className="panel coach-card" key={row.id}>
                                 <div className="coach-card-title">
-                                    <h2>{row.trainee.name}</h2>
-                                    <Users size={20} aria-hidden="true" />
+                                    <div className="person-identity">
+                                        <PersonAvatar name={row.trainee.name} />
+                                        <h2>{row.trainee.name}</h2>
+                                    </div>
                                 </div>
                                 <p>{row.trainee.training_code}</p>
                                 <CoachStatus

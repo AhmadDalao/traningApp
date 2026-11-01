@@ -1,3 +1,10 @@
+import {
+    Check,
+    Dumbbell,
+    CalendarDays,
+    ShieldCheck,
+    ArrowRight,
+} from "lucide-react";
 import { Head, router, usePage } from "@inertiajs/react";
 import { useState } from "react";
 import {
@@ -22,6 +29,7 @@ export default function SetupTrainee({
         { today, timezone } = usePage().props;
     const [draft, setDraft] = useState(initial),
         [choices, setChoices] = useState(initial.choices);
+    const [reviewExpanded, setReviewExpanded] = useState(false);
     const [step, setStep] = useState(1),
         [preview, setPreview] = useState(null),
         [days, setDays] = useState([]);
@@ -187,7 +195,16 @@ export default function SetupTrainee({
                                     }
                                     onClick={() => setStep(i + 1)}
                                 >
-                                    <span>{i + 1}</span>
+                                    <span>
+                                        {step > i + 1 ? (
+                                            <Check
+                                                size={15}
+                                                aria-hidden="true"
+                                            />
+                                        ) : (
+                                            i + 1
+                                        )}
+                                    </span>
                                     <strong>{name}</strong>
                                 </button>
                             </li>
@@ -200,7 +217,7 @@ export default function SetupTrainee({
                     </p>
                 )}
                 {step === 1 && (
-                    <section className="panel coach-card">
+                    <section className="panel coach-card setup-training-panel">
                         <h2>1. Choose Training Program</h2>
                         <p>
                             Choose training first. Your selection stays a draft
@@ -368,7 +385,21 @@ export default function SetupTrainee({
                 {step === 2 && (
                     <section className="panel coach-card">
                         <h2>2. Dates & Schedule</h2>
-                        <h3>{selected?.name}</h3>
+                        <div className="setup-selected-training">
+                            <span className="feature-icon">
+                                <Dumbbell size={22} aria-hidden="true" />
+                            </span>
+                            <div>
+                                <small>Training program</small>
+                                <h3>{selected?.name}</h3>
+                            </div>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setStep(1)}
+                            >
+                                Change training
+                            </Button>
+                        </div>
                         {scheduled ? (
                             <p className="coach-callout">
                                 Schedule already active. Activation will
@@ -376,132 +407,235 @@ export default function SetupTrainee({
                                 trainee’s Calendar for later changes.
                             </p>
                         ) : (
-                            <>
-                                <div className="form-grid">
-                                    <Field label="Training starts" required>
-                                        <input
-                                            type="date"
-                                            min={today}
-                                            value={choices.start_date || ""}
-                                            onChange={(e) => {
-                                                setChoices((c) => ({
-                                                    ...c,
-                                                    start_date: e.target.value,
-                                                    time_overrides: {},
-                                                }));
-                                                setPreview(null);
-                                            }}
-                                        />
-                                    </Field>
-                                    {selected?.structure_type === "simple" && (
-                                        <>
-                                            <Field label="Schedule mode">
-                                                <select
-                                                    value={
-                                                        choices.schedule_mode
-                                                    }
-                                                    onChange={(e) =>
-                                                        update(
-                                                            "schedule_mode",
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                >
-                                                    <option value="fixed">
-                                                        Fixed
-                                                    </option>
-                                                    <option value="ongoing">
-                                                        Ongoing
-                                                    </option>
-                                                </select>
-                                            </Field>
-                                            {choices.schedule_mode ===
-                                                "fixed" && (
-                                                <Field
-                                                    label="Training ends"
-                                                    required
-                                                >
-                                                    <input
-                                                        type="date"
-                                                        min={
-                                                            choices.start_date ||
-                                                            today
-                                                        }
-                                                        value={
-                                                            choices.end_date ||
-                                                            ""
-                                                        }
-                                                        onChange={(e) =>
-                                                            update(
-                                                                "end_date",
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                    />
-                                                </Field>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                                <p>
-                                    Coaching will start today. Training may
-                                    start later. Leave a workout time empty for
-                                    Anytime.
-                                </p>
-                                {days.map((day) => {
-                                    const option = choices.day_options[
-                                        day.id
-                                    ] || {
-                                        weekdays: day.weekdays || [],
-                                        time: day.time,
-                                    };
-                                    return (
-                                        <div
-                                            className="setup-day-option"
-                                            key={day.id}
-                                        >
-                                            <h3>{day.title}</h3>
-                                            <WeekdayPicker
-                                                value={option.weekdays}
-                                                onChange={(weekdays) => {
+                            <div className="setup-dates-layout">
+                                <div>
+                                    <div className="form-grid">
+                                        <Field label="Training starts" required>
+                                            <input
+                                                type="date"
+                                                min={today}
+                                                value={choices.start_date || ""}
+                                                onChange={(e) => {
                                                     setChoices((c) => ({
                                                         ...c,
-                                                        day_options: {
-                                                            ...c.day_options,
-                                                            [day.id]: {
-                                                                ...option,
-                                                                weekdays,
-                                                            },
-                                                        },
+                                                        start_date:
+                                                            e.target.value,
                                                         time_overrides: {},
                                                     }));
                                                     setPreview(null);
                                                 }}
                                             />
-                                            <Field
-                                                label={`Time for ${day.title} (optional)`}
-                                            >
-                                                <input
-                                                    type="time"
-                                                    value={option.time || ""}
-                                                    onChange={(e) =>
-                                                        update("day_options", {
-                                                            ...choices.day_options,
-                                                            [day.id]: {
-                                                                ...option,
-                                                                time:
+                                        </Field>
+                                        {selected?.structure_type ===
+                                            "simple" && (
+                                            <>
+                                                <Field label="Schedule mode">
+                                                    <select
+                                                        value={
+                                                            choices.schedule_mode
+                                                        }
+                                                        onChange={(e) =>
+                                                            update(
+                                                                "schedule_mode",
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    >
+                                                        <option value="fixed">
+                                                            Fixed
+                                                        </option>
+                                                        <option value="ongoing">
+                                                            Ongoing
+                                                        </option>
+                                                    </select>
+                                                </Field>
+                                                {choices.schedule_mode ===
+                                                    "fixed" && (
+                                                    <Field
+                                                        label="Training ends"
+                                                        required
+                                                    >
+                                                        <input
+                                                            type="date"
+                                                            min={
+                                                                choices.start_date ||
+                                                                today
+                                                            }
+                                                            value={
+                                                                choices.end_date ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) =>
+                                                                update(
+                                                                    "end_date",
                                                                     e.target
-                                                                        .value ||
-                                                                    null,
+                                                                        .value,
+                                                                )
+                                                            }
+                                                        />
+                                                    </Field>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <p>
+                                        Coaching will start today. Training may
+                                        start later. Leave a workout time empty
+                                        for Anytime.
+                                    </p>
+                                    {days.map((day) => {
+                                        const option = choices.day_options[
+                                            day.id
+                                        ] || {
+                                            weekdays: day.weekdays || [],
+                                            time: day.time,
+                                        };
+                                        return (
+                                            <div
+                                                className="setup-day-option"
+                                                key={day.id}
+                                            >
+                                                <h3>{day.title}</h3>
+                                                <WeekdayPicker
+                                                    value={option.weekdays}
+                                                    onChange={(weekdays) => {
+                                                        setChoices((c) => ({
+                                                            ...c,
+                                                            day_options: {
+                                                                ...c.day_options,
+                                                                [day.id]: {
+                                                                    ...option,
+                                                                    weekdays,
+                                                                },
                                                             },
-                                                        })
-                                                    }
+                                                            time_overrides: {},
+                                                        }));
+                                                        setPreview(null);
+                                                    }}
                                                 />
-                                            </Field>
-                                        </div>
-                                    );
-                                })}
-                            </>
+                                                <Field
+                                                    label={`Time for ${day.title} (optional)`}
+                                                >
+                                                    <input
+                                                        type="time"
+                                                        value={
+                                                            option.time || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                            update(
+                                                                "day_options",
+                                                                {
+                                                                    ...choices.day_options,
+                                                                    [day.id]: {
+                                                                        ...option,
+                                                                        time:
+                                                                            e
+                                                                                .target
+                                                                                .value ||
+                                                                            null,
+                                                                    },
+                                                                },
+                                                            )
+                                                        }
+                                                    />
+                                                </Field>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <aside
+                                    className="setup-week-preview"
+                                    aria-label="Weekly schedule preview"
+                                >
+                                    <h3>
+                                        <CalendarDays
+                                            size={18}
+                                            aria-hidden="true"
+                                        />{" "}
+                                        Weekly schedule
+                                    </h3>
+                                    <p>
+                                        Your weekly pattern. Review exact dates
+                                        before activation.
+                                    </p>
+                                    <ul>
+                                        {[1, 2, 3, 4, 5, 6, 0].map(
+                                            (weekday) => {
+                                                const workouts = days.filter(
+                                                    (day) =>
+                                                        (
+                                                            choices.day_options[
+                                                                day.id
+                                                            ]?.weekdays ||
+                                                            day.weekdays ||
+                                                            []
+                                                        ).includes(weekday),
+                                                );
+                                                return (
+                                                    <li key={weekday}>
+                                                        <span>
+                                                            {
+                                                                [
+                                                                    "Sun",
+                                                                    "Mon",
+                                                                    "Tue",
+                                                                    "Wed",
+                                                                    "Thu",
+                                                                    "Fri",
+                                                                    "Sat",
+                                                                ][weekday]
+                                                            }
+                                                        </span>
+                                                        <div>
+                                                            {workouts.length ? (
+                                                                workouts.map(
+                                                                    (day) => (
+                                                                        <p
+                                                                            key={
+                                                                                day.id
+                                                                            }
+                                                                        >
+                                                                            <strong>
+                                                                                {
+                                                                                    day.title
+                                                                                }
+                                                                            </strong>
+                                                                            <small>
+                                                                                {(
+                                                                                    choices
+                                                                                        .day_options[
+                                                                                        day
+                                                                                            .id
+                                                                                    ] ||
+                                                                                    day
+                                                                                )
+                                                                                    .time ||
+                                                                                    "Anytime"}
+                                                                            </small>
+                                                                        </p>
+                                                                    ),
+                                                                )
+                                                            ) : (
+                                                                <small>
+                                                                    No workout
+                                                                </small>
+                                                            )}
+                                                        </div>
+                                                    </li>
+                                                );
+                                            },
+                                        )}
+                                    </ul>
+                                    <p className="setup-preview-note">
+                                        <ShieldCheck
+                                            size={16}
+                                            aria-hidden="true"
+                                        />{" "}
+                                        Coaching starts today. Your training
+                                        dates stay separate.
+                                    </p>
+                                </aside>
+                            </div>
                         )}
                         <div className="form-actions">
                             <Button
@@ -519,7 +653,18 @@ export default function SetupTrainee({
                 {step === 3 && (
                     <div className="setup-review-grid">
                         <section className="panel coach-card setup-review-training">
-                            <h2>Training Program</h2>
+                            <div className="coach-card-title">
+                                <h2>
+                                    <Dumbbell size={20} aria-hidden="true" />{" "}
+                                    Training Program
+                                </h2>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setStep(1)}
+                                >
+                                    Change training
+                                </Button>
+                            </div>
                             <h3>{preview?.training?.name || selected?.name}</h3>
                             {preview && (
                                 <p>
@@ -747,7 +892,21 @@ export default function SetupTrainee({
                             </div>
                         </section>
                         <section className="panel coach-card setup-review-schedule">
-                            <h2>Training Schedule</h2>
+                            <div className="coach-card-title">
+                                <h2>
+                                    <CalendarDays
+                                        size={20}
+                                        aria-hidden="true"
+                                    />{" "}
+                                    Training Schedule
+                                </h2>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setStep(2)}
+                                >
+                                    Change dates & schedule
+                                </Button>
+                            </div>
                             {preview && (
                                 <>
                                     <h3>
@@ -774,151 +933,200 @@ export default function SetupTrainee({
                                         </div>
                                     )}
                                     <ul className="setup-review-rows">
-                                        {preview.sessions.map((row) => {
-                                            const key = `${row.training_day_id}:${row.scheduled_date}`;
-                                            return (
-                                                <li key={row.key}>
-                                                    <div>
-                                                        <strong>
-                                                            {row.title}
-                                                        </strong>
-                                                        {row.program_week && (
-                                                            <small>
-                                                                Week{" "}
-                                                                {
-                                                                    row.program_week
-                                                                }{" "}
-                                                                ·{" "}
-                                                                {
-                                                                    row
-                                                                        .program_context
-                                                                        ?.block_name
-                                                                }
-                                                            </small>
-                                                        )}
-                                                        <span>
-                                                            <DateLabel
-                                                                date={
-                                                                    row.scheduled_date
-                                                                }
-                                                            />{" "}
-                                                            ·{" "}
-                                                            {row.scheduled_time ? (
-                                                                <TimeLabel
-                                                                    time={
-                                                                        row.scheduled_time
+                                        {preview.sessions.map(
+                                            (row, rowIndex) => {
+                                                const key = `${row.training_day_id}:${row.scheduled_date}`;
+                                                return (
+                                                    <li
+                                                        key={row.key}
+                                                        hidden={
+                                                            !reviewExpanded &&
+                                                            rowIndex >= 8 &&
+                                                            row.issues
+                                                                .length === 0
+                                                        }
+                                                    >
+                                                        <div>
+                                                            <strong>
+                                                                {row.title}
+                                                            </strong>
+                                                            {row.program_week && (
+                                                                <small>
+                                                                    Week{" "}
+                                                                    {
+                                                                        row.program_week
+                                                                    }{" "}
+                                                                    ·{" "}
+                                                                    {
+                                                                        row
+                                                                            .program_context
+                                                                            ?.block_name
                                                                     }
-                                                                />
-                                                            ) : row.scheduled_date ===
-                                                              today ? (
-                                                                "Anytime today"
-                                                            ) : (
-                                                                "Anytime"
+                                                                </small>
                                                             )}
-                                                        </span>
-                                                        {row.reused && (
-                                                            <small>
-                                                                Existing ·
-                                                                preserved
-                                                            </small>
-                                                        )}
-                                                    </div>
-                                                    {row.issues.map(
-                                                        (message) => (
-                                                            <p
-                                                                className="field-error"
-                                                                key={message}
-                                                            >
-                                                                {message}
-                                                            </p>
-                                                        ),
-                                                    )}
-                                                    {!row.reused &&
-                                                        row.scheduled_date >=
-                                                            today && (
-                                                            <Field
-                                                                label={`Time for ${row.title} on ${row.scheduled_date}`}
-                                                            >
-                                                                <div className="setup-time-correction">
-                                                                    <input
-                                                                        type="time"
-                                                                        value={
-                                                                            (Object.hasOwn(
-                                                                                choices.time_overrides,
-                                                                                key,
-                                                                            )
-                                                                                ? choices
-                                                                                      .time_overrides[
-                                                                                      key
-                                                                                  ]
-                                                                                : row.scheduled_time
-                                                                            )?.slice(
-                                                                                0,
-                                                                                5,
-                                                                            ) ||
-                                                                            ""
+                                                            <span>
+                                                                <DateLabel
+                                                                    date={
+                                                                        row.scheduled_date
+                                                                    }
+                                                                />{" "}
+                                                                ·{" "}
+                                                                {row.scheduled_time ? (
+                                                                    <TimeLabel
+                                                                        time={
+                                                                            row.scheduled_time
                                                                         }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) => {
-                                                                            const next =
-                                                                                {
-                                                                                    ...choices,
-                                                                                    time_overrides:
-                                                                                        {
-                                                                                            ...choices.time_overrides,
-                                                                                            [key]:
-                                                                                                e
-                                                                                                    .target
-                                                                                                    .value ||
-                                                                                                null,
-                                                                                        },
-                                                                                };
-                                                                            setChoices(
-                                                                                next,
-                                                                            );
-                                                                            review(
-                                                                                3,
-                                                                                next,
-                                                                            );
-                                                                        }}
                                                                     />
-                                                                    <Button
-                                                                        variant="secondary"
-                                                                        disabled={
-                                                                            busy
-                                                                        }
-                                                                        onClick={() => {
-                                                                            const next =
-                                                                                {
-                                                                                    ...choices,
-                                                                                    time_overrides:
-                                                                                        {
-                                                                                            ...choices.time_overrides,
-                                                                                            [key]: null,
-                                                                                        },
-                                                                                };
-                                                                            setChoices(
-                                                                                next,
-                                                                            );
-                                                                            review(
-                                                                                3,
-                                                                                next,
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        {row.scheduled_date ===
-                                                                        today
-                                                                            ? "Anytime Today"
-                                                                            : "Anytime"}
-                                                                    </Button>
-                                                                </div>
-                                                            </Field>
+                                                                ) : row.scheduled_date ===
+                                                                  today ? (
+                                                                    "Anytime today"
+                                                                ) : (
+                                                                    "Anytime"
+                                                                )}
+                                                            </span>
+                                                            {row.reused && (
+                                                                <small>
+                                                                    Existing ·
+                                                                    preserved
+                                                                </small>
+                                                            )}
+                                                        </div>
+                                                        {row.issues.map(
+                                                            (message) => (
+                                                                <p
+                                                                    className="field-error"
+                                                                    key={
+                                                                        message
+                                                                    }
+                                                                >
+                                                                    {message}
+                                                                </p>
+                                                            ),
                                                         )}
-                                                </li>
-                                            );
-                                        })}
+                                                        {!row.reused &&
+                                                            row.scheduled_date >=
+                                                                today && (
+                                                                <Field
+                                                                    label={`Time for ${row.title} on ${row.scheduled_date}`}
+                                                                >
+                                                                    <div className="setup-time-correction">
+                                                                        <input
+                                                                            type="time"
+                                                                            value={
+                                                                                (Object.hasOwn(
+                                                                                    choices.time_overrides,
+                                                                                    key,
+                                                                                )
+                                                                                    ? choices
+                                                                                          .time_overrides[
+                                                                                          key
+                                                                                      ]
+                                                                                    : row.scheduled_time
+                                                                                )?.slice(
+                                                                                    0,
+                                                                                    5,
+                                                                                ) ||
+                                                                                ""
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) => {
+                                                                                const next =
+                                                                                    {
+                                                                                        ...choices,
+                                                                                        time_overrides:
+                                                                                            {
+                                                                                                ...choices.time_overrides,
+                                                                                                [key]:
+                                                                                                    e
+                                                                                                        .target
+                                                                                                        .value ||
+                                                                                                    null,
+                                                                                            },
+                                                                                    };
+                                                                                setChoices(
+                                                                                    next,
+                                                                                );
+                                                                                review(
+                                                                                    3,
+                                                                                    next,
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                        <Button
+                                                                            variant="secondary"
+                                                                            disabled={
+                                                                                busy
+                                                                            }
+                                                                            onClick={() => {
+                                                                                const next =
+                                                                                    {
+                                                                                        ...choices,
+                                                                                        time_overrides:
+                                                                                            {
+                                                                                                ...choices.time_overrides,
+                                                                                                [key]: null,
+                                                                                            },
+                                                                                    };
+                                                                                setChoices(
+                                                                                    next,
+                                                                                );
+                                                                                review(
+                                                                                    3,
+                                                                                    next,
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            {row.scheduled_date ===
+                                                                            today
+                                                                                ? "Anytime Today"
+                                                                                : "Anytime"}
+                                                                        </Button>
+                                                                    </div>
+                                                                </Field>
+                                                            )}
+                                                    </li>
+                                                );
+                                            },
+                                        )}
                                     </ul>
+                                    {preview.sessions.length > 8 && (
+                                        <Button
+                                            variant="secondary"
+                                            onClick={() =>
+                                                setReviewExpanded(
+                                                    !reviewExpanded,
+                                                )
+                                            }
+                                        >
+                                            {reviewExpanded
+                                                ? "Show fewer sessions"
+                                                : `View all ${preview.sessions.length} sessions`}
+                                        </Button>
+                                    )}
+                                    {preview.valid && (
+                                        <div className="setup-ready">
+                                            <Check
+                                                size={22}
+                                                aria-hidden="true"
+                                            />
+                                            <div>
+                                                <strong>
+                                                    Ready to{" "}
+                                                    {operation === "resume"
+                                                        ? "resume"
+                                                        : operation === "renew"
+                                                          ? "renew"
+                                                          : "activate"}
+                                                </strong>
+                                                <p>
+                                                    {ctx.trainee.name} will have
+                                                    access to the reviewed
+                                                    training and schedule.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </>
                             )}
                             <Button

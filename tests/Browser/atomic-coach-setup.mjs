@@ -134,9 +134,8 @@ try {
         }
         await fit(`Review ${width}x${height}`);
         assert.equal(await page.locator(".setup-review-rows li").count(), 48);
-        await page
-            .locator(".setup-review-rows")
-            .evaluate((e) => (e.scrollTop = e.scrollHeight));
+        await button("View all 48 sessions").click();
+        pass("Full reviewed schedule expands without an internal scrollbar");
         await page
             .locator(".setup-review-rows li")
             .last()

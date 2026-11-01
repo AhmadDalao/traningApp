@@ -15,6 +15,8 @@ import {
     UserRound,
     ChevronDown,
     Users,
+    Bell,
+    Settings,
 } from "lucide-react";
 import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
 import { TraineeNav } from "../Features/CoachingUI";
@@ -99,7 +101,9 @@ export default function AppLayout({ children }) {
               },
           ];
     return (
-        <div className="app">
+        <div
+            className={`app journey-app ${coach ? "coach-workspace" : "personal-workspace"}`}
+        >
             <a className="skip-link" href="#main">
                 Skip to content
             </a>
@@ -132,7 +136,7 @@ export default function AppLayout({ children }) {
                 <div className="nav-label">
                     {coach ? "COACH WORKSPACE" : "PERSONAL WORKSPACE"}
                 </div>
-                <nav>
+                <nav aria-label="Main navigation">
                     {nav.map(({ href, label, icon: Icon, active }) => (
                         <Link
                             key={href}
@@ -145,6 +149,21 @@ export default function AppLayout({ children }) {
                             {active && <span className="nav-dot" />}
                         </Link>
                     ))}
+                    <Link
+                        href="/notifications"
+                        className={`nav-item ${url.startsWith("/notifications") ? "active" : ""}`}
+                        onClick={closeNavigation}
+                    >
+                        <Bell size={19} aria-hidden="true" /> Notifications
+                    </Link>
+                    <Link
+                        href="/profile"
+                        className={`nav-item ${url.startsWith("/profile") ? "active" : ""}`}
+                        onClick={closeNavigation}
+                    >
+                        <Settings size={19} aria-hidden="true" /> Profile &
+                        settings
+                    </Link>
                 </nav>
                 <div className="sidebar-bottom">
                     <div className="sidebar-note">

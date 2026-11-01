@@ -236,7 +236,10 @@ export default function Index({
                             )}
                         </section>
                     </div>
-                    <section aria-labelledby="exercise-highlights">
+                    <section
+                        className="panel coach-card exercise-highlights-panel"
+                        aria-labelledby="exercise-highlights"
+                    >
                         <div className="coach-card-title">
                             <h2 id="exercise-highlights">
                                 <TrendingUp size={20} aria-hidden="true" />{" "}
@@ -357,32 +360,36 @@ export default function Index({
                 </div>
                 {summary.current !== null ? (
                     <>
-                        <div className="body-summary-values">
-                            <div>
-                                <span>Current</span>
-                                <strong>{formatWeight(summary.current)}</strong>
+                        <div className="body-summary-visual">
+                            <div className="body-summary-values">
+                                <div>
+                                    <span>Current</span>
+                                    <strong>
+                                        {formatWeight(summary.current)}
+                                    </strong>
+                                </div>
+                                {summary.target !== null && (
+                                    <div>
+                                        <span>Target</span>
+                                        <strong>
+                                            {formatWeight(summary.target)}
+                                        </strong>
+                                    </div>
+                                )}
+                                {summary.change !== null && (
+                                    <div>
+                                        <span>Change from first entry</span>
+                                        <strong>
+                                            {summary.change > 0 ? "+" : ""}
+                                            {summary.change} kg
+                                        </strong>
+                                    </div>
+                                )}
                             </div>
-                            {summary.target !== null && (
-                                <div>
-                                    <span>Target</span>
-                                    <strong>
-                                        {formatWeight(summary.target)}
-                                    </strong>
-                                </div>
-                            )}
-                            {summary.change !== null && (
-                                <div>
-                                    <span>Change from first entry</span>
-                                    <strong>
-                                        {summary.change > 0 ? "+" : ""}
-                                        {summary.change} kg
-                                    </strong>
-                                </div>
+                            {trend.length > 1 && (
+                                <BodyWeightChart entries={trend} />
                             )}
                         </div>
-                        {trend.length > 1 && (
-                            <BodyWeightChart entries={trend} />
-                        )}
                     </>
                 ) : (
                     <p>No body-weight measurements recorded yet.</p>

@@ -158,10 +158,39 @@ try {
     await matrix("templates");
     await button("Next: Dates & Schedule").click();
     await page.getByRole("heading", { name: "2. Dates & Schedule" }).waitFor();
+    await page.getByLabel("Friday", { exact: true }).uncheck();
+    await page.getByLabel("Saturday", { exact: true }).check();
+    await page.getByLabel("Time for Full body (optional)").fill("21:15");
+    const weekly = page.getByRole("complementary", {
+        name: "Weekly schedule preview",
+    });
+    assert.ok(
+        (
+            await weekly.locator("li").filter({ hasText: /^Sat/ }).innerText()
+        ).includes("Full body"),
+    );
+    assert.ok(
+        !(
+            await weekly.locator("li").filter({ hasText: /^Fri/ }).innerText()
+        ).includes("Full body"),
+    );
+    assert.equal(await weekly.getByText("21:15", { exact: true }).count(), 4);
+    pass("Weekly preview reflects weekday and optional-time edits immediately");
     await matrix("dates");
     await button("Review subscription & calendar").click();
     await page.locator(".setup-review-rows li").first().waitFor();
     assert.equal(await page.locator(".setup-review-rows li").count(), 48);
+    assert.equal(
+        await page.locator(".setup-review-rows li:visible").count(),
+        8,
+    );
+    await button("View all 48 sessions").click();
+    assert.equal(
+        await page.locator(".setup-review-rows li:visible").count(),
+        48,
+    );
+    await button("Show fewer sessions").click();
+    pass("Review expands all sessions without dropping any proposed dates");
     await matrix("review");
     await page.setViewportSize({ width: 320, height: 480 });
     await button("Complete Setup").scrollIntoViewIfNeeded();

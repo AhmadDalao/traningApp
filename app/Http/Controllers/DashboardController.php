@@ -31,6 +31,7 @@ class DashboardController extends Controller
             'checkIn' => $checkIn ? ['last_weight' => $latestWeight?->weight_kg ?? $profile->current_weight_kg, 'last_date' => $latestWeight?->recorded_date?->toDateString()] : null,
             'profileIncomplete' => ! $profile?->onboarding_completed_at,
             'stats' => ['completed' => (clone $week)->where('status', 'completed')->count(), 'planned' => (clone $week)->where('status', 'planned')->count(), 'today' => $today->count(), 'upcoming' => (clone $upcoming)->count()],
+            'recentWorkout' => $request->user()->scheduleEntries()->where('status', 'completed')->latest('completed_at')->latest('id')->first(['id', 'title', 'scheduled_date', 'icon', 'entry_type', 'focus_area']),
             'activeWorkout' => $request->user()->scheduleEntries()->activeWorkout()->first(['id', 'title', 'started_at']),
             'todayEntries' => $today, 'upcomingEntries' => $upcoming->get(),
             'plans' => $request->user()->personalPlans()->with('trainingDays')->orderBy('name')->get(),

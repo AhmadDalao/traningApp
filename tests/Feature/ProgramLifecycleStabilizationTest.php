@@ -368,7 +368,7 @@ class ProgramLifecycleStabilizationTest extends TestCase
             $this->assertSame(1, $service->position($run)['current_week']);
             $this->assertSame(0, $service->position($run)['completed_workouts']);
         }
-        $this->get('/dashboard')->assertInertia(fn (Assert $p) => $p->has('programRuns', 2));
+        $this->get('/dashboard')->assertInertia(fn (Assert $p) => $p->has('programRuns', 2)->where('programRuns.0.progress_percent', 0)->where('programRuns.1.progress_percent', 0));
     }
 
     public function test_adherence_counts_due_skipped_and_missed_but_excludes_future_and_rest(): void

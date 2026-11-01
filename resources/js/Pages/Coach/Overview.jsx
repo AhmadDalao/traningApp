@@ -1,3 +1,4 @@
+import PersonAvatar from "../../Components/PersonAvatar";
 import {
     Users,
     CalendarDays,
@@ -22,7 +23,8 @@ function SessionList({ entries, empty }) {
                     href={`/coach/trainees/${entry.user_id}/schedule-entries/${entry.id}`}
                     key={entry.id}
                 >
-                    <div>
+                    <PersonAvatar name={entry.trainee_name} />
+                    <div className="coach-session-copy">
                         <strong>{entry.trainee_name}</strong>
                         <span>{entry.title}</span>
                         {entry.scheduled_date && (
@@ -77,7 +79,8 @@ export default function Overview({
                                 key={row.id}
                                 href={row.action.url}
                             >
-                                <div>
+                                <PersonAvatar name={row.trainee.name} />
+                                <div className="coach-session-copy">
                                     <strong>{row.trainee.name}</strong>
                                     <span>{row.reason}</span>
                                     <small>{row.action.label} →</small>
@@ -85,7 +88,12 @@ export default function Overview({
                                 <TraineeState state={row.display_state} />
                             </Link>
                         ))}
-                        {!attention.length && <p>Everyone is on track.</p>}
+                        {!attention.length && (
+                            <p className="on-track">
+                                <CheckCircle2 size={18} aria-hidden="true" />{" "}
+                                Everyone is on track.
+                            </p>
+                        )}
                     </div>
                 </section>
                 <section className="panel coach-card coach-today">
@@ -99,32 +107,45 @@ export default function Overview({
                         empty="No upcoming sessions. Open a trainee to schedule their next workout."
                     />
                 </section>
-                <section className="panel coach-card coach-pending">
-                    <div className="coach-card-title">
-                        <h2>Pending requests</h2>
-                        <Link href="/coach/trainees?status=pending">
-                            View requests →
-                        </Link>
-                    </div>
-                    {pending.map((row) => (
-                        <p key={row.id}>
-                            <strong>{row.trainee.name}</strong> · Waiting for
-                            acceptance
-                        </p>
-                    ))}
-                    {!pending.length && <p>No requests awaiting acceptance.</p>}
-                </section>
+                {pending.length > 0 && (
+                    <section className="panel coach-card coach-pending">
+                        <div className="coach-card-title">
+                            <h2>Pending requests</h2>
+                            <Link href="/coach/trainees?status=pending">
+                                View requests →
+                            </Link>
+                        </div>
+                        {pending.map((row) => (
+                            <p key={row.id}>
+                                <strong>{row.trainee.name}</strong> · Waiting
+                                for acceptance
+                            </p>
+                        ))}
+                    </section>
+                )}
                 <div className="coach-stats coach-summary">
                     {[
-                        ["Active trainees", stats.trainees, Users],
-                        ["Training today", stats.today, CalendarDays],
-                        ["Completed today", stats.completed, CheckCircle2],
-                        ["Need attention", stats.attention, AlertTriangle],
-                    ].map(([label, count, Icon]) => (
+                        ["Active trainees", stats.trainees, Users, "green"],
+                        ["Training today", stats.today, CalendarDays, "blue"],
+                        [
+                            "Completed today",
+                            stats.completed,
+                            CheckCircle2,
+                            "green",
+                        ],
+                        [
+                            "Need attention",
+                            stats.attention,
+                            AlertTriangle,
+                            "orange",
+                        ],
+                    ].map(([label, count, Icon, color]) => (
                         <div className="panel coach-stat" key={label}>
                             <span className="metric-label">
-                                <Icon size={18} aria-hidden="true" />
                                 {label}
+                                <span className={`stat-icon ${color}`}>
+                                    <Icon size={18} aria-hidden="true" />
+                                </span>
                             </span>
                             <strong>{count}</strong>
                         </div>

@@ -6,6 +6,7 @@ export default function SessionStatusActions({
     entry,
     compact = false,
     programHeld = false,
+    startOnly = false,
 }) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
@@ -77,16 +78,18 @@ export default function SessionStatusActions({
                         <Play size={16} />
                         Start workout
                     </Button>
-                    <Button
-                        variant="secondary"
-                        disabled={busy}
-                        onClick={() => update("completed")}
-                        className={compact ? "small" : ""}
-                    >
-                        <Check size={16} />
-                        {busy ? "Saving…" : "Mark completed"}
-                    </Button>
-                    {!compact && (
+                    {!startOnly && (
+                        <Button
+                            variant="secondary"
+                            disabled={busy}
+                            onClick={() => update("completed")}
+                            className={compact ? "small" : ""}
+                        >
+                            <Check size={16} />
+                            {busy ? "Saving…" : "Mark completed"}
+                        </Button>
+                    )}
+                    {!compact && !startOnly && (
                         <Button
                             variant="secondary"
                             disabled={busy}

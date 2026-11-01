@@ -35,9 +35,19 @@ export default function Dashboard({
     checkIn,
     profileIncomplete,
     activeWorkout,
+    recentWorkout,
 }) {
     const { auth, today } = usePage().props;
     const [modal, setModal] = useState(null);
+    const nextWorkout =
+        todayEntries.find(
+            (entry) =>
+                entry.status === "planned" && entry.entry_type === "training",
+        ) ||
+        upcomingEntries.find(
+            (entry) =>
+                entry.status === "planned" && entry.entry_type === "training",
+        );
     const cards = [
         {
             label: "Completed",
@@ -150,6 +160,94 @@ export default function Dashboard({
                     </div>
                 </section>
             )}
+            <div className="dashboard-feature-grid">
+                <section className="panel dashboard-feature">
+                    <h2>Next session</h2>
+                    {nextWorkout ? (
+                        <>
+                            <div className="dashboard-feature-workout">
+                                <DayIcon
+                                    icon={nextWorkout.icon}
+                                    type={nextWorkout.entry_type}
+                                    focus={nextWorkout.focus_area}
+                                    large
+                                />
+                                <div>
+                                    <h3>{nextWorkout.title}</h3>
+                                    <p>
+                                        <DateLabel
+                                            date={nextWorkout.scheduled_date}
+                                        />{" "}
+                                        ·{" "}
+                                        {nextWorkout.scheduled_time?.slice(
+                                            0,
+                                            5,
+                                        ) || "Anytime"}
+                                    </p>
+                                </div>
+                            </div>
+                            <SessionStatusActions
+                                entry={nextWorkout}
+                                startOnly
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <p>
+                                No upcoming workout. Give your week a little
+                                structure.
+                            </p>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setModal("schedule")}
+                            >
+                                Schedule session
+                            </Button>
+                        </>
+                    )}
+                </section>
+                <section className="panel dashboard-feature">
+                    <h2>Recent workout</h2>
+                    {recentWorkout ? (
+                        <>
+                            <div className="dashboard-feature-workout">
+                                <DayIcon
+                                    icon={recentWorkout.icon}
+                                    type={recentWorkout.entry_type}
+                                    focus={recentWorkout.focus_area}
+                                    large
+                                />
+                                <div>
+                                    <h3>{recentWorkout.title}</h3>
+                                    <p>
+                                        <DateLabel
+                                            date={recentWorkout.scheduled_date}
+                                        />{" "}
+                                        · Completed
+                                    </p>
+                                </div>
+                            </div>
+                            <ButtonLink
+                                variant="secondary"
+                                href={`/training-history/${recentWorkout.id}`}
+                            >
+                                View details{" "}
+                                <ArrowRight size={16} aria-hidden="true" />
+                            </ButtonLink>
+                        </>
+                    ) : (
+                        <>
+                            <p>Your completed workouts will appear here.</p>
+                            <ButtonLink
+                                variant="secondary"
+                                href="/training-history"
+                            >
+                                View history
+                            </ButtonLink>
+                        </>
+                    )}
+                </section>
+            </div>
             <div className="stats-grid">
                 {cards.map(({ label, value, note, icon: Icon, color }) => (
                     <div className="stat-card" key={label}>
@@ -184,14 +282,13 @@ export default function Dashboard({
                         </TextLink>
                     </div>
                     <div
-                        className="dashboard-scroll"
+                        className="dashboard-session-list"
                         role="region"
                         aria-label="Today's sessions"
-                        tabIndex={0}
                     >
                         {todayEntries.length ? (
                             <div className="today-list">
-                                {todayEntries.map((entry) => (
+                                {todayEntries.slice(0, 3).map((entry) => (
                                     <article
                                         className={`session-card ${entry.status}`}
                                         key={entry.id}
@@ -270,14 +367,13 @@ export default function Dashboard({
                         <TextLink href="/calendar">View all</TextLink>
                     </div>
                     <div
-                        className="dashboard-scroll"
+                        className="dashboard-session-list"
                         role="region"
                         aria-label="Upcoming sessions"
-                        tabIndex={0}
                     >
                         {upcomingEntries.length ? (
                             <div className="upcoming-list">
-                                {upcomingEntries.map((entry) => (
+                                {upcomingEntries.slice(0, 4).map((entry) => (
                                     <Link
                                         href={`/schedule-entries/${entry.id}`}
                                         key={entry.id}

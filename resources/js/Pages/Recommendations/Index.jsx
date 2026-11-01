@@ -24,7 +24,9 @@ import { emptyPlanFilters, filterPlans } from "../../Features/planDiscovery";
 function PlanCard({ plan, recommended = false }) {
     const { url } = useTraining();
     return (
-        <article className="panel discovery-card">
+        <article
+            className={`panel discovery-card ${recommended ? "recommended-card" : "catalog-row"}`}
+        >
             <div className="recommendation-tags">
                 {recommended && (
                     <span className="badge completed">
@@ -38,6 +40,11 @@ function PlanCard({ plan, recommended = false }) {
                 </span>
                 <span className="discovery-focus">{plan.focus_label}</span>
             </div>
+            {!recommended && (
+                <span className="feature-icon catalog-icon">
+                    <Dumbbell size={23} aria-hidden="true" />
+                </span>
+            )}
             <h3>{plan.name}</h3>
             {plan.structure_type === "program" && (
                 <span className="badge training">
@@ -326,7 +333,7 @@ export default function Index({
                     </h2>
                 </div>
                 {filtered.length ? (
-                    <div className="discovery-grid">
+                    <div className="discovery-catalog">
                         {filtered.map((plan) => (
                             <PlanCard key={plan.key} plan={plan} />
                         ))}

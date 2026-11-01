@@ -1,3 +1,4 @@
+import PersonAvatar from "../Components/PersonAvatar";
 import {
     CheckCircle2,
     PauseCircle,
@@ -96,8 +97,7 @@ export function TraineeNav() {
     const ctx = useTraining(),
         { url: current } = usePage();
     if (!ctx.coaching) return null;
-    const state = ctx.summary,
-        plan = state?.plan;
+    const state = ctx.summary;
     const tabs = [
         ["", "Overview", LayoutDashboard],
         ["/training-plans", "Program", Layers],
@@ -121,11 +121,16 @@ export function TraineeNav() {
                 ← Trainees
             </Link>
             <div className="trainee-identity">
-                <div>
-                    <Link href={ctx.url("")}>
-                        <strong>{ctx.trainee.name}</strong>
-                    </Link>
-                    <small>{ctx.trainee.training_code} · Coaching view</small>
+                <div className="trainee-person">
+                    <PersonAvatar name={ctx.trainee.name} large />
+                    <div>
+                        <Link href={ctx.url("")}>
+                            <strong>{ctx.trainee.name}</strong>
+                        </Link>
+                        <small>
+                            {ctx.trainee.training_code} · Coaching view
+                        </small>
+                    </div>
                 </div>
                 <div>
                     <TraineeState state={state?.display_state} />
@@ -139,16 +144,6 @@ export function TraineeNav() {
                               : ""}
                     </small>
                 </div>
-                {plan && (
-                    <div>
-                        <strong>{plan.name}</strong>
-                        <small>
-                            {plan.current_week
-                                ? `Week ${plan.current_week} of ${plan.duration_weeks}`
-                                : plan.run_status || "Training assigned"}
-                        </small>
-                    </div>
-                )}
             </div>
             <nav className="trainee-desktop-nav" aria-label="Trainee sections">
                 {tabs.map(([path, name, Icon]) => (

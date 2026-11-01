@@ -1,0 +1,1207 @@
+/* The approved journey mockups: light workspace, compact hierarchy, one page scroll. */
+.journey-app {
+    --border: #e5ecf7;
+    --muted: #667792;
+    --radius: 12px;
+    color: #172642;
+}
+.journey-app .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    color: #61718d;
+    padding-top: 24px;
+}
+.journey-app .sidebar > .brand {
+    padding: 0 10px 30px;
+}
+.journey-app .brand,
+.journey-app .brand:hover {
+    color: #172642;
+}
+.journey-app .brand-mark {
+    color: #fff;
+    box-shadow: 0 4px 12px #1763ef17;
+}
+.journey-app .brand-second {
+    color: #75829a;
+}
+.journey-app .nav-label {
+    color: #7c89a0;
+    letter-spacing: 1.2px;
+}
+.journey-app .nav-item {
+    color: #5d6f8c;
+    padding: 12px;
+    gap: 10px;
+}
+.journey-app .nav-item:hover {
+    background: #f4f7fd;
+    color: #1763ef;
+}
+.journey-app .nav-item.active {
+    color: #1763ef;
+    background: #eaf2ff;
+    font-weight: 700;
+}
+.journey-app .nav-item.active svg {
+    color: #1763ef;
+}
+.journey-app .nav-dot {
+    background: #1763ef;
+}
+.journey-app .sidebar-note {
+    display: none;
+}
+.journey-app .user-block {
+    border-color: var(--border);
+}
+.journey-app .user-block strong {
+    color: #273a58;
+}
+.journey-app .user-block .avatar {
+    background: #e7efff;
+    color: #1763ef;
+}
+.journey-app .user-menu {
+    background: white;
+    border-color: var(--border);
+    box-shadow: 0 8px 30px #1b3c7212;
+}
+.journey-app .user-menu a,
+.journey-app .user-menu button {
+    color: #334766;
+}
+.journey-app .topbar {
+    height: 58px;
+    padding-inline: 32px;
+    background: #fbfcff;
+}
+.journey-app .topbar > span {
+    letter-spacing: 1.2px;
+}
+.journey-app .workspace main {
+    max-width: 1440px;
+    padding: 28px 32px 40px;
+}
+.journey-app .page-header {
+    margin-bottom: 22px;
+    gap: 16px;
+}
+.journey-app .page-header h1 {
+    font-size: 27px;
+    letter-spacing: -0.7px;
+}
+.journey-app .page-header p {
+    margin-top: 7px;
+}
+.journey-app .eyebrow {
+    font-size: 10px;
+    margin-bottom: 6px;
+    letter-spacing: 0.7px;
+}
+.journey-app .panel {
+    border-color: var(--border);
+    box-shadow: 0 2px 5px #173b6502;
+}
+.journey-app .coach-card {
+    padding: 20px;
+}
+.journey-app .coach-card h2 {
+    font-size: 16px;
+}
+.journey-app .coach-card-title {
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.journey-app .coach-card-title h2 {
+    margin: 0;
+}
+.journey-app .coach-card p {
+    font-size: 13px;
+}
+.journey-app .btn {
+    border-radius: 7px;
+}
+.journey-app .btn-secondary {
+    color: #315178;
+}
+.journey-app .stat-card {
+    padding: 18px;
+    min-height: 116px;
+    box-shadow: none;
+}
+.journey-app .stats-grid {
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.journey-app .stat-card > strong {
+    font-size: 27px;
+    margin-top: 10px;
+}
+.journey-app .stat-card > p {
+    font-size: 11px;
+}
+.journey-app .stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+}
+.journey-app .badge,
+.journey-app .coach-status {
+    border-radius: 6px;
+    line-height: 1.4;
+}
+.person-avatar {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    background: #e8f1ff;
+    color: #215ccb;
+}
+.person-avatar.large {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    font-size: 15px;
+}
+.person-avatar.tone-1 {
+    background: #eeeaff;
+    color: #6d4fbc;
+}
+.person-avatar.tone-2 {
+    background: #e3f6f2;
+    color: #137565;
+}
+.person-avatar.tone-3 {
+    background: #fff2dd;
+    color: #986719;
+}
+.person-identity,
+.quick-workout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.person-identity > :last-child,
+.quick-workout > :last-child {
+    min-width: 0;
+}
+.feature-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 10px;
+    background: #edf4ff;
+    color: #1763ef;
+}
+.feature-icon.green {
+    background: #e8f8f0;
+    color: #139768;
+}
+.journey-app .trainee-context {
+    padding: 18px 20px 0;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    background: #fff;
+}
+.journey-app .trainee-back {
+    font-size: 12px;
+    color: #667792;
+    margin-bottom: 12px;
+}
+.journey-app .trainee-context .trainee-identity {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+.journey-app .trainee-identity .trainee-person {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+.trainee-person > div {
+    min-width: 0;
+}
+.journey-app .trainee-person strong {
+    font-size: 16px;
+}
+.trainee-person small {
+    display: block;
+    margin-top: 5px;
+}
+.journey-app .trainee-identity > div:last-child:not(.trainee-person) {
+    align-items: flex-end;
+    text-align: right;
+}
+.journey-app .trainee-desktop-nav {
+    margin-top: 16px;
+    border-top: 1px solid #f0f4fa;
+    padding: 5px 0;
+}
+.journey-app .trainee-desktop-nav a {
+    min-height: 44px;
+    padding: 10px 14px;
+    position: relative;
+    font-size: 12px;
+    border-radius: 7px;
+}
+.journey-app .trainee-desktop-nav a.active {
+    background: #edf4ff;
+    color: #1763ef;
+}
+.journey-app .trainee-desktop-nav a.active::after {
+    content: "";
+    height: 2px;
+    position: absolute;
+    bottom: -5px;
+    left: 12px;
+    right: 12px;
+    background: #1763ef;
+    border-radius: 2px;
+}
+.journey-app .coach-operational {
+    gap: 16px;
+    align-items: start;
+}
+.journey-app .coach-summary {
+    order: 0;
+    gap: 14px;
+}
+.journey-app .coach-stat {
+    padding: 16px 18px;
+}
+.journey-app .metric-label {
+    justify-content: space-between;
+    font-size: 12px;
+}
+.journey-app .coach-stat strong {
+    margin-top: 8px;
+    font-size: 26px;
+}
+.journey-app .coach-session {
+    padding: 13px 0;
+    gap: 12px;
+    align-items: center;
+}
+.coach-session-copy {
+    flex: 1;
+}
+.journey-app .coach-session strong {
+    font-size: 13px;
+}
+.journey-app .coach-session span,
+.journey-app .coach-session small {
+    font-size: 12px;
+}
+.journey-app .coach-session .coach-status {
+    flex: none;
+    font-size: 11px;
+}
+.journey-app .coach-pending {
+    order: 6;
+}
+.journey-app .coach-recent {
+    grid-column: 1/-1;
+}
+.on-track {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f0faf5;
+    color: #167952;
+}
+.journey-app .live-filter-bar {
+    padding: 16px 18px;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.journey-app .live-filter-bar .field-label {
+    font-size: 12px;
+}
+.journey-app .trainee-filters {
+    margin: 0 0 16px;
+    gap: 6px;
+}
+.journey-app .trainee-filters button {
+    border-radius: 7px;
+    padding: 8px 11px;
+    font-size: 12px;
+}
+.journey-app .trainee-filters button[aria-pressed="true"] {
+    background: #1763ef;
+    border-color: #1763ef;
+    color: white;
+}
+.journey-app .trainee-filters button[aria-pressed="true"] span {
+    color: white;
+}
+.journey-app .trainee-table table {
+    table-layout: auto;
+}
+.journey-app .trainee-table th,
+.journey-app .trainee-table td {
+    padding: 14px 12px;
+    font-size: 12px;
+}
+.journey-app .trainee-table thead th {
+    background: #f7f9fe;
+    color: #647796;
+    white-space: nowrap;
+}
+.journey-app .trainee-table th:first-child {
+    min-width: 175px;
+    width: 22%;
+}
+.journey-app .trainee-table th:last-child {
+    width: auto;
+}
+.journey-app .trainee-table th:nth-child(4) {
+    width: auto;
+}
+.journey-app .trainee-table .btn {
+    white-space: nowrap;
+    font-size: 12px;
+    min-width: 0;
+    padding: 8px 10px;
+}
+.journey-app .trainee-cell small {
+    font-size: 11px;
+}
+.roster-progress {
+    display: block;
+    height: 5px;
+    margin-top: 6px;
+    width: 72px;
+    accent-color: #20b978;
+}
+.journey-app .assignment-actions {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+.journey-app .assignment-actions details {
+    min-width: 72px;
+}
+.trainee-training-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.trainee-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.trainee-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: start;
+}
+.journey-app .current-training {
+    background: #f5f8ff;
+    margin-top: 0;
+    padding: 16px;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.journey-app .current-training > div {
+    flex: 1 1 180px;
+}
+.journey-app .current-training h3 {
+    font-size: 15px;
+    margin: 0 0 5px;
+}
+.trainee-quick-grid .coach-card,
+.trainee-coaching-card {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 10px;
+    min-width: 0;
+}
+.trainee-quick-grid .coach-card > .btn {
+    margin-top: auto;
+}
+.trainee-quick-grid .coach-card h2 {
+    margin: 0 0 4px;
+}
+.quick-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.quick-value > strong {
+    font-size: 25px;
+}
+.quick-value small {
+    font-size: 16px;
+    color: #6f829f;
+}
+.trainee-overview progress {
+    width: 100%;
+    height: 6px;
+    accent-color: #20b978;
+}
+.trainee-attention {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 16px;
+    border-color: #f6d7b5 !important;
+    background: #fffcf5;
+}
+.trainee-attention > div {
+    flex: 1;
+}
+.trainee-attention > svg {
+    color: #ca831f;
+}
+.recent-performance {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+.recent-performance a {
+    font-weight: 600;
+}
+.recent-performance small {
+    color: var(--muted);
+}
+.trainee-goals {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.journey-app .setup-checklist {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #f1f6ff;
+}
+.journey-app .setup-checklist h2 {
+    margin: 0 0 5px;
+}
+.journey-app .setup-steps {
+    margin: 10px 0 22px;
+    gap: 0;
+}
+.journey-app .setup-steps li {
+    min-width: 0;
+    position: relative;
+}
+.journey-app .setup-steps li:not(:last-child)::after {
+    content: "";
+    height: 1px;
+    background: #d9e5f8;
+    position: absolute;
+    right: 10px;
+    top: 22px;
+    width: 20px;
+}
+.journey-app .setup-steps button {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 36px 8px 0;
+    border: 0;
+    background: transparent;
+    border-radius: 4px;
+    font-size: 13px;
+}
+.journey-app .setup-steps button[aria-current="step"] {
+    background: transparent;
+    color: #1763ef;
+}
+.journey-app .setup-steps button[aria-current="step"] > span {
+    background: #1763ef;
+    color: #fff;
+    box-shadow: 0 0 0 4px #eaf2ff;
+}
+.journey-app .setup-steps button > span {
+    flex: 0 0 26px;
+}
+.journey-app .setup-v231 h2 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+.journey-app .setup-training-categories {
+    margin: 18px 0;
+}
+.journey-app .setup-training-categories button {
+    padding: 8px 12px;
+    font-size: 12px;
+}
+.journey-app .setup-training-options {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+}
+.journey-app .setup-training-option {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 9px;
+}
+.journey-app .setup-training-select {
+    padding: 16px;
+    align-items: center;
+}
+.journey-app .setup-training-content {
+    gap: 4px;
+}
+.journey-app .setup-training-content strong {
+    font-size: 14px;
+}
+.journey-app .setup-training-meta,
+.journey-app .setup-training-description {
+    font-size: 12px;
+    line-height: 1.5;
+}
+.journey-app .setup-training-description {
+    -webkit-line-clamp: 2;
+}
+.journey-app .setup-training-status {
+    display: none;
+}
+.journey-app .setup-training-footer {
+    flex: 0 0 160px;
+    align-self: stretch;
+    margin: 0;
+    padding: 12px 16px;
+    border-top: 0;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 12px;
+}
+.setup-selected-training {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #e4edff;
+    background: #f5f8ff;
+    border-radius: 9px;
+    margin: 16px 0 20px;
+}
+.setup-selected-training > div {
+    flex: 1;
+    min-width: 0;
+}
+.setup-selected-training small {
+    color: var(--muted);
+}
+.setup-dates-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+.setup-week-preview {
+    background: #f5f8ff;
+    border: 1px solid #e4edff;
+    border-radius: 10px;
+    padding: 18px;
+}
+.setup-week-preview h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.setup-week-preview > p {
+    margin-top: 8px;
+    font-size: 12px !important;
+    color: var(--muted);
+}
+.setup-week-preview ul {
+    padding: 0;
+    margin: 14px 0;
+    list-style: none;
+}
+.setup-week-preview li {
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid #e3ebf8;
+    padding: 12px 0;
+}
+.setup-week-preview li > span {
+    flex: 0 0 30px;
+    font-size: 12px;
+    color: #5e7598;
+}
+.setup-week-preview li > div {
+    flex: 1;
+    min-width: 0;
+}
+.setup-week-preview li p {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+.setup-week-preview small {
+    font-size: 11px;
+    color: #6c7d98;
+}
+.setup-week-preview strong {
+    font-size: 12px;
+}
+.setup-preview-note {
+    display: flex;
+    gap: 8px;
+    align-items: start;
+}
+.journey-app .setup-day-option {
+    padding: 14px;
+}
+.journey-app .setup-review-grid {
+    gap: 14px;
+}
+.journey-app .setup-review-rows {
+    max-height: none;
+    overflow: visible;
+    gap: 8px;
+}
+.journey-app .setup-review-rows li {
+    padding: 14px;
+    background: #fbfcff;
+}
+.journey-app .setup-review-rows li[hidden] {
+    display: none;
+}
+.setup-ready {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid #ccebdc;
+    background: #edfaf3;
+    border-radius: 10px;
+    color: #176b4c;
+}
+.setup-ready p {
+    margin-top: 3px;
+}
+.journey-app .discovery-filter-panel {
+    padding: 16px;
+}
+.journey-app .discovery-section {
+    margin: 22px 0;
+}
+.journey-app .discovery-section-heading h2 {
+    font-size: 17px;
+    margin: 0;
+}
+.journey-app .discovery-section-heading p {
+    font-size: 12px;
+    margin-top: 5px;
+}
+.journey-app .discovery-card {
+    gap: 8px;
+    padding: 18px;
+}
+.journey-app .discovery-card h3 {
+    font-size: 16px;
+    margin: 5px 0;
+}
+.journey-app .discovery-card > p {
+    font-size: 12px;
+}
+.journey-app .plan-metadata {
+    font-size: 11px;
+    gap: 6px 10px;
+    margin: 4px 0;
+}
+.journey-app .recommendation-reasons {
+    margin: 4px 0 12px;
+    gap: 4px;
+}
+.journey-app .recommended-card > .btn {
+    background: #edf4ff;
+    border-color: #edf4ff;
+    color: #1763ef;
+}
+.discovery-catalog {
+    display: grid;
+    gap: 10px;
+}
+.journey-app .catalog-row {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    gap: 4px 14px;
+    align-items: center;
+}
+.catalog-row .catalog-icon {
+    grid-column: 1;
+    grid-row: 1/5;
+}
+.catalog-row > .recommendation-tags,
+.catalog-row > h3,
+.catalog-row > .plan-metadata,
+.catalog-row > p,
+.catalog-row > .badge {
+    grid-column: 2;
+}
+.catalog-row > .btn {
+    grid-column: 3;
+    grid-row: 1/6;
+    align-self: center;
+    margin: 0 !important;
+}
+.journey-app .catalog-row > p {
+    display: none;
+}
+.journey-app .unified-progress {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.unified-progress > .page-header,
+.unified-progress > .stats-grid,
+.unified-progress > .program-card,
+.unified-progress > .consistency-panel,
+.unified-progress > .sr-only {
+    grid-column: 1/-1;
+}
+.journey-app .unified-progress > .page-header,
+.journey-app .unified-progress > .stats-grid,
+.journey-app .unified-progress > .program-card {
+    margin: 0;
+}
+.journey-app .unified-progress .progress-columns {
+    display: contents;
+}
+.journey-app .unified-progress h2 {
+    font-size: 16px;
+}
+.journey-app .unified-progress .coach-card-title > .btn {
+    font-size: 12px;
+    padding: 8px 10px;
+}
+.journey-app .unified-progress .stat-card strong {
+    font-size: 26px;
+}
+.journey-app .compact-activity li {
+    padding: 11px 0;
+}
+.journey-app .compact-activity a {
+    font-size: 13px;
+}
+.journey-app .compact-activity small {
+    font-size: 11px;
+}
+.journey-app .compact-records > li {
+    padding: 10px 0;
+    font-size: 12px;
+}
+.journey-app .compact-records .inline-link {
+    text-decoration: none;
+    color: #233d61;
+}
+.journey-app .compact-records > li > svg {
+    color: #d59c25;
+}
+.journey-app .exercise-highlight-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+}
+.journey-app .exercise-highlight-grid .coach-card {
+    box-shadow: none;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    padding: 12px 0;
+}
+.journey-app .exercise-highlight-grid .exercise-progress-identity h3 {
+    font-size: 14px;
+}
+.journey-app .exercise-highlight-grid .exercise-progress-identity {
+    margin-bottom: 8px;
+}
+.journey-app .exercise-highlight-grid .btn {
+    margin-top: 8px;
+    font-size: 12px;
+}
+.journey-app .body-summary {
+    margin: 0;
+    align-self: start;
+}
+.journey-app .body-summary-values {
+    gap: 16px;
+    padding: 0 0 10px;
+}
+.journey-app .body-summary-values strong {
+    font-size: 21px;
+}
+.journey-app .body-summary-values span {
+    font-size: 11px;
+}
+.journey-app .body-summary .weight-chart {
+    margin: 0;
+}
+.journey-app .body-summary .weight-chart svg {
+    width: 100%;
+    max-height: 170px;
+}
+.journey-app .body-summary figcaption {
+    font-size: 11px;
+}
+.journey-app .weight-history summary {
+    font-size: 12px;
+}
+.journey-app .program-journey-card {
+    padding: 18px 20px;
+    margin-bottom: 18px;
+}
+.program-journey-card .program-heading {
+    margin-bottom: 10px;
+}
+.program-journey-card .program-heading h2 {
+    font-size: 14px;
+    color: #5e7392;
+}
+.journey-app .program-run-link {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 14px;
+    padding: 16px;
+    border-color: #e0eaff;
+    background: #f4f8ff;
+}
+.program-run-copy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    flex: 1;
+    min-width: 0;
+}
+.program-run-copy > span:not(.badge),
+.program-mini-progress {
+    flex-basis: 100%;
+    font-size: 12px;
+    color: #617697;
+}
+.program-run-copy strong {
+    font-size: 15px;
+}
+.program-mini-progress {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 5px;
+}
+.program-mini-progress progress {
+    flex: 1;
+    width: 100%;
+    height: 6px;
+    accent-color: #1763ef;
+}
+.program-mini-progress small {
+    flex: 0 0 auto;
+    font-size: 10px;
+}
+.program-view {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #1763ef;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.dashboard-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0 0 20px;
+}
+.dashboard-feature {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.dashboard-feature > .btn {
+    margin-top: auto;
+}
+.dashboard-feature-workout {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.dashboard-feature-workout > div {
+    min-width: 0;
+}
+.dashboard-feature-workout p {
+    color: var(--muted);
+    font-size: 12px;
+}
+.journey-app .weekly-check-in {
+    padding: 18px 20px;
+    margin-bottom: 18px;
+}
+.journey-app .dashboard-session-list {
+    padding: 0 20px 20px;
+}
+.journey-app .session-card {
+    padding: 14px;
+}
+.journey-app .dashboard-bottom {
+    margin-top: 20px;
+    padding: 24px;
+}
+.journey-app .schedule-diff-tabs button {
+    background: #f8faff;
+}
+.journey-app .schedule-diff-tabs button.active {
+    background: #edf4ff;
+}
+.journey-app .fc .fc-toolbar-title {
+    font-size: 20px;
+}
+.journey-app .fc .fc-col-header-cell {
+    background: #f7faff;
+    padding: 9px 0;
+}
+.journey-app .fc .fc-daygrid-day-number {
+    font-size: 12px;
+    padding: 9px;
+}
+@media (min-width: 768px) {
+    .journey-app .coach-operational {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .journey-app .coach-recent .coach-session-copy {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: center;
+        gap: 12px;
+    }
+    .journey-app .coach-recent .coach-session-copy span {
+        margin: 0;
+    }
+    .journey-app .setup-review-rows li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 1fr);
+        align-items: center;
+        gap: 18px;
+    }
+    .journey-app .setup-review-rows li > .field-error {
+        grid-column: 1/-1;
+    }
+    .journey-app .setup-review-rows .field {
+        margin: 0;
+    }
+}
+@media (max-width: 1100px) and (min-width: 768px) {
+    .journey-app .workspace main {
+        padding-inline: 22px;
+    }
+    .trainee-training-grid,
+    .setup-dates-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .trainee-quick-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .journey-app .unified-progress {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .journey-app .program-view {
+        display: none;
+    }
+}
+@media (max-width: 767px) {
+    .journey-app .workspace main {
+        padding: 20px 16px 32px;
+    }
+    .journey-app .topbar {
+        display: none;
+    }
+    .journey-app .mobile-top {
+        background: white;
+        border-bottom: 1px solid var(--border);
+        color: #172642;
+    }
+    .journey-app .mobile-top .icon-btn {
+        color: #3f597d;
+    }
+    .journey-app .page-header h1 {
+        font-size: 23px;
+    }
+    .journey-app .coach-card {
+        padding: 16px;
+    }
+    .journey-app .stats-grid {
+        gap: 10px;
+    }
+    .journey-app .stat-card {
+        padding: 14px;
+        min-height: 110px;
+    }
+    .journey-app .stat-card > strong,
+    .journey-app .unified-progress .stat-card strong {
+        font-size: 23px;
+    }
+    .journey-app .trainee-context {
+        padding: 14px 14px 0;
+    }
+    .journey-app .trainee-context .trainee-identity {
+        align-items: start;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .journey-app .trainee-identity > div:last-child:not(.trainee-person) {
+        align-items: start;
+        text-align: left;
+        margin-left: 56px;
+    }
+    .journey-app .trainee-person strong {
+        font-size: 15px;
+    }
+    .journey-app .trainee-mobile-nav {
+        margin-top: 12px;
+        padding-bottom: 14px;
+    }
+    .trainee-training-grid,
+    .trainee-quick-grid,
+    .trainee-detail-grid,
+    .setup-dates-layout,
+    .dashboard-feature-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+    .trainee-attention,
+    .journey-app .setup-checklist {
+        flex-wrap: wrap;
+    }
+    .journey-app .current-training {
+        flex-direction: row;
+        align-items: center;
+        padding: 14px;
+    }
+    .journey-app .current-training > .btn {
+        width: 100%;
+    }
+    .journey-app .setup-steps button {
+        flex-direction: column;
+        align-items: start;
+        padding: 8px;
+        gap: 8px;
+        font-size: 11px;
+    }
+    .journey-app .setup-steps button strong {
+        font-size: 11px;
+    }
+    .journey-app .setup-steps li:not(:last-child)::after {
+        right: 10px;
+        width: calc(100% - 54px);
+    }
+    .journey-app .setup-training-option {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .journey-app .setup-training-footer {
+        flex-basis: auto;
+        padding: 4px 16px;
+        flex-direction: row;
+        border-top: 1px solid var(--border);
+        justify-content: space-between;
+    }
+    .setup-selected-training {
+        flex-wrap: wrap;
+    }
+    .setup-selected-training > .btn {
+        width: 100%;
+    }
+    .journey-app .unified-progress {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+    .journey-app .program-journey-card {
+        padding: 16px;
+    }
+    .journey-app .program-run-link {
+        flex-wrap: wrap;
+        padding: 12px;
+        gap: 10px;
+    }
+    .program-run-copy {
+        flex-basis: calc(100% - 54px);
+    }
+    .program-view {
+        margin-left: 54px;
+    }
+    .journey-app .catalog-row {
+        grid-template-columns: 40px minmax(0, 1fr);
+        padding: 14px;
+        gap: 5px 10px;
+    }
+    .catalog-icon {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+    }
+    .catalog-row > .btn {
+        grid-column: 1/-1;
+        grid-row: auto;
+        margin-top: 8px !important;
+    }
+    .journey-app .assignment-actions {
+        flex-wrap: wrap;
+    }
+    .journey-app .dashboard-session-list {
+        padding: 0 16px 16px;
+    }
+    .journey-app .coach-bounded-list .coach-session {
+        flex-wrap: nowrap;
+    }
+    .journey-app .coach-bounded-list .coach-session .coach-status {
+        max-width: 96px;
+        white-space: normal;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .journey-app *,
+    .journey-app *::before,
+    .journey-app *::after {
+        scroll-behavior: auto;
+        transition-duration: 0.01ms;
+    }
+}
+
+/* Long reviews remain fully available without a second page scrollbar. */
+.journey-app .plan-schedule-preview > .plan-schedule-list {
+    max-height: none;
+    overflow: visible;
+}
+.journey-app .plan-schedule-row[hidden] {
+    display: none;
+}
+.journey-app .schedule-show-all {
+    margin: 14px 0 20px;
+}
+.journey-app .dashboard-feature > .status-actions {
+    margin-top: auto;
+}
+.journey-app .dashboard-feature > .status-actions > .btn {
+    width: 100%;
+}

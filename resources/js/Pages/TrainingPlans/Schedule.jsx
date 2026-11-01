@@ -24,6 +24,7 @@ import {
 import { weekdaySummary } from "../../Components/WeekdayPicker";
 
 function Sessions({ rows, label }) {
+    const [expanded, setExpanded] = useState(false);
     if (!rows.length)
         return (
             <EmptyState
@@ -33,15 +34,11 @@ function Sessions({ rows, label }) {
             />
         );
     return (
-        <div
-            className="plan-schedule-list"
-            role="region"
-            aria-label={label}
-            tabIndex={0}
-        >
-            {rows.map((session) => (
+        <div className="plan-schedule-list" role="region" aria-label={label}>
+            {rows.map((session, index) => (
                 <div
                     className="plan-schedule-row"
+                    hidden={!expanded && index >= 8}
                     key={session.key || session.id}
                 >
                     <div>
@@ -70,6 +67,17 @@ function Sessions({ rows, label }) {
                     </div>
                 </div>
             ))}
+            {rows.length > 8 && (
+                <Button
+                    variant="secondary"
+                    className="schedule-show-all"
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    {expanded
+                        ? "Show fewer sessions"
+                        : `View all ${rows.length} sessions`}
+                </Button>
+            )}
         </div>
     );
 }
@@ -306,6 +314,7 @@ export default function Schedule({ plan, preview }) {
                             : "Completed, skipped, active, saved, historical and independent sessions stay untouched. Older generated sessions are kept because their individual edit history is unknown."}
                 </p>
                 <Sessions
+                    key={group}
                     rows={preview[group]}
                     label={`${group} sessions preview`}
                 />
@@ -404,6 +413,7 @@ export default function Schedule({ plan, preview }) {
                             <>
                                 <h3>Dates to add</h3>
                                 <Sessions
+                                    key={group}
                                     rows={adding}
                                     label="Confirm dates to add"
                                 />
@@ -413,6 +423,7 @@ export default function Schedule({ plan, preview }) {
                             <>
                                 <h3>Dates to remove</h3>
                                 <Sessions
+                                    key={group}
                                     rows={removing}
                                     label="Confirm dates to remove"
                                 />

@@ -1,3 +1,4 @@
+import { Dumbbell, ArrowRight } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import { Button, ButtonLink, DateLabel, StatusBadge } from "../Components/UI";
 import { useTraining } from "./CoachingUI";
@@ -196,9 +197,11 @@ export function ProgramRunCards({ runs = [] }) {
     const { url } = useTraining();
     if (!runs.length) return null;
     return (
-        <section className="panel program-card">
+        <section className="panel program-card program-journey-card">
             <div className="program-heading">
-                <h2>Programs</h2>
+                <h2>
+                    {runs.length === 1 ? "Current program" : "Your programs"}
+                </h2>
                 <ButtonLink variant="secondary" href={url("/program-runs")}>
                     All program runs
                 </ButtonLink>
@@ -210,22 +213,46 @@ export function ProgramRunCards({ runs = [] }) {
                         key={run.id}
                         href={url(`/program-runs/${run.id}`)}
                     >
-                        <strong>{run.name}</strong>
-                        <span className={`badge program-status-${run.status}`}>
-                            {programStatus(run.status)}
+                        <span className="feature-icon">
+                            <Dumbbell size={23} aria-hidden="true" />
                         </span>
-                        {run.status === "paused" && (
-                            <span>
-                                Paused from {run.paused_from} · Resume program →
+                        <div className="program-run-copy">
+                            <strong>{run.name}</strong>
+                            <span
+                                className={`badge program-status-${run.status}`}
+                            >
+                                {programStatus(run.status)}
                             </span>
-                        )}
-                        <span>
-                            {run.current_week
-                                ? `Week ${run.current_week} / ${run.duration_weeks} · ${run.block}`
-                                : run.status}
-                            {run.adherence !== null
-                                ? ` · ${run.adherence}% adherence`
-                                : ""}
+                            {run.status === "paused" && (
+                                <span>
+                                    Paused from {run.paused_from} · Resume
+                                    program →
+                                </span>
+                            )}
+                            <span>
+                                {run.current_week
+                                    ? `Week ${run.current_week} / ${run.duration_weeks} · ${run.block}`
+                                    : run.status}
+                                {run.adherence !== null
+                                    ? ` · ${run.adherence}% adherence`
+                                    : ""}
+                            </span>
+                            {run.progress_percent !== undefined && (
+                                <div className="program-mini-progress">
+                                    <progress
+                                        max="100"
+                                        value={run.progress_percent}
+                                        aria-label="Resolved program weeks"
+                                    />
+                                    <small>
+                                        {run.progress_percent}% complete
+                                    </small>
+                                </div>
+                            )}
+                        </div>
+                        <span className="program-view">
+                            View program{" "}
+                            <ArrowRight size={16} aria-hidden="true" />
                         </span>
                     </Link>
                 ))}

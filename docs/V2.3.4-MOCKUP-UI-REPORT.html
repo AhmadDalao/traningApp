@@ -1,0 +1,1707 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Training Planner v2.3.4 — Mockup UI Implementation</title>
+        <style>
+            :root {
+                color-scheme: light;
+                --blue: #1763ef;
+                --ink: #172642;
+                --muted: #647792;
+                --line: #e1e9f6;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                background: #f5f8fd;
+                color: var(--ink);
+                font:
+                    15px/1.65 system-ui,
+                    -apple-system,
+                    sans-serif;
+            }
+            main {
+                max-width: 1240px;
+                margin: auto;
+                padding: 42px 24px 70px;
+            }
+            a {
+                color: var(--blue);
+                text-underline-offset: 3px;
+            }
+            header {
+                padding: 28px 0 36px;
+            }
+            .eyebrow {
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-size: 11px;
+                color: var(--blue);
+                font-weight: 750;
+            }
+            h1 {
+                font-size: clamp(32px, 5vw, 54px);
+                line-height: 1.08;
+                letter-spacing: -1.8px;
+                max-width: 900px;
+                margin: 18px 0;
+            }
+            header p {
+                max-width: 760px;
+                color: var(--muted);
+                font-size: 17px;
+            }
+            .status {
+                display: inline-flex;
+                gap: 8px;
+                padding: 8px 13px;
+                border-radius: 8px;
+                background: #e6f7ee;
+                color: #176941;
+                font-size: 12px;
+                font-weight: 750;
+            }
+            .release-links {
+                font-size: 13px;
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+            .metrics {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 12px;
+                margin-bottom: 40px;
+            }
+            .metric {
+                padding: 20px;
+                background: white;
+                border: 1px solid var(--line);
+                border-radius: 12px;
+            }
+            .metric b {
+                display: block;
+                font-size: 29px;
+                letter-spacing: -1px;
+            }
+            .metric span {
+                color: var(--muted);
+                font-size: 12px;
+            }
+            .gallery-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 18px;
+                margin: 35px 0 18px;
+            }
+            .gallery-header h2 {
+                margin: 0;
+                font-size: 25px;
+            }
+            .gallery-header p {
+                margin: 4px 0;
+                color: var(--muted);
+                font-size: 13px;
+            }
+            .switcher {
+                display: flex;
+                border: 1px solid var(--line);
+                padding: 4px;
+                border-radius: 10px;
+                background: white;
+            }
+            .switcher button {
+                border: 0;
+                border-radius: 7px;
+                min-height: 40px;
+                padding: 8px 16px;
+                color: var(--muted);
+                background: transparent;
+                font: inherit;
+                font-size: 13px;
+                cursor: pointer;
+            }
+            .switcher button[aria-pressed="true"] {
+                background: var(--blue);
+                color: white;
+            }
+            .gallery {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 20px;
+            }
+            .shot {
+                border: 1px solid var(--line);
+                background: white;
+                border-radius: 14px;
+                overflow: hidden;
+            }
+            .shot-heading {
+                display: flex;
+                gap: 12px;
+                padding: 18px;
+                min-height: 133px;
+            }
+            .shot-heading > span {
+                background: #eaf2ff;
+                color: var(--blue);
+                border-radius: 9px;
+                display: grid;
+                place-items: center;
+                width: 32px;
+                height: 32px;
+                flex: 0 0 32px;
+                font-size: 12px;
+                font-weight: 750;
+            }
+            .shot h3 {
+                margin: 0;
+                font-size: 16px;
+            }
+            .shot p {
+                color: var(--muted);
+                font-size: 12px;
+                margin: 5px 0 0;
+            }
+            .shot a {
+                display: block;
+                background: #f2f5fb;
+                height: 320px;
+                overflow: hidden;
+                border-top: 1px solid var(--line);
+            }
+            .shot img {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            .shot .mobile-shot {
+                display: none;
+            }
+            .gallery.mobile .desktop-shot {
+                display: none;
+            }
+            .gallery.mobile .mobile-shot {
+                display: block;
+                height: 470px;
+            }
+            .mobile-shot img {
+                width: 250px;
+                margin: auto;
+                box-shadow: 0 0 0 1px var(--line);
+            }
+            .caption {
+                color: var(--muted);
+                font-size: 12px;
+                margin: 16px 0 36px;
+            }
+            details {
+                background: white;
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                margin: 36px 0;
+                padding: 18px 22px;
+            }
+            summary {
+                cursor: pointer;
+                font-weight: 700;
+            }
+            nav {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 9px 24px;
+                padding-top: 22px;
+            }
+            nav a {
+                font-size: 12px;
+                text-decoration: none;
+                color: var(--muted);
+                display: flex;
+                gap: 10px;
+            }
+            nav a span {
+                color: var(--blue);
+                font-variant-numeric: tabular-nums;
+            }
+            .report-section {
+                display: grid;
+                grid-template-columns: 32px 1fr;
+                gap: 16px;
+                padding: 25px;
+                background: white;
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                margin: 14px 0;
+                scroll-margin-top: 20px;
+            }
+            .section-no {
+                color: var(--blue);
+                font-size: 12px;
+                padding-top: 5px;
+            }
+            .report-section h2 {
+                font-size: 19px;
+                margin: 0 0 9px;
+                letter-spacing: -0.3px;
+            }
+            .report-section p {
+                margin: 0;
+                color: #485c77;
+            }
+            .report-section > div {
+                min-width: 0;
+            }
+            code {
+                font-size: 12px;
+                overflow-wrap: anywhere;
+            }
+            .files {
+                padding-left: 18px;
+            }
+            .files li {
+                margin: 5px 0;
+            }
+            .table-wrap {
+                overflow: auto;
+                margin-top: 20px;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 13px;
+            }
+            th,
+            td {
+                text-align: left;
+                padding: 10px;
+                border-bottom: 1px solid var(--line);
+            }
+            th {
+                color: var(--muted);
+                font-weight: 600;
+            }
+            footer {
+                padding-top: 24px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+            @media (max-width: 700px) {
+                main {
+                    padding: 18px 14px 35px;
+                }
+                .metrics {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 9px;
+                }
+                .metric {
+                    padding: 15px;
+                }
+                .gallery {
+                    grid-template-columns: 1fr;
+                }
+                .gallery-header {
+                    align-items: start;
+                    flex-direction: column;
+                }
+                .shot-heading {
+                    min-height: 0;
+                }
+                .shot a {
+                    height: 260px;
+                }
+                nav {
+                    grid-template-columns: 1fr;
+                }
+                .report-section {
+                    padding: 19px 16px;
+                    grid-template-columns: 24px 1fr;
+                    gap: 8px;
+                }
+                .report-section h2 {
+                    font-size: 18px;
+                }
+                h1 {
+                    letter-spacing: -1px;
+                }
+                .status {
+                    font-size: 10px;
+                }
+                .release-links {
+                    gap: 12px;
+                }
+                header p {
+                    font-size: 15px;
+                }
+            }
+            @media print {
+                .switcher,
+                details {
+                    display: none;
+                }
+                .gallery {
+                    display: block;
+                }
+                .shot {
+                    break-inside: avoid;
+                    margin-bottom: 20px;
+                }
+                .shot a {
+                    height: auto;
+                }
+                .report-section {
+                    break-inside: avoid;
+                }
+                body {
+                    background: white;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <header>
+                <div class="eyebrow">
+                    Training Planner / v2.3.4 / 1 November 2026
+                </div>
+                <h1>Your coaching journey,<br />now built into the app.</h1>
+                <p>
+                    The two supplied mockups implemented across Coach and
+                    Personal workspaces: lighter navigation, compact cards,
+                    clear setup and one consistent view of training.
+                </p>
+                <span class="status"
+                    >READY — SOURCE VERIFIED · NOT DEPLOYED</span
+                >
+                <div class="release-links">
+                    <a href="#screens">Explore 16 implemented screens</a
+                    ><a href="#s33">Verification results</a
+                    ><a href="v2.3.4-qa/checks.json"
+                        >Machine-readable evidence</a
+                    ><a href="#s44">Deployment hold</a>
+                </div>
+            </header>
+            <div class="metrics">
+                <div class="metric">
+                    <b>16</b><span>Mockup screens covered</span>
+                </div>
+                <div class="metric">
+                    <b>611 × 2</b><span>SQLite + MySQL tests passed</span>
+                </div>
+                <div class="metric">
+                    <b>1,676</b><span>Browser checks passed</span>
+                </div>
+                <div class="metric">
+                    <b>22 / 44</b><span>Original tables / media preserved</span>
+                </div>
+            </div>
+            <div id="screens" class="gallery-header">
+                <div>
+                    <h2>From the mockups to working screens</h2>
+                    <p>
+                        Actual local QA captures. Click any image to inspect it
+                        at full size.
+                    </p>
+                </div>
+                <div class="switcher" aria-label="Screenshot viewport">
+                    <button
+                        type="button"
+                        data-mode="desktop"
+                        aria-pressed="true"
+                    >
+                        Desktop</button
+                    ><button
+                        type="button"
+                        data-mode="mobile"
+                        aria-pressed="false"
+                    >
+                        Mobile
+                    </button>
+                </div>
+            </div>
+            <div class="gallery">
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>01</span>
+                        <div>
+                            <h3>Coach Overview</h3>
+                            <p>
+                                Four clear metrics, attention, upcoming sessions
+                                and compact recent activity.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/01-coach-overview-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/01-coach-overview-desktop.png"
+                            alt="Implemented Coach Overview desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/01-coach-overview-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/01-coach-overview-mobile.png"
+                            alt="Implemented Coach Overview mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>02</span>
+                        <div>
+                            <h3>Trainees</h3>
+                            <p>
+                                Live roster with initials, coaching state and
+                                compact progress; mobile cards stay readable.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/02-trainees-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/02-trainees-desktop.png"
+                            alt="Implemented Trainees desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/02-trainees-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/02-trainees-mobile.png"
+                            alt="Implemented Trainees mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>03</span>
+                        <div>
+                            <h3>Assign to trainee</h3>
+                            <p>
+                                Eligible trainees appear immediately, with live
+                                search and clear assignment state.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/03-assign-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/03-assign-desktop.png"
+                            alt="Implemented Assign to trainee desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/03-assign-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/03-assign-mobile.png"
+                            alt="Implemented Assign to trainee mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>04</span>
+                        <div>
+                            <h3>Find a training plan</h3>
+                            <p>
+                                Search first, three labeled recommendations and
+                                a compact catalog below.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/04-discovery-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/04-discovery-desktop.png"
+                            alt="Implemented Find a training plan desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/04-discovery-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/04-discovery-mobile.png"
+                            alt="Implemented Find a training plan mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>05</span>
+                        <div>
+                            <h3>Choose training</h3>
+                            <p>
+                                Full-width selectable rows and a slim step
+                                indicator, aligned with the trainee header.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/05-training-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/05-training-desktop.png"
+                            alt="Implemented Choose training desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/05-training-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/05-training-mobile.png"
+                            alt="Implemented Choose training mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>06</span>
+                        <div>
+                            <h3>Dates &amp; Schedule</h3>
+                            <p>
+                                Weekday and time choices update the weekly
+                                preview beside the form.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/06-dates-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/06-dates-desktop.png"
+                            alt="Implemented Dates &amp; Schedule desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/06-dates-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/06-dates-mobile.png"
+                            alt="Implemented Dates &amp; Schedule mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>07</span>
+                        <div>
+                            <h3>Review &amp; Activate</h3>
+                            <p>
+                                Training, coverage and schedule reviewed
+                                together; expand all sessions when needed.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/07-review-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/07-review-desktop.png"
+                            alt="Implemented Review &amp; Activate desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/07-review-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/07-review-mobile.png"
+                            alt="Implemented Review &amp; Activate mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>08</span>
+                        <div>
+                            <h3>Trainee Overview</h3>
+                            <p>
+                                One current-training card, service status and
+                                next-workout / week / progress shortcuts.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/08-trainee-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/08-trainee-desktop.png"
+                            alt="Implemented Trainee Overview desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/08-trainee-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/08-trainee-mobile.png"
+                            alt="Implemented Trainee Overview mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>09</span>
+                        <div>
+                            <h3>Training program</h3>
+                            <p>
+                                Existing days, exercises and program controls in
+                                the lighter, shared layout.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/09-program-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/09-program-desktop.png"
+                            alt="Implemented Training program desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/09-program-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/09-program-mobile.png"
+                            alt="Implemented Training program mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>10</span>
+                        <div>
+                            <h3>Manage schedule</h3>
+                            <p>
+                                Readable change counts, compact session groups
+                                and View all without nested page scrolling.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/10-manage-schedule-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/10-manage-schedule-desktop.png"
+                            alt="Implemented Manage schedule desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/10-manage-schedule-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/10-manage-schedule-mobile.png"
+                            alt="Implemented Manage schedule mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>11</span>
+                        <div>
+                            <h3>Coach Calendar</h3>
+                            <p>
+                                The existing calendar with persistent trainee
+                                context and clearer shared navigation.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/11-calendar-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/11-calendar-desktop.png"
+                            alt="Implemented Coach Calendar desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/11-calendar-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/11-calendar-mobile.png"
+                            alt="Implemented Coach Calendar mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>12</span>
+                        <div>
+                            <h3>Schedule workout</h3>
+                            <p>
+                                Existing preselection, Anytime action and
+                                optional details in the aligned form.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/12-schedule-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/12-schedule-desktop.png"
+                            alt="Implemented Schedule workout desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/12-schedule-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/12-schedule-mobile.png"
+                            alt="Implemented Schedule workout mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>13</span>
+                        <div>
+                            <h3>Personal Progress</h3>
+                            <p>
+                                Training, exercise highlights, PRs and
+                                body-weight information on one dashboard.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/13-personal-progress-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/13-personal-progress-desktop.png"
+                            alt="Implemented Personal Progress desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/13-personal-progress-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/13-personal-progress-mobile.png"
+                            alt="Implemented Personal Progress mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>14</span>
+                        <div>
+                            <h3>Coach Progress</h3>
+                            <p>
+                                The same compact presentation, restricted to the
+                                Coach’s assignments and consent.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/14-coach-progress-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/14-coach-progress-desktop.png"
+                            alt="Implemented Coach Progress desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/14-coach-progress-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/14-coach-progress-mobile.png"
+                            alt="Implemented Coach Progress mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>15</span>
+                        <div>
+                            <h3>History</h3>
+                            <p>
+                                Live filters and the existing training-history
+                                records, with consistent trainee navigation.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/15-history-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/15-history-desktop.png"
+                            alt="Implemented History desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/15-history-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/15-history-mobile.png"
+                            alt="Implemented History mobile screenshot"
+                    /></a>
+                </article>
+                <article class="shot">
+                    <div class="shot-heading">
+                        <span>16</span>
+                        <div>
+                            <h3>Personal Overview</h3>
+                            <p>
+                                Program progress, direct Start / Resume action
+                                and recent workout; compact daily lists.
+                            </p>
+                        </div>
+                    </div>
+                    <a
+                        class="desktop-shot"
+                        href="v2.3.4-qa/16-personal-overview-desktop.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/16-personal-overview-desktop.png"
+                            alt="Implemented Personal Overview desktop screenshot" /></a
+                    ><a
+                        class="mobile-shot"
+                        href="v2.3.4-qa/16-personal-overview-mobile.png"
+                        target="_blank"
+                        ><img
+                            loading="lazy"
+                            src="v2.3.4-qa/16-personal-overview-mobile.png"
+                            alt="Implemented Personal Overview mobile screenshot"
+                    /></a>
+                </article>
+            </div>
+            <p class="caption">
+                Screenshots show disposable QA data, not production accounts.
+                Desktop captures are 1280 or 1920px wide; mobile captures use
+                phone widths. Full images remain available even where the
+                gallery crops a long page.
+            </p>
+            <details>
+                <summary>Full report — 46 sections</summary>
+                <nav>
+                    <a href="#s1"><span>01</span>Baseline and version</a
+                    ><a href="#s2"><span>02</span>Coach privacy architecture</a
+                    ><a href="#s3"><span>03</span>Assignment scoping</a
+                    ><a href="#s4"><span>04</span>Program privacy</a
+                    ><a href="#s5"><span>05</span>Calendar privacy</a
+                    ><a href="#s6"><span>06</span>History privacy</a
+                    ><a href="#s7"><span>07</span>Progress privacy</a
+                    ><a href="#s8"><span>08</span>Direct-route protection</a
+                    ><a href="#s9"><span>09</span>Assign to Trainee</a
+                    ><a href="#s10"><span>10</span>Live trainee search</a
+                    ><a href="#s11"><span>11</span>Duplicate assignments</a
+                    ><a href="#s12"><span>12</span>Plan Discovery</a
+                    ><a href="#s13"><span>13</span>Recommendations</a
+                    ><a href="#s14"><span>14</span>Live filter architecture</a
+                    ><a href="#s15"><span>15</span>Filter URL state</a
+                    ><a href="#s16"><span>16</span>Unified Progress</a
+                    ><a href="#s17"><span>17</span>Personal Progress</a
+                    ><a href="#s18"><span>18</span>Coach Progress</a
+                    ><a href="#s19"><span>19</span>Program Progress</a
+                    ><a href="#s20"><span>20</span>Exercise highlights</a
+                    ><a href="#s21"><span>21</span>Personal records</a
+                    ><a href="#s22"><span>22</span>Body-weight section</a
+                    ><a href="#s23"><span>23</span>Trainee Overview</a
+                    ><a href="#s24"><span>24</span>Schedule Workout</a
+                    ><a href="#s25"><span>25</span>Schedule Manager</a
+                    ><a href="#s26"><span>26</span>Coach Overview</a
+                    ><a href="#s27"><span>27</span>Icons and shared shell</a
+                    ><a href="#s28"><span>28</span>Mobile behavior</a
+                    ><a href="#s29"><span>29</span>Accessibility</a
+                    ><a href="#s30"><span>30</span>Query measurements</a
+                    ><a href="#s31"><span>31</span>Architecture</a
+                    ><a href="#s32"><span>32</span>Fixes and test adjustments</a
+                    ><a href="#s33"><span>33</span>SQLite</a
+                    ><a href="#s34"><span>34</span>MySQL</a
+                    ><a href="#s35"><span>35</span>Concurrency</a
+                    ><a href="#s36"><span>36</span>JavaScript</a
+                    ><a href="#s37"><span>37</span>Browser verification</a
+                    ><a href="#s38"><span>38</span>Production build</a
+                    ><a href="#s39"><span>39</span>Formatting and audit</a
+                    ><a href="#s40"><span>40</span>Data and media integrity</a
+                    ><a href="#s41"><span>41</span>Files changed</a
+                    ><a href="#s42"><span>42</span>Source commit</a
+                    ><a href="#s43"><span>43</span>Release tag</a
+                    ><a href="#s44"><span>44</span>Deployment status</a
+                    ><a href="#s45"
+                        ><span>45</span>Known limits and design choices</a
+                    ><a href="#s46"><span>46</span>Final status</a>
+                </nav>
+            </details>
+            <section id="s1" class="report-section">
+                <span class="section-no">01</span>
+                <div>
+                    <h2>Baseline and version</h2>
+                    <p>
+                        The supplied brief targets v2.3.3, but that immutable
+                        release was already deployed before this task. This
+                        follow-up continues from v2.3.3 source
+                        <code>61a7286</code> and documentation HEAD
+                        <code>8cc6fcf</code>. It is released as
+                        <strong>v2.3.4</strong> so all earlier tags remain
+                        untouched. The prior
+                        <a href="V2.3.3-UX-PRIVACY-POLISH-REPORT.html"
+                            >v2.3.3 implementation and deployment report</a
+                        >
+                        remains historical evidence.
+                    </p>
+                </div>
+            </section>
+            <section id="s2" class="report-section">
+                <span class="section-no">02</span>
+                <div>
+                    <h2>Coach privacy architecture</h2>
+                    <p>
+                        The deployed server-side CoachAccess authorization
+                        remains the source of truth. The visual work does not
+                        broaden Coach access to a trainee’s personal training or
+                        another Coach’s assignments. Privacy tests were rerun on
+                        both databases and browser engines.
+                    </p>
+                </div>
+            </section>
+            <section id="s3" class="report-section">
+                <span class="section-no">03</span>
+                <div>
+                    <h2>Assignment scoping</h2>
+                    <p>
+                        Existing assignment-based scopes remain shared across
+                        trainee routes and queries. Owning a plan as a trainee
+                        is still insufficient to expose it to a connected Coach.
+                    </p>
+                </div>
+            </section>
+            <section id="s4" class="report-section">
+                <span class="section-no">04</span>
+                <div>
+                    <h2>Program privacy</h2>
+                    <p>
+                        The Program tab continues to show training assigned by
+                        the authenticated Coach. Current training appears once
+                        in the overview; other legitimate assignments remain
+                        available in the Program context.
+                    </p>
+                </div>
+            </section>
+            <section id="s5" class="report-section">
+                <span class="section-no">05</span>
+                <div>
+                    <h2>Calendar privacy</h2>
+                    <p>
+                        Coach Calendar retains the existing assignment-scoped
+                        session queries. The lighter shell changes presentation
+                        only; unrelated workout names and prescriptions are not
+                        added.
+                    </p>
+                </div>
+            </section>
+            <section id="s6" class="report-section">
+                <span class="section-no">06</span>
+                <div>
+                    <h2>History privacy</h2>
+                    <p>
+                        Coach History remains scoped to the authenticated
+                        Coach’s assignments. Completed and skipped records keep
+                        the accepted History visibility behavior, including
+                        untimed and early-completed records.
+                    </p>
+                </div>
+            </section>
+            <section id="s7" class="report-section">
+                <span class="section-no">07</span>
+                <div>
+                    <h2>Progress privacy</h2>
+                    <p>
+                        Coach adherence, exercise highlights and records retain
+                        the assignment scope. Body-weight visibility remains
+                        governed by existing consent. Personal Progress
+                        continues to use the user’s own full history.
+                    </p>
+                </div>
+            </section>
+            <section id="s8" class="report-section">
+                <span class="section-no">08</span>
+                <div>
+                    <h2>Direct-route protection</h2>
+                    <p>
+                        The full feature suites and privacy HTTP checks pass for
+                        unauthorized personal and other-Coach plan access,
+                        scheduling, history and progress. Frontend hiding is not
+                        used as authorization.
+                    </p>
+                </div>
+            </section>
+            <section id="s9" class="report-section">
+                <span class="section-no">09</span>
+                <div>
+                    <h2>Assign to Trainee</h2>
+                    <p>
+                        The existing immediate trainee list and assignment
+                        states are retained. Initial avatars, tighter rows and
+                        consistent action spacing implement the mockup while
+                        mobile still uses cards.
+                    </p>
+                </div>
+            </section>
+            <section id="s10" class="report-section">
+                <span class="section-no">10</span>
+                <div>
+                    <h2>Live trainee search</h2>
+                    <p>
+                        The shared existing React/Inertia filter behavior
+                        remains: debounced text, immediate discrete criteria, no
+                        Search button, bounded server-side results. Search and
+                        clear flows pass in Chromium and WebKit.
+                    </p>
+                </div>
+            </section>
+            <section id="s11" class="report-section">
+                <span class="section-no">11</span>
+                <div>
+                    <h2>Duplicate assignments</h2>
+                    <p>
+                        Existing duplicate detection and explicit separate-copy
+                        actions remain unchanged. Atomic setup and assignment
+                        tests verify reuse and rejection of unintended
+                        duplicates; this update adds no copy path.
+                    </p>
+                </div>
+            </section>
+            <section id="s12" class="report-section">
+                <span class="section-no">12</span>
+                <div>
+                    <h2>Plan Discovery</h2>
+                    <p>
+                        Search and filters stay above recommendations. Three
+                        concise recommendation cards lead into compact
+                        horizontal catalog rows on desktop and stacked cards on
+                        mobile.
+                    </p>
+                </div>
+            </section>
+            <section id="s13" class="report-section">
+                <span class="section-no">13</span>
+                <div>
+                    <h2>Recommendations</h2>
+                    <p>
+                        Recommended labels and actual matching reasons remain
+                        visible. No invented match percentages or training
+                        results were added. Preview and use actions continue
+                        through existing routes.
+                    </p>
+                </div>
+            </section>
+            <section id="s14" class="report-section">
+                <span class="section-no">14</span>
+                <div>
+                    <h2>Live filter architecture</h2>
+                    <p>
+                        No Livewire, dependency, second filter framework or new
+                        frontend architecture. The existing shared React/Inertia
+                        hook remains responsible for debounce, request handling
+                        and partial updates.
+                    </p>
+                </div>
+            </section>
+            <section id="s15" class="report-section">
+                <span class="section-no">15</span>
+                <div>
+                    <h2>Filter URL state</h2>
+                    <p>
+                        Existing URL criteria and history replacement are
+                        preserved. Browser checks cover live search, discrete
+                        filters, focus and result restoration in the established
+                        workflows.
+                    </p>
+                </div>
+            </section>
+            <section id="s16" class="report-section">
+                <span class="section-no">16</span>
+                <div>
+                    <h2>Unified Progress</h2>
+                    <p>
+                        The unified dashboard now has a tighter visual hierarchy
+                        and desktop grouping. Exercise highlights and
+                        body-weight content share the lower layout; phone widths
+                        stack naturally. Detailed drill-down routes remain
+                        available.
+                    </p>
+                </div>
+            </section>
+            <section id="s17" class="report-section">
+                <span class="section-no">17</span>
+                <div>
+                    <h2>Personal Progress</h2>
+                    <p>
+                        Training summary, consistency, active programs, recent
+                        records, exercise highlights and body-weight information
+                        remain together. Empty states use real availability
+                        rather than fabricated charts.
+                    </p>
+                </div>
+            </section>
+            <section id="s18" class="report-section">
+                <span class="section-no">18</span>
+                <div>
+                    <h2>Coach Progress</h2>
+                    <p>
+                        The same dashboard presentation remains read-only in
+                        Coach context. No weight entry, workout completion or
+                        performance-write controls are introduced for Coaches.
+                    </p>
+                </div>
+            </section>
+            <section id="s19" class="report-section">
+                <span class="section-no">19</span>
+                <div>
+                    <h2>Program Progress</h2>
+                    <p>
+                        Run cards now include an icon, current week/block and a
+                        progress bar. The percentage is exposed from the
+                        existing ProgramLifecycle position calculation, with no
+                        new formula or query.
+                    </p>
+                </div>
+            </section>
+            <section id="s20" class="report-section">
+                <span class="section-no">20</span>
+                <div>
+                    <h2>Exercise highlights</h2>
+                    <p>
+                        Existing structured workout results continue to drive
+                        compact highlights and exercise detail links. Zero and
+                        missing actual weights do not become weighted records.
+                    </p>
+                </div>
+            </section>
+            <section id="s21" class="report-section">
+                <span class="section-no">21</span>
+                <div>
+                    <h2>Personal records</h2>
+                    <p>
+                        The current PR engine remains unchanged. Current
+                        completed status, positive-weight rules, repetitions and
+                        duration handling are preserved by the regression
+                        suites.
+                    </p>
+                </div>
+            </section>
+            <section id="s22" class="report-section">
+                <span class="section-no">22</span>
+                <div>
+                    <h2>Body-weight section</h2>
+                    <p>
+                        Existing chart, entries and target information are
+                        retained in a compact section. No new Coach permission
+                        or write action was added.
+                    </p>
+                </div>
+            </section>
+            <section id="s23" class="report-section">
+                <span class="section-no">23</span>
+                <div>
+                    <h2>Trainee Overview</h2>
+                    <p>
+                        The header now focuses on trainee identity and coaching
+                        state. Current training appears once beside service
+                        status, followed by three quick cards for next workout,
+                        this week and progress. Normal subscription and program
+                        actions remain distinct.
+                    </p>
+                </div>
+            </section>
+            <section id="s24" class="report-section">
+                <span class="section-no">24</span>
+                <div>
+                    <h2>Schedule Workout</h2>
+                    <p>
+                        The existing assigned-plan and single-day preselection,
+                        optional time and Anytime interaction are preserved.
+                        Consistent full-width panels, spacing and shared icons
+                        make the form match the trainee context.
+                    </p>
+                </div>
+            </section>
+            <section id="s25" class="report-section">
+                <span class="section-no">25</span>
+                <div>
+                    <h2>Schedule Manager</h2>
+                    <p>
+                        Add / Keep / Remove / Protected / Outside service date
+                        summaries remain actionable. Lists initially show eight
+                        rows with View all; every reviewed row remains
+                        available. Signature, selection and schedule mutation
+                        behavior is unchanged.
+                    </p>
+                </div>
+            </section>
+            <section id="s26" class="report-section">
+                <span class="section-no">26</span>
+                <div>
+                    <h2>Coach Overview</h2>
+                    <p>
+                        Four icon metrics, compact attention and upcoming
+                        panels, initials and recent activity follow the mockup.
+                        An empty pending panel is omitted, while actual pending
+                        requests still have their existing presentation.
+                    </p>
+                </div>
+            </section>
+            <section id="s27" class="report-section">
+                <span class="section-no">27</span>
+                <div>
+                    <h2>Icons and shared shell</h2>
+                    <p>
+                        The shared sidebar is light, with blue active navigation
+                        and direct existing Notifications / Profile & settings
+                        links. Lucide remains the icon library. One small
+                        initials component provides consistent identities
+                        without invented photos.
+                    </p>
+                </div>
+            </section>
+            <section id="s28" class="report-section">
+                <span class="section-no">28</span>
+                <div>
+                    <h2>Mobile behavior</h2>
+                    <p>
+                        Browser matrices cover 320, 360, 375, 390, 430, 768 and
+                        1280px, including 320 × 480. Setup also checks 1920 and
+                        2560px alignment. The new journey suite visits 13 routes
+                        at four viewport sizes in each engine.
+                    </p>
+                </div>
+            </section>
+            <section id="s29" class="report-section">
+                <span class="section-no">29</span>
+                <div>
+                    <h2>Accessibility</h2>
+                    <p>
+                        Existing keyboard, modal focus and mobile menu behavior
+                        passed. Initial avatars are decorative, status retains
+                        text, training rows remain keyboard-selectable, and
+                        shared controls retain accessible names. No claim of a
+                        complete WCAG certification is made.
+                    </p>
+                </div>
+            </section>
+            <section id="s30" class="report-section">
+                <span class="section-no">30</span>
+                <div>
+                    <h2>Query measurements</h2>
+                    <p>
+                        Measured locally with 45 connected trainees. All sampled
+                        list/detail routes avoided raw session-set collection
+                        reads. Measurements below are one local run, not
+                        production latency guarantees.
+                    </p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Page</th>
+                                    <th>Queries</th>
+                                    <th>Response</th>
+                                    <th>Payload</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Coach Overview</td>
+                                    <td>20</td>
+                                    <td>174.35 ms</td>
+                                    <td>21.8 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Trainees live search</td>
+                                    <td>10</td>
+                                    <td>90 ms</td>
+                                    <td>34 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Assign trainee live search</td>
+                                    <td>12</td>
+                                    <td>55.38 ms</td>
+                                    <td>35 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Coach Discovery</td>
+                                    <td>3</td>
+                                    <td>7.78 ms</td>
+                                    <td>27.6 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Trainee Overview</td>
+                                    <td>38</td>
+                                    <td>27.25 ms</td>
+                                    <td>10.3 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Coach Progress</td>
+                                    <td>33</td>
+                                    <td>17.36 ms</td>
+                                    <td>14.2 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Schedule form</td>
+                                    <td>17</td>
+                                    <td>9.39 ms</td>
+                                    <td>4.8 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Personal Progress</td>
+                                    <td>15</td>
+                                    <td>6.42 ms</td>
+                                    <td>13.7 KB</td>
+                                </tr>
+                                <tr>
+                                    <td>Personal Discovery</td>
+                                    <td>1</td>
+                                    <td>3.52 ms</td>
+                                    <td>27.6 KB</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <section id="s31" class="report-section">
+                <span class="section-no">31</span>
+                <div>
+                    <h2>Architecture</h2>
+                    <p>
+                        The application remains Laravel + Inertia + React. One
+                        scoped presentation stylesheet and one initials
+                        component were added. Only two additive read props
+                        changed in PHP: latest completed workout and existing
+                        program progress percentage. No migrations, dependency
+                        changes or competing domain services.
+                    </p>
+                </div>
+            </section>
+            <section id="s32" class="report-section">
+                <span class="section-no">32</span>
+                <div>
+                    <h2>Fixes and test adjustments</h2>
+                    <p>
+                        Training cards and all setup panels now share the
+                        trainee-header width. A live weekly pattern preview
+                        responds to weekday/time changes; review exposes Change
+                        actions and all schedule rows. Personal Overview
+                        starts/resumes through the existing workout engine. QA
+                        fixture order and asynchronous logout waits were
+                        corrected before clean browser reruns; these were
+                        harness issues.
+                    </p>
+                </div>
+            </section>
+            <section id="s33" class="report-section">
+                <span class="section-no">33</span>
+                <div>
+                    <h2>SQLite</h2>
+                    <p>
+                        <strong>611 tests passed · 12,002 assertions</strong> in
+                        14.57 seconds. Includes new recent-workout
+                        ownership/completion ordering and existing program
+                        progress presentation assertions.
+                    </p>
+                </div>
+            </section>
+            <section id="s34" class="report-section">
+                <span class="section-no">34</span>
+                <div>
+                    <h2>MySQL</h2>
+                    <p>
+                        <strong>611 tests passed · 12,002 assertions</strong> in
+                        41.33 seconds against the isolated test database.
+                        Original local application data was not used for
+                        destructive database tests.
+                    </p>
+                </div>
+            </section>
+            <section id="s35" class="report-section">
+                <span class="section-no">35</span>
+                <div>
+                    <h2>Concurrency</h2>
+                    <p>
+                        <strong>88 checks passed across six suites:</strong>
+                        CoachSetup 32, Coaching 17, Notification 10, Program 10,
+                        ProgramControl 15, RecurringSchedule 4. Existing atomic
+                        activation, draft revisions, resume/renew, ownership and
+                        schedule race coverage remains intact.
+                    </p>
+                </div>
+            </section>
+            <section id="s36" class="report-section">
+                <span class="section-no">36</span>
+                <div>
+                    <h2>JavaScript</h2>
+                    <p>
+                        <strong>38 tests passed</strong>, zero failed or
+                        skipped. Real UI behavior is additionally covered by
+                        browser checks rather than tests that mirror CSS
+                        implementation.
+                    </p>
+                </div>
+            </section>
+            <section id="s37" class="report-section">
+                <span class="section-no">37</span>
+                <div>
+                    <h2>Browser verification</h2>
+                    <p>
+                        <strong>28 suite runs · 1,676 checks passed</strong>
+                        across Chromium and WebKit. Includes setup, workspace,
+                        privacy/live filters, program lifecycle/controls,
+                        schedule, full Coach/Personal workflows, mobile, PWA and
+                        the new mockup journey. Final full-lifecycle and PWA
+                        suites were rerun after the last UI changes.
+                    </p>
+                </div>
+            </section>
+            <section id="s38" class="report-section">
+                <span class="section-no">38</span>
+                <div>
+                    <h2>Production build</h2>
+                    <p>
+                        <code>npm run build</code> passed. The existing
+                        runtime-resolved gym image warning remains; no new build
+                        errors or dependencies. No production deployment was
+                        performed.
+                    </p>
+                </div>
+            </section>
+            <section id="s39" class="report-section">
+                <span class="section-no">39</span>
+                <div>
+                    <h2>Formatting and audit</h2>
+                    <p>
+                        Pint, Prettier, Composer strict validation, Composer
+                        audit and git diff checks passed. Composer reported no
+                        security vulnerability advisories.
+                    </p>
+                </div>
+            </section>
+            <section id="s40" class="report-section">
+                <span class="section-no">40</span>
+                <div>
+                    <h2>Data and media integrity</h2>
+                    <p>
+                        All <strong>72 disposable QA accounts</strong> and
+                        <strong>772 generated media files</strong> were removed.
+                        Exact pre/post fingerprints match for
+                        <strong>22 original tables</strong> and hashes match for
+                        <strong>44 original media files</strong>. Credential
+                        ledgers were removed. No environment configuration was
+                        edited; a local pre/post environment hash was not
+                        collected.
+                    </p>
+                </div>
+            </section>
+            <section id="s41" class="report-section">
+                <span class="section-no">41</span>
+                <div>
+                    <h2>Files changed</h2>
+                    <p>
+                        Presentation changes are concentrated in existing pages
+                        and shared UI. Full changed-file inventory follows;
+                        generated evidence includes the real local QA
+                        screenshots.
+                    </p>
+                    <ul class="files">
+                        <li>
+                            <code
+                                >app/Http/Controllers/DashboardController.php</code
+                            >
+                        </li>
+                        <li><code>app/Services/ProgramLifecycle.php</code></li>
+                        <li>
+                            <code>resources/js/Components/AppLayout.jsx</code>
+                        </li>
+                        <li>
+                            <code>resources/js/Features/CoachingUI.jsx</code>
+                        </li>
+                        <li>
+                            <code>resources/js/Features/ProgramUI.jsx</code>
+                        </li>
+                        <li>
+                            <code
+                                >resources/js/Features/SessionStatusActions.jsx</code
+                            >
+                        </li>
+                        <li>
+                            <code
+                                >resources/js/Pages/Coach/ChooseTrainee.jsx</code
+                            >
+                        </li>
+                        <li>
+                            <code>resources/js/Pages/Coach/Overview.jsx</code>
+                        </li>
+                        <li>
+                            <code
+                                >resources/js/Pages/Coach/SetupTrainee.jsx</code
+                            >
+                        </li>
+                        <li>
+                            <code>resources/js/Pages/Coach/Trainee.jsx</code>
+                        </li>
+                        <li>
+                            <code>resources/js/Pages/Coach/Trainees.jsx</code>
+                        </li>
+                        <li><code>resources/js/Pages/Dashboard.jsx</code></li>
+                        <li>
+                            <code>resources/js/Pages/Progress/Index.jsx</code>
+                        </li>
+                        <li>
+                            <code
+                                >resources/js/Pages/Recommendations/Index.jsx</code
+                            >
+                        </li>
+                        <li>
+                            <code
+                                >resources/js/Pages/TrainingPlans/Schedule.jsx</code
+                            >
+                        </li>
+                        <li><code>resources/js/app.jsx</code></li>
+                        <li>
+                            <code>tests/Browser/atomic-coach-setup.mjs</code>
+                        </li>
+                        <li>
+                            <code>tests/Browser/coach-setup-layout.mjs</code>
+                        </li>
+                        <li>
+                            <code>tests/Feature/ProfileProgressTest.php</code>
+                        </li>
+                        <li>
+                            <code
+                                >tests/Feature/ProgramLifecycleStabilizationTest.php</code
+                            >
+                        </li>
+                        <li><code>resources/css/journey.css</code></li>
+                        <li>
+                            <code
+                                >resources/js/Components/PersonAvatar.jsx</code
+                            >
+                        </li>
+                        <li><code>tests/Browser/journey-ui.mjs</code></li>
+                        <li><code>docs/V2.3.4-MOCKUP-UI-REPORT.html</code></li>
+                        <li><code>docs/v2.3.4-qa/</code></li>
+                    </ul>
+                </div>
+            </section>
+            <section id="s42" class="report-section">
+                <span class="section-no">42</span>
+                <div>
+                    <h2>Source commit</h2>
+                    <p>
+                        The immutable source commit is the commit resolved by
+                        <a
+                            href="https://github.com/AhmadDalao/traningApp/tree/v2.3.4"
+                            >the v2.3.4 tag</a
+                        >
+                        (<code>git rev-parse v2.3.4^{}</code>). The report is
+                        included in that same commit, avoiding a
+                        self-referential hard-coded commit hash.
+                    </p>
+                </div>
+            </section>
+            <section id="s43" class="report-section">
+                <span class="section-no">43</span>
+                <div>
+                    <h2>Release tag</h2>
+                    <p>
+                        <strong>v2.3.4</strong> is an annotated release tag for
+                        this mockup implementation. v2.3.3 and all earlier tags
+                        are preserved. No force-push or tag replacement.
+                    </p>
+                </div>
+            </section>
+            <section id="s44" class="report-section">
+                <span class="section-no">44</span>
+                <div>
+                    <h2>Deployment status</h2>
+                    <p>
+                        <strong>NOT DEPLOYED.</strong> Section 94 of the latest
+                        supplied brief explicitly holds automatic deployment
+                        until Ahmad says “deploy”. No production backups,
+                        uploads, migrations, credentials, Push configuration or
+                        cron were changed in this task. The last recorded
+                        verified production release remains v2.3.3.
+                    </p>
+                </div>
+            </section>
+            <section id="s45" class="report-section">
+                <span class="section-no">45</span>
+                <div>
+                    <h2>Known limits and design choices</h2>
+                    <p>
+                        The UI follows the mockups using existing working
+                        capabilities and real data, rather than copying
+                        placeholder stats or adding inactive controls. Weekly
+                        setup preview is a pattern; exact dates and coverage
+                        stay in signed review. Long lists expand through View
+                        all. Physical phones and real push delivery were not
+                        tested; browser emulation and PWA regression were. No
+                        known blocker or high issue remains in the tested source
+                        scope.
+                    </p>
+                </div>
+            </section>
+            <section id="s46" class="report-section">
+                <span class="section-no">46</span>
+                <div>
+                    <h2>Final status</h2>
+                    <p>
+                        <strong>READY — SOURCE VERIFIED; NOT DEPLOYED.</strong>
+                        The mockup UI is implemented, full regression is green,
+                        QA data is cleaned and source is ready for the
+                        separately requested deployment.
+                    </p>
+                </div>
+            </section>
+            <footer>
+                Source-only follow-up to deployed v2.3.3. Production remains
+                unchanged pending an explicit deployment request.
+            </footer>
+        </main>
+        <script>
+            document.querySelectorAll("[data-mode]").forEach((button) =>
+                button.addEventListener("click", () => {
+                    document
+                        .querySelector(".gallery")
+                        .classList.toggle(
+                            "mobile",
+                            button.dataset.mode === "mobile",
+                        );
+                    document
+                        .querySelectorAll("[data-mode]")
+                        .forEach((item) =>
+                            item.setAttribute(
+                                "aria-pressed",
+                                String(item === button),
+                            ),
+                        );
+                }),
+            );
+        </script>
+    </body>
+</html>

@@ -16,6 +16,7 @@ class ProgramLifecycle
 
             return ['id' => $run->id, 'name' => $run->definition_snapshot['name'], 'status' => $run->status,
                 'current_week' => $position['current_week'], 'duration_weeks' => $position['duration_weeks'],
+                'progress_percent' => $position['progress_percent'],
                 'paused_from' => $run->paused_from?->toDateString(), 'block' => $position['current_block']['name'] ?? null, 'adherence' => $position['adherence']];
         })->all();
     }
