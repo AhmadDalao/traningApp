@@ -19,7 +19,7 @@ export default function SetupTrainee({
     packages,
 }) {
     const ctx = useTraining(),
-        { today } = usePage().props;
+        { today, timezone } = usePage().props;
     const [draft, setDraft] = useState(initial),
         [choices, setChoices] = useState(initial.choices);
     const [step, setStep] = useState(1),
@@ -43,6 +43,41 @@ export default function SetupTrainee({
     const selected = (
         choices.selection_type === "assigned" ? assignedPlans : templates
     ).find((p) => p.id === Number(choices.training_plan_id));
+    const categories = [
+        ...(assignedPlans.length
+            ? [
+                  {
+                      value: "assigned",
+                      label: "Assigned training",
+                      plans: assignedPlans,
+                  },
+              ]
+            : []),
+        {
+            value: "program",
+            label: "My Programs",
+            plans: templates.filter((p) => p.structure_type === "program"),
+        },
+        {
+            value: "simple",
+            label: "My Plans",
+            plans: templates.filter((p) => p.structure_type === "simple"),
+        },
+    ];
+    const visiblePlans =
+        categories.find((category) => category.value === kind)?.plans || [];
+    function chooseCategory(value) {
+        if (value === kind) return;
+        setKind(value);
+        setChoices((c) => ({
+            ...c,
+            selection_type: value === "assigned" ? "assigned" : "template",
+            training_plan_id: null,
+            day_options: {},
+            time_overrides: {},
+        }));
+        setPreview(null);
+    }
     async function save(next = choices) {
         const result = await coachingJson(
             ctx.url("/setup/draft"),
@@ -171,91 +206,134 @@ export default function SetupTrainee({
                             Choose training first. Your selection stays a draft
                             until activation.
                         </p>
-                        <Field label="Choose training">
-                            <select
-                                value={kind}
-                                onChange={(e) => {
-                                    setKind(e.target.value);
-                                    setChoices((c) => ({
-                                        ...c,
-                                        selection_type:
-                                            e.target.value === "assigned"
-                                                ? "assigned"
-                                                : "template",
-                                        training_plan_id: null,
-                                        day_options: {},
-                                        time_overrides: {},
-                                    }));
-                                    setPreview(null);
-                                }}
-                            >
-                                {assignedPlans.length > 0 && (
-                                    <option value="assigned">
-                                        Already assigned training
-                                    </option>
-                                )}
-                                <option value="program">My Programs</option>
-                                <option value="simple">My Plans</option>
-                            </select>
-                        </Field>
-                        <div className="setup-training-options">
-                            {(kind === "assigned"
-                                ? assignedPlans
-                                : templates.filter(
-                                      (p) => p.structure_type === kind,
-                                  )
-                            ).map((p) => (
-                                <article
-                                    className={`setup-training-option ${Number(choices.training_plan_id) === p.id ? "selected" : ""}`}
-                                    key={p.id}
+                        <div
+                            className="setup-training-categories"
+                            role="group"
+                            aria-label="Choose training"
+                        >
+                            {categories.map((category) => (
+                                <button
+                                    type="button"
+                                    key={category.value}
+                                    aria-pressed={kind === category.value}
+                                    onClick={() =>
+                                        chooseCategory(category.value)
+                                    }
                                 >
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="training"
-                                            checked={
-                                                Number(
-                                                    choices.training_plan_id,
-                                                ) === p.id
-                                            }
-                                            onChange={() => {
-                                                setChoices((c) => ({
-                                                    ...c,
-                                                    training_plan_id: p.id,
-                                                    day_options: {},
-                                                    time_overrides: {},
-                                                }));
-                                                setPreview(null);
-                                            }}
-                                        />
-                                        <strong>{p.name}</strong>
-                                    </label>
-                                    <p>{p.description}</p>
-                                    <small>
-                                        {p.duration_weeks
-                                            ? `${p.duration_weeks} weeks · Structured Program`
-                                            : "Simple Plan"}
-                                    </small>
-                                    <a
-                                        href={
-                                            kind === "assigned"
-                                                ? ctx.url(
-                                                      `/training-plans/${p.id}`,
-                                                  )
-                                                : `/coach/training-plans/${p.id}`
-                                        }
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        Preview training ↗
-                                    </a>
-                                </article>
+                                    {category.label}
+                                    <span>{category.plans.length}</span>
+                                </button>
                             ))}
                         </div>
-                        {!templates.length && !assignedPlans.length && (
-                            <p>
-                                Create a Coach Program or Plan to get started.
-                            </p>
+                        <div
+                            className="setup-training-options"
+                            role="radiogroup"
+                            aria-label="Training programs"
+                        >
+                            {visiblePlans.map((p) => {
+                                const checked =
+                                    Number(choices.training_plan_id) === p.id;
+                                return (
+                                    <article
+                                        className={`setup-training-option ${checked ? "selected" : ""}`}
+                                        key={p.id}
+                                    >
+                                        <label className="setup-training-select">
+                                            <input
+                                                type="radio"
+                                                name="training"
+                                                aria-label={p.name}
+                                                checked={checked}
+                                                onChange={() => {
+                                                    setChoices((c) => ({
+                                                        ...c,
+                                                        training_plan_id: p.id,
+                                                        day_options: {},
+                                                        time_overrides: {},
+                                                    }));
+                                                    setPreview(null);
+                                                }}
+                                            />
+                                            <span className="setup-training-content">
+                                                <strong>{p.name}</strong>
+                                                <span className="setup-training-meta">
+                                                    {p.duration_weeks
+                                                        ? `${p.duration_weeks} weeks · Structured Program`
+                                                        : "Simple Plan"}
+                                                    {p.training_days_count >
+                                                        0 &&
+                                                        ` · ${p.training_days_count} training ${p.training_days_count === 1 ? "day" : "days"}`}
+                                                </span>
+                                                {p.description && (
+                                                    <span className="setup-training-description">
+                                                        {p.description}
+                                                    </span>
+                                                )}
+                                                {kind === "assigned" &&
+                                                    p.created_at && (
+                                                        <span className="setup-training-meta">
+                                                            Assigned{" "}
+                                                            {new Date(
+                                                                p.created_at,
+                                                            ).toLocaleString(
+                                                                "en-GB",
+                                                                {
+                                                                    dateStyle:
+                                                                        "medium",
+                                                                    timeStyle:
+                                                                        "short",
+                                                                    timeZone:
+                                                                        timezone,
+                                                                },
+                                                            )}
+                                                        </span>
+                                                    )}
+                                                <span className="setup-training-status">
+                                                    {checked
+                                                        ? "Selected"
+                                                        : "Select training"}
+                                                </span>
+                                            </span>
+                                        </label>
+                                        <div className="setup-training-footer">
+                                            <a
+                                                href={
+                                                    kind === "assigned"
+                                                        ? ctx.url(
+                                                              `/training-plans/${p.id}`,
+                                                          )
+                                                        : `/coach/training-plans/${p.id}`
+                                                }
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                Preview training ↗
+                                            </a>
+                                            {kind === "assigned" &&
+                                                state.plan?.id === p.id && (
+                                                    <small>
+                                                        Current assignment
+                                                    </small>
+                                                )}
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                        {!visiblePlans.length && (
+                            <div className="setup-training-empty">
+                                <strong>
+                                    No{" "}
+                                    {kind === "simple"
+                                        ? "simple plans"
+                                        : "programs"}{" "}
+                                    yet
+                                </strong>
+                                <p>
+                                    Create training below, or choose another
+                                    category.
+                                </p>
+                            </div>
                         )}
                         <div className="form-actions">
                             <a

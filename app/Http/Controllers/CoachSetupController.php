@@ -27,7 +27,7 @@ class CoachSetupController extends Controller
 
         return Inertia::render('Coach/SetupTrainee', [
             'state' => $summary->one($this->context->actor(), $this->context->owner()), 'draft' => $draft, 'templates' => $templates,
-            'assignedPlans' => $this->context->plans(true)->get(['id', 'name', 'structure_type', 'duration_weeks']),
+            'assignedPlans' => $this->context->plans(true)->withCount('trainingDays')->latest('id')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks', 'created_at']),
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $this->context->actor()->id)->where('active', true)->orderBy('name')->get(),
         ]);
     }

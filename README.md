@@ -2,6 +2,12 @@
 
 A personal training and coaching planner built as **one Laravel monolith**. Laravel owns authentication, authorization, validation, uploads, and MySQL. Inertia connects normal Laravel web routes to React. Vite compiles the frontend to `public/build`; production needs only PHP and MySQL.
 
+## v2.3.2 Coach Setup Layout — source verified, deployment pending
+
+Setup panels now align with the trainee header at every width. Training cards have properly sized radios, a selectable body, separate previews, visible category filters, and clear selection/assignment labels. Review panels use the same full width. No activation, ownership, subscription or scheduling logic changes; no migration.
+
+Verified 601 tests / 11,887 assertions on each database, 37 JavaScript tests and 86 focused Chromium/WebKit checks from 320 × 480 to 2560 px. [Release report](docs/V2.3.2-COACH-SETUP-LAYOUT-REPORT.html).
+
 ## v2.3.1 Simpler Coach Setup — deployed and verified
 
 Setup now follows **Training → Dates & Schedule → Review → Activate Coaching**. Drafts create no active records; one atomic, idempotent activation handles the subscription, independent training copy and reviewed schedule. Coverage extensions are explicit, existing periods and runs are reused, and Resume/Renew are available directly on the trainee overview.
