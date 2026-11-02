@@ -1,0 +1,90 @@
+{
+  "release": "v2.3.7",
+  "baseline": "v2.3.6",
+  "sqlite": {
+    "passed": 614,
+    "assertions": 12064
+  },
+  "mysql": "Not rerun: no PHP/schema changes; full MySQL suite passed at v2.3.6 baseline",
+  "javascript": {
+    "passed": 38
+  },
+  "browser_runs": [
+    {
+      "script": "thumbnail-preview",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 8.24,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 9.94,
+      "checks": 75
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 2.91,
+      "checks": 31
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 3.07,
+      "checks": 31
+    },
+    {
+      "script": "full-lifecycle",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 13.7,
+      "checks": 27
+    },
+    {
+      "script": "full-lifecycle",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 15.36,
+      "checks": 27
+    }
+  ],
+  "browser_checks": 266,
+  "http_checks": {
+    "checks": [
+      "chromium: Personal /dashboard retains all three distinct runs",
+      "chromium: image covers and empty fallback are available",
+      "chromium: Personal /progress retains all three distinct runs",
+      "chromium: image covers and empty fallback are available",
+      "chromium: Coach sees only two assigned program covers",
+      "chromium: run start dates identify separate runs",
+      "webkit: Personal /dashboard retains all three distinct runs",
+      "webkit: image covers and empty fallback are available",
+      "webkit: Personal /progress retains all three distinct runs",
+      "webkit: image covers and empty fallback are available",
+      "webkit: Coach sees only two assigned program covers",
+      "webkit: run start dates identify separate runs"
+    ],
+    "count": 12
+  },
+  "integrity": {
+    "original_data_and_media_unchanged": true,
+    "tables": 22,
+    "original_media_files": 44,
+    "qa_accounts_removed": 8,
+    "ledger_entries": 8,
+    "qa_images_removed": 146
+  },
+  "production_build": "passed",
+  "pint": "passed",
+  "prettier": "passed",
+  "composer_validate": "passed",
+  "composer_audit": "passed",
+  "migrations": 0,
+  "dependencies_changed": false,
+  "physical_phone_tested": false
+}

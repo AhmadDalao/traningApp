@@ -28,7 +28,7 @@ function PlanCard({ plan, recommended = false }) {
         <article
             className={`panel discovery-card ${recommended ? "recommended-card" : "catalog-row"}`}
         >
-            <PlanThumbnail src={plan.thumbnail_url} />
+            <PlanThumbnail src={plan.thumbnail_url} name={plan.name} />
             <div className="recommendation-tags">
                 {recommended && (
                     <span className="badge completed">

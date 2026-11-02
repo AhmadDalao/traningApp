@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.3.7 — Full image previews</title
+    ><style>
+        body {
+            font: 16px/1.65 system-ui;
+            color: #162b49;
+            background: #f4f7fc;
+            margin: 0;
+        }
+        main {
+            max-width: 1040px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+        header,
+        section {
+            background: white;
+            border: 1px solid #dce5f2;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        h2 {
+            font-size: 22px;
+        }
+        a {
+            color: #1763ef;
+        }
+        .status {
+            font-weight: 700;
+            color: #1763ef;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .mobile {
+            max-width: 390px;
+        }
+        .muted {
+            color: #667790;
+        }
+    </style>
+    <main>
+        <header>
+            <p class="muted">Training Planner · 2 November 2026</p>
+            <h1>v2.3.7 — Full image previews</h1>
+            <p class="status">SOURCE VERIFIED — DEPLOYMENT PENDING</p>
+            <p>
+                Click or tap plan and program thumbnails to see the complete,
+                uncropped image.
+            </p>
+        </header>
+        <section>
+            <h2>Behavior</h2>
+            <p>
+                Thumbnails now show an expand icon and open the existing
+                accessible modal. This covers Personal Overview, Personal and
+                Coach Progress, personal plans, Coach templates, assigned plans,
+                recommendations and the full catalog.
+            </p>
+            <p>
+                The preview fits the full stored image within the screen. Open
+                original image opens that file in a separate browser tab. Close
+                with the X, Escape or backdrop; focus returns to the thumbnail.
+                Missing images use the existing fallback.
+            </p>
+            <p>
+                Program cards now have a separate thumbnail button and program
+                links, avoiding nested interactive controls and accidental
+                navigation. The recent responsive card layout is preserved.
+                Existing media files are reused without uploads or copies.
+            </p>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <p>
+                Chromium and WebKit passed 266 checks across image previews,
+                keyboard interaction, native modal background isolation, focus
+                return, original-image tabs, fallback images, card layout and
+                the full workout/program lifecycle. Responsive checks covered
+                320 × 480, 360, 375, 390, 430, 768 and 1280 widths. No physical
+                phone test is claimed.
+            </p>
+            <p>
+                614 SQLite tests (12,064 assertions), 38 JavaScript tests, the
+                production build, Pint, Prettier, Composer validation/audit and
+                diff checks passed. This update changes only frontend behavior
+                and browser checks; no PHP, database schema or dependency
+                changes. MySQL was last verified by the full v2.3.6 baseline
+                suite.
+            </p>
+            <p>
+                Local QA cleanup removed eight disposable accounts and 146
+                generated images; original fingerprints across 22 tables and 44
+                media files match.
+            </p>
+            <p><a href="v2.3.7-qa/checks.json">Verification evidence</a></p>
+        </section>
+        <section>
+            <h2>Mobile preview</h2>
+            <img
+                class="mobile"
+                src="v2.3.7-qa/preview-mobile.png"
+                alt="Mobile full-image preview with close and original-image controls"
+            />
+        </section>
+        <section>
+            <h2>Desktop preview</h2>
+            <img
+                src="v2.3.7-qa/preview-desktop.png"
+                alt="Desktop recommended-plan image preview"
+            />
+        </section>
+        <section id="deployment">
+            <h2>Release and deployment</h2>
+            <p>
+                Source verification is complete. Fresh backups, immutable
+                release deployment, live checks and original-data integrity
+                evidence will be recorded here before declaring deployment
+                complete.
+            </p>
+        </section>
+    </main>
+</html>

@@ -176,7 +176,7 @@ try {
         (
             await page
                 .locator(
-                    `.program-run-link[href="/program-runs/${fixture.run}"]`,
+                    `.program-run-summary .program-view[href="/program-runs/${fixture.run}"]`,
                 )
                 .innerText()
         ).includes("Paused"),

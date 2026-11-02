@@ -133,7 +133,10 @@ export default function Index({
                         {plans.data.map((plan, index) => (
                             <article className="panel plan-card" key={plan.id}>
                                 <div className="plan-cover plan-cover-photo">
-                                    <PlanThumbnail src={plan.thumbnail_url} />
+                                    <PlanThumbnail
+                                        src={plan.thumbnail_url}
+                                        name={plan.name}
+                                    />
                                     <span>
                                         {plan.structure_type === "program"
                                             ? `${plan.duration_weeks}-WEEK PROGRAM`

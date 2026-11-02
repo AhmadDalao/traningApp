@@ -56,7 +56,9 @@ async function matrix(name, count) {
     assert.equal(
         new Set(
             await cards().evaluateAll((rows) =>
-                rows.map((row) => row.getAttribute("href")),
+                rows.map((row) =>
+                    row.querySelector(".program-view").getAttribute("href"),
+                ),
             ),
         ).size,
         count,
@@ -132,7 +134,7 @@ async function matrix(name, count) {
                 fullPage: true,
             });
     }
-    const first = cards().first();
+    const first = cards().first().locator(".program-view");
     await first.focus();
     assert.ok(await first.evaluate((el) => el === document.activeElement));
     const href = await first.getAttribute("href");

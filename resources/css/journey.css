@@ -747,7 +747,7 @@
     border-radius: 8px;
     background: #eaf0f9;
 }
-.recommended-card > .plan-thumbnail {
+.recommended-card > .plan-thumbnail-trigger {
     height: 144px;
     margin-bottom: 6px;
 }
@@ -757,7 +757,7 @@
     color: white;
     overflow: hidden;
 }
-.plan-cover-photo > .plan-thumbnail {
+.plan-cover-photo > .plan-thumbnail-trigger {
     position: absolute;
     inset: 0;
     height: 100%;
@@ -768,8 +768,10 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(transparent 20%, #11213ddb);
+    pointer-events: none;
 }
 .plan-cover-photo > span {
+    pointer-events: none;
     position: relative;
     z-index: 1;
 }
@@ -799,7 +801,7 @@
     gap: 4px 14px;
     align-items: center;
 }
-.catalog-row > .plan-thumbnail {
+.catalog-row > .plan-thumbnail-trigger {
     grid-column: 1;
     grid-row: 1/6;
     height: 88px;
@@ -945,10 +947,10 @@
     background: #f4f8ff;
     text-align: left;
 }
-.program-run-summary > .plan-thumbnail {
+.program-run-summary > .plan-thumbnail-trigger {
     height: 96px;
 }
-.program-run-summary:focus-visible {
+.program-run-summary:focus-within {
     outline: 2px solid #1763ef;
     outline-offset: 3px;
 }
@@ -1211,7 +1213,7 @@
         padding: 14px;
         gap: 5px 10px;
     }
-    .catalog-row > .plan-thumbnail {
+    .catalog-row > .plan-thumbnail-trigger {
         height: 72px;
     }
     .plan-cover-photo {
@@ -1270,7 +1272,7 @@
         padding: 12px;
         gap: 10px;
     }
-    .program-run-summary > .plan-thumbnail {
+    .program-run-summary > .plan-thumbnail-trigger {
         height: 64px;
     }
     .program-run-summary .program-view {
@@ -1287,4 +1289,53 @@
     .program-run-summary .program-mini-progress progress {
         flex-basis: 100%;
     }
+}
+
+.plan-thumbnail-trigger {
+    display: block;
+    position: relative;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #eaf0f9;
+    cursor: zoom-in;
+}
+.plan-thumbnail-trigger > .plan-thumbnail {
+    height: 100%;
+    border-radius: inherit;
+}
+.plan-thumbnail-trigger:focus-visible {
+    outline: 3px solid #1763ef;
+    outline-offset: -3px;
+}
+.thumbnail-expand {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: #ffffffeb;
+    color: #23416a;
+    pointer-events: none;
+}
+.plan-image-preview {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+}
+.plan-image-preview > img {
+    display: block;
+    width: 100%;
+    max-height: max(120px, calc(90dvh - 230px));
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f4f7fc;
+}
+.plan-image-preview > a {
+    min-height: 44px;
 }

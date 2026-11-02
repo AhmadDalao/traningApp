@@ -209,13 +209,18 @@ export function ProgramRunCards({ runs = [] }) {
             </div>
             <div className="program-stack">
                 {runs.map((run) => (
-                    <Link
+                    <article
                         className="program-run-link program-run-summary"
                         key={run.id}
-                        href={url(`/program-runs/${run.id}`)}
                     >
-                        <PlanThumbnail src={run.thumbnail_url} />
-                        <div className="program-run-copy">
+                        <PlanThumbnail
+                            src={run.thumbnail_url}
+                            name={run.name}
+                        />
+                        <Link
+                            className="program-run-copy"
+                            href={url(`/program-runs/${run.id}`)}
+                        >
                             <strong>{run.name}</strong>
                             <span
                                 className={`badge program-status-${run.status}`}
@@ -254,12 +259,15 @@ export function ProgramRunCards({ runs = [] }) {
                                     </small>
                                 </div>
                             )}
-                        </div>
-                        <span className="program-view">
+                        </Link>
+                        <Link
+                            className="program-view"
+                            href={url(`/program-runs/${run.id}`)}
+                        >
                             View program{" "}
                             <ArrowRight size={16} aria-hidden="true" />
-                        </span>
-                    </Link>
+                        </Link>
+                    </article>
                 ))}
             </div>
         </section>
