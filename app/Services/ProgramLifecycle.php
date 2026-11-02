@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ProgramRun;
 use App\Models\SessionExercise;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProgramLifecycle
 {
@@ -13,8 +14,12 @@ class ProgramLifecycle
         return $query->latest('id')->limit(6)->get()->map(function ($run) {
             $run = $this->sync($run->id);
             $position = $this->position($run);
+            $thumbnail = collect($run->definition_snapshot['blocks'] ?? [])->pluck('days')->flatten(1)
+                ->where('type', 'training')->pluck('exercises')->flatten(1)->pluck('thumbnail_path')->first(fn ($path) => filled($path));
 
             return ['id' => $run->id, 'name' => $run->definition_snapshot['name'], 'status' => $run->status,
+                'thumbnail_url' => $thumbnail ? Storage::disk('public')->url($thumbnail) : null,
+                'started_on' => $run->started_on?->toDateString(),
                 'current_week' => $position['current_week'], 'duration_weeks' => $position['duration_weeks'],
                 'progress_percent' => $position['progress_percent'],
                 'paused_from' => $run->paused_from?->toDateString(), 'block' => $position['current_block']['name'] ?? null, 'adherence' => $position['adherence']];

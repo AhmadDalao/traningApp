@@ -919,24 +919,41 @@
     font-size: 12px;
 }
 .journey-app .program-journey-card {
+    container: program-cards / inline-size;
     padding: 18px 20px;
     margin-bottom: 18px;
 }
 .program-journey-card .program-heading {
-    margin-bottom: 10px;
+    margin: 0 0 16px;
 }
 .program-journey-card .program-heading h2 {
     font-size: 14px;
     color: #5e7392;
+    margin: 0;
 }
-.journey-app .program-run-link {
-    display: flex;
+.program-journey-card > .program-stack {
+    margin: 0;
+    gap: 12px;
+}
+.journey-app .program-run-summary {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr) auto;
     align-items: center;
-    flex-wrap: nowrap;
-    gap: 14px;
+    gap: 16px;
     padding: 16px;
-    border-color: #e0eaff;
+    border: 1px solid #e0eaff;
     background: #f4f8ff;
+    text-align: left;
+}
+.program-run-summary > .plan-thumbnail {
+    height: 96px;
+}
+.program-run-summary:focus-visible {
+    outline: 2px solid #1763ef;
+    outline-offset: 3px;
+}
+.program-run-summary:hover {
+    border-color: #9ebeff;
 }
 .program-run-copy {
     display: flex;
@@ -964,6 +981,7 @@
 .program-mini-progress progress {
     flex: 1;
     width: 100%;
+    min-width: 0;
     height: 6px;
     accent-color: #1763ef;
 }
@@ -1077,9 +1095,6 @@
     .journey-app .unified-progress {
         grid-template-columns: minmax(0, 1fr);
     }
-    .journey-app .program-view {
-        display: none;
-    }
 }
 @media (max-width: 767px) {
     .journey-app .workspace main {
@@ -1191,17 +1206,6 @@
     .journey-app .program-journey-card {
         padding: 16px;
     }
-    .journey-app .program-run-link {
-        flex-wrap: wrap;
-        padding: 12px;
-        gap: 10px;
-    }
-    .program-run-copy {
-        flex-basis: calc(100% - 54px);
-    }
-    .program-view {
-        margin-left: 54px;
-    }
     .journey-app .catalog-row {
         grid-template-columns: 72px minmax(0, 1fr);
         padding: 14px;
@@ -1257,4 +1261,30 @@
 }
 .journey-app .dashboard-feature > .status-actions > .btn {
     width: 100%;
+}
+
+@container program-cards (max-width: 620px) {
+    .journey-app .program-run-summary {
+        grid-template-columns: 64px minmax(0, 1fr);
+        align-items: start;
+        padding: 12px;
+        gap: 10px;
+    }
+    .program-run-summary > .plan-thumbnail {
+        height: 64px;
+    }
+    .program-run-summary .program-view {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+        min-height: 44px;
+        border-top: 1px solid #e0eaff;
+        padding-top: 8px;
+    }
+    .program-run-summary .program-mini-progress {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .program-run-summary .program-mini-progress progress {
+        flex-basis: 100%;
+    }
 }

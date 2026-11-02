@@ -1,4 +1,5 @@
-import { Dumbbell, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import PlanThumbnail from "../Components/PlanThumbnail";
 import { Link } from "@inertiajs/react";
 import { Button, ButtonLink, DateLabel, StatusBadge } from "../Components/UI";
 import { useTraining } from "./CoachingUI";
@@ -209,13 +210,11 @@ export function ProgramRunCards({ runs = [] }) {
             <div className="program-stack">
                 {runs.map((run) => (
                     <Link
-                        className="program-run-link"
+                        className="program-run-link program-run-summary"
                         key={run.id}
                         href={url(`/program-runs/${run.id}`)}
                     >
-                        <span className="feature-icon">
-                            <Dumbbell size={23} aria-hidden="true" />
-                        </span>
+                        <PlanThumbnail src={run.thumbnail_url} />
                         <div className="program-run-copy">
                             <strong>{run.name}</strong>
                             <span
@@ -237,6 +236,12 @@ export function ProgramRunCards({ runs = [] }) {
                                     ? ` · ${run.adherence}% adherence`
                                     : ""}
                             </span>
+                            {run.started_on && (
+                                <span>
+                                    Start date:{" "}
+                                    <DateLabel date={run.started_on} />
+                                </span>
+                            )}
                             {run.progress_percent !== undefined && (
                                 <div className="program-mini-progress">
                                     <progress

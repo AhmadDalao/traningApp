@@ -130,6 +130,38 @@ class CoachPrivacyPolishTest extends TestCase
         $this->assertStringNotContainsString('other.jpg', json_encode($rows));
     }
 
+    public function test_program_card_covers_and_dates_preserve_personal_and_coach_scopes(): void
+    {
+        foreach ($this->plans as $kind => $plan) {
+            $plan->update(['structure_type' => 'program', 'duration_weeks' => 1]);
+            $run = $plan->programRuns()->create(['user_id' => $this->trainee->id, 'status' => 'active',
+                'started_on' => today()->subDays(3), 'start_token' => (string) Str::uuid(),
+                'definition_snapshot' => ['name' => $plan->name, 'duration_weeks' => 1, 'blocks' => [
+                    ['name' => 'Foundation', 'start_week' => 1, 'end_week' => 1, 'days' => [
+                        ['type' => 'rest', 'exercises' => [['thumbnail_path' => 'rest.jpg']]],
+                        ['type' => 'training', 'exercises' => [['thumbnail_path' => null], ['thumbnail_path' => 'exercise-thumbnails/'.$kind.'.jpg']]],
+                    ]],
+                ]]]);
+            $this->entries[$kind]->update(['program_run_id' => $run->id, 'program_week' => 1, 'status' => 'planned', 'completed_at' => null]);
+        }
+        $cards = $this->props($this->base.'/progress')['programRuns'];
+        $this->assertCount(1, $cards);
+        $this->assertSame(Storage::disk('public')->url('exercise-thumbnails/own.jpg'), $cards[0]['thumbnail_url']);
+        $this->assertSame(today()->subDays(3)->toDateString(), $cards[0]['started_on']);
+        $this->actingAs($this->trainee);
+        foreach (['/dashboard', '/progress'] as $path) {
+            $cards = $this->props($path)['programRuns'];
+            $this->assertCount(3, $cards);
+            $this->assertEqualsCanonicalizing(array_map(fn ($kind) => Storage::disk('public')->url('exercise-thumbnails/'.$kind.'.jpg'), ['private', 'other', 'own']), array_column($cards, 'thumbnail_url'));
+        }
+        $run = $this->plans['own']->programRuns()->first();
+        $definition = $run->definition_snapshot;
+        $definition['blocks'][0]['days'] = [];
+        $run->update(['definition_snapshot' => $definition]);
+        $this->actingAs($this->coach);
+        $this->assertNull($this->props($this->base.'/progress')['programRuns'][0]['thumbnail_url']);
+    }
+
     public function test_progress_uses_only_owned_assignments_and_personal_scope_keeps_all_results(): void
     {
         $props = $this->props($this->base.'/progress');

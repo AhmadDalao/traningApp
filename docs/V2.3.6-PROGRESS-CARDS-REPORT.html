@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.3.6 — Progress cards</title
+    ><style>
+        body {
+            font: 16px/1.65 system-ui;
+            color: #162b49;
+            background: #f4f7fc;
+            margin: 0;
+        }
+        main {
+            max-width: 1040px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+        header,
+        section {
+            background: white;
+            border: 1px solid #dce5f2;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        h2 {
+            font-size: 22px;
+        }
+        a {
+            color: #1763ef;
+        }
+        .status {
+            font-weight: 700;
+            color: #1763ef;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .mobile {
+            max-width: 390px;
+        }
+        .muted {
+            color: #667790;
+        }
+    </style>
+    <main>
+        <header>
+            <p class="muted">Training Planner · 2 November 2026</p>
+            <h1>v2.3.6 — Progress card layout &amp; thumbnails</h1>
+            <p class="status">SOURCE VERIFIED — DEPLOYMENT PENDING</p>
+            <p>
+                Compact, left-aligned program cards in Coach Progress, Personal
+                Progress and Personal Overview.
+            </p>
+        </header>
+        <section>
+            <h2>What changed</h2>
+            <p>
+                The old shared program row inherited a vertical flex direction,
+                centering its icon, text and link inside a large card. It now
+                uses a photo / details / action grid. The containing panel stays
+                aligned with the rest of the page.
+            </p>
+            <p>
+                Cards adapt to their available width: narrow cards retain the
+                photo beside the title and place an easy-to-tap View program
+                action below. Tablet actions are no longer hidden. Program
+                names, status, week/block, adherence, progress and start date
+                remain readable. Separate saved runs keep their individual
+                links; this update does not merge or delete programs.
+            </p>
+            <p>
+                The existing thumbnail component displays the first available
+                training-exercise image from each run’s saved definition, or the
+                existing gym image when no image exists or loading fails.
+                Thumbnail metadata adds no database queries or media copies.
+                Removed source images safely fall back; custom cover uploads are
+                outside this update.
+            </p>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <p>
+                614 tests and 12,064 assertions passed on both SQLite and
+                isolated MySQL; all 38 JavaScript tests passed. Chromium and
+                WebKit passed 116 checks covering card geometry, keyboard links,
+                long names, multiple runs, missing-image fallback and the
+                existing workout/program lifecycle. Twelve HTTP checks verified
+                scoped Coach covers and Personal cards.
+            </p>
+            <p>
+                Screen sizes: 320 × 480, 360, 375, 390, 430, 768 and 1280
+                widths. No physical phone test is claimed. Production build,
+                Pint, Prettier, Composer validation/audit and diff checks
+                passed. The two database suites initially collided in their
+                shared fake-media test directory; the isolated sequential rerun
+                passed.
+            </p>
+            <p>
+                Original local table and media fingerprints match after
+                disposable QA cleanup. No migration or dependency changes;
+                authorization, workout records, lifecycle and scheduling
+                behavior are preserved.
+            </p>
+            <p>
+                <a href="v2.3.6-qa/checks.json"
+                    >Detailed verification evidence</a
+                >
+            </p>
+        </section>
+        <section>
+            <h2>Coach Progress</h2>
+            <img
+                src="v2.3.6-qa/coach-progress-desktop.png"
+                alt="Coach Progress with compact aligned photo cards"
+            />
+        </section>
+        <section>
+            <h2>Personal Progress on mobile</h2>
+            <img
+                class="mobile"
+                src="v2.3.6-qa/personal-progress-mobile.png"
+                alt="Personal Progress cards on a phone width"
+            />
+        </section>
+        <section>
+            <h2>Personal Overview</h2>
+            <img
+                src="v2.3.6-qa/personal-overview-desktop.png"
+                alt="Personal Overview uses the same program cards"
+            />
+        </section>
+        <section id="deployment">
+            <h2>Release and deployment</h2>
+            <p>
+                Source verification is complete. Fresh production backups,
+                immutable release deployment, live verification and cleanup
+                evidence will be recorded before declaring deployment complete.
+            </p>
+        </section>
+    </main>
+</html>
