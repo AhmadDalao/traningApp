@@ -54,7 +54,7 @@
         <header>
             <p class="muted">Training Planner · 2 November 2026</p>
             <h1>v2.3.6 — Progress card layout &amp; thumbnails</h1>
-            <p class="status">SOURCE VERIFIED — DEPLOYMENT PENDING</p>
+            <p class="status">READY — DEPLOYED AND VERIFIED</p>
             <p>
                 Compact, left-aligned program cards in Coach Progress, Personal
                 Progress and Personal Overview.
@@ -140,10 +140,53 @@
         <section id="deployment">
             <h2>Release and deployment</h2>
             <p>
-                Source verification is complete. Fresh production backups,
-                immutable release deployment, live verification and cleanup
-                evidence will be recorded before declaring deployment complete.
+                READY — DEPLOYED AND VERIFIED. Production moved from verified
+                v2.3.5 to immutable v2.3.6 commit
+                <code>d057fd1b9bcaa907f9dd96d5839763ad38eaaa5a</code>. The
+                source and annotated tag were pushed without changing earlier
+                tags. This evidence is recorded in a documentation-only
+                follow-up commit.
             </p>
+            <p>
+                Fresh database, runtime, uploads and environment backups were
+                verified before replacement. The immutable tag was exported and
+                rebuilt in a separate release directory. 73 patch files were
+                deployed; all 7,524 origin file hashes verified. All 472 public
+                assets verified: 468 exact HTTP hashes and 4 CDN-reencoded PNGs
+                with identical decoded pixels.
+            </p>
+            <p>
+                Live Chromium and WebKit passed 101 checks across program card
+                layout, thumbnails, responsive layouts, failed-image fallback
+                and PWA behavior. Twelve HTTP checks verified Personal and
+                assignment-scoped Coach card data. No migration ran. Push
+                remains disabled; cron and environment settings are unchanged.
+            </p>
+            <p>
+                All 4 disposable live accounts and generated media were removed.
+                All 650 original rows across 22 tables and 490 original media
+                files match the fresh backup. Environment bytes match exactly.
+                Temporary deployment endpoints, archives and credential ledgers
+                were removed. No known BLOCKER or HIGH issue remains in the
+                tested scope.
+            </p>
+            <p>
+                <a href="v2.3.6-qa/deployment.json">Deployment evidence</a> ·
+                <a href="https://training.ahmaddalao.com/progress"
+                    >Open live Progress</a
+                >
+            </p>
+            <h2>Live Coach Progress</h2>
+            <img
+                src="v2.3.6-qa/live-coach-progress-desktop.png"
+                alt="Verified production Coach Progress cards"
+            />
+            <h2>Live Personal Progress</h2>
+            <img
+                class="mobile"
+                src="v2.3.6-qa/live-personal-progress-mobile.png"
+                alt="Verified production Personal Progress cards"
+            />
         </section>
     </main>
 </html>
