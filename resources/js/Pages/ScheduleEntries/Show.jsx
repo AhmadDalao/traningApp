@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { ProgramContext } from "../../Features/ProgramUI";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
@@ -82,6 +83,11 @@ export default function Show({
                 ]}
             />
             <PageHeader
+                thumbnail={
+                    <TrainingThumbnail
+                        item={{ ...entry, exercises: workout?.exercises }}
+                    />
+                }
                 eyebrow={
                     history
                         ? "TRAINING HISTORY SESSION DETAILS"

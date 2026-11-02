@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../Components/TrainingThumbnail";
 import { useTraining } from "./CoachingUI";
 import { useState } from "react";
 import { Link, useForm, usePage } from "@inertiajs/react";
@@ -75,6 +76,22 @@ export default function ScheduleEntryForm({
                       });
             }}
         >
+            {form.data.training_day_id && !directRest && (
+                <div className="thumbnail-identity schedule-selected-image">
+                    <TrainingThumbnail
+                        item={
+                            recorded
+                                ? entry
+                                : days.find(
+                                      (day) =>
+                                          day.id ===
+                                          Number(form.data.training_day_id),
+                                  )
+                        }
+                    />
+                    <strong>{form.data.title}</strong>
+                </div>
+            )}
             {!coaching && (
                 <div className="segmented schedule-mode">
                     <button

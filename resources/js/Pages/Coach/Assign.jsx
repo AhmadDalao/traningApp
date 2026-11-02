@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import PlanPeriodFields from "../../Features/PlanPeriodFields";
 import { Head, useForm } from "@inertiajs/react";
 import {
@@ -76,6 +77,26 @@ export default function Assign({
                             ))}
                         </select>
                     </Field>
+                    {form.data.training_plan_id && (
+                        <div className="thumbnail-identity schedule-selected-image">
+                            <TrainingThumbnail
+                                item={templates.find(
+                                    (plan) =>
+                                        plan.id ===
+                                        Number(form.data.training_plan_id),
+                                )}
+                            />
+                            <strong>
+                                {
+                                    templates.find(
+                                        (plan) =>
+                                            plan.id ===
+                                            Number(form.data.training_plan_id),
+                                    )?.name
+                                }
+                            </strong>
+                        </div>
+                    )}
                     {!templates.length && (
                         <p>
                             Create a Coach Plan first, or build a custom plan

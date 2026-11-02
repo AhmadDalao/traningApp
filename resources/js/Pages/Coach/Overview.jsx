@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import PersonAvatar from "../../Components/PersonAvatar";
 import {
     Users,
@@ -18,15 +19,18 @@ function SessionList({ entries, empty }) {
     return (
         <div className="coach-bounded-list">
             {entries.slice(0, 6).map((entry) => (
-                <Link
-                    className="coach-session"
-                    href={`/coach/trainees/${entry.user_id}/schedule-entries/${entry.id}`}
-                    key={entry.id}
-                >
+                <article className="coach-session" key={entry.id}>
                     <PersonAvatar name={entry.trainee_name} />
                     <div className="coach-session-copy">
                         <strong>{entry.trainee_name}</strong>
-                        <span>{entry.title}</span>
+                        <div className="thumbnail-identity">
+                            <TrainingThumbnail item={entry} />
+                            <Link
+                                href={`/coach/trainees/${entry.user_id}/schedule-entries/${entry.id}`}
+                            >
+                                {entry.title}
+                            </Link>
+                        </div>
                         {entry.scheduled_date && (
                             <small>
                                 <DateLabel date={entry.scheduled_date} />{" "}
@@ -39,7 +43,7 @@ function SessionList({ entries, empty }) {
                         )}
                     </div>
                     <CoachStatus status={entry.status} />
-                </Link>
+                </article>
             ))}
             {!entries.length && <p>{empty}</p>}
         </div>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.3.8 — Thumbnails across workspaces</title
+    ><style>
+        body {
+            font: 16px/1.65 system-ui;
+            color: #162b49;
+            background: #f4f7fc;
+            margin: 0;
+        }
+        main {
+            max-width: 1040px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+        header,
+        section {
+            background: white;
+            border: 1px solid #dce5f2;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        h2 {
+            font-size: 22px;
+        }
+        a {
+            color: #1763ef;
+        }
+        .status {
+            font-weight: 700;
+            color: #1763ef;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .mobile {
+            max-width: 390px;
+        }
+        .muted {
+            color: #667790;
+        }
+    </style>
+    <main>
+        <header>
+            <p class="muted">Training Planner · 2 November 2026</p>
+            <h1>v2.3.8 — Thumbnails across workspaces</h1>
+            <p class="status">SOURCE VERIFIED — DEPLOYMENT PENDING</p>
+            <p>
+                Consistent expandable photos throughout Personal and Coach
+                training screens.
+            </p>
+        </header>
+        <section>
+            <h2>Coverage</h2>
+            <p>
+                Thumbnails now identify dashboard next/recent/today/upcoming
+                workouts, Coach upcoming/recent sessions and trainee current
+                training, setup choices, selected assignments and scheduling
+                forms, plan training-day lists and headers, structured program
+                details and runs, Calendar date session lists, History rows and
+                details, recent Progress workouts, and recommendation details.
+            </p>
+            <p>
+                The shared exercise viewer covers the library, builder/editor,
+                workout lists, active workouts, completed structured workouts,
+                actual-weight forms, and exercise Progress/PR screens. Existing
+                recommended/catalog/plan/program covers keep the same full-image
+                viewer. Rest days retain recovery icons. Compact month cells and
+                non-training statistics remain uncluttered.
+            </p>
+            <p>
+                Image buttons are separate from navigation and selection. Photos
+                expand without changing the draft or navigating. Preview uses
+                the complete stored image, supports Open original image, closes
+                with Escape, backdrop or close button, and restores focus.
+                Nested preview Escape closes only the photo, preserving the
+                exercise editor or Calendar dialog.
+            </p>
+        </section>
+        <section>
+            <h2>Data, performance and architecture</h2>
+            <p>
+                No migration, new media uploads or new dependencies. Existing
+                authorized queries supply covers with a correlated first-image
+                projection; no per-plan/day queries. Dedicated checks prove 12
+                plan covers in one query, 24 day covers in one query, and no
+                implicit queries in session image access.
+            </p>
+            <p>
+                Saved workout snapshots take precedence over program
+                prescriptions and live training-day photos. Empty saved
+                snapshots and legacy completions never borrow a changed template
+                image. Frozen run definitions supply run covers. Missing
+                exercise photos retain their chosen icon; missing plan/workout
+                photos use the established gym fallback.
+            </p>
+            <p>
+                Shared PlanThumbnail handles the viewer, ExerciseThumbnail
+                handles local upload previews and icon fallback, and
+                TrainingThumbnail handles day/workout presentation. Existing
+                authorization, subscriptions, program lifecycle, schedule
+                controls and PWA behavior are preserved.
+                <a href="v2.3.8-qa/files.json">Changed source files</a>.
+            </p>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <p>
+                Full SQLite and isolated MySQL suites each passed 616 tests /
+                12,123 assertions. All 38 JavaScript tests passed. Chromium and
+                WebKit passed 392 checks across thumbnail coverage, image
+                previews, program layout and complete personal/Coach workout
+                lifecycle. Widths include 320, 360, 375, 390, 430, 768 and 1280,
+                including 320 × 480. No physical phone was used.
+            </p>
+            <p>
+                Twelve HTTP fixture checks passed. Build, Pint, Prettier,
+                Composer validation/audit and git diff checks passed. A local
+                registration rate limit during repeated browser logins was
+                allowed to expire; the lifecycle rerun passed. An early parse
+                typo was corrected before both full backend suites passed.
+            </p>
+            <p>
+                Local cleanup removed 12 disposable accounts and 280 generated
+                images. All 22 original tables and 44 original media hashes
+                match the baseline.
+                <a href="v2.3.8-qa/checks.json">Verification evidence</a>.
+            </p>
+        </section>
+        <section>
+            <h2>Desktop setup</h2>
+            <img
+                src="v2.3.8-qa/setup-desktop.png"
+                alt="Setup choices with separate image previews"
+            />
+            <h2>Mobile History</h2>
+            <img
+                class="mobile"
+                src="v2.3.8-qa/history-mobile.png"
+                alt="Mobile workout History with photos"
+            />
+        </section>
+        <section id="deployment">
+            <h2>Release and deployment</h2>
+            <p>
+                Source verified; production deployment and live verification
+                pending. The immutable v2.3.8 tag will be deployed only after
+                fresh backups and baseline verification. This section will be
+                updated with live evidence.
+            </p>
+        </section>
+    </main>
+</html>

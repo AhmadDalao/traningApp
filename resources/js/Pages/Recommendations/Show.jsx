@@ -1,3 +1,5 @@
+import Thumbnail from "../../Components/ExerciseThumbnail";
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { useTraining } from "../../Features/CoachingUI";
 import { BlockTimeline } from "../../Features/ProgramUI";
 import { Head, useForm } from "@inertiajs/react";
@@ -28,7 +30,11 @@ export default function Show({ plan }) {
                     { label: plan.name },
                 ]}
             />
-            <PageHeader title={plan.name} description={plan.description}>
+            <PageHeader
+                thumbnail={<TrainingThumbnail item={plan} />}
+                title={plan.name}
+                description={plan.description}
+            >
                 <Button disabled={form.processing} onClick={usePlan}>
                     {form.processing
                         ? "Adding…"
@@ -113,13 +119,7 @@ export default function Show({ plan }) {
                                     <ul className="program-prescriptions">
                                         {day.exercises.map((ex, k) => (
                                             <li key={k}>
-                                                <img
-                                                    src={ex.thumbnail_url}
-                                                    alt=""
-                                                    width="48"
-                                                    height="48"
-                                                    loading="lazy"
-                                                />
+                                                <Thumbnail exercise={ex} />
                                                 <span>
                                                     <strong>{ex.name}</strong>
                                                     <small>
@@ -176,13 +176,7 @@ export default function Show({ plan }) {
                             <ol className="discovery-exercises">
                                 {day.exercises.map((exercise, position) => (
                                     <li key={`${exercise.key}-${position}`}>
-                                        <img
-                                            src={exercise.thumbnail_url}
-                                            alt=""
-                                            width="56"
-                                            height="56"
-                                            loading="lazy"
-                                        />
+                                        <Thumbnail exercise={exercise} />
                                         <div>
                                             <h3>{exercise.name}</h3>
                                             <p>

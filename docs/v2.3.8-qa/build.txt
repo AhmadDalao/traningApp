@@ -1,0 +1,83 @@
+
+> build
+> vite build
+
+vite v6.4.5 building for production...
+transforming...
+
+/images/gym.jpg referenced in /images/gym.jpg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 2439 modules transformed.
+rendering chunks...
+computing gzip size...
+public/build/manifest.json                              22.62 kB │ gzip:   2.49 kB
+public/build/assets/app-f4t1Z3DP.css                   121.25 kB │ gzip:  23.96 kB
+public/build/assets/plus-Bekto_Pi.js                     0.32 kB │ gzip:   0.26 kB
+public/build/assets/arrow-up-right-DyKmX8wR.js           0.33 kB │ gzip:   0.26 kB
+public/build/assets/search-DvfCtmf9.js                   0.34 kB │ gzip:   0.27 kB
+public/build/assets/clock-3-D1hFJHVW.js                  0.35 kB │ gzip:   0.28 kB
+public/build/assets/pencil-B-HFKVwx.js                   0.44 kB │ gzip:   0.33 kB
+public/build/assets/shield-check-DVEdGu6w.js             0.49 kB │ gzip:   0.35 kB
+public/build/assets/calendar-plus-4Q1YmbUf.js            0.52 kB │ gzip:   0.33 kB
+public/build/assets/arrow-up-oN-_8Q-p.js                 0.61 kB │ gzip:   0.31 kB
+public/build/assets/TrainingThumbnail-qqVsWB5O.js        0.61 kB │ gzip:   0.37 kB
+public/build/assets/workout-DQGg6K1V.js                  0.66 kB │ gzip:   0.36 kB
+public/build/assets/Form-DjIdBPwN.js                     0.67 kB │ gzip:   0.41 kB
+public/build/assets/calories-bgweOPQR.js                 0.68 kB │ gzip:   0.45 kB
+public/build/assets/Connect-Kul6Aw7k.js                  0.72 kB │ gzip:   0.44 kB
+public/build/assets/Form-BFIEikg2.js                     0.91 kB │ gzip:   0.51 kB
+public/build/assets/useLiveFilters-j7X0e8e-.js           0.97 kB │ gzip:   0.56 kB
+public/build/assets/ExerciseThumbnail-TeAVVngz.js        0.97 kB │ gzip:   0.48 kB
+public/build/assets/supersets-DnAV5wKI.js                0.99 kB │ gzip:   0.51 kB
+public/build/assets/AuthLayout-Bs30iVwl.js               1.04 kB │ gzip:   0.47 kB
+public/build/assets/Setup-CrbjHyDT.js                    1.05 kB │ gzip:   0.58 kB
+public/build/assets/Edit-BMhmjHaf.js                     1.27 kB │ gzip:   0.62 kB
+public/build/assets/Subscriptions-BPKW8ea-.js            1.46 kB │ gzip:   0.69 kB
+public/build/assets/Index--OmDfaZV.js                    1.46 kB │ gzip:   0.73 kB
+public/build/assets/PlanThumbnail-oGAGxmg-.js            1.49 kB │ gzip:   0.87 kB
+public/build/assets/PlanPeriodFields-pa5C7Jqf.js         1.50 kB │ gzip:   0.66 kB
+public/build/assets/WeekdayPicker-Dlp_2d5P.js            1.51 kB │ gzip:   0.68 kB
+public/build/assets/BodyWeightForm-DoVcQ2BJ.js           1.54 kB │ gzip:   0.75 kB
+public/build/assets/Login-taSho_Z0.js                    1.54 kB │ gzip:   0.76 kB
+public/build/assets/ManageCoaching-C2kv94Gx.js           1.55 kB │ gzip:   0.74 kB
+public/build/assets/ExerciseList-DKbIsEO1.js             1.90 kB │ gzip:   0.88 kB
+public/build/assets/Start-BEtU6enI.js                    1.91 kB │ gzip:   1.01 kB
+public/build/assets/Index-BbOSeHIR.js                    2.30 kB │ gzip:   1.18 kB
+public/build/assets/TrainingPlanForm-DzFXxyyV.js         2.40 kB │ gzip:   1.05 kB
+public/build/assets/ExerciseRecords-BEnKCHXI.js          2.45 kB │ gzip:   1.14 kB
+public/build/assets/SessionStatusActions-Dqai65Lm.js     2.46 kB │ gzip:   1.06 kB
+public/build/assets/Assign-_vp0jVuW.js                   2.49 kB │ gzip:   1.16 kB
+public/build/assets/Register-CiS9qpJS.js                 3.15 kB │ gzip:   1.14 kB
+public/build/assets/TrainingCopyActions-DbQrif40.js      3.42 kB │ gzip:   1.46 kB
+public/build/assets/Overview-B4ibo-Ky.js                 3.52 kB │ gzip:   1.23 kB
+public/build/assets/Show-3AoqLNUz.js                     3.52 kB │ gzip:   1.54 kB
+public/build/assets/Index-DYdb5KRq.js                    3.89 kB │ gzip:   1.55 kB
+public/build/assets/ChooseTrainee-Nefh7U7t.js            4.05 kB │ gzip:   1.42 kB
+public/build/assets/Show-DvGehy64.js                     4.33 kB │ gzip:   1.33 kB
+public/build/assets/Show-Bar-WSVn.js                     4.82 kB │ gzip:   1.74 kB
+public/build/assets/ScheduleChangeModal-DYJgy1zK.js      4.85 kB │ gzip:   2.08 kB
+public/build/assets/Index-D7pUq72G.js                    5.13 kB │ gzip:   2.02 kB
+public/build/assets/Show-ZBNf5rdw.js                     5.17 kB │ gzip:   2.10 kB
+public/build/assets/CoachingForms-D9tx9mEB.js            5.29 kB │ gzip:   1.74 kB
+public/build/assets/ProgramUI-CIXa8EvV.js                5.36 kB │ gzip:   1.90 kB
+public/build/assets/ScheduleEntryForm-DBEgUt0J.js        5.39 kB │ gzip:   1.87 kB
+public/build/assets/Show-qdo4VQVT.js                     6.26 kB │ gzip:   2.42 kB
+public/build/assets/ProfileFields-DI30Jfpj.js            6.51 kB │ gzip:   2.18 kB
+public/build/assets/Index-DmxHJOeE.js                    6.88 kB │ gzip:   2.43 kB
+public/build/assets/ActiveWorkoutExercise-BuByKKlH.js    7.03 kB │ gzip:   2.56 kB
+public/build/assets/Trainees-COUoPyN2.js                 7.35 kB │ gzip:   2.76 kB
+public/build/assets/Index-Df3ZU0ej.js                    8.25 kB │ gzip:   3.08 kB
+public/build/assets/Trainee-BDNm3urV.js                  8.35 kB │ gzip:   2.43 kB
+public/build/assets/Dashboard-DLWyOgXR.js                8.36 kB │ gzip:   2.70 kB
+public/build/assets/Show-FawJTWvA.js                     8.91 kB │ gzip:   2.92 kB
+public/build/assets/Schedule-BgTIZ7hV.js                 9.27 kB │ gzip:   3.36 kB
+public/build/assets/Index-BHLYzhTF.js                    9.57 kB │ gzip:   3.32 kB
+public/build/assets/Index-ahrtHckY.js                   10.17 kB │ gzip:   3.58 kB
+public/build/assets/Run-CcByG9ma.js                     10.80 kB │ gzip:   3.70 kB
+public/build/assets/Show-livY4rmV.js                    12.23 kB │ gzip:   4.23 kB
+public/build/assets/Show-3Uhc5Doj.js                    12.63 kB │ gzip:   4.27 kB
+public/build/assets/SetupTrainee-BtKbOWiq.js            15.90 kB │ gzip:   4.72 kB
+public/build/assets/Index-ES07nuGR.js                   20.69 kB │ gzip:   7.75 kB
+public/build/assets/Index-By2-Qr85.js                  243.67 kB │ gzip:  73.16 kB
+public/build/assets/Form-CCGTL3_X.js                   267.58 kB │ gzip:  31.44 kB
+public/build/assets/app-UZ_O5K1w.js                    482.66 kB │ gzip: 154.60 kB
+✓ built in 1.56s

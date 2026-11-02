@@ -11,7 +11,7 @@ import {
     Pagination,
     DateLabel,
 } from "../../Components/UI";
-import { Thumbnail } from "../../Features/ExerciseEditor";
+import Thumbnail from "../../Components/ExerciseThumbnail";
 import {
     ExerciseProgressTabs,
     RecordList,

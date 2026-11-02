@@ -37,7 +37,7 @@ class CoachAssignmentController extends Controller
     {
         $subscription = $access->subscription($access->relationship($context->actor(), $context->owner()));
 
-        return Inertia::render('Coach/Assign', ['selectedTemplate' => $request->integer('template'), 'anotherCopy' => $request->boolean('another'), 'templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
+        return Inertia::render('Coach/Assign', ['selectedTemplate' => $request->integer('template'), 'anotherCopy' => $request->boolean('another'), 'templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->withThumbnail()->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
     }
 
     public function store(Request $request, TrainingContext $context, TrainingPlanDuplicator $duplicator)

@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link, router, usePage } from "@inertiajs/react";
@@ -65,6 +66,7 @@ export default function Show({ plan, copyPlans = [] }) {
                 ]}
             />
             <PageHeader
+                thumbnail={<TrainingThumbnail item={plan} />}
                 eyebrow="YOUR TRAINING PLAN"
                 title={plan.name}
                 description={plan.description || "A routine built around you."}
@@ -167,11 +169,7 @@ export default function Show({ plan, copyPlans = [] }) {
                                 <span className="row-number">
                                     {String(i + 1).padStart(2, "0")}
                                 </span>
-                                <DayIcon
-                                    icon={day.icon}
-                                    type={day.type}
-                                    focus={day.focus_area}
-                                />
+                                <TrainingThumbnail item={day} />
                                 <div className="day-info">
                                     <Link
                                         href={url(`/training-days/${day.id}`)}

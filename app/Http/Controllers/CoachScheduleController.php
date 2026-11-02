@@ -19,14 +19,14 @@ class CoachScheduleController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('ScheduleEntries/Form', ['plans' => $this->context->plans(true)->with('trainingDays')->get(), 'selectedDay' => $request->integer('day'), 'selectedDate' => $request->input('date', today()->toDateString())]);
+        return Inertia::render('ScheduleEntries/Form', ['plans' => $this->context->plans(true)->with(['trainingDays' => fn ($day) => $day->withThumbnail()])->get(), 'selectedDay' => $request->integer('day'), 'selectedDate' => $request->input('date', today()->toDateString())]);
     }
 
     public function edit(ScheduleEntry $scheduleEntry)
     {
         $this->access->futureSession($this->context->actor(), $this->context->owner(), $scheduleEntry);
 
-        return Inertia::render('ScheduleEntries/Form', ['entry' => $scheduleEntry, 'plans' => $this->context->plans(true)->with('trainingDays')->get()]);
+        return Inertia::render('ScheduleEntries/Form', ['entry' => $scheduleEntry, 'plans' => $this->context->plans(true)->with(['trainingDays' => fn ($day) => $day->withThumbnail()])->get()]);
     }
 
     private function save(StoreScheduleEntryRequest $request, ?ScheduleEntry $entry = null): ScheduleEntry

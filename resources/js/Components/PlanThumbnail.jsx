@@ -5,7 +5,12 @@ import { Modal } from "./UI";
 
 const fallback = "/images/gym.jpg";
 
-export default function PlanThumbnail({ src, name = "Training plan" }) {
+export default function PlanThumbnail({
+    src,
+    name = "Training plan",
+    className = "",
+    fallbackContent = null,
+}) {
     const [failed, setFailed] = useState(null);
     const [open, setOpen] = useState(false);
     const trigger = useRef(null);
@@ -14,12 +19,14 @@ export default function PlanThumbnail({ src, name = "Training plan" }) {
         if (image !== fallback) setFailed(src);
     };
 
+    if ((!src || failed === src) && fallbackContent) return fallbackContent;
+
     return (
         <>
             <button
                 ref={trigger}
                 type="button"
-                className="plan-thumbnail-trigger"
+                className={`plan-thumbnail-trigger ${className}`}
                 aria-label={`View full image for ${name}`}
                 aria-haspopup="dialog"
                 onClick={() => setOpen(true)}

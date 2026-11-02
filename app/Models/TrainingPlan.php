@@ -2,10 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class TrainingPlan extends Model
 {
+    protected $appends = ['thumbnail_url'];
+
+    protected $hidden = ['cover_thumbnail_path'];
+
+    public function scopeWithThumbnail(Builder $query): void
+    {
+        $query->addSelect(['cover_thumbnail_path' => TrainingExercise::select('thumbnail_path')
+            ->join('training_days', 'training_days.id', '=', 'training_exercises.training_day_id')
+            ->whereColumn('training_days.training_plan_id', 'training_plans.id')->where('training_days.type', 'training')
+            ->whereNotNull('thumbnail_path')->where('thumbnail_path', '!=', '')
+            ->orderBy('training_days.position')->orderBy('training_days.id')
+            ->orderBy('training_exercises.position')->orderBy('training_exercises.id')->limit(1)]);
+    }
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        return $this->cover_thumbnail_path ? Storage::disk('public')->url($this->cover_thumbnail_path) : null;
+    }
+
     protected $fillable = ['name', 'description', 'start_date', 'end_date', 'schedule_mode', 'structure_type', 'duration_weeks'];
 
     public function isProgram(): bool

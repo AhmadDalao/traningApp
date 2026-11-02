@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import ProgramControlModal from "../../Features/ProgramControlModal";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useState } from "react";
@@ -75,6 +76,11 @@ export default function Run({ run, position, summary }) {
                 ]}
             />
             <PageHeader
+                thumbnail={
+                    <TrainingThumbnail
+                        item={{ ...run, name: definition.name }}
+                    />
+                }
                 eyebrow={
                     run.status === "completed"
                         ? "PROGRAM COMPLETE 🎉"

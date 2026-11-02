@@ -1,0 +1,109 @@
+{
+  "release": "v2.3.8",
+  "baseline": "v2.3.7",
+  "sqlite": {
+    "passed": 616,
+    "assertions": 12123
+  },
+  "mysql": {
+    "passed": 616,
+    "assertions": 12123,
+    "database": "training_planner_test"
+  },
+  "javascript": {
+    "passed": 38
+  },
+  "browser_runs": [
+    {
+      "script": "thumbnail-coverage",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 8.86,
+      "checks": 63
+    },
+    {
+      "script": "thumbnail-coverage",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 10.36,
+      "checks": 63
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 8.52,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 9.91,
+      "checks": 75
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 3.04,
+      "checks": 31
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 3.24,
+      "checks": 31
+    },
+    {
+      "script": "full-lifecycle",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 14.26,
+      "checks": 27
+    },
+    {
+      "script": "full-lifecycle",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 18.15,
+      "checks": 27
+    }
+  ],
+  "browser_checks": 392,
+  "http": {
+    "checks": [
+      "chromium: Personal /dashboard retains all three distinct runs",
+      "chromium: image covers and empty fallback are available",
+      "chromium: Personal /progress retains all three distinct runs",
+      "chromium: image covers and empty fallback are available",
+      "chromium: Coach sees only two assigned program covers",
+      "chromium: run start dates identify separate runs",
+      "webkit: Personal /dashboard retains all three distinct runs",
+      "webkit: image covers and empty fallback are available",
+      "webkit: Personal /progress retains all three distinct runs",
+      "webkit: image covers and empty fallback are available",
+      "webkit: Coach sees only two assigned program covers",
+      "webkit: run start dates identify separate runs"
+    ],
+    "count": 12
+  },
+  "integrity": {
+    "original_data_and_media_unchanged": true,
+    "tables": 22,
+    "original_media_files": 44,
+    "qa_accounts_removed": 12,
+    "ledger_entries": 13,
+    "qa_images_removed": 280
+  },
+  "build": "passed",
+  "pint": "passed",
+  "prettier": "passed",
+  "composer_validate": "passed",
+  "composer_audit": "No security vulnerability advisories found",
+  "diff_check": "passed",
+  "physical_phone_tested": false,
+  "migrations": 0,
+  "performance": "12 plan covers use one query; 24 day covers use one query; session image access performs zero queries."
+}

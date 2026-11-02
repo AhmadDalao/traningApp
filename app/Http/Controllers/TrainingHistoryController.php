@@ -69,13 +69,14 @@ class TrainingHistoryController extends Controller
         $pageSize = $perPage === 'all' ? max((clone $query)->count(), 1) : (int) $perPage;
         $entries = $query->with([
             'sessionExercises' => fn ($exercises) => $exercises->withCount(['sets', 'sets as completed_sets_count' => fn ($sets) => $sets->whereNotNull('completed_at')]),
-            'trainingDay' => fn ($day) => $day->withCount('exercises'),
+            'trainingDay' => fn ($day) => $day->withThumbnail()->withCount('exercises'),
         ])
             ->orderByDesc('scheduled_date')->orderByDesc('scheduled_time')->orderByDesc('id')
             ->paginate($pageSize, ['*'], 'page', $perPage === 'all' ? 1 : null)->withQueryString()
             ->through(fn (ScheduleEntry $entry) => [
                 ...$entry->only('id', 'title', 'entry_type', 'status', 'focus_area', 'icon', 'scheduled_date', 'scheduled_time'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
+                'thumbnail_url' => $entry->thumbnail_url,
                 'exercises_count' => $entry->workoutExerciseCount(),
                 'detailed_workout' => $entry->sessionExercises->isNotEmpty(),
                 'sets_count' => $entry->sessionExercises->sum('sets_count'),

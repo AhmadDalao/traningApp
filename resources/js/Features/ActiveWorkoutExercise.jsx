@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, router } from "@inertiajs/react";
 import { Plus } from "lucide-react";
 import { Button, ConfirmDialog, formatWeight } from "../Components/UI";
-import { Thumbnail } from "./ExerciseEditor";
+import Thumbnail from "../Components/ExerciseThumbnail";
 import WorkoutSetRow from "./WorkoutSetRow";
 import { formatDuration } from "./workout";
 

@@ -40,8 +40,8 @@ class ScheduleEntryController extends Controller
         $end = $date->copy()->endOfMonth()->addWeek();
 
         return Inertia::render('Calendar/Index', [
-            'entries' => app(TrainingContext::class)->sessions()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan', 'programRun')->withExists('sessionExercises')->get()->map(fn ($entry) => [
-                ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key', 'program_run_id', 'program_week', 'program_context'),
+            'entries' => app(TrainingContext::class)->sessions()->whereBetween('scheduled_date', [$start->toDateString(), $end->toDateString()])->orderBy('scheduled_date')->orderBy('scheduled_time')->with('trainingDay.trainingPlan', 'programRun')->withThumbnail()->withExists('sessionExercises')->get()->map(fn ($entry) => [
+                ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key', 'program_run_id', 'program_week', 'program_context', 'thumbnail_url'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
                 'program_status' => $entry->programRun?->status,
                 'can_move' => $schedule->canMove($entry, $context->owner()) && $coachCanMove($entry),
@@ -55,7 +55,7 @@ class ScheduleEntryController extends Controller
 
     private function plans(Request $request)
     {
-        return app(TrainingContext::class)->plans(true)->with('trainingDays', 'assignment.relationship.coach.coachProfile')->orderBy('name')->get()->map(fn ($plan) => [...$plan->only('id', 'name', 'workspace_type'), 'training_days' => $plan->trainingDays, 'coach_name' => $plan->assignment?->relationship?->coach?->coachProfile?->display_name]);
+        return app(TrainingContext::class)->plans(true)->with(['trainingDays' => fn ($day) => $day->withThumbnail(), 'assignment.relationship.coach.coachProfile'])->orderBy('name')->get()->map(fn ($plan) => [...$plan->only('id', 'name', 'workspace_type'), 'training_days' => $plan->trainingDays, 'coach_name' => $plan->assignment?->relationship?->coach?->coachProfile?->display_name]);
     }
 
     public function create(Request $request)

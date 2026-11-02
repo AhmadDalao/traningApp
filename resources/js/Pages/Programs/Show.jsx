@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { useState } from "react";
 import { Head, Link } from "@inertiajs/react";
 import {
@@ -31,6 +32,16 @@ export default function Show({ plan, blocks, runs }) {
                 ]}
             />
             <PageHeader
+                thumbnail={
+                    <TrainingThumbnail
+                        item={{
+                            ...plan,
+                            training_days: blocks.flatMap(
+                                (block) => block.training_days,
+                            ),
+                        }}
+                    />
+                }
                 eyebrow={`${plan.duration_weeks}-WEEK STRUCTURED PROGRAM`}
                 title={plan.name}
                 description={plan.description}
@@ -161,6 +172,7 @@ export default function Show({ plan, blocks, runs }) {
                                         </span>
                                     </summary>
                                     <div className="program-actions">
+                                        <TrainingThumbnail item={day} />
                                         <ButtonLink
                                             variant="secondary"
                                             href={url(

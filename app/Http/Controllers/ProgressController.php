@@ -48,7 +48,7 @@ class ProgressController extends Controller
             'training' => ['completed' => $completed, 'skipped' => $skipped, 'due' => $total, 'completion_rate' => $total ? round($completed / $total * 100) : null, 'streak' => $streak, 'weighted_volume' => $volume === null ? null : round((float) $volume, 2)],
             'highlights' => $exerciseSummary['highlights'],
             'recentRecords' => $exerciseSummary['recentRecords'], 'recentRecordCount' => $exerciseSummary['recentRecordCount'],
-            'recentWorkouts' => (clone $sessions)->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->limit(5)->get(['id', 'title', 'status', 'scheduled_date', 'duration_minutes']),
+            'recentWorkouts' => (clone $sessions)->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->limit(5)->get(['id', 'title', 'status', 'scheduled_date', 'duration_minutes', 'entry_type', 'workout_snapshot', 'program_prescription']),
             'programRuns' => app(ProgramLifecycle::class)->cards(ProgramRun::where('user_id', $user->id)->whereIn('training_plan_id', $context->plans()->select('training_plans.id'))->whereIn('status', ['active', 'paused'])),
         ]);
     }

@@ -13,6 +13,29 @@ use Illuminate\Validation\ValidationException;
 
 class ScheduleEntry extends Model
 {
+    protected $appends = ['thumbnail_url'];
+
+    public function scopeWithThumbnail(Builder $query): void
+    {
+        $query->with(['trainingDay' => fn ($day) => $day->withThumbnail()]);
+    }
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if ($this->entry_type === 'rest') {
+            return null;
+        }
+        // Historical media takes precedence; never reconstruct a legacy completion from a changed template.
+        $snapshot = $this->workout_snapshot ?? $this->program_prescription;
+        if ($snapshot !== null) {
+            $path = collect($snapshot['exercises'] ?? [])->pluck('thumbnail_path')->first(fn ($path) => filled($path));
+
+            return $path ? Storage::disk('public')->url($path) : null;
+        }
+
+        return $this->status !== 'completed' && $this->relationLoaded('trainingDay') ? $this->trainingDay?->thumbnail_url : null;
+    }
+
     protected $fillable = ['scheduled_by_user_id', 'icon', 'training_day_id', 'title', 'entry_type', 'focus_area', 'scheduled_date', 'scheduled_time', 'status', 'notes', 'completed_at', 'workout_snapshot', 'plan_occurrence_key', 'schedule_managed', 'duration_minutes', 'calories_burned', 'calories_source', 'estimated_calories', 'intensity', 'started_at', 'program_run_id', 'program_week', 'program_context', 'program_prescription'];
 
     protected function casts(): array

@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { RecordList } from "../../Features/ExerciseRecords";
 import { Head, Link } from "@inertiajs/react";
 import {
@@ -106,9 +107,15 @@ export default function Trainee({
                     </div>
                     {current ? (
                         <div className="current-training">
-                            <span className="feature-icon">
-                                <Dumbbell size={24} aria-hidden="true" />
-                            </span>
+                            <TrainingThumbnail
+                                item={
+                                    plans.find(
+                                        (plan) => plan.id === current.id,
+                                    ) ||
+                                    run ||
+                                    current
+                                }
+                            />
                             <div>
                                 <h3>{current.name}</h3>
                                 <p>
@@ -216,9 +223,7 @@ export default function Trainee({
                     {nextSession ? (
                         <>
                             <div className="quick-workout">
-                                <span className="feature-icon">
-                                    <Dumbbell size={21} aria-hidden="true" />
-                                </span>
+                                <TrainingThumbnail item={nextSession} />
                                 <div>
                                     <h3>{nextSession.title}</h3>
                                     <p>

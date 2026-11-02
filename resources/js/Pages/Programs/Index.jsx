@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { programStatus } from "../../Features/ProgramUI";
 import { Head } from "@inertiajs/react";
 import {
@@ -23,7 +24,15 @@ export default function Index({ runs }) {
             <div className="program-stack">
                 {runs.data.map((run) => (
                     <section className="panel program-card" key={run.id}>
-                        <h2>{run.definition_snapshot.name}</h2>
+                        <div className="thumbnail-identity">
+                            <TrainingThumbnail
+                                item={{
+                                    ...run,
+                                    name: run.definition_snapshot.name,
+                                }}
+                            />
+                            <h2>{run.definition_snapshot.name}</h2>
+                        </div>
                         <p>
                             Started {run.started_on} ·{" "}
                             <span

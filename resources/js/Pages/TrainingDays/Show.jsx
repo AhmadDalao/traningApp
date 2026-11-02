@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link } from "@inertiajs/react";
@@ -36,6 +37,7 @@ export default function Show({ day, copyPlans = [], canEditDay = true }) {
                 ]}
             />
             <PageHeader
+                thumbnail={<TrainingThumbnail item={day} />}
                 eyebrow="REUSABLE TRAINING DAY"
                 title={day.title}
                 description={

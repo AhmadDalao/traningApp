@@ -1,0 +1,242 @@
+
+> test
+> node --test tests/js/*.test.js
+
+TAP version 13
+# Subtest: reported calories take priority while estimates remain separate
+ok 1 - reported calories take priority while estimates remain separate
+  ---
+  duration_ms: 1.567333
+  type: 'test'
+  ...
+# Subtest: zero reported calories are not replaced by an estimate
+ok 2 - zero reported calories are not replaced by an estimate
+  ---
+  duration_ms: 0.070459
+  type: 'test'
+  ...
+# Subtest: estimate-only values are explicitly approximate and missing values use a dash
+ok 3 - estimate-only values are explicitly approximate and missing values use a dash
+  ---
+  duration_ms: 0.054375
+  type: 'test'
+  ...
+# Subtest: legacy manual values and each supported source are readable
+ok 4 - legacy manual values and each supported source are readable
+  ---
+  duration_ms: 0.097458
+  type: 'test'
+  ...
+# Subtest: progress weights and volume preserve decimals without excessive precision
+ok 5 - progress weights and volume preserve decimals without excessive precision
+  ---
+  duration_ms: 11.266708
+  type: 'test'
+  ...
+# Subtest: missing weighted results stay missing and reps remain reps
+ok 6 - missing weighted results stay missing and reps remain reps
+  ---
+  duration_ms: 0.29
+  type: 'test'
+  ...
+# Subtest: durations reuse the workout formatter with readable units
+ok 7 - durations reuse the workout formatter with readable units
+  ---
+  duration_ms: 0.443125
+  type: 'test'
+  ...
+# Subtest: cleared filters show every level without modifying source plans
+ok 8 - cleared filters show every level without modifying source plans
+  ---
+  duration_ms: 1.148417
+  type: 'test'
+  ...
+# Subtest: level, goal, days, and equipment filters combine and accept select strings
+ok 9 - level, goal, days, and equipment filters combine and accept select strings
+  ---
+  duration_ms: 0.153125
+  type: 'test'
+  ...
+# Subtest: search covers case-insensitive names, goals, descriptions, and weekly split
+ok 10 - search covers case-insensitive names, goals, descriptions, and weekly split
+  ---
+  duration_ms: 0.149042
+  type: 'test'
+  ...
+# Subtest: duration combines with type and keeps the cutoff inclusive
+ok 11 - duration combines with type and keeps the cutoff inclusive
+  ---
+  duration_ms: 0.066375
+  type: 'test'
+  ...
+# Subtest: program discovery type composes with existing filters and legacy simple plans
+ok 12 - program discovery type composes with existing filters and legacy simple plans
+  ---
+  duration_ms: 2.5165
+  type: 'test'
+  ...
+# Subtest: install caches public allowlist with omitted credentials and does not activate automatically
+ok 13 - install caches public allowlist with omitted credentials and does not activate automatically
+  ---
+  duration_ms: 24.405417
+  type: 'test'
+  ...
+# Subtest: private HTML, Inertia, APIs, media, mutations and third party requests never enter cache
+ok 14 - private HTML, Inertia, APIs, media, mutations and third party requests never enter cache
+  ---
+  duration_ms: 1.325875
+  type: 'test'
+  ...
+# Subtest: navigation goes network first and offline uses only the generic fallback
+ok 15 - navigation goes network first and offline uses only the generic fallback
+  ---
+  duration_ms: 0.585416
+  type: 'test'
+  ...
+# Subtest: install refuses private HTML returned in place of a static script
+ok 16 - install refuses private HTML returned in place of a static script
+  ---
+  duration_ms: 0.727208
+  type: 'test'
+  ...
+# Subtest: activation removes only old app caches
+ok 17 - activation removes only old app caches
+  ---
+  duration_ms: 0.287833
+  type: 'test'
+  ...
+# Subtest: malformed push is generic and normal push has stable non-renotifying tag
+ok 18 - malformed push is generic and normal push has stable non-renotifying tag
+  ---
+  duration_ms: 0.325167
+  type: 'test'
+  ...
+# Subtest: notification clicks reject external, protocol-relative and mutation paths
+ok 19 - notification clicks reject external, protocol-relative and mutation paths
+  ---
+  duration_ms: 1.619
+  type: 'test'
+  ...
+# Subtest: click focuses exact destination and leaves unrelated workout tabs untouched
+ok 20 - click focuses exact destination and leaves unrelated workout tabs untouched
+  ---
+  duration_ms: 0.309417
+  type: 'test'
+  ...
+# Subtest: logout message closes displayed notifications
+ok 21 - logout message closes displayed notifications
+  ---
+  duration_ms: 0.403167
+  type: 'test'
+  ...
+# Subtest: new unsaved exercises can be paired by selecting a named partner
+ok 22 - new unsaved exercises can be paired by selecting a named partner
+  ---
+  duration_ms: 1.21775
+  type: 'test'
+  ...
+# Subtest: editing an existing pair preserves its group and selected icon
+ok 23 - editing an existing pair preserves its group and selected icon
+  ---
+  duration_ms: 0.121833
+  type: 'test'
+  ...
+# Subtest: choosing no superset unlinks both exercises in a pair
+ok 24 - choosing no superset unlinks both exercises in a pair
+  ---
+  duration_ms: 0.05125
+  type: 'test'
+  ...
+# Subtest: joining an existing group keeps its members linked
+ok 25 - joining an existing group keeps its members linked
+  ---
+  duration_ms: 0.056208
+  type: 'test'
+  ...
+# Subtest: switching partners detaches only the edited exercise from its former group
+ok 26 - switching partners detaches only the edited exercise from its former group
+  ---
+  duration_ms: 0.140791
+  type: 'test'
+  ...
+# Subtest: removing one member keeps larger groups and clears a lone partner
+ok 27 - removing one member keeps larger groups and clears a lone partner
+  ---
+  duration_ms: 0.054875
+  type: 'test'
+  ...
+# Subtest: new groups do not accidentally join another pair and work after Z
+ok 28 - new groups do not accidentally join another pair and work after Z
+  ---
+  duration_ms: 0.173916
+  type: 'test'
+  ...
+# Subtest: partner names stay accurate after reordering and duplicate exercise names
+ok 29 - partner names stay accurate after reordering and duplicate exercise names
+  ---
+  duration_ms: 0.181083
+  type: 'test'
+  ...
+# Subtest: a row cannot be linked to itself or to a missing exercise
+ok 30 - a row cannot be linked to itself or to a missing exercise
+  ---
+  duration_ms: 0.429708
+  type: 'test'
+  ...
+# Subtest: a library partner is added after the first exercise with independent settings and media
+ok 31 - a library partner is added after the first exercise with independent settings and media
+  ---
+  duration_ms: 0.420334
+  type: 'test'
+  ...
+# Subtest: switching an existing exercise to a library partner keeps its position and clears the old pair
+ok 32 - switching an existing exercise to a library partner keeps its position and clears the old pair
+  ---
+  duration_ms: 0.278125
+  type: 'test'
+  ...
+# Subtest: an unselected library partner is not added when choosing no superset or an existing exercise
+ok 33 - an unselected library partner is not added when choosing no superset or an existing exercise
+  ---
+  duration_ms: 0.086
+  type: 'test'
+  ...
+# Subtest: repeated pair updates do not duplicate a newly added library partner
+ok 34 - repeated pair updates do not duplicate a newly added library partner
+  ---
+  duration_ms: 0.046667
+  type: 'test'
+  ...
+# Subtest: mm:ss is converted to integer seconds and round-trips
+ok 35 - mm:ss is converted to integer seconds and round-trips
+  ---
+  duration_ms: 0.620833
+  type: 'test'
+  ...
+# Subtest: invalid, ambiguous, negative and out-of-range durations are rejected
+ok 36 - invalid, ambiguous, negative and out-of-range durations are rejected
+  ---
+  duration_ms: 0.101166
+  type: 'test'
+  ...
+# Subtest: progress counts only completed results and excludes skipped work from finish warnings
+ok 37 - progress counts only completed results and excludes skipped work from finish warnings
+  ---
+  duration_ms: 1.180584
+  type: 'test'
+  ...
+# Subtest: empty workouts have no fabricated completed exercises or sets
+ok 38 - empty workouts have no fabricated completed exercises or sets
+  ---
+  duration_ms: 0.069917
+  type: 'test'
+  ...
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 130.621208

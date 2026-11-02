@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { useTraining } from "../../Features/CoachingUI";
 import useLiveFilters from "../../Features/useLiveFilters";
 import { useState } from "react";
@@ -30,7 +31,7 @@ import BodyWeightForm from "../../Features/BodyWeightForm";
 import BodyWeightChart from "../../Features/BodyWeightChart";
 import { RecordList, RecordValue } from "../../Features/ExerciseRecords";
 import { ProgramRunCards } from "../../Features/ProgramUI";
-import { Thumbnail } from "../../Features/ExerciseEditor";
+import Thumbnail from "../../Components/ExerciseThumbnail";
 
 export default function Index({
     summary,
@@ -208,22 +209,27 @@ export default function Index({
                             <ul className="compact-activity">
                                 {recentWorkouts.map((entry) => (
                                     <li key={entry.id}>
-                                        <div>
-                                            <Link
-                                                href={url(
-                                                    `/training-history/${entry.id}`,
-                                                )}
-                                            >
-                                                {entry.title}
-                                            </Link>
-                                            <small>
-                                                <DateLabel
-                                                    date={entry.scheduled_date}
-                                                />
-                                                {entry.duration_minutes
-                                                    ? ` · ${entry.duration_minutes} min`
-                                                    : ""}
-                                            </small>
+                                        <div className="thumbnail-identity">
+                                            <TrainingThumbnail item={entry} />
+                                            <div>
+                                                <Link
+                                                    href={url(
+                                                        `/training-history/${entry.id}`,
+                                                    )}
+                                                >
+                                                    {entry.title}
+                                                </Link>
+                                                <small>
+                                                    <DateLabel
+                                                        date={
+                                                            entry.scheduled_date
+                                                        }
+                                                    />
+                                                    {entry.duration_minutes
+                                                        ? ` · ${entry.duration_minutes} min`
+                                                        : ""}
+                                                </small>
+                                            </div>
                                         </div>
                                         <span className="badge completed">
                                             Completed

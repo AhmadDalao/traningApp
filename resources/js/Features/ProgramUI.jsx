@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../Components/TrainingThumbnail";
 import { ArrowRight } from "lucide-react";
 import PlanThumbnail from "../Components/PlanThumbnail";
 import { Link } from "@inertiajs/react";
@@ -75,19 +76,22 @@ export function ProgramSessions({
         <ul className="program-sessions">
             {sessions.map((entry) => (
                 <li key={entry.id || entry.key}>
-                    <div>
-                        <strong>{entry.title}</strong>
-                        <small>
-                            <DateLabel date={entry.scheduled_date} />
-                            {entry.scheduled_time
-                                ? ` · ${entry.scheduled_time.slice(0, 5)}`
-                                : ""}{" "}
-                            ·{" "}
-                            {entry.entry_type === "rest"
-                                ? "Rest day"
-                                : entry.program_context?.block_name}
-                        </small>
-                        {entry.reason && <small>{entry.reason}</small>}
+                    <div className="thumbnail-identity">
+                        <TrainingThumbnail item={entry} />
+                        <div>
+                            <strong>{entry.title}</strong>
+                            <small>
+                                <DateLabel date={entry.scheduled_date} />
+                                {entry.scheduled_time
+                                    ? ` · ${entry.scheduled_time.slice(0, 5)}`
+                                    : ""}{" "}
+                                ·{" "}
+                                {entry.entry_type === "rest"
+                                    ? "Rest day"
+                                    : entry.program_context?.block_name}
+                            </small>
+                            {entry.reason && <small>{entry.reason}</small>}
+                        </div>
                     </div>
                     {entry.missed && onReschedule && (
                         <div className="program-actions">

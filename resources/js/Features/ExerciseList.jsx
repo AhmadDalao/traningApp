@@ -1,6 +1,7 @@
 import { Link2 } from "lucide-react";
 import { EmptyState, formatWeight } from "../Components/UI";
 import ExerciseIcon from "../Components/ExerciseIcon";
+import Thumbnail from "../Components/ExerciseThumbnail";
 import { supersetPartners } from "./supersets";
 
 export default function ExerciseList({
@@ -18,19 +19,12 @@ export default function ExerciseList({
                     <span className="row-number">
                         {String(i + 1).padStart(2, "0")}
                     </span>
-                    {exercise.thumbnail_url ? (
-                        <img
-                            className="exercise-thumb"
-                            src={exercise.thumbnail_url}
-                            alt={exercise.name}
-                        />
-                    ) : (
-                        <div className="exercise-thumb placeholder">
-                            <ExerciseIcon exercise={exercise} size={23} />
-                        </div>
-                    )}
+                    <Thumbnail exercise={exercise} />
                     <div className="exercise-info">
-                        <h3 className="exercise-name-with-icon"><ExerciseIcon exercise={exercise} size={17} />{exercise.name}</h3>
+                        <h3 className="exercise-name-with-icon">
+                            <ExerciseIcon exercise={exercise} size={17} />
+                            {exercise.name}
+                        </h3>
                         {exercise.notes && <p>{exercise.notes}</p>}
                         {supersetPartners(exercise, exercises).length > 0 && (
                             <span className="superset-badge superset-partners">

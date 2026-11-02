@@ -1,35 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ImagePlus, Library, X } from "lucide-react";
 import { Modal, Field, Button, formatWeight } from "../Components/UI";
 import IconPicker from "../Components/IconPicker";
 import ExerciseIcon from "../Components/ExerciseIcon";
+import Thumbnail from "../Components/ExerciseThumbnail";
 import ExerciseLibraryPicker from "./ExerciseLibraryPicker";
 import { supersetPartners } from "./supersets";
-export function Thumbnail({ exercise, className = "exercise-thumb" }) {
-    const [preview, setPreview] = useState(null);
-    useEffect(() => {
-        if (!exercise.thumbnail) {
-            setPreview(null);
-            return;
-        }
-        const url = URL.createObjectURL(exercise.thumbnail);
-        setPreview(url);
-        return () => URL.revokeObjectURL(url);
-    }, [exercise.thumbnail]);
-    const url =
-        preview || (!exercise.remove_thumbnail && exercise.thumbnail_url);
-    return url ? (
-        <img
-            className={className}
-            src={url}
-            alt={exercise.name || "Exercise preview"}
-        />
-    ) : (
-        <div className={`${className} placeholder`}>
-            <ExerciseIcon exercise={exercise} size={26} />
-        </div>
-    );
-}
 export default function ExerciseEditor({
     exercise,
     exercises,

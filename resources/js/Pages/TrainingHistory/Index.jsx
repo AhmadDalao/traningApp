@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { calorieDisplay } from "../../Features/calories";
@@ -119,7 +120,6 @@ export default function Index({ entries, summary, filters, plans }) {
                     <Field label="Period" error={errors.period}>
                         <select
                             value={draft.period}
-
                             onChange={(event) =>
                                 change("period", event.target.value)
                             }
@@ -195,7 +195,6 @@ export default function Index({ entries, summary, filters, plans }) {
                         <Button
                             type="button"
                             variant="secondary"
-
                             onClick={() => {
                                 apply({
                                     status: "all",
@@ -228,7 +227,6 @@ export default function Index({ entries, summary, filters, plans }) {
                                 type="button"
                                 className={`filter-chip ${filters.status === value ? "active" : ""}`}
                                 aria-pressed={filters.status === value}
-
                                 key={value}
                                 onClick={() =>
                                     apply({ ...draft, status: value })
@@ -246,7 +244,6 @@ export default function Index({ entries, summary, filters, plans }) {
                     <Field label="Items per page">
                         <select
                             value={filters.per_page}
-
                             onChange={(event) =>
                                 apply({
                                     ...draft,
@@ -309,7 +306,12 @@ export default function Index({ entries, summary, filters, plans }) {
                                             className="history-title-cell"
                                             data-label="Title"
                                         >
-                                            <strong>{entry.title}</strong>
+                                            <div className="thumbnail-identity">
+                                                <TrainingThumbnail
+                                                    item={entry}
+                                                />
+                                                <strong>{entry.title}</strong>
+                                            </div>
                                             {entry.focus_area && (
                                                 <small>
                                                     {entry.focus_area}

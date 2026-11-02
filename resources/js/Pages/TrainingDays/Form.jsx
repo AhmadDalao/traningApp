@@ -19,7 +19,8 @@ import {
     EmptyState,
     formatWeight,
 } from "../../Components/UI";
-import ExerciseEditor, { Thumbnail } from "../../Features/ExerciseEditor";
+import ExerciseEditor from "../../Features/ExerciseEditor";
+import Thumbnail from "../../Components/ExerciseThumbnail";
 import IconPicker from "../../Components/IconPicker";
 import WeekdayPicker from "../../Components/WeekdayPicker";
 import {

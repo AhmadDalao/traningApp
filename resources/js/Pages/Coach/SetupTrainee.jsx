@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import {
     Check,
     Dumbbell,
@@ -255,6 +256,9 @@ export default function SetupTrainee({
                                         className={`setup-training-option ${checked ? "selected" : ""}`}
                                         key={p.id}
                                     >
+                                        <div className="setup-option-image">
+                                            <TrainingThumbnail item={p} />
+                                        </div>
                                         <label className="setup-training-select">
                                             <input
                                                 type="radio"
@@ -386,9 +390,7 @@ export default function SetupTrainee({
                     <section className="panel coach-card">
                         <h2>2. Dates & Schedule</h2>
                         <div className="setup-selected-training">
-                            <span className="feature-icon">
-                                <Dumbbell size={22} aria-hidden="true" />
-                            </span>
+                            <TrainingThumbnail item={selected} />
                             <div>
                                 <small>Training program</small>
                                 <h3>{selected?.name}</h3>

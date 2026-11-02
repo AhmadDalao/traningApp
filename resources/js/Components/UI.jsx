@@ -110,13 +110,28 @@ export function DayIcon({ icon, type, focus, large = false }) {
         </div>
     );
 }
-export function PageHeader({ eyebrow, title, description, children }) {
+export function PageHeader({
+    eyebrow,
+    title,
+    description,
+    children,
+    thumbnail,
+}) {
     return (
         <header className="page-header">
-            <div>
-                {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-                <h1>{title}</h1>
-                {description && <p>{description}</p>}
+            <div
+                className={
+                    thumbnail
+                        ? "thumbnail-identity page-title-media"
+                        : undefined
+                }
+            >
+                {thumbnail}
+                <div>
+                    {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+                    <h1>{title}</h1>
+                    {description && <p>{description}</p>}
+                </div>
             </div>
             {children && <div className="header-actions">{children}</div>}
         </header>
@@ -177,6 +192,7 @@ export function Modal({
             ref={ref}
             className={`modal ${wide ? "wide" : ""}`}
             onCancel={(e) => {
+                e.stopPropagation();
                 e.preventDefault();
                 onClose();
             }}

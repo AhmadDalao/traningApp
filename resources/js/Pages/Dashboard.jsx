@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../Components/TrainingThumbnail";
 import { ProgramRunCards } from "../Features/ProgramUI";
 import { useState } from "react";
 import { Head, Link, usePage, router } from "@inertiajs/react";
@@ -166,12 +167,7 @@ export default function Dashboard({
                     {nextWorkout ? (
                         <>
                             <div className="dashboard-feature-workout">
-                                <DayIcon
-                                    icon={nextWorkout.icon}
-                                    type={nextWorkout.entry_type}
-                                    focus={nextWorkout.focus_area}
-                                    large
-                                />
+                                <TrainingThumbnail item={nextWorkout} />
                                 <div>
                                     <h3>{nextWorkout.title}</h3>
                                     <p>
@@ -211,12 +207,7 @@ export default function Dashboard({
                     {recentWorkout ? (
                         <>
                             <div className="dashboard-feature-workout">
-                                <DayIcon
-                                    icon={recentWorkout.icon}
-                                    type={recentWorkout.entry_type}
-                                    focus={recentWorkout.focus_area}
-                                    large
-                                />
+                                <TrainingThumbnail item={recentWorkout} />
                                 <div>
                                     <h3>{recentWorkout.title}</h3>
                                     <p>
@@ -294,12 +285,7 @@ export default function Dashboard({
                                         key={entry.id}
                                     >
                                         <div className="session-main">
-                                            <DayIcon
-                                                icon={entry.icon}
-                                                type={entry.entry_type}
-                                                focus={entry.focus_area}
-                                                large
-                                            />
+                                            <TrainingThumbnail item={entry} />
                                             <div>
                                                 <div className="session-title">
                                                     <Link
@@ -374,8 +360,7 @@ export default function Dashboard({
                         {upcomingEntries.length ? (
                             <div className="upcoming-list">
                                 {upcomingEntries.slice(0, 4).map((entry) => (
-                                    <Link
-                                        href={`/schedule-entries/${entry.id}`}
+                                    <article
                                         key={entry.id}
                                         className="upcoming-row"
                                     >
@@ -394,8 +379,15 @@ export default function Dashboard({
                                                 )}
                                             </strong>
                                         </div>
+                                        <TrainingThumbnail item={entry} />
                                         <div className="upcoming-info">
-                                            <h3>{entry.title}</h3>
+                                            <h3>
+                                                <Link
+                                                    href={`/schedule-entries/${entry.id}`}
+                                                >
+                                                    {entry.title}
+                                                </Link>
+                                            </h3>
                                             <p>
                                                 {entry.entry_type === "rest"
                                                     ? "Rest & recovery"
@@ -410,7 +402,7 @@ export default function Dashboard({
                                                 Boolean(entry.started_at)
                                             }
                                         />
-                                    </Link>
+                                    </article>
                                 ))}
                             </div>
                         ) : (

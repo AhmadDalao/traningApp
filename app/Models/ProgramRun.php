@@ -3,10 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ProgramRun extends Model
 {
     protected $guarded = ['id'];
+
+    protected $appends = ['thumbnail_url'];
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        $path = collect($this->definition_snapshot['blocks'] ?? [])->pluck('days')->flatten(1)->where('type', 'training')->pluck('exercises')->flatten(1)->pluck('thumbnail_path')->first(fn ($path) => filled($path));
+
+        return $path ? Storage::disk('public')->url($path) : null;
+    }
 
     protected function casts(): array
     {

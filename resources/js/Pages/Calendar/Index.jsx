@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useRef, useState } from "react";
@@ -283,29 +284,34 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                                             schedule.date,
                                     )
                                     .map((entry) => (
-                                        <Link
+                                        <article
                                             key={entry.id}
-                                            href={url(
-                                                `/schedule-entries/${entry.id}`,
-                                            )}
+                                            className="thumbnail-identity"
                                         >
-                                            <strong>{entry.title}</strong>
-                                            <span>
-                                                {entry.scheduled_time ? (
-                                                    <TimeLabel
-                                                        time={
-                                                            entry.scheduled_time
-                                                        }
+                                            <TrainingThumbnail item={entry} />
+                                            <Link
+                                                href={url(
+                                                    `/schedule-entries/${entry.id}`,
+                                                )}
+                                            >
+                                                <strong>{entry.title}</strong>
+                                                <span>
+                                                    {entry.scheduled_time ? (
+                                                        <TimeLabel
+                                                            time={
+                                                                entry.scheduled_time
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        "Anytime"
+                                                    )}{" "}
+                                                    ·{" "}
+                                                    <StatusBadge
+                                                        status={entry.status}
                                                     />
-                                                ) : (
-                                                    "Anytime"
-                                                )}{" "}
-                                                ·{" "}
-                                                <StatusBadge
-                                                    status={entry.status}
-                                                />
-                                            </span>
-                                        </Link>
+                                                </span>
+                                            </Link>
+                                        </article>
                                     ))}
                             </div>
                         </>

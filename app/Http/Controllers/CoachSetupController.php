@@ -18,7 +18,7 @@ class CoachSetupController extends Controller
     {
         $relationship = $request->attributes->get('coach_relationship');
         $templates = $this->context->actor()->trainingPlans()->where('workspace_type', 'coach_template')
-            ->withCount('trainingDays')->orderBy('name')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks']);
+            ->withThumbnail()->withCount('trainingDays')->orderBy('name')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks']);
         $draft = $setup->publicDraft($relationship);
         if (! $relationship->setup_draft && $templates->contains('id', $request->integer('template'))) {
             $draft['choices']['selection_type'] = 'template';
@@ -27,7 +27,7 @@ class CoachSetupController extends Controller
 
         return Inertia::render('Coach/SetupTrainee', [
             'state' => $summary->one($this->context->actor(), $this->context->owner()), 'draft' => $draft, 'templates' => $templates,
-            'assignedPlans' => $this->context->plans(true)->withCount('trainingDays')->latest('id')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks', 'created_at']),
+            'assignedPlans' => $this->context->plans(true)->withThumbnail()->withCount('trainingDays')->latest('id')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks', 'created_at']),
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $this->context->actor()->id)->where('active', true)->orderBy('name')->get(),
         ]);
     }

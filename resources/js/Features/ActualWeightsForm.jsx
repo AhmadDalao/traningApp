@@ -1,3 +1,4 @@
+import Thumbnail from "../Components/ExerciseThumbnail";
 import { useForm } from "@inertiajs/react";
 import { Button, Field, Modal, formatWeight } from "../Components/UI";
 
@@ -31,12 +32,16 @@ export default function ActualWeightsForm({ entry, exercises, onClose }) {
                 <div className="actual-weight-fields">
                     {exercises.map((exercise, index) => (
                         <div className="actual-weight-row" key={index}>
-                            <div>
-                                <strong>{exercise.name}</strong>
-                                <p>
-                                    {exercise.sets} × {exercise.reps} · Planned:{" "}
-                                    {formatWeight(exercise.target_weight)}
-                                </p>
+                            <div className="thumbnail-identity">
+                                <Thumbnail exercise={exercise} />
+                                <div>
+                                    <strong>{exercise.name}</strong>
+                                    <p>
+                                        {exercise.sets} × {exercise.reps} ·
+                                        Planned:{" "}
+                                        {formatWeight(exercise.target_weight)}
+                                    </p>
+                                </div>
                             </div>
                             <Field
                                 label={`Actual weight for ${exercise.name}`}

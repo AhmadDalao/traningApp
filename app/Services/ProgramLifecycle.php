@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\ProgramRun;
 use App\Models\SessionExercise;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ProgramLifecycle
 {
@@ -14,11 +13,9 @@ class ProgramLifecycle
         return $query->latest('id')->limit(6)->get()->map(function ($run) {
             $run = $this->sync($run->id);
             $position = $this->position($run);
-            $thumbnail = collect($run->definition_snapshot['blocks'] ?? [])->pluck('days')->flatten(1)
-                ->where('type', 'training')->pluck('exercises')->flatten(1)->pluck('thumbnail_path')->first(fn ($path) => filled($path));
 
             return ['id' => $run->id, 'name' => $run->definition_snapshot['name'], 'status' => $run->status,
-                'thumbnail_url' => $thumbnail ? Storage::disk('public')->url($thumbnail) : null,
+                'thumbnail_url' => $run->thumbnail_url,
                 'started_on' => $run->started_on?->toDateString(),
                 'current_week' => $position['current_week'], 'duration_weeks' => $position['duration_weeks'],
                 'progress_percent' => $position['progress_percent'],
@@ -50,7 +47,7 @@ class ProgramLifecycle
             'adherence' => $due->isEmpty() ? null : round($completed / $due->count() * 100),
             'all_resolved' => $required->isNotEmpty() && $unresolved->isEmpty() && ! $sessions->contains(fn ($entry) => $entry->isActiveWorkout()),
             'next_workout' => $next ? [...$next->only('id', 'title', 'scheduled_time', 'program_week', 'started_at'), 'scheduled_date' => $next->scheduled_date->toDateString(), 'held' => $run->holds($next)] : null,
-            'sessions' => $sessions->map(fn ($entry) => [...$entry->only('id', 'title', 'entry_type', 'status', 'scheduled_date', 'scheduled_time', 'program_week', 'program_context', 'started_at'),
+            'sessions' => $sessions->map(fn ($entry) => [...$entry->only('id', 'title', 'entry_type', 'status', 'scheduled_date', 'scheduled_time', 'program_week', 'program_context', 'started_at', 'thumbnail_url'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(), 'held' => $run->holds($entry),
                 'can_reschedule' => $entry->status === 'planned' && ! $entry->started_at && $entry->workout_snapshot === null && ! $entry->session_exercises_exists && ! $run->holds($entry),
                 'missed' => $entry->entry_type === 'training' && $entry->status === 'planned' && ! $entry->started_at && ! ($entry->status === 'planned' && $run->holds($entry)) && ! app(CoachAccess::class)->future($entry->scheduled_date->toDateString(), $entry->scheduled_time),
