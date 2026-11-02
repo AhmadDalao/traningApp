@@ -1,0 +1,121 @@
+{
+  "release": "v2.3.7",
+  "status": "READY \u2014 DEPLOYED AND VERIFIED",
+  "commit": "1846a4573540722776e09e4a37795e18e7c17e14",
+  "baseline": "v2.3.6",
+  "baseline_commit": "d057fd1b9bcaa907f9dd96d5839763ad38eaaa5a",
+  "php": "8.3.36",
+  "database": "11.8.9-MariaDB-log",
+  "backup_evidence": {
+    "created_at_utc": "2026-11-02T10:29:22+00:00",
+    "runtime_bytes": 66610449,
+    "runtime_sha256": "3c017e818dd93b8611cf76d29b0ebfdc5599e99d9825595446e1a719136d55a6",
+    "database_bytes": 46798,
+    "database_uncompressed_bytes": 700252,
+    "database_sha256": "606fe3caa5c3054752dec48530413425c5f138a10fd742769b31dcd32aced365",
+    "uploads_bytes": 30751988,
+    "uploads_sha256": "a947becf885370264fcb032c0c55e8c2b27457884ce21760962f1d48d280ab27",
+    "original_upload_files": 490,
+    "source_file_backups": 9,
+    "environment_backed_up": true,
+    "archives_verified": true
+  },
+  "patch_files": 75,
+  "origin_files_verified": 7592,
+  "public_assets_verified": 540,
+  "exact_public_hashes": 536,
+  "cdn_png_pixels_identical": 4,
+  "migrations_changed": false,
+  "push_enabled": false,
+  "cron_changed": false,
+  "browser_runs": [
+    {
+      "script": "thumbnail-preview",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 12.5,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 14.91,
+      "checks": 75
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 6.75,
+      "checks": 31
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 6.84,
+      "checks": 31
+    },
+    {
+      "script": "pwa-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 16.72,
+      "checks": 20
+    },
+    {
+      "script": "pwa-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 12.05,
+      "checks": 19
+    }
+  ],
+  "browser_checks": 251,
+  "http_checks": 12,
+  "qa_accounts_removed": 4,
+  "original_tables": 22,
+  "original_rows_verified": 650,
+  "original_media_verified": 490,
+  "original_table_fingerprints_equal": true,
+  "environment_preserved": true,
+  "cleanup": {
+    "ok": true,
+    "qa_removed": true,
+    "removed": 4,
+    "unreferenced_qa_media_removed": 4,
+    "original_data_unchanged": true,
+    "uploads_preserved": true
+  },
+  "final_public_checks": {
+    "checks": [
+      {
+        "check": "Temporary deployment endpoint removed",
+        "status": 404
+      },
+      {
+        "check": "Temporary release archive removed",
+        "status": 404
+      },
+      {
+        "check": "/login",
+        "status": 200
+      },
+      {
+        "check": "/up",
+        "status": 200
+      },
+      {
+        "check": "/.env",
+        "status": 403
+      },
+      {
+        "check": "/storage/app/private/deploy-backups/",
+        "status": 404
+      }
+    ],
+    "count": 6
+  },
+  "physical_phone_tested": false
+}
