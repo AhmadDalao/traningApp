@@ -1,0 +1,135 @@
+{
+  "release": "v2.3.8",
+  "status": "READY \u2014 DEPLOYED AND VERIFIED",
+  "commit": "330cd754111da8cd952505e8f7892b799dc0c308",
+  "baseline": "v2.3.7",
+  "baseline_commit": "1846a4573540722776e09e4a37795e18e7c17e14",
+  "php": "8.3.36",
+  "database": "11.8.9-MariaDB-log",
+  "backup_evidence": {
+    "created_at_utc": "2026-11-02T12:55:02+00:00",
+    "runtime_bytes": 67004630,
+    "runtime_sha256": "94681fa8e93e966537ef94633107317ed5187125c31e19685329a341874e9a82",
+    "database_bytes": 46799,
+    "database_uncompressed_bytes": 700253,
+    "database_sha256": "40b4212adaa091246341adcaba80510e3518cb090b8c90bf65d1ef7c831ecefe",
+    "uploads_bytes": 30751988,
+    "uploads_sha256": "9caf74a076db4df8d04d3c700a6462854e6355485b0013f77384ca804a93a2a1",
+    "original_upload_files": 490,
+    "source_file_backups": 46,
+    "environment_backed_up": true,
+    "archives_verified": true
+  },
+  "patch_files": 115,
+  "origin_files_verified": 7663,
+  "public_assets_verified": 609,
+  "exact_public_hashes": 605,
+  "cdn_png_pixels_identical": 4,
+  "migrations_changed": false,
+  "push_enabled": false,
+  "cron_changed": false,
+  "browser_runs": [
+    {
+      "script": "thumbnail-coverage",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 19.04,
+      "checks": 63
+    },
+    {
+      "script": "thumbnail-coverage",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 17.48,
+      "checks": 63
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 13.73,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 15.91,
+      "checks": 75
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 6.26,
+      "checks": 31
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 7.19,
+      "checks": 31
+    },
+    {
+      "script": "pwa-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 10.55,
+      "checks": 20
+    },
+    {
+      "script": "pwa-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 12.15,
+      "checks": 19
+    }
+  ],
+  "browser_checks": 377,
+  "http_checks": 12,
+  "qa_accounts_removed": 4,
+  "original_tables": 22,
+  "original_rows_verified": 650,
+  "original_media_verified": 490,
+  "original_table_fingerprints_equal": true,
+  "environment_preserved": true,
+  "cleanup": {
+    "ok": true,
+    "qa_removed": true,
+    "removed": 4,
+    "unreferenced_qa_media_removed": 4,
+    "original_data_unchanged": true,
+    "uploads_preserved": true
+  },
+  "final_public_checks": {
+    "checks": [
+      {
+        "check": "Temporary deployment endpoint removed",
+        "status": 404
+      },
+      {
+        "check": "Temporary release archive removed",
+        "status": 404
+      },
+      {
+        "check": "/login",
+        "status": 200
+      },
+      {
+        "check": "/up",
+        "status": 200
+      },
+      {
+        "check": "/.env",
+        "status": 403
+      },
+      {
+        "check": "/storage/app/private/deploy-backups/",
+        "status": 404
+      }
+    ],
+    "count": 6
+  },
+  "physical_phone_tested": false
+}
