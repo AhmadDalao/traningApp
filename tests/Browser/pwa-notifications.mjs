@@ -465,7 +465,7 @@ try {
     await login(settings, accounts[1]);
     await go(settings, "/notifications");
     await settings
-        .getByRole("link", { name: "Coach Overview", exact: true })
+        .getByRole("link", { name: "Overview", exact: true })
         .waitFor();
     await geometry(settings, "Coach notification settings");
     pass(

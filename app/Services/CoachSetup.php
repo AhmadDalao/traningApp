@@ -58,7 +58,9 @@ class CoachSetup
             abort_unless(($old['revision'] ?? 0) === $data['revision'], 409, 'Setup changed in another tab. Reload to review the latest choices.');
             if (isset($old['result'])) {
                 $current = app(CoachingSubscriptions::class)->setupReview($relationship, [], null);
-                abort_unless(($data['begin'] ?? false) && $current['operation'] !== 'reuse', 409, 'Setup is already complete. Use the normal assignment or program controls for new training.');
+                $newTraining = $data['choices']['selection_type'] !== $old['choices']['selection_type']
+                    || (int) $data['choices']['training_plan_id'] !== (int) $old['choices']['training_plan_id'];
+                abort_unless(($data['begin'] ?? false) && ($current['operation'] !== 'reuse' || $newTraining), 409, 'This training is already assigned. View its training or adjust its existing schedule.');
                 $old = null;
             }
             $choices = $data['choices'];
@@ -232,7 +234,7 @@ class CoachSetup
             'sessions' => app(ProgramSchedule::class)->publicRows($rows), 'count' => count($rows), 'issues' => $issues,
             'already_scheduled' => $hasSchedule, 'assignment_reused' => (bool) $assignment,
             'revision' => $revision, 'valid' => ! $issues,
-            'days' => $days->map(fn ($d) => [...$d->only('id', 'title', 'type', 'weekdays'), 'time' => $d->default_time ? substr($d->default_time, 0, 5) : null])->all()];
+            'days' => $days->map(fn ($d) => [...$d->only('id', 'title', 'type', 'weekdays'), 'thumbnail_url' => $d->thumbnail_url, 'time' => $d->default_time ? substr($d->default_time, 0, 5) : null])->all()];
         $preview['signature'] = hash_hmac('sha256', json_encode([$relationship->id, $relationship->coach_user_id, $relationship->trainee_user_id, $relationship->status,
             today()->toDateString(), $draft, $selected?->getAttributes(), $plan?->getAttributes(), $assignment?->getAttributes(), $run?->getAttributes(),
             $definition, $days->map(fn ($day) => [$day->getAttributes(), $day->exercises->map->getAttributes()->all()])->all(),

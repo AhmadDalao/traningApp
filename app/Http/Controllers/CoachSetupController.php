@@ -20,13 +20,28 @@ class CoachSetupController extends Controller
         $templates = $this->context->actor()->trainingPlans()->where('workspace_type', 'coach_template')
             ->withThumbnail()->withCount('trainingDays')->orderBy('name')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks']);
         $draft = $setup->publicDraft($relationship);
-        if (! $relationship->setup_draft && $templates->contains('id', $request->integer('template'))) {
+        $assigning = $request->boolean('assign') || $request->filled('template');
+        if ($request->filled('template')) {
+            abort_unless($templates->contains('id', $request->integer('template')), 404);
+        }
+        $sameDraft = ! $draft['completed'] && $draft['saved_at']
+            && $draft['choices']['selection_type'] === 'template'
+            && (int) $draft['choices']['training_plan_id'] === $request->integer('template');
+        if ($assigning && ! $sameDraft) {
+            // Entering a new assignment changes only the page's choices. Saving remains
+            // revision-checked and activation remains the sole domain commit.
+            $base = $draft['saved_at'] && ! $draft['completed'] ? $draft['choices'] : $setup->defaults($relationship);
+            $draft['choices'] = [...$base, 'selection_type' => 'template', 'training_plan_id' => null, 'day_options' => [], 'time_overrides' => []];
+        }
+        if ($request->filled('template')) {
             $draft['choices']['selection_type'] = 'template';
             $draft['choices']['training_plan_id'] = $request->integer('template');
         }
 
         return Inertia::render('Coach/SetupTrainee', [
             'state' => $summary->one($this->context->actor(), $this->context->owner()), 'draft' => $draft, 'templates' => $templates,
+            'assigning' => $assigning, 'startAtSchedule' => $request->filled('template'),
+            'existingAssignments' => $relationship->assignments()->where('status', 'active')->whereHas('plan')->orderBy('id')->pluck('assigned_training_plan_id', 'source_training_plan_id'),
             'assignedPlans' => $this->context->plans(true)->withThumbnail()->withCount('trainingDays')->latest('id')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks', 'created_at']),
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $this->context->actor()->id)->where('active', true)->orderBy('name')->get(),
         ]);

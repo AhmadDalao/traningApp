@@ -1,4 +1,4 @@
-import { useTraining } from "../../Features/CoachingUI";
+import { coachingJson, useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, useForm } from "@inertiajs/react";
 import {
@@ -46,6 +46,9 @@ export default function Form({
     day,
     selectedBlock,
     customExercises = [],
+    embedded = false,
+    onSaved,
+    onCancel,
 }) {
     const { url } = useTraining();
     const [exercises, setExercises] = useState(
@@ -59,6 +62,7 @@ export default function Form({
         })),
     );
     const [editor, setEditor] = useState(null);
+    const [saving, setSaving] = useState(false);
     const form = useForm({
         training_block_id: day?.training_block_id || selectedBlock || "",
         icon: day?.icon || "",
@@ -85,9 +89,9 @@ export default function Form({
             return copy;
         });
     }
-    function submit(e) {
+    async function submit(e) {
         e.preventDefault();
-        form.transform((data) => ({
+        const payload = ((data) => ({
             ...data,
             exercises:
                 data.type === "training"
@@ -128,7 +132,48 @@ export default function Form({
                       )
                     : [],
             ...(day ? { _method: "put" } : {}),
-        }));
+        }))(form.data);
+        if (embedded) {
+            setSaving(true);
+            form.clearErrors();
+            const body = new FormData();
+            function append(value, key) {
+                if (value instanceof File) body.append(key, value);
+                else if (value !== null && typeof value === "object")
+                    Object.entries(value).forEach(([child, item]) =>
+                        append(item, `${key}[${child}]`),
+                    );
+                else
+                    body.append(
+                        key,
+                        value == null
+                            ? ""
+                            : typeof value === "boolean"
+                              ? value
+                                  ? "1"
+                                  : "0"
+                              : String(value),
+                    );
+            }
+            Object.entries(payload).forEach(([key, value]) =>
+                append(value, key),
+            );
+            try {
+                const result = await coachingJson(
+                    day
+                        ? url(`/training-days/${day.id}`)
+                        : url(`/training-plans/${plan.id}/days`),
+                    body,
+                );
+                onSaved(result.day);
+            } catch (error) {
+                form.setError({ ...error.fields, save: error.message });
+            } finally {
+                setSaving(false);
+            }
+            return;
+        }
+        form.transform(() => payload);
         form.post(
             day
                 ? url(`/training-days/${day.id}`)
@@ -141,22 +186,40 @@ export default function Form({
     );
     return (
         <>
-            <Head title={day ? `Edit ${day.title}` : "Create training day"} />
-            <Breadcrumbs
-                items={[
-                    { label: "Training plans", href: url("/training-plans") },
-                    {
-                        label: plan.name,
-                        href: url(`/training-plans/${plan.id}`),
-                    },
-                    { label: day ? "Edit day" : "Create day" },
-                ]}
-            />
-            <PageHeader
-                title={day ? `Edit ${day.title}` : "Create a training day"}
-                description="Build a workout you can use again and again."
-            />
+            {!embedded && (
+                <>
+                    <Head
+                        title={
+                            day ? `Edit ${day.title}` : "Create training day"
+                        }
+                    />
+                    <Breadcrumbs
+                        items={[
+                            {
+                                label: "Training plans",
+                                href: url("/training-plans"),
+                            },
+                            {
+                                label: plan.name,
+                                href: url(`/training-plans/${plan.id}`),
+                            },
+                            { label: day ? "Edit day" : "Create day" },
+                        ]}
+                    />
+                    <PageHeader
+                        title={
+                            day ? `Edit ${day.title}` : "Create a training day"
+                        }
+                        description="Build a workout you can use again and again."
+                    />
+                </>
+            )}
             <form onSubmit={submit}>
+                {form.errors.save && (
+                    <p className="field-error" role="alert">
+                        {form.errors.save}
+                    </p>
+                )}
                 <section className="panel builder-settings">
                     <div className="section-label">
                         01 <span>THE BASICS</span>
@@ -502,19 +565,29 @@ export default function Form({
                     </section>
                 )}
                 <div className="form-actions page-actions">
-                    <ButtonLink
-                        variant="secondary"
-                        href={
-                            day
-                                ? url(`/training-days/${day.id}`)
-                                : url(`/training-plans/${plan.id}`)
-                        }
-                    >
-                        Cancel
-                    </ButtonLink>
-                    <Button disabled={form.processing}>
+                    {embedded ? (
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={onCancel}
+                        >
+                            Cancel
+                        </Button>
+                    ) : (
+                        <ButtonLink
+                            variant="secondary"
+                            href={
+                                day
+                                    ? url(`/training-days/${day.id}`)
+                                    : url(`/training-plans/${plan.id}`)
+                            }
+                        >
+                            Cancel
+                        </ButtonLink>
+                    )}
+                    <Button disabled={form.processing || saving}>
                         <Save size={16} />
-                        {form.processing
+                        {form.processing || saving
                             ? `Saving${form.progress ? ` ${form.progress.percentage}%` : "…"}`
                             : "Save training day"}
                     </Button>

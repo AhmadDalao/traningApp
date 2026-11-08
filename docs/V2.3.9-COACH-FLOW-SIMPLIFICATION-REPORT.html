@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Training Planner v2.3.9 — Coach Journey Release Report</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                margin: 0;
+                background: #f3f6fc;
+                color: #20324e;
+                font:
+                    16px/1.65 system-ui,
+                    -apple-system,
+                    sans-serif;
+            }
+            main {
+                max-width: 1160px;
+                margin: auto;
+                padding: 32px 22px;
+            }
+            header {
+                padding: 44px;
+                background: linear-gradient(120deg, #122c57, #125bd0);
+                color: white;
+                border-radius: 24px;
+            }
+            h1 {
+                font-size: clamp(30px, 5vw, 48px);
+                line-height: 1.12;
+                margin: 12px 0;
+            }
+            h2 {
+                font-size: 23px;
+                margin: 0 0 12px;
+                line-height: 1.3;
+            }
+            h3 {
+                font-size: 16px;
+            }
+            .eyebrow {
+                font-size: 12px;
+                letter-spacing: 0.13em;
+                text-transform: uppercase;
+            }
+            .status {
+                display: inline-block;
+                border: 1px solid #8fc9ff;
+                border-radius: 30px;
+                padding: 7px 15px;
+                background: #ffffff15;
+                font-weight: 700;
+            }
+            .lead {
+                max-width: 730px;
+                color: #dce9ff;
+            }
+            .flow {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-top: 24px;
+            }
+            .flow span {
+                padding: 9px 14px;
+                background: #ffffff15;
+                border-radius: 10px;
+            }
+            .metrics {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 12px;
+                margin: 20px 0;
+            }
+            .metrics div,
+            section,
+            nav {
+                background: white;
+                border: 1px solid #dee5f1;
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 18px;
+            }
+            .metrics div {
+                margin: 0;
+            }
+            .metrics strong {
+                display: block;
+                font-size: 28px;
+                color: #1761d8;
+            }
+            .muted,
+            figcaption {
+                color: #657a98;
+                font-size: 14px;
+            }
+            a {
+                color: #145fd3;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            header a {
+                color: white;
+            }
+            code {
+                font-size: 13px;
+                overflow-wrap: anywhere;
+                background: #eef3fc;
+                padding: 2px 5px;
+                border-radius: 4px;
+            }
+            nav ol {
+                columns: 3;
+                margin: 0;
+                padding-left: 24px;
+                font-size: 14px;
+                column-gap: 30px;
+            }
+            nav li {
+                break-inside: avoid;
+                padding: 3px 0;
+            }
+            section {
+                scroll-margin-top: 16px;
+            }
+            p {
+                margin: 10px 0;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 14px;
+            }
+            th,
+            td {
+                text-align: left;
+                border-bottom: 1px solid #e6edf6;
+                padding: 10px 8px;
+            }
+            th {
+                background: #f5f8fd;
+            }
+            .table-wrap {
+                overflow: auto;
+            }
+            .screens {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            .screens figure {
+                margin: 0;
+            }
+            .screens img {
+                width: 100%;
+                height: auto;
+                border: 1px solid #dce5f2;
+                border-radius: 10px;
+            }
+            .mobile-shot {
+                max-width: 320px;
+                margin: auto !important;
+            }
+            .file-list {
+                columns: 2;
+                font:
+                    12px/1.8 ui-monospace,
+                    monospace;
+                padding-left: 18px;
+                overflow-wrap: anywhere;
+            }
+            .file-list li {
+                break-inside: avoid;
+            }
+            footer {
+                padding: 30px;
+                text-align: center;
+                color: #657a98;
+            }
+            details summary {
+                cursor: pointer;
+                font-weight: 650;
+            }
+            @media (max-width: 720px) {
+                main {
+                    padding: 14px;
+                }
+                header {
+                    padding: 26px;
+                }
+                .metrics {
+                    grid-template-columns: 1fr 1fr;
+                }
+                section,
+                nav {
+                    padding: 20px;
+                }
+                nav ol {
+                    columns: 1;
+                }
+                .screens {
+                    grid-template-columns: 1fr;
+                }
+                .file-list {
+                    columns: 1;
+                }
+            }
+            @media print {
+                nav {
+                    display: none;
+                }
+                body {
+                    background: white;
+                }
+                section {
+                    break-inside: avoid;
+                }
+                a {
+                    color: inherit;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <header>
+                <p class="eyebrow">
+                    Training Planner · Release report · 8 November 2026
+                </p>
+                <h1>A simpler Coach journey.</h1>
+                <p class="lead">
+                    v2.3.9 brings program creation, trainee selection and
+                    scheduling into one connected flow, while keeping the
+                    existing training engines and safety rules.
+                </p>
+                <p class="status">READY · Verified source · Deployment held</p>
+                <div class="flow">
+                    <span>Create</span><span>→ Assign</span
+                    ><span>→ Schedule</span><span>→ Review &amp; done</span>
+                </div>
+            </header>
+            <div class="metrics">
+                <div>
+                    <strong>624 × 2</strong><span>SQLite + MySQL tests</span>
+                </div>
+                <div><strong>626</strong><span>Browser checkpoints</span></div>
+                <div><strong>89</strong><span>Concurrency checks</span></div>
+                <div><strong>0</strong><span>Composer advisories</span></div>
+            </div>
+            <nav aria-label="Report contents">
+                <h2>Release contents</h2>
+                <ol>
+                    <li><a href="#s1">Baseline v2.3.8</a></li>
+                    <li><a href="#s2">Old Coach journey</a></li>
+                    <li><a href="#s3">New Coach mental model</a></li>
+                    <li><a href="#s4">Coach navigation</a></li>
+                    <li><a href="#s5">Programs page</a></li>
+                    <li><a href="#s6">Program Builder</a></li>
+                    <li><a href="#s7">Training Days</a></li>
+                    <li><a href="#s8">Save Program</a></li>
+                    <li><a href="#s9">Save &amp; Assign</a></li>
+                    <li><a href="#s10">Existing Program Assign</a></li>
+                    <li><a href="#s11">Choose Trainee</a></li>
+                    <li><a href="#s12">Live trainee search</a></li>
+                    <li><a href="#s13">Trainee identity</a></li>
+                    <li><a href="#s14">Duplicate assignment protection</a></li>
+                    <li><a href="#s15">Schedule page</a></li>
+                    <li><a href="#s16">Weekday/time configuration</a></li>
+                    <li><a href="#s17">Anytime today</a></li>
+                    <li><a href="#s18">Subscription background UX</a></li>
+                    <li><a href="#s19">Coaching activation</a></li>
+                    <li><a href="#s20">Coaching resume</a></li>
+                    <li><a href="#s21">Coaching renewal</a></li>
+                    <li><a href="#s22">Coverage extension</a></li>
+                    <li><a href="#s23">Coaching Package behavior</a></li>
+                    <li><a href="#s24">Final summary</a></li>
+                    <li><a href="#s25">Assign &amp; Schedule</a></li>
+                    <li><a href="#s26">Atomic orchestration</a></li>
+                    <li><a href="#s27">Idempotency</a></li>
+                    <li><a href="#s28">Existing assignment reuse</a></li>
+                    <li><a href="#s29">Existing Program Run protection</a></li>
+                    <li><a href="#s30">Program-first flow</a></li>
+                    <li><a href="#s31">Trainee-first flow</a></li>
+                    <li>
+                        <a href="#s32">Current Training trainee Overview</a>
+                    </li>
+                    <li><a href="#s33">Coach privacy</a></li>
+                    <li><a href="#s34">Thumbnails in the new flow</a></li>
+                    <li><a href="#s35">Image preview behavior</a></li>
+                    <li><a href="#s36">Mobile UX</a></li>
+                    <li><a href="#s37">Accessibility</a></li>
+                    <li><a href="#s38">Query/performance</a></li>
+                    <li><a href="#s39">Architecture</a></li>
+                    <li><a href="#s40">Bugs found</a></li>
+                    <li><a href="#s41">Bugs fixed</a></li>
+                    <li><a href="#s42">SQLite</a></li>
+                    <li><a href="#s43">MySQL</a></li>
+                    <li><a href="#s44">Concurrency</a></li>
+                    <li><a href="#s45">JavaScript</a></li>
+                    <li><a href="#s46">Browser tests</a></li>
+                    <li><a href="#s47">Production build</a></li>
+                    <li><a href="#s48">Formatting/audit</a></li>
+                    <li><a href="#s49">Data/media integrity</a></li>
+                    <li><a href="#s50">Files changed</a></li>
+                    <li><a href="#s51">Commit</a></li>
+                    <li><a href="#s52">v2.3.9 tag</a></li>
+                    <li><a href="#s53">Deployment status</a></li>
+                    <li><a href="#s54">Known limitations</a></li>
+                    <li><a href="#s55">READY / NOT READY</a></li>
+                </ol>
+            </nav>
+            <section id="s1">
+                <p class="eyebrow">01 / 55</p>
+                <h2>Baseline v2.3.8</h2>
+                <p>
+                    The accepted application baseline is v2.3.8, commit
+                    <code>330cd754111da8cd952505e8f7892b799dc0c308</code>. Work
+                    began on main after documentation commit
+                    <code>dad9c80</code>, with a clean tree. The baseline suite
+                    passed 616 tests and its frontend build passed. The
+                    implementation extends that application.
+                </p>
+            </section>
+            <section id="s2">
+                <p class="eyebrow">02 / 55</p>
+                <h2>Old Coach journey</h2>
+                <p>
+                    Coaches could create a template, leave its editor, select a
+                    trainee, assign an independent copy, and then open a
+                    separate scheduling flow. The newer atomic setup coexisted
+                    with that older assignment screen. Settings also linked to
+                    the Personal profile route, so selecting it changed the
+                    visible workspace.
+                </p>
+            </section>
+            <section id="s3">
+                <p class="eyebrow">03 / 55</p>
+                <h2>New Coach mental model</h2>
+                <p>
+                    <strong>Program → Trainee → Schedule.</strong> For new
+                    training: Create → Save &amp; Assign → Choose trainee →
+                    Schedule → Review → Assign &amp; Schedule. Starting from a
+                    trainee carries that person through creation and returns
+                    directly to their Schedule step.
+                </p>
+            </section>
+            <section id="s4">
+                <p class="eyebrow">04 / 55</p>
+                <h2>Coach navigation</h2>
+                <p>
+                    Overview, Trainees and Programs remain the primary
+                    navigation. Settings and Notifications remain secondary.
+                    Coach Settings now uses <code>/coach/settings</code>;
+                    account editing uses <code>/coach/settings/account</code>;
+                    notifications use <code>/coach/notifications</code>.
+                    Sidebar, avatar and account-menu links preserve Coach
+                    context. Explicit workspace switching still works.
+                </p>
+            </section>
+            <section id="s5">
+                <p class="eyebrow">05 / 55</p>
+                <h2>Programs page</h2>
+                <p>
+                    The existing paginated Programs page retains live search,
+                    type filters, images and full-image previews. Create Program
+                    opens the builder. Each template has a direct Assign action
+                    alongside View and editing tools. Active-trainee counts now
+                    count distinct connected trainees with active assignments,
+                    so two legacy copies do not inflate the number.
+                </p>
+            </section>
+            <section id="s6">
+                <p class="eyebrow">06 / 55</p>
+                <h2>Program Builder</h2>
+                <p>
+                    A dedicated Coach page combines the existing template fields
+                    and training-day list. Desktop uses two columns; phones
+                    stack them. It stores name, description, training format and
+                    existing program duration. The builder does not introduce a
+                    separate training model. The mockup’s Level, Goal and
+                    Equipment fields are not added as new schema; useful
+                    guidance can remain in the description.
+                </p>
+                <figure class="screens">
+                    <a href="v2.3.9/builder-1280.png"
+                        ><img
+                            src="v2.3.9/builder-1280.png"
+                            alt="Desktop program builder with embedded training-day list"
+                    /></a>
+                    <figcaption>
+                        Actual browser capture using disposable QA data. Click
+                        any screenshot to open the full image.
+                    </figcaption>
+                </figure>
+            </section>
+            <section id="s7">
+                <p class="eyebrow">07 / 55</p>
+                <h2>Training Days</h2>
+                <p>
+                    Add and edit days inside the builder using the existing
+                    Training Day / Exercise form in a modal. Library search,
+                    thumbnails, full-image preview, sets, reps, duration,
+                    supersets and custom uploads reuse the same components and
+                    validation. Day rows show thumbnails, exercise counts and
+                    weekdays. Existing block editing remains available from the
+                    program detail screen.
+                </p>
+            </section>
+            <section id="s8">
+                <p class="eyebrow">08 / 55</p>
+                <h2>Save Program</h2>
+                <p>
+                    Save Program writes only the reusable Coach template and
+                    returns to its detail page. Opening the first day editor
+                    first persists the template so the existing day endpoint can
+                    reference it; the browser URL becomes the saved edit URL.
+                    Reloading returns to that template instead of starting a
+                    duplicate. No trainee assignment, run or Calendar session is
+                    created by builder saves.
+                </p>
+            </section>
+            <section id="s9">
+                <p class="eyebrow">09 / 55</p>
+                <h2>Save &amp; Assign</h2>
+                <p>
+                    After saving, Save &amp; Assign opens the eligible-trainee
+                    list immediately. When creation began from a trainee, it
+                    skips that list and returns directly to their schedule. The
+                    action stays disabled until at least one training day
+                    exists.
+                </p>
+            </section>
+            <section id="s10">
+                <p class="eyebrow">10 / 55</p>
+                <h2>Existing Program Assign</h2>
+                <p>
+                    Assign on a program opens connected trainees immediately.
+                    Selecting a trainee goes to Schedule, with that template
+                    already selected. The old GET assignment URL redirects into
+                    the same atomic journey. Its existing protected POST
+                    endpoint remains for backward compatibility; the redesigned
+                    UI does not use it.
+                </p>
+            </section>
+            <section id="s11">
+                <p class="eyebrow">11 / 55</p>
+                <h2>Choose Trainee</h2>
+                <p>
+                    The list shows identity, Coaching status, current training
+                    and the next action. Desktop uses the existing table; mobile
+                    uses cards. A trainee with the same active source assignment
+                    gets Already assigned and View, avoiding accidental extra
+                    copies.
+                </p>
+            </section>
+            <section id="s12">
+                <p class="eyebrow">12 / 55</p>
+                <h2>Live trainee search</h2>
+                <p>
+                    The existing debounced React/Inertia search remains in use.
+                    Search accepts name or Training Planner ID and updates
+                    results without a Search button. Clearing search restores
+                    the connected-trainee list. Pagination and server-side
+                    authorization remain unchanged.
+                </p>
+            </section>
+            <section id="s13">
+                <p class="eyebrow">13 / 55</p>
+                <h2>Trainee identity</h2>
+                <p>
+                    The selected trainee’s name, Training Planner ID and
+                    Coaching context remain visible in scheduling and review.
+                    The existing initials avatar is reused. Starting a program
+                    from a trainee adds a context banner to the builder; no
+                    profile photographs are invented.
+                </p>
+            </section>
+            <section id="s14">
+                <p class="eyebrow">14 / 55</p>
+                <h2>Duplicate assignment protection</h2>
+                <p>
+                    Already assigned is visible in both trainee selection and
+                    template selection. Existing copies are linked for viewing,
+                    and appropriate existing assignment/run/session records are
+                    reused by CoachSetup. A distinct intentional assignment
+                    after completed setup requires a new reviewed draft and
+                    rotates the token. The superseded token cannot activate the
+                    new draft.
+                </p>
+            </section>
+            <section id="s15">
+                <p class="eyebrow">15 / 55</p>
+                <h2>Schedule page</h2>
+                <p>
+                    Training, Schedule and Review form one focused flow.
+                    Schedule shows the chosen program, start date, weekly
+                    workout controls and Coaching coverage. Desktop places
+                    controls on the left with coverage and weekly summary on the
+                    right. Panels use the same content width as the trainee
+                    header.
+                </p>
+                <div class="screens">
+                    <figure>
+                        <a href="v2.3.9/schedule-1280.png"
+                            ><img
+                                loading="lazy"
+                                src="v2.3.9/schedule-1280.png"
+                                alt="Schedule controls alongside compact Coaching coverage"
+                        /></a>
+                        <figcaption>Schedule and coverage together.</figcaption>
+                    </figure>
+                    <figure>
+                        <a href="v2.3.9/review-1280.png"
+                            ><img
+                                loading="lazy"
+                                src="v2.3.9/review-1280.png"
+                                alt="Desktop assignment review and final confirmation"
+                        /></a>
+                        <figcaption>
+                            Human-readable review before the atomic commit.
+                        </figcaption>
+                    </figure>
+                </div>
+            </section>
+            <section id="s16">
+                <p class="eyebrow">16 / 55</p>
+                <h2>Weekday/time configuration</h2>
+                <p>
+                    Each day keeps the existing weekday picker, including
+                    Weekdays, Weekends (Friday/Saturday), Every day and Clear.
+                    Optional times can be cleared with Anytime. Adjustments
+                    remain draft choices and apply only to the eventual assigned
+                    copy. The reusable Coach template is not rewritten. The
+                    weekly summary normalizes numeric/string weekday values.
+                </p>
+            </section>
+            <section id="s17">
+                <p class="eyebrow">17 / 55</p>
+                <h2>Anytime today</h2>
+                <p>
+                    An untimed workout continues to mean Anytime on its
+                    scheduled date. Existing WorkoutDate semantics remain
+                    authoritative in Asia/Riyadh: untimed today is not elapsed
+                    before local midnight; a timed workout uses its actual
+                    timestamp. No fake midnight time or reminder time is added.
+                </p>
+            </section>
+            <section id="s18">
+                <p class="eyebrow">18 / 55</p>
+                <h2>Subscription background UX</h2>
+                <p>
+                    When coverage is healthy, the coach sees one compact green
+                    Coaching active through date / Ongoing state. Attention is
+                    requested only for activation, resumption, renewal or
+                    insufficient coverage. Coaching and schedule are reviewed
+                    together; there is no required detour to subscription
+                    administration.
+                </p>
+            </section>
+            <section id="s19">
+                <p class="eyebrow">19 / 55</p>
+                <h2>Coaching activation</h2>
+                <p>
+                    A new Coaching period starts today while training may start
+                    next week. Review requires an explicit Activate coaching
+                    today choice before the final Assign &amp; Schedule action.
+                    Browser verification confirmed the start-date separation and
+                    one subscription, one assignment, one run and eight
+                    scheduled workouts in each disposable scenario.
+                </p>
+            </section>
+            <section id="s20">
+                <p class="eyebrow">20 / 55</p>
+                <h2>Coaching resume</h2>
+                <p>
+                    Paused Coaching shows an explicit Resume coaching today
+                    choice in the same flow. Resumption keeps the existing
+                    subscription period and ongoing coverage when applicable.
+                    Browser cases and concurrent Resume checks passed. A paused
+                    training program remains a separate lifecycle state.
+                </p>
+            </section>
+            <section id="s21">
+                <p class="eyebrow">21 / 55</p>
+                <h2>Coaching renewal</h2>
+                <p>
+                    Ended or expired Coaching uses Renew coaching today. Renewal
+                    creates a new period; the previous ended period remains
+                    unchanged. Browser verification found two periods for
+                    renewal, with exactly one new assignment/run/schedule.
+                    Existing concurrency tests verify double-renew does not
+                    create duplicate periods.
+                </p>
+            </section>
+            <section id="s22">
+                <p class="eyebrow">22 / 55</p>
+                <h2>Coverage extension</h2>
+                <p>
+                    When Coaching ends before training finishes, review shows
+                    current coverage, the required end and extension days.
+                    Extend coaching through the required date refreshes and
+                    re-signs the preview. Assignment stays disabled until the
+                    issue is reviewed. No workouts are silently omitted, moved
+                    or truncated to fit coverage.
+                </p>
+            </section>
+            <section id="s23">
+                <p class="eyebrow">23 / 55</p>
+                <h2>Coaching Package behavior</h2>
+                <p>
+                    Package selection stays inline when relevant. Create
+                    Coaching Package opens the existing small modal and returns
+                    without losing trainee, program or dates. A single available
+                    package can be preselected for new Coaching. The browser
+                    exercised a seven-day package with a longer program and
+                    verified that only the subscription was extended; the
+                    reusable package stayed seven days.
+                </p>
+            </section>
+            <section id="s24">
+                <p class="eyebrow">24 / 55</p>
+                <h2>Final summary</h2>
+                <p>
+                    Review shows the selected training, training start/end,
+                    actual schedule count, compact workout rows and Coaching
+                    coverage. Workout rows include dates, optional times,
+                    week/block context and actionable issues. Large schedules
+                    can expand beyond the initial rows. Existing schedules are
+                    clearly described as being kept.
+                </p>
+            </section>
+            <section id="s25">
+                <p class="eyebrow">25 / 55</p>
+                <h2>Assign &amp; Schedule</h2>
+                <p>
+                    One final action submits the signed reviewed setup and
+                    returns to the selected trainee. The existing atomic service
+                    determines the actual activate/resume/renew/reuse wording
+                    and scheduled outcome. Save &amp; finish later stores only
+                    draft choices; a browser reload verified that chosen dates
+                    are preserved.
+                </p>
+            </section>
+            <section id="s26">
+                <p class="eyebrow">26 / 55</p>
+                <h2>Atomic orchestration</h2>
+                <p>
+                    CoachSetup remains the single coordinator. CoachAccess,
+                    CoachingSubscriptions, TrainingPlanDuplicator,
+                    ProgramSchedule and PlanSchedule still own their respective
+                    authorization, coverage, copying and scheduling behavior.
+                    Existing transaction locks, consent checks, signed previews,
+                    rollback and copied-media cleanup remain intact.
+                    Draft/preview still create no active domain records.
+                </p>
+            </section>
+            <section id="s27">
+                <p class="eyebrow">27 / 55</p>
+                <h2>Idempotency</h2>
+                <p>
+                    The same completed activation token returns the same result
+                    while its completed draft remains current. Intentional new
+                    training uses a fresh token and optimistic revision; stale
+                    revisions and superseded tokens reject safely. Real-process
+                    races verified one result per assignment and no mixed draft
+                    state.
+                </p>
+            </section>
+            <section id="s28">
+                <p class="eyebrow">28 / 55</p>
+                <h2>Existing assignment reuse</h2>
+                <p>
+                    Source-specific matching remains authoritative; setup does
+                    not choose an unrelated assignment merely because it is
+                    newest. Legacy partial setups can use Assigned training in
+                    the same flow. Existing active subscriptions are reused and
+                    never shortened. Existing MySQL/SQLite regression tests
+                    cover partial, stale, revoked-consent and forged-resource
+                    cases.
+                </p>
+            </section>
+            <section id="s29">
+                <p class="eyebrow">29 / 55</p>
+                <h2>Existing Program Run protection</h2>
+                <p>
+                    Existing runs and scheduled sessions are preserved rather
+                    than restarting Week 1. The assignment flow explains when
+                    training is already scheduled and points to existing
+                    schedule controls. Pause, resume, shift, end and history
+                    behavior continue through their existing services and pages.
+                </p>
+            </section>
+            <section id="s30">
+                <p class="eyebrow">30 / 55</p>
+                <h2>Program-first flow</h2>
+                <p>
+                    Verified in Chromium and WebKit: Programs → Create Program →
+                    embedded day/exercise editing → Save &amp; Assign →
+                    immediate trainee results → live search → Schedule → Review
+                    → Assign &amp; Schedule → Current Training. Existing
+                    template assignment uses the same shorter path from Assign.
+                </p>
+            </section>
+            <section id="s31">
+                <p class="eyebrow">31 / 55</p>
+                <h2>Trainee-first flow</h2>
+                <p>
+                    Verified in both engines: trainee → Assign Training → Create
+                    New Program → builder with trainee context → Save &amp;
+                    Assign → Schedule directly → Review → trainee Overview. A
+                    second intentional program after completed setup succeeded
+                    without duplicating the prior run or subscription.
+                </p>
+            </section>
+            <section id="s32">
+                <p class="eyebrow">32 / 55</p>
+                <h2>Current Training trainee Overview</h2>
+                <p>
+                    One Current Training section identifies the authoritative
+                    current assignment, its image, week/progress and actions.
+                    Calendar and Edit Schedule remain accessible. Other
+                    legitimate assignments appear separately under Other
+                    Training Assigned By You. The existing next-workout, weekly
+                    activity, Coaching status and Progress information remain
+                    available.
+                </p>
+            </section>
+            <section id="s33">
+                <p class="eyebrow">33 / 55</p>
+                <h2>Coach privacy</h2>
+                <p>
+                    TrainingContext and CoachAccess remain the server-side
+                    source of truth. Coach A can access only accepted
+                    relationships and their own templates/assignments; personal
+                    and other-Coach training remains excluded. Added tests
+                    reject foreign templates and unconnected trainee IDs.
+                    Settings routes remain Coach-only; trainee self-promotion is
+                    still disabled.
+                </p>
+            </section>
+            <section id="s34">
+                <p class="eyebrow">34 / 55</p>
+                <h2>Thumbnails in the new flow</h2>
+                <p>
+                    PlanThumbnail, TrainingThumbnail and ExerciseThumbnail are
+                    reused for program cards, chooser headers, assignment
+                    options, day rows, review rows, library exercises and
+                    Current Training. Setup day thumbnails use already-loaded
+                    exercises rather than extra queries. Personal thumbnails,
+                    historical snapshot images, frozen runs and fallback
+                    behavior remain covered by regression tests.
+                </p>
+            </section>
+            <section id="s35">
+                <p class="eyebrow">35 / 55</p>
+                <h2>Image preview behavior</h2>
+                <p>
+                    Images open the existing full-image modal independently of
+                    selection and navigation. Tests exercised Escape/close,
+                    focus restoration, nested day/exercise/library dialogs,
+                    image loading, missing-image fallback and unchanged program
+                    selection after viewing an image. No image button is nested
+                    inside another button, link or selection label in the tested
+                    journey.
+                </p>
+            </section>
+            <section id="s36">
+                <p class="eyebrow">36 / 55</p>
+                <h2>Mobile UX</h2>
+                <p>
+                    The journey was exercised in Chromium and WebKit at 320×480,
+                    360×800, 375×812, 390×844, 430×900, 768×1024 and 1280×900.
+                    Builder, day editor, trainee choice, training choice,
+                    schedule, review and trainee Overview had no horizontal
+                    overflow. Phone review stacks schedule, Coaching and the
+                    final action; short-screen controls remain scrollable and
+                    reachable.
+                </p>
+                <details>
+                    <summary>View 320 × 480 browser capture</summary>
+                    <figure class="screens mobile-shot">
+                        <a href="v2.3.9/review-320.png"
+                            ><img
+                                loading="lazy"
+                                src="v2.3.9/review-320.png"
+                                alt="Full-page mobile review, captured with a 320 by 480 viewport"
+                        /></a>
+                    </figure>
+                </details>
+            </section>
+            <section id="s37">
+                <p class="eyebrow">37 / 55</p>
+                <h2>Accessibility</h2>
+                <p>
+                    The redesign retains semantic buttons, labeled inputs,
+                    native radio/checkbox selection, headings, focus handling
+                    and the shared modal. Time inputs and Anytime buttons are
+                    separate controls. Keyboard/image-preview regression checks
+                    passed. This is browser-based verification, not a claim of a
+                    complete assistive-technology audit or physical-device test.
+                </p>
+            </section>
+            <section id="s38">
+                <p class="eyebrow">38 / 55</p>
+                <h2>Query/performance</h2>
+                <p>
+                    Measured with 26 accepted trainees, a 12-week program, 20
+                    exercises and 48 proposed sessions. Read paths stayed
+                    bounded; no full workout history was loaded for setup. Times
+                    below are local isolated MySQL request timings, not
+                    production latency guarantees.
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Request</th>
+                                <th>Queries</th>
+                                <th>MySQL time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Programs</td>
+                                <td>6</td>
+                                <td>2.99 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Builder</td>
+                                <td>8</td>
+                                <td>3.86 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Choose Trainee</td>
+                                <td>13</td>
+                                <td>12.51 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Schedule</td>
+                                <td>23</td>
+                                <td>9.51 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Overview</td>
+                                <td>36</td>
+                                <td>15.46 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Preview</td>
+                                <td>18</td>
+                                <td>6.4 ms</td>
+                            </tr>
+                            <tr>
+                                <td>Activation</td>
+                                <td>143</td>
+                                <td>53.43 ms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="muted">
+                    Activation includes the transaction, independent copy, one
+                    run and 48 actual inserts. The read-only preview uses 18
+                    queries.
+                </p>
+            </section>
+            <section id="s39">
+                <p class="eyebrow">39 / 55</p>
+                <h2>Architecture</h2>
+                <p>
+                    No migration and no new domain table or service family. New
+                    Coach ProgramBuilder composes the existing day editor.
+                    Existing template/day endpoints add JSON responses for this
+                    embedded UI; Personal Inertia responses are preserved.
+                    CoachSetup adds intentional new-draft handling and day-image
+                    payloads. Settings adds context-preserving routes around
+                    existing controllers.
+                </p>
+            </section>
+            <section id="s40">
+                <p class="eyebrow">40 / 55</p>
+                <h2>Bugs found</h2>
+                <p>
+                    Confirmed: Settings/Notifications routes could leave Coach
+                    context; the older Assign screen split assignment from
+                    scheduling; completed setup blocked subsequent intentional
+                    assignments; template entry could reset draft dates; string
+                    weekdays could leave the visual weekly summary empty; legacy
+                    copies could inflate the active-trainee count. The
+                    dependency audit also found six advisories published after
+                    v2.3.8.
+                </p>
+            </section>
+            <section id="s41">
+                <p class="eyebrow">41 / 55</p>
+                <h2>Bugs fixed</h2>
+                <p>
+                    Context-preserving Settings/Notifications routes, unified
+                    assignment navigation, fresh-token handling for new
+                    intentional work, draft date preservation, normalized
+                    weekday display and distinct trainee counts are implemented.
+                    Builder refresh now reopens the saved template. Time-control
+                    nesting was removed. Three Symfony dependencies were patched
+                    from 7.4.21 to 7.4.23; the final audit is clean.
+                </p>
+            </section>
+            <section id="s42">
+                <p class="eyebrow">42 / 55</p>
+                <h2>SQLite</h2>
+                <p>
+                    Complete suite:
+                    <strong
+                        >624 passed · 12,312 assertions · 15.71 seconds.</strong
+                    >
+                    Eight focused CoachJourney feature tests cover the builder,
+                    draft entry/reload, second assignment, Settings context,
+                    foreign resources, distinct counts and representative query
+                    bounds. Existing authorization, rollback, dates, Personal
+                    and Coach suites remain included.
+                </p>
+            </section>
+            <section id="s43">
+                <p class="eyebrow">43 / 55</p>
+                <h2>MySQL</h2>
+                <p>
+                    Complete isolated MySQL suite:
+                    <strong
+                        >624 passed · 12,312 assertions · 36.96 seconds.</strong
+                    >
+                    It ran against <code>training_planner_test</code>, never the
+                    original local database or production. This validates the
+                    same code path against a real MySQL connection, including
+                    locks, dates and JSON draft behavior.
+                </p>
+            </section>
+            <section id="s44">
+                <p class="eyebrow">44 / 55</p>
+                <h2>Concurrency</h2>
+                <p>
+                    All six existing real-process concurrency suites passed:
+                    Coaching 17 checks, RecurringSchedule 4, Program 10,
+                    ProgramControl 15, Notification 10 and CoachSetup 33 —
+                    <strong>89 checks total</strong>. The added race assigns a
+                    different program after completed setup with concurrent
+                    retries, retaining one subscription, both legitimate
+                    assignments and the original sessions.
+                </p>
+            </section>
+            <section id="s45">
+                <p class="eyebrow">45 / 55</p>
+                <h2>JavaScript</h2>
+                <p>
+                    <strong>38 tests passed, 0 failed.</strong> Existing client
+                    logic tests remain intact. The new UX is primarily covered
+                    with real browser journeys rather than tests that mirror JSX
+                    implementation.
+                </p>
+            </section>
+            <section id="s46">
+                <p class="eyebrow">46 / 55</p>
+                <h2>Browser tests</h2>
+                <p>
+                    <strong
+                        >626 passing checkpoints across Chromium and
+                        WebKit.</strong
+                    >
+                    Seven scripts cover the new journey, inline Coaching
+                    lifecycle, thumbnail coverage, image previews, existing
+                    program-card layout, full Personal/Coach lifecycle and
+                    PWA/notifications. Fixture-dependent card tests used fresh
+                    disposable accounts after new assignments changed the
+                    original fixture’s expected run count.
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Suite</th>
+                                <th>Chromium</th>
+                                <th>WebKit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>coach-journey</td>
+                                <td>84 passed</td>
+                                <td>84 passed</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-coverage</td>
+                                <td>12 passed</td>
+                                <td>12 passed</td>
+                            </tr>
+                            <tr>
+                                <td>full-lifecycle</td>
+                                <td>26 passed</td>
+                                <td>26 passed</td>
+                            </tr>
+                            <tr>
+                                <td>program-card-layout</td>
+                                <td>31 passed</td>
+                                <td>31 passed</td>
+                            </tr>
+                            <tr>
+                                <td>pwa-notifications</td>
+                                <td>22 passed</td>
+                                <td>22 passed</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-coverage</td>
+                                <td>63 passed</td>
+                                <td>63 passed</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-preview</td>
+                                <td>75 passed</td>
+                                <td>75 passed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="s47">
+                <p class="eyebrow">47 / 55</p>
+                <h2>Production build</h2>
+                <p>
+                    <code>npm run build</code> passed. Vite generated the
+                    production assets successfully. No deployment was performed.
+                    PWA tests exercised actual service-worker registration,
+                    public-asset caches, offline fallback and reconnection; push
+                    permission/provider behavior was mocked where required, and
+                    no real push delivery is claimed.
+                </p>
+            </section>
+            <section id="s48">
+                <p class="eyebrow">48 / 55</p>
+                <h2>Formatting/audit</h2>
+                <p>
+                    Pint on changed PHP files, Prettier on changed frontend/test
+                    files, Composer validate --strict, Composer audit, platform
+                    requirements and git diff --check passed. Composer audit
+                    initially reported six advisories in
+                    http-foundation/http-kernel/routing; the targeted compatible
+                    update changed only those three packages to 7.4.23. See
+                    <a href="https://symfony.com/cve-2026-118514"
+                        >Symfony’s security advisory</a
+                    >
+                    and
+                    <a
+                        href="https://github.com/symfony/symfony/security/advisories/GHSA-5mx8-mwrp-5693"
+                        >the URL-generation advisory</a
+                    >.
+                </p>
+            </section>
+            <section id="s49">
+                <p class="eyebrow">49 / 55</p>
+                <h2>Data/media integrity</h2>
+                <p>
+                    Local QA cleanup removed
+                    <strong
+                        >26 disposable accounts and 348 newly created test
+                        images</strong
+                    >, including their dependent relationships, training,
+                    sessions and notification records. All
+                    <strong>22 original table fingerprints</strong> and
+                    <strong>44 original media SHA-256 hashes</strong> matched
+                    the pre-test snapshot. Credential ledgers were removed.
+                    Production data/media/environment were not modified.
+                </p>
+                <p>
+                    <a href="v2.3.9/evidence.json"
+                        >Open the structured verification evidence</a
+                    >
+                </p>
+            </section>
+            <section id="s50">
+                <p class="eyebrow">50 / 55</p>
+                <h2>Files changed</h2>
+                <p>
+                    The source changes are listed below. Generated evidence
+                    contains no passwords or user data. Detailed raw test output
+                    remains in the private local QA folder; the portable
+                    evidence file contains the measured results needed to review
+                    this release.
+                </p>
+                <ul class="file-list">
+                    <li>app/Http/Controllers/CoachAssignmentController.php</li>
+                    <li>app/Http/Controllers/CoachController.php</li>
+                    <li>app/Http/Controllers/CoachSetupController.php</li>
+                    <li>app/Http/Controllers/ProfileController.php</li>
+                    <li>app/Http/Controllers/TrainingDayController.php</li>
+                    <li>app/Http/Controllers/TrainingPlanController.php</li>
+                    <li>app/Services/CoachSetup.php</li>
+                    <li>app/Services/CoachWorkspaceSummary.php</li>
+                    <li>composer.lock</li>
+                    <li>resources/css/journey.css</li>
+                    <li>resources/js/Components/AppLayout.jsx</li>
+                    <li>resources/js/Features/CoachingUI.jsx</li>
+                    <li>resources/js/Pages/Coach/ChooseTrainee.jsx</li>
+                    <li>resources/js/Pages/Coach/ProgramBuilder.jsx</li>
+                    <li>resources/js/Pages/Coach/SetupTrainee.jsx</li>
+                    <li>resources/js/Pages/Coach/Trainee.jsx</li>
+                    <li>resources/js/Pages/Coaching/Setup.jsx</li>
+                    <li>resources/js/Pages/Profile/Edit.jsx</li>
+                    <li>resources/js/Pages/Programs/Show.jsx</li>
+                    <li>resources/js/Pages/TrainingDays/Form.jsx</li>
+                    <li>resources/js/Pages/TrainingPlans/Index.jsx</li>
+                    <li>routes/web.php</li>
+                    <li>tests/Browser/coach-journey-coverage.mjs</li>
+                    <li>tests/Browser/coach-journey.mjs</li>
+                    <li>tests/Browser/full-lifecycle.mjs</li>
+                    <li>tests/Browser/pwa-notifications.mjs</li>
+                    <li>tests/Browser/thumbnail-coverage.mjs</li>
+                    <li>tests/Concurrency/CoachSetupConcurrency.php</li>
+                    <li>tests/Feature/CoachJourneyTest.php</li>
+                    <li>tests/Feature/CoachWorkspaceTest.php</li>
+                    <li>tests/Feature/StabilizationTest.php</li>
+                </ul>
+                <p>
+                    Also added: this report and
+                    <code>docs/v2.3.9/</code> screenshots/evidence.
+                </p>
+            </section>
+            <section id="s51">
+                <p class="eyebrow">51 / 55</p>
+                <h2>Commit</h2>
+                <p>
+                    Application commit:
+                    <strong id="release-commit"
+                        >Recorded after the release commit</strong
+                    >. The immutable release is identified by
+                    <a
+                        href="https://github.com/AhmadDalao/traningApp/tree/v2.3.9"
+                        >v2.3.9</a
+                    >. A later report-only commit may record the final hash
+                    without moving that tag.
+                </p>
+            </section>
+            <section id="s52">
+                <p class="eyebrow">52 / 55</p>
+                <h2>v2.3.9 tag</h2>
+                <p>
+                    An annotated immutable <code>v2.3.9</code> tag identifies
+                    this verified application release. Earlier tags, including
+                    v2.3.8, are preserved; no force push or tag replacement is
+                    used. Final tag/remote verification is recorded after
+                    commit.
+                </p>
+            </section>
+            <section id="s53">
+                <p class="eyebrow">53 / 55</p>
+                <h2>Deployment status</h2>
+                <p>
+                    <strong>NOT DEPLOYED.</strong> Section 130 of the supplied
+                    v2.3.9 brief explicitly requires stopping after
+                    implementation, testing, report and tag until Ahmad says
+                    deploy. A read-only production check on 8 November returned
+                    HTTP 200 for login and health; both public app assets
+                    matched the archived v2.3.8 release. No production login,
+                    database migration, upload, environment, VAPID, cron or
+                    deployment change was made.
+                </p>
+            </section>
+            <section id="s54">
+                <p class="eyebrow">54 / 55</p>
+                <h2>Known limitations</h2>
+                <p>
+                    Browser emulation was used; no physical phone or real push
+                    delivery was tested. Push configuration remains unchanged.
+                    Existing block editing stays in the program detail flow. The
+                    builder reuses existing template fields; it does not
+                    introduce new Level/Goal/Equipment metadata or a second
+                    plan-discovery system. The protected legacy assignment POST
+                    remains for compatibility, while the new UI exclusively uses
+                    atomic setup. Local timings are illustrative. Deployment and
+                    live smoke tests await the explicit deploy instruction.
+                </p>
+            </section>
+            <section id="s55">
+                <p class="eyebrow">55 / 55</p>
+                <h2>READY / NOT READY</h2>
+                <p>
+                    <strong
+                        >READY — IMPLEMENTED, TESTED AND TAGGED. NOT
+                        DEPLOYED.</strong
+                    >
+                    No known BLOCKER or HIGH issue remains in the verified
+                    source. Release delivery is intentionally held. On an
+                    explicit deploy request, use the existing safe Hostinger
+                    procedure, fresh backups, live disposable smoke tests,
+                    cleanup and integrity verification. Stop here until that
+                    request.
+                </p>
+            </section>
+            <footer>
+                Training Planner v2.3.9 · Source verified locally · Production
+                deployment intentionally held
+            </footer>
+        </main>
+    </body>
+</html>

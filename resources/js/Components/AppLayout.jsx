@@ -35,11 +35,13 @@ export default function AppLayout({ children }) {
     }, [url]);
     const coach = trainingContext?.workspace === "coach";
     const home = coach ? "/coach" : "/dashboard";
+    const settings = coach ? "/coach/settings" : "/profile";
+    const notifications = coach ? "/coach/notifications" : "/notifications";
     const nav = coach
         ? [
               {
                   href: "/coach",
-                  label: "Coach Overview",
+                  label: "Overview",
                   icon: LayoutDashboard,
                   active: url === "/coach",
               },
@@ -150,19 +152,19 @@ export default function AppLayout({ children }) {
                         </Link>
                     ))}
                     <Link
-                        href="/notifications"
-                        className={`nav-item ${url.startsWith("/notifications") ? "active" : ""}`}
+                        href={notifications}
+                        className={`nav-item ${url.startsWith(notifications) ? "active" : ""}`}
                         onClick={closeNavigation}
                     >
                         <Bell size={19} aria-hidden="true" /> Notifications
                     </Link>
                     <Link
-                        href="/profile"
-                        className={`nav-item ${url.startsWith("/profile") ? "active" : ""}`}
+                        href={settings}
+                        className={`nav-item ${url.startsWith(settings) ? "active" : ""}`}
                         onClick={closeNavigation}
                     >
-                        <Settings size={19} aria-hidden="true" /> Profile &
-                        settings
+                        <Settings size={19} aria-hidden="true" />{" "}
+                        {coach ? "Settings" : "Profile & settings"}
                     </Link>
                 </nav>
                 <div className="sidebar-bottom">
@@ -226,7 +228,7 @@ export default function AppLayout({ children }) {
                                         Coach Workspace
                                     </Link>
                                     <Link
-                                        href="/profile/coach"
+                                        href="/coach/settings"
                                         className="nav-item"
                                     >
                                         Coach profile
@@ -241,10 +243,10 @@ export default function AppLayout({ children }) {
                                     Coaching administration
                                 </Link>
                             )}
-                            <Link href="/notifications" className="nav-item">
+                            <Link href={notifications} className="nav-item">
                                 Notifications & install
                             </Link>
-                            <Link href="/profile" className="nav-item">
+                            <Link href={settings} className="nav-item">
                                 <UserRound size={17} />
                                 Profile
                             </Link>
@@ -281,7 +283,7 @@ export default function AppLayout({ children }) {
                         <span className="live-dot" />
                         Make time for yourself
                         <Link
-                            href="/profile"
+                            href={settings}
                             className="avatar small"
                             aria-label="Open profile"
                         >

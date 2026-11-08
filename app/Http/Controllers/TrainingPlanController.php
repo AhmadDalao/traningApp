@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTrainingPlanRequest;
 use App\Http\Requests\UpdateTrainingPlanRequest;
 use App\Models\TrainingPlan;
+use App\Models\User;
+use App\Services\CoachAccess;
+use App\Services\ExerciseLibrary;
 use App\Services\Notifications\CoachNotifications;
 use App\Services\ProgramDefinition;
 use App\Services\ProgramLifecycle;
 use App\Services\TrainingContext;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -23,7 +27,7 @@ class TrainingPlanController extends Controller
         $filters = $request->validate(['search' => 'nullable|string|max:100', 'type' => 'nullable|in:all,program,simple']);
 
         return Inertia::render('TrainingPlans/Index', ['filters' => ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? 'all'], 'plans' => $this->context->plans()->when($this->context->templates() && ! empty($filters['search']), fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))->when($this->context->templates() && ($filters['type'] ?? 'all') !== 'all', fn ($q) => $q->where('structure_type', $filters['type']))->with('assignment.relationship.coach.coachProfile', 'programRuns')->withCount([
-            'templateAssignments as assigned_trainees_count' => fn ($q) => $q->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active')),
+            'templateAssignments as assigned_trainees_count' => fn ($q) => $q->select(DB::raw('count(distinct coach_trainee_relationship_id)'))->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active')),
             'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
             'trainingDays as rest_days_count' => fn ($q) => $q->where('type', 'rest'),
         ])->withThumbnail()->latest()->paginate(12)->withQueryString()->through(fn ($plan) => $this->describe($plan))]);
@@ -36,6 +40,10 @@ class TrainingPlanController extends Controller
 
     public function create()
     {
+        if ($this->context->templates()) {
+            return Inertia::render('Coach/ProgramBuilder', $this->builderProps());
+        }
+
         return Inertia::render('TrainingPlans/Form');
     }
 
@@ -55,6 +63,10 @@ class TrainingPlanController extends Controller
 
             return $plan;
         });
+
+        if ($request->expectsJson() && $this->context->templates()) {
+            return response()->json(['plan' => $plan->load('blocks', 'trainingDays.exercises')], 201);
+        }
 
         return $this->context->redirect('/training-plans/'.$plan->id)->with('success', 'Training plan created. Add your first day.');
     }
@@ -81,7 +93,21 @@ class TrainingPlanController extends Controller
     {
         $this->context->plan($trainingPlan, 'update');
 
-        return Inertia::render('TrainingPlans/Form', ['plan' => $trainingPlan]);
+        return $this->context->templates()
+            ? Inertia::render('Coach/ProgramBuilder', $this->builderProps($trainingPlan))
+            : Inertia::render('TrainingPlans/Form', ['plan' => $trainingPlan]);
+    }
+
+    private function builderProps(?TrainingPlan $plan = null): array
+    {
+        $trainee = null;
+        if (request()->filled('assign_to')) {
+            $trainee = User::findOrFail(request()->integer('assign_to'));
+            app(CoachAccess::class)->relationship($this->context->actor(), $trainee);
+        }
+
+        return ['plan' => $plan?->load('blocks', 'trainingDays.exercises'), 'assignTo' => $trainee?->only('id', 'name', 'training_code'),
+            'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)];
     }
 
     public function update(UpdateTrainingPlanRequest $request, TrainingPlan $trainingPlan)
@@ -98,6 +124,10 @@ class TrainingPlanController extends Controller
 
             return $changed;
         });
+
+        if ($request->expectsJson() && $this->context->templates()) {
+            return response()->json(['plan' => $trainingPlan->fresh()->load('blocks', 'trainingDays.exercises')]);
+        }
 
         return $this->context->redirect('/training-plans/'.$trainingPlan->id)->with('success', 'Training plan updated.')
             ->with('schedule_review', $changed && ! $this->context->templates() ? $trainingPlan->only('id', 'name') : null);

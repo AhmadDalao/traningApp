@@ -30,14 +30,14 @@ class CoachAssignmentController extends Controller
             'existing_plan_id' => $existing[$row['id']]->assigned_training_plan_id ?? null,
         ]));
 
-        return Inertia::render('Coach/ChooseTrainee', ['plan' => $trainingPlan->only('id', 'name', 'structure_type', 'duration_weeks'), 'relationships' => $relationships, 'search' => $data['search'] ?? '']);
+        $trainingPlan->load(['trainingDays' => fn ($q) => $q->withThumbnail()]);
+
+        return Inertia::render('Coach/ChooseTrainee', ['plan' => [...$trainingPlan->only('id', 'name', 'structure_type', 'duration_weeks'), 'training_days' => $trainingPlan->trainingDays], 'relationships' => $relationships, 'search' => $data['search'] ?? '']);
     }
 
     public function create(Request $request, TrainingContext $context, CoachAccess $access)
     {
-        $subscription = $access->subscription($access->relationship($context->actor(), $context->owner()));
-
-        return Inertia::render('Coach/Assign', ['selectedTemplate' => $request->integer('template'), 'anotherCopy' => $request->boolean('another'), 'templates' => $context->actor()->trainingPlans()->where('workspace_type', 'coach_template')->withThumbnail()->orderBy('name')->get(['id', 'name', 'description', 'structure_type']), 'subscription' => $subscription?->summary()]);
+        return $context->redirect('/setup?assign=1'.($request->filled('template') ? '&template='.$request->integer('template') : ''));
     }
 
     public function store(Request $request, TrainingContext $context, TrainingPlanDuplicator $duplicator)

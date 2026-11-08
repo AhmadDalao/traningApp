@@ -1,0 +1,335 @@
+{
+    "release": "v2.3.9",
+    "baseline_tag": "v2.3.8",
+    "baseline_commit": "330cd754111da8cd952505e8f7892b799dc0c308",
+    "application_commit": "Resolved by immutable v2.3.9 tag; recorded after commit in the release report.",
+    "date": "2026-11-08",
+    "sqlite": {
+        "passed": 624,
+        "assertions": 12312,
+        "seconds": 15.71
+    },
+    "mysql": {
+        "passed": 624,
+        "assertions": 12312,
+        "seconds": 36.96
+    },
+    "javascript": {
+        "passed": 38
+    },
+    "browser_runs": [
+        {
+            "script": "thumbnail-preview",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 8.8,
+            "checks": 75
+        },
+        {
+            "script": "thumbnail-preview",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 10.07,
+            "checks": 75
+        },
+        {
+            "script": "coach-journey-coverage",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 3.3,
+            "checks": 12
+        },
+        {
+            "script": "coach-journey-coverage",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 4.16,
+            "checks": 12
+        },
+        {
+            "script": "thumbnail-coverage",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 9.14,
+            "checks": 63
+        },
+        {
+            "script": "thumbnail-coverage",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 9.62,
+            "checks": 63
+        },
+        {
+            "script": "full-lifecycle",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 13.54,
+            "checks": 26
+        },
+        {
+            "script": "full-lifecycle",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 17.51,
+            "checks": 26
+        },
+        {
+            "script": "pwa-notifications",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 4.78,
+            "checks": 22
+        },
+        {
+            "script": "pwa-notifications",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 5.17,
+            "checks": 22
+        },
+        {
+            "script": "coach-journey",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 7.62,
+            "checks": 84
+        },
+        {
+            "script": "coach-journey",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 8.49,
+            "checks": 84
+        },
+        {
+            "script": "program-card-layout",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 4.05,
+            "checks": 31
+        },
+        {
+            "script": "program-card-layout",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 3.49,
+            "checks": 31
+        }
+    ],
+    "concurrency": [
+        {
+            "suite": "Coaching",
+            "exit": 0,
+            "seconds": 0.54,
+            "checks": 17
+        },
+        {
+            "suite": "RecurringSchedule",
+            "exit": 0,
+            "seconds": 0.48,
+            "checks": 4
+        },
+        {
+            "suite": "Program",
+            "exit": 0,
+            "seconds": 0.38,
+            "checks": 10
+        },
+        {
+            "suite": "ProgramControl",
+            "exit": 0,
+            "seconds": 1.58,
+            "checks": 15
+        },
+        {
+            "suite": "Notification",
+            "exit": 0,
+            "seconds": 1.33,
+            "checks": 10
+        },
+        {
+            "suite": "CoachSetup",
+            "exit": 0,
+            "seconds": 7.83,
+            "checks": 33
+        }
+    ],
+    "queries_sqlite": {
+        "programs": {
+            "queries": 6,
+            "milliseconds": 1.76
+        },
+        "builder": {
+            "queries": 8,
+            "milliseconds": 2.23
+        },
+        "choose_trainee": {
+            "queries": 13,
+            "milliseconds": 6.7
+        },
+        "schedule": {
+            "queries": 23,
+            "milliseconds": 5.39
+        },
+        "overview": {
+            "queries": 36,
+            "milliseconds": 7.92
+        },
+        "preview": {
+            "queries": 18,
+            "milliseconds": 4.73
+        },
+        "activation": {
+            "queries": 143,
+            "milliseconds": 28.02
+        }
+    },
+    "queries_mysql": {
+        "programs": {
+            "queries": 6,
+            "milliseconds": 2.99
+        },
+        "builder": {
+            "queries": 8,
+            "milliseconds": 3.86
+        },
+        "choose_trainee": {
+            "queries": 13,
+            "milliseconds": 12.51
+        },
+        "schedule": {
+            "queries": 23,
+            "milliseconds": 9.51
+        },
+        "overview": {
+            "queries": 36,
+            "milliseconds": 15.46
+        },
+        "preview": {
+            "queries": 18,
+            "milliseconds": 6.4
+        },
+        "activation": {
+            "queries": 143,
+            "milliseconds": 53.43
+        }
+    },
+    "integrity": {
+        "original_data_and_media_unchanged": true,
+        "tables": 22,
+        "original_media_files": 44,
+        "qa_accounts_removed": 26,
+        "ledger_entries": 26,
+        "qa_images_removed": 348
+    },
+    "production_read_only": {
+        "checked_at": "2026-11-08T17:25:13.527463+00:00",
+        "login_http": 200,
+        "health_http": 200,
+        "assets": [
+            {
+                "path": "/build/assets/app-UZ_O5K1w.js",
+                "http_sha256": "e75d0bac357ce935924e3ba752b6a1e18aaa2d67bbd1393eef1673d4f2446fe7",
+                "v238_release_match": true
+            },
+            {
+                "path": "/build/assets/app-f4t1Z3DP.css",
+                "http_sha256": "10318dbf4280175a906b2d04683cc9f7bdb129e54be7256679b1226e4b18705d",
+                "v238_release_match": true
+            }
+        ],
+        "production_modified": false
+    },
+    "coaching_cases": [
+        {
+            "engine": "chromium",
+            "case": "new",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "chromium",
+            "case": "paused",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "chromium",
+            "case": "ended",
+            "subscriptions": 2,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "chromium",
+            "case": "short",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "new",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "paused",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "ended",
+            "subscriptions": 2,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "short",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "verified": true
+        }
+    ],
+    "dependency_patches": {
+        "symfony/http-foundation": {
+            "from": "v7.4.21",
+            "to": "v7.4.23"
+        },
+        "symfony/http-kernel": {
+            "from": "v7.4.21",
+            "to": "v7.4.23"
+        },
+        "symfony/routing": {
+            "from": "v7.4.21",
+            "to": "v7.4.23"
+        }
+    },
+    "composer_advisories_remaining": 0,
+    "deployed": false,
+    "physical_device_tested": false
+}

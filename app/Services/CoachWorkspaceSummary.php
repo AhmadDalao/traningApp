@@ -77,7 +77,7 @@ class CoachWorkspaceSummary
                 default => 'Training is on track',
             };
             $action = match ($r->display_state) {
-                'setup' => ['label' => 'Continue setup', 'url' => $prefix.'/setup'],
+                'setup' => ['label' => $r->plan_id ? 'Continue Assignment' : 'Assign Training', 'url' => $prefix.'/setup'],
                 'paused' => ['label' => 'Review pause', 'url' => $r->subscription_status === 'paused' ? $prefix.'/coaching' : $prefix.'/program-runs/'.$r->run_id],
                 'attention' => ['label' => 'Review', 'url' => $prefix],
                 default => ['label' => 'View trainee', 'url' => $prefix],

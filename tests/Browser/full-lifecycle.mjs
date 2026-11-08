@@ -168,17 +168,19 @@ async function addExercise(p, name, mode = "reps", partner = false) {
 }
 async function makeProgram(p, prefix = "", rich = false) {
     await visit(p, prefix + "/training-plans");
-    await button(
-        p,
-        prefix === "/coach" ? "Create program or plan" : "Create training plan",
-    ).click();
     const d = p.getByRole("dialog");
-    await d.getByLabel("Create").selectOption("program");
-    await d
-        .getByLabel("Plan name")
-        .fill(`QA lifecycle ${rich ? "Personal" : "Coach"} ${engine}`);
-    await d.getByLabel("Program duration (weeks)").fill("1");
-    await button(d, "Create plan").click();
+    if (prefix === "/coach") {
+        await button(p, "Create Program").click();
+        await p.getByLabel("Program name").fill(`QA lifecycle Coach ${engine}`);
+        await p.getByLabel("Duration (weeks)").fill("1");
+        await button(p, "Save Program").click();
+    } else {
+        await button(p, "Create training plan").click();
+        await d.getByLabel("Create").selectOption("program");
+        await d.getByLabel("Plan name").fill(`QA lifecycle Personal ${engine}`);
+        await d.getByLabel("Program duration (weeks)").fill("1");
+        await button(d, "Create plan").click();
+    }
     await p.waitForURL(/\/training-plans\/\d+$/);
     const definition = new URL(p.url()).pathname;
     await link(p, "Add training day").click();
@@ -460,14 +462,25 @@ try {
         .click();
     await coach.waitForURL(/\/coach\/trainees\/\d+$/);
     const prefix = new URL(coach.url()).pathname;
-    await visit(coach, prefix + "/assign");
+    await visit(
+        coach,
+        prefix + "/setup?template=" + template.split("/").at(-1),
+    );
     await coach
-        .getByLabel("Coach template")
-        .selectOption(template.split("/").at(-1));
-    await button(coach, "Confirm assignment").click();
-    await coach.waitForURL(/\/training-plans\/\d+$/);
-    const assigned = new URL(coach.url()).pathname;
-    const coachedRun = await start(coach, assigned);
+        .getByRole("heading", { name: "Schedule Training", exact: true })
+        .waitFor();
+    await coach.locator(".assignment-day").first().waitFor();
+    await coach.getByLabel("Start training", { exact: false }).fill(date(1));
+    await button(coach, "Continue to Review").click();
+    await coach.locator(".assignment-review-rows li").first().waitFor();
+    await button(coach, "Assign & Schedule").click();
+    await coach.waitForURL(base + prefix);
+    await coach
+        .locator(".current-training-actions")
+        .getByRole("link", { name: "Edit Schedule", exact: true })
+        .click();
+    await coach.waitForURL(/\/program-runs\/\d+$/);
+    const coachedRun = new URL(coach.url()).pathname;
     urls.coachedRun = coachedRun;
     const ownerRun = "/program-runs/" + coachedRun.split("/").at(-1);
     assert.equal(await button(coach, "Start workout").count(), 0);

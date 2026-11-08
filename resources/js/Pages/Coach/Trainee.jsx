@@ -70,7 +70,9 @@ export default function Trainee({
                     <div>
                         <Link href={ctx.url("/coaching")}>Manage coaching</Link>
                         {incomplete && (
-                            <Link href={ctx.url("/setup")}>Continue setup</Link>
+                            <Link href={ctx.url("/setup")}>
+                                Continue Assignment
+                            </Link>
                         )}
                         <hr />
                         <EndRelationship
@@ -83,11 +85,11 @@ export default function Trainee({
             {incomplete && (
                 <section className="panel coach-card setup-checklist">
                     <div>
-                        <h2>Finish coaching setup</h2>
+                        <h2>Finish assigning training</h2>
                         <p>{state?.reason}</p>
                     </div>
                     <ButtonLink href={ctx.url("/setup")}>
-                        Continue setup{" "}
+                        Continue Assignment{" "}
                         <ArrowRight size={16} aria-hidden="true" />
                     </ButtonLink>
                 </section>
@@ -95,11 +97,11 @@ export default function Trainee({
             <div className="trainee-training-grid">
                 <section className="panel coach-card assigned-training">
                     <div className="coach-card-title">
-                        <h2>Training assigned by you</h2>
-                        {ctx.canManage && (
+                        <h2>Current Training</h2>
+                        {(ctx.canManage || !current) && (
                             <ButtonLink
                                 variant="secondary"
-                                href={ctx.url("/assign")}
+                                href={ctx.url("/setup?assign=1")}
                             >
                                 Assign training
                             </ButtonLink>
@@ -154,10 +156,33 @@ export default function Trainee({
                     ) : (
                         <p>No training assigned yet.</p>
                     )}
+                    {current && (
+                        <div className="coach-actions current-training-actions">
+                            <ButtonLink
+                                variant="secondary"
+                                href={ctx.url("/calendar")}
+                            >
+                                Calendar
+                            </ButtonLink>
+                            {ctx.canManage && (
+                                <ButtonLink
+                                    variant="secondary"
+                                    href={ctx.url(
+                                        current.structure_type === "program" &&
+                                            current.run_id
+                                            ? `/program-runs/${current.run_id}`
+                                            : `/training-plans/${current.id}/schedule-preview`,
+                                    )}
+                                >
+                                    Edit Schedule
+                                </ButtonLink>
+                            )}
+                        </div>
+                    )}
                     {others.length > 0 && (
                         <details className="other-assignments">
                             <summary>
-                                Other assignments by you ({others.length})
+                                Other Training Assigned By You ({others.length})
                             </summary>
                             <ul className="compact-activity">
                                 {others.map((plan) => (

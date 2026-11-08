@@ -31,6 +31,10 @@ class TrainingDayController extends Controller
     {
         $day = $this->saveDay($request, $trainingPlan);
 
+        if ($request->expectsJson() && $this->context->templates()) {
+            return response()->json(['day' => $day->load('exercises')], 201);
+        }
+
         return $this->context->redirect('/training-days/'.$day->id)->with('success', 'Training day created.')
             ->with('schedule_review', $trainingPlan->isProgram() ? null : $trainingPlan->only('id', 'name'));
     }
@@ -56,6 +60,10 @@ class TrainingDayController extends Controller
         $fields = ['title', 'type', 'focus_area', 'icon', 'notes', 'weekdays', 'default_time'];
         $before = $trainingDay->only($fields);
         $this->saveDay($request, $trainingDay->trainingPlan, $trainingDay);
+
+        if ($request->expectsJson() && $this->context->templates()) {
+            return response()->json(['day' => $trainingDay->fresh()->load('exercises')]);
+        }
 
         return $this->context->redirect('/training-days/'.$trainingDay->id)->with('success', 'Training day updated.')
             ->with('schedule_review', ! $trainingDay->trainingPlan->isProgram() && $before !== $trainingDay->fresh()->only($fields) ? $trainingDay->trainingPlan->only('id', 'name') : null);

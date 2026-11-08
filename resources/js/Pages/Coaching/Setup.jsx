@@ -1,6 +1,6 @@
 import { Head, useForm } from "@inertiajs/react";
 import { PageHeader, Field, Button, ButtonLink } from "../../Components/UI";
-export default function Setup({ coachProfile }) {
+export default function Setup({ coachProfile, settings = false }) {
     const form = useForm({
         display_name: coachProfile?.display_name || "",
         specialization: coachProfile?.specialization || "",
@@ -8,16 +8,32 @@ export default function Setup({ coachProfile }) {
     });
     return (
         <>
-            <Head title="Coach profile" />
+            <Head title={settings ? "Settings" : "Coach profile"} />
             <PageHeader
-                title="Coach profile"
+                title={settings ? "Settings" : "Coach profile"}
                 description="Manage your coaching name and information."
             />
+            {settings && (
+                <div className="coach-actions settings-links">
+                    <ButtonLink
+                        variant="secondary"
+                        href="/coach/settings/account"
+                    >
+                        Account & personal details
+                    </ButtonLink>
+                    <ButtonLink variant="secondary" href="/coach/notifications">
+                        Notifications & install
+                    </ButtonLink>
+                    <ButtonLink variant="secondary" href="/coach/subscriptions">
+                        Coaching packages & administration
+                    </ButtonLink>
+                </div>
+            )}
             <form
                 className="panel coach-form"
                 onSubmit={(e) => {
                     e.preventDefault();
-                    form.post("/profile/coach");
+                    form.post(settings ? "/coach/settings" : "/profile/coach");
                 }}
             >
                 {[
@@ -35,7 +51,10 @@ export default function Setup({ coachProfile }) {
                     </Field>
                 ))}
                 <div className="form-actions">
-                    <ButtonLink variant="secondary" href="/profile">
+                    <ButtonLink
+                        variant="secondary"
+                        href={settings ? "/coach" : "/profile"}
+                    >
                         Cancel
                     </ButtonLink>
                     <Button disabled={form.processing}>

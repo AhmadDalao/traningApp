@@ -194,9 +194,9 @@ try {
         ".current-training .training-thumbnail",
     );
     await surface(
-        prefix + "/setup",
+        prefix + "/setup?assign=1",
         "setup",
-        ".setup-option-image .training-thumbnail",
+        ".assignment-program-option .training-thumbnail",
         [
             [320, 480],
             [360, 800],
@@ -207,10 +207,13 @@ try {
             [1280, 900],
         ],
     );
+    await page.locator('input[name="training"]:enabled').first().check();
     const choice = await page
         .locator('input[name="training"]:checked')
         .getAttribute("aria-label");
-    await open(page.locator(".setup-option-image .training-thumbnail").last());
+    await open(
+        page.locator(".assignment-program-option .training-thumbnail").last(),
+    );
     await page.keyboard.press("Escape");
     assert.equal(
         await page
@@ -266,7 +269,7 @@ try {
     // Library previews are separate from the exercise selection control.
     await page.goto(base + "/coach/training-plans");
     const template = await page
-        .locator(".plan-actions a")
+        .locator('.plan-actions a[href$="/assign"] + a')
         .first()
         .getAttribute("href");
     const templateProps = await props(template);

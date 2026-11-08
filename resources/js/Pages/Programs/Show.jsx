@@ -1,6 +1,6 @@
 import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import {
     PageHeader,
     Button,
@@ -56,7 +56,13 @@ export default function Show({ plan, blocks, runs }) {
                 {canManage && (
                     <Button
                         variant="secondary"
-                        onClick={() => setEditing(true)}
+                        onClick={() =>
+                            templates
+                                ? router.visit(
+                                      `/coach/training-plans/${plan.id}/edit`,
+                                  )
+                                : setEditing(true)
+                        }
                     >
                         Edit details
                     </Button>
@@ -71,7 +77,7 @@ export default function Show({ plan, blocks, runs }) {
                 )}
                 {templates && (
                     <ButtonLink href={url(`/training-plans/${plan.id}/assign`)}>
-                        Assign to trainee
+                        Assign
                     </ButtonLink>
                 )}
             </PageHeader>

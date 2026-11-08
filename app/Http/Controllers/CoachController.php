@@ -20,7 +20,7 @@ class CoachController extends Controller
     {
         abort_unless($request->user()->isCoach(), 403);
 
-        return Inertia::render('Coaching/Setup', ['coachProfile' => $request->user()->coachProfile]);
+        return Inertia::render('Coaching/Setup', ['coachProfile' => $request->user()->coachProfile, 'settings' => $request->is('coach/settings')]);
     }
 
     public function updateProfile(Request $request)
@@ -34,7 +34,7 @@ class CoachController extends Controller
         });
         $request->session()->put('workspace', 'coach');
 
-        return redirect('/coach')->with('success', 'Coach profile updated.');
+        return redirect($request->is('coach/settings') ? '/coach/settings' : '/coach')->with('success', 'Coach profile updated.');
     }
 
     public function switch(Request $request)

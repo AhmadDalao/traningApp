@@ -1,13 +1,13 @@
-import TrainingThumbnail from "../../Components/TrainingThumbnail";
+import { useEffect, useRef, useState } from "react";
+import { Head, router, usePage } from "@inertiajs/react";
 import {
     Check,
-    Dumbbell,
     CalendarDays,
-    ShieldCheck,
     ArrowRight,
+    Plus,
+    ShieldCheck,
 } from "lucide-react";
-import { Head, router, usePage } from "@inertiajs/react";
-import { useState } from "react";
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import {
     PageHeader,
     Button,
@@ -17,6 +17,7 @@ import {
     TimeLabel,
 } from "../../Components/UI";
 import { useTraining, coachingJson } from "../../Features/CoachingUI";
+import { PackageForm } from "../../Features/CoachingForms";
 import WeekdayPicker from "../../Components/WeekdayPicker";
 
 export default function SetupTrainee({
@@ -25,43 +26,42 @@ export default function SetupTrainee({
     templates,
     assignedPlans,
     packages,
+    existingAssignments = {},
+    assigning = false,
+    startAtSchedule = false,
 }) {
     const ctx = useTraining(),
-        { today, timezone } = usePage().props;
-    const [draft, setDraft] = useState(initial),
-        [choices, setChoices] = useState(initial.choices);
-    const [reviewExpanded, setReviewExpanded] = useState(false);
-    const [step, setStep] = useState(1),
+        { today } = usePage().props;
+    const [draft, setDraft] = useState(initial);
+    const [choices, setChoices] = useState(() => ({
+        ...initial.choices,
+        package_id:
+            initial.choices.package_id ||
+            (!initial.saved_at && packages.length === 1 && !state.subscription
+                ? packages[0].id
+                : null),
+    }));
+    const [step, setStep] = useState(startAtSchedule ? 2 : 1),
         [preview, setPreview] = useState(null),
-        [days, setDays] = useState([]);
+        [dirty, setDirty] = useState(true);
     const [busy, setBusy] = useState(false),
         [error, setError] = useState(""),
-        [scheduled, setScheduled] = useState(
-            state.has_schedule && choices.selection_type === "assigned",
-        );
+        [acknowledged, setAcknowledged] = useState(false);
+    const [expanded, setExpanded] = useState(false),
+        [packageOpen, setPackageOpen] = useState(false);
     const [kind, setKind] = useState(
-        choices.selection_type === "assigned"
+        initial.choices.selection_type === "assigned"
             ? "assigned"
-            : templates.find((p) => p.id === choices.training_plan_id)
+            : templates.find((p) => p.id === initial.choices.training_plan_id)
                   ?.structure_type || "program",
     );
-    const update = (key, value) => {
-        setChoices((c) => ({ ...c, [key]: value }));
-        setPreview(null);
-    };
+    const booted = useRef(false);
     const selected = (
         choices.selection_type === "assigned" ? assignedPlans : templates
     ).find((p) => p.id === Number(choices.training_plan_id));
+    const days = preview?.days || [];
+    const scheduled = preview?.already_scheduled || false;
     const categories = [
-        ...(assignedPlans.length
-            ? [
-                  {
-                      value: "assigned",
-                      label: "Assigned training",
-                      plans: assignedPlans,
-                  },
-              ]
-            : []),
         {
             value: "program",
             label: "My Programs",
@@ -72,20 +72,20 @@ export default function SetupTrainee({
             label: "My Plans",
             plans: templates.filter((p) => p.structure_type === "simple"),
         },
+        ...(assignedPlans.length
+            ? [
+                  {
+                      value: "assigned",
+                      label: "Assigned training",
+                      plans: assignedPlans,
+                  },
+              ]
+            : []),
     ];
-    const visiblePlans =
-        categories.find((category) => category.value === kind)?.plans || [];
-    function chooseCategory(value) {
-        if (value === kind) return;
-        setKind(value);
-        setChoices((c) => ({
-            ...c,
-            selection_type: value === "assigned" ? "assigned" : "template",
-            training_plan_id: null,
-            day_options: {},
-            time_overrides: {},
-        }));
-        setPreview(null);
+    function update(values) {
+        setChoices((c) => ({ ...c, ...values }));
+        setDirty(true);
+        setAcknowledged(false);
     }
     async function save(next = choices) {
         const result = await coachingJson(
@@ -99,6 +99,7 @@ export default function SetupTrainee({
     async function review(target = 3, next = choices) {
         setBusy(true);
         setError("");
+        setAcknowledged(false);
         try {
             const saved = await save(next);
             const result = await coachingJson(ctx.url("/setup/preview"), {
@@ -106,21 +107,31 @@ export default function SetupTrainee({
                 token: saved.token,
             });
             setPreview(result.preview);
-            setDays(result.preview.days);
-            setScheduled(result.preview.already_scheduled);
+            setDirty(false);
             setStep(target);
         } catch (e) {
             setError(e.message);
+            setDirty(true);
         } finally {
             setBusy(false);
         }
     }
-    async function finishLater() {
+    useEffect(() => {
+        if (startAtSchedule && !booted.current) {
+            booted.current = true;
+            review(2);
+        }
+    }, []);
+    async function finishLater(create = false) {
         setBusy(true);
         setError("");
         try {
             await save();
-            router.visit(ctx.url(""));
+            router.visit(
+                create
+                    ? `/coach/training-plans/create?assign_to=${ctx.trainee.id}`
+                    : ctx.url(""),
+            );
         } catch (e) {
             setError(e.message);
         } finally {
@@ -128,6 +139,13 @@ export default function SetupTrainee({
         }
     }
     async function activate() {
+        if (
+            !preview?.valid ||
+            dirty ||
+            busy ||
+            (preview.subscription.operation !== "reuse" && !acknowledged)
+        )
+            return;
         setBusy(true);
         setError("");
         try {
@@ -140,77 +158,91 @@ export default function SetupTrainee({
             router.visit(result.url);
         } catch (e) {
             setError(e.message);
-            setPreview(null);
+            setDirty(true);
         } finally {
             setBusy(false);
         }
     }
     const operation = preview?.subscription.operation;
-    const label =
-        operation === "resume"
-            ? "Resume Coaching"
-            : operation === "renew"
-              ? "Renew Coaching"
-              : operation === "reuse"
-                ? "Complete Setup"
-                : "Activate Coaching";
-    if (initial.completed && state.subscription?.effective_status === "active")
+    const finalEnabled =
+        preview?.valid && !dirty && (operation === "reuse" || acknowledged);
+    const coverage = (
+        <CoachingCoverage
+            state={state}
+            preview={preview}
+            choices={choices}
+            packages={packages}
+            today={today}
+            dirty={dirty}
+            acknowledged={acknowledged}
+            setAcknowledged={setAcknowledged}
+            update={update}
+            createPackage={() => setPackageOpen(true)}
+            refresh={(next) => {
+                setChoices(next);
+                review(step, next);
+            }}
+        />
+    );
+    if (
+        initial.completed &&
+        !assigning &&
+        state.subscription?.effective_status === "active"
+    )
         return (
             <>
-                <Head title="Coaching setup complete" />
+                <Head title="Training ready" />
                 <PageHeader
-                    title="Coaching setup complete"
-                    description={`Coaching for ${ctx.trainee.name} is active. The existing schedule is preserved.`}
+                    title="Training ready"
+                    description={`${ctx.trainee.name}’s existing training and schedule are preserved.`}
                 />
-                <ButtonLink href={ctx.url("")}>View trainee</ButtonLink>
-                <ButtonLink variant="secondary" href={ctx.url("/assign")}>
-                    Assign different training
+                <ButtonLink href={ctx.url("")}>View trainee</ButtonLink>{" "}
+                <ButtonLink
+                    variant="secondary"
+                    href={ctx.url("/setup?assign=1")}
+                >
+                    Assign Training
                 </ButtonLink>
             </>
         );
     return (
-        <div className="coach-setup setup-v231">
-            <Head title={`Set up ${ctx.trainee.name}`} />
+        <div className="coach-setup assignment-journey">
+            <Head title={`Assign training to ${ctx.trainee.name}`} />
             <PageHeader
-                title="Setup Coaching"
-                description={`A training plan for ${ctx.trainee.name}. Review everything before activating.`}
+                title={`Assign Training to ${ctx.trainee.name}`}
+                description="Choose training, set the schedule, then confirm everything together."
             >
                 <Button
                     variant="secondary"
                     disabled={busy}
-                    onClick={finishLater}
+                    onClick={() => finishLater()}
                 >
                     Save & finish later
                 </Button>
             </PageHeader>
             <fieldset className="setup-fields" disabled={busy} aria-busy={busy}>
-                <ol className="setup-steps" aria-label="Setup steps">
-                    {["Training", "Dates & Schedule", "Review & Activate"].map(
-                        (name, i) => (
-                            <li key={name}>
-                                <button
-                                    type="button"
-                                    disabled={busy || i + 1 > step}
-                                    aria-current={
-                                        step === i + 1 ? "step" : undefined
-                                    }
-                                    onClick={() => setStep(i + 1)}
-                                >
-                                    <span>
-                                        {step > i + 1 ? (
-                                            <Check
-                                                size={15}
-                                                aria-hidden="true"
-                                            />
-                                        ) : (
-                                            i + 1
-                                        )}
-                                    </span>
-                                    <strong>{name}</strong>
-                                </button>
-                            </li>
-                        ),
-                    )}
+                <ol className="setup-steps" aria-label="Assignment steps">
+                    {["Training", "Schedule", "Review"].map((name, index) => (
+                        <li key={name}>
+                            <button
+                                type="button"
+                                disabled={index + 1 > step}
+                                aria-current={
+                                    step === index + 1 ? "step" : undefined
+                                }
+                                onClick={() => setStep(index + 1)}
+                            >
+                                <span>
+                                    {step > index + 1 ? (
+                                        <Check size={15} />
+                                    ) : (
+                                        index + 1
+                                    )}
+                                </span>
+                                <strong>{name}</strong>
+                            </button>
+                        </li>
+                    ))}
                 </ol>
                 {error && (
                     <p className="field-error" role="alert">
@@ -218,12 +250,16 @@ export default function SetupTrainee({
                     </p>
                 )}
                 {step === 1 && (
-                    <section className="panel coach-card setup-training-panel">
-                        <h2>1. Choose Training Program</h2>
-                        <p>
-                            Choose training first. Your selection stays a draft
-                            until activation.
-                        </p>
+                    <section className="panel coach-card assignment-selection">
+                        <div className="coach-card-title">
+                            <div>
+                                <h2>Choose a training program</h2>
+                                <p>
+                                    Select existing training or create something
+                                    new for {ctx.trainee.name}.
+                                </p>
+                            </div>
+                        </div>
                         <div
                             className="setup-training-categories"
                             role="group"
@@ -234,9 +270,18 @@ export default function SetupTrainee({
                                     type="button"
                                     key={category.value}
                                     aria-pressed={kind === category.value}
-                                    onClick={() =>
-                                        chooseCategory(category.value)
-                                    }
+                                    onClick={() => {
+                                        setKind(category.value);
+                                        update({
+                                            selection_type:
+                                                category.value === "assigned"
+                                                    ? "assigned"
+                                                    : "template",
+                                            training_plan_id: null,
+                                            day_options: {},
+                                            time_overrides: {},
+                                        });
+                                    }}
                                 >
                                     {category.label}
                                     <span>{category.plans.length}</span>
@@ -244,246 +289,223 @@ export default function SetupTrainee({
                             ))}
                         </div>
                         <div
-                            className="setup-training-options"
+                            className="assignment-program-options"
                             role="radiogroup"
                             aria-label="Training programs"
                         >
-                            {visiblePlans.map((p) => {
-                                const checked =
-                                    Number(choices.training_plan_id) === p.id;
-                                return (
+                            {categories
+                                .find((c) => c.value === kind)
+                                ?.plans.map((plan) => (
                                     <article
-                                        className={`setup-training-option ${checked ? "selected" : ""}`}
-                                        key={p.id}
+                                        key={plan.id}
+                                        className={`assignment-program-option ${Number(choices.training_plan_id) === plan.id ? "selected" : ""}`}
                                     >
-                                        <div className="setup-option-image">
-                                            <TrainingThumbnail item={p} />
-                                        </div>
-                                        <label className="setup-training-select">
+                                        <TrainingThumbnail item={plan} />
+                                        <label>
                                             <input
                                                 type="radio"
+                                                disabled={
+                                                    kind !== "assigned" &&
+                                                    !!existingAssignments[
+                                                        plan.id
+                                                    ]
+                                                }
                                                 name="training"
-                                                aria-label={p.name}
-                                                checked={checked}
-                                                onChange={() => {
-                                                    setChoices((c) => ({
-                                                        ...c,
-                                                        training_plan_id: p.id,
+                                                aria-label={plan.name}
+                                                checked={
+                                                    Number(
+                                                        choices.training_plan_id,
+                                                    ) === plan.id
+                                                }
+                                                onChange={() =>
+                                                    update({
+                                                        training_plan_id:
+                                                            plan.id,
                                                         day_options: {},
                                                         time_overrides: {},
-                                                    }));
-                                                    setPreview(null);
-                                                }}
+                                                    })
+                                                }
                                             />
-                                            <span className="setup-training-content">
-                                                <strong>{p.name}</strong>
-                                                <span className="setup-training-meta">
-                                                    {p.duration_weeks
-                                                        ? `${p.duration_weeks} weeks · Structured Program`
-                                                        : "Simple Plan"}
-                                                    {p.training_days_count >
-                                                        0 &&
-                                                        ` · ${p.training_days_count} training ${p.training_days_count === 1 ? "day" : "days"}`}
-                                                </span>
-                                                {p.description && (
-                                                    <span className="setup-training-description">
-                                                        {p.description}
+                                            <span>
+                                                <strong>{plan.name}</strong>
+                                                {kind !== "assigned" &&
+                                                    existingAssignments[
+                                                        plan.id
+                                                    ] && (
+                                                        <small className="assignment-success">
+                                                            Already assigned
+                                                        </small>
+                                                    )}
+                                                <small>
+                                                    {plan.duration_weeks
+                                                        ? `${plan.duration_weeks} weeks`
+                                                        : "Simple plan"}{" "}
+                                                    · {plan.training_days_count}{" "}
+                                                    training days
+                                                </small>
+                                                {plan.description && (
+                                                    <span className="assignment-description">
+                                                        {plan.description}
                                                     </span>
                                                 )}
-                                                {kind === "assigned" &&
-                                                    p.created_at && (
-                                                        <span className="setup-training-meta">
-                                                            Assigned{" "}
-                                                            {new Date(
-                                                                p.created_at,
-                                                            ).toLocaleString(
-                                                                "en-GB",
-                                                                {
-                                                                    dateStyle:
-                                                                        "medium",
-                                                                    timeStyle:
-                                                                        "short",
-                                                                    timeZone:
-                                                                        timezone,
-                                                                },
-                                                            )}
-                                                        </span>
-                                                    )}
-                                                <span className="setup-training-status">
-                                                    {checked
-                                                        ? "Selected"
-                                                        : "Select training"}
-                                                </span>
                                             </span>
                                         </label>
-                                        <div className="setup-training-footer">
-                                            <a
-                                                href={
-                                                    kind === "assigned"
-                                                        ? ctx.url(
-                                                              `/training-plans/${p.id}`,
-                                                          )
-                                                        : `/coach/training-plans/${p.id}`
-                                                }
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                Preview training ↗
-                                            </a>
-                                            {kind === "assigned" &&
-                                                state.plan?.id === p.id && (
-                                                    <small>
-                                                        Current assignment
-                                                    </small>
-                                                )}
-                                        </div>
+                                        <a
+                                            href={
+                                                kind !== "assigned" &&
+                                                existingAssignments[plan.id]
+                                                    ? ctx.url(
+                                                          `/training-plans/${existingAssignments[plan.id]}`,
+                                                      )
+                                                    : kind === "assigned"
+                                                      ? ctx.url(
+                                                            `/training-plans/${plan.id}`,
+                                                        )
+                                                      : `/coach/training-plans/${plan.id}`
+                                            }
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="btn btn-secondary"
+                                        >
+                                            {kind !== "assigned" &&
+                                            existingAssignments[plan.id]
+                                                ? "View training ↗"
+                                                : "Preview ↗"}
+                                        </a>
                                     </article>
-                                );
-                            })}
+                                ))}
                         </div>
-                        {!visiblePlans.length && (
-                            <div className="setup-training-empty">
-                                <strong>
-                                    No{" "}
-                                    {kind === "simple"
-                                        ? "simple plans"
-                                        : "programs"}{" "}
-                                    yet
-                                </strong>
-                                <p>
-                                    Create training below, or choose another
-                                    category.
-                                </p>
-                            </div>
+                        {!categories.find((c) => c.value === kind)?.plans
+                            .length && (
+                            <p>
+                                No training here yet. Create a program to get
+                                started.
+                            </p>
                         )}
                         <div className="form-actions">
-                            <a
-                                className="btn btn-secondary"
-                                href="/coach/training-plans/create"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                Create Training ↗
-                            </a>
                             <Button
                                 variant="secondary"
-                                disabled={busy}
-                                onClick={() =>
-                                    router.reload({
-                                        only: ["templates"],
-                                        preserveState: true,
-                                    })
-                                }
+                                onClick={() => finishLater(true)}
                             >
-                                Refresh training list
+                                <Plus size={16} /> Create New Program
                             </Button>
                             <Button
-                                disabled={busy || !selected}
+                                disabled={!selected}
                                 onClick={() => review(2)}
                             >
-                                Next: Dates & Schedule
+                                Continue <ArrowRight size={17} />
                             </Button>
                         </div>
                     </section>
                 )}
                 {step === 2 && (
-                    <section className="panel coach-card">
-                        <h2>2. Dates & Schedule</h2>
-                        <div className="setup-selected-training">
-                            <TrainingThumbnail item={selected} />
-                            <div>
-                                <small>Training program</small>
-                                <h3>{selected?.name}</h3>
-                            </div>
-                            <Button
-                                variant="secondary"
-                                onClick={() => setStep(1)}
-                            >
-                                Change training
-                            </Button>
-                        </div>
-                        {scheduled ? (
-                            <p className="coach-callout">
-                                Schedule already active. Activation will
-                                preserve its workouts and program week. Use the
-                                trainee’s Calendar for later changes.
-                            </p>
-                        ) : (
-                            <div className="setup-dates-layout">
-                                <div>
+                    <div className="assignment-schedule-grid">
+                        <section className="panel coach-card">
+                            <h2>Schedule Training</h2>
+                            <TrainingSummary plan={selected} />
+                            {scheduled ? (
+                                <p className="coach-callout">
+                                    Already scheduled. These workouts and the
+                                    current program week will be kept. Use Edit
+                                    Schedule from the trainee overview to change
+                                    them.
+                                </p>
+                            ) : (
+                                <>
                                     <div className="form-grid">
-                                        <Field label="Training starts" required>
+                                        <Field label="Start training" required>
                                             <input
                                                 type="date"
                                                 min={today}
                                                 value={choices.start_date || ""}
-                                                onChange={(e) => {
-                                                    setChoices((c) => ({
-                                                        ...c,
+                                                onChange={(e) =>
+                                                    update({
                                                         start_date:
                                                             e.target.value,
                                                         time_overrides: {},
-                                                    }));
-                                                    setPreview(null);
-                                                }}
+                                                    })
+                                                }
                                             />
                                         </Field>
                                         {selected?.structure_type ===
+                                            "program" && (
+                                            <div className="field">
+                                                <span className="field-label">
+                                                    Estimated finish
+                                                </span>
+                                                <strong>
+                                                    {choices.start_date ? (
+                                                        <DateLabel
+                                                            date={programEnd(
+                                                                choices.start_date,
+                                                                selected.duration_weeks,
+                                                            )}
+                                                        />
+                                                    ) : (
+                                                        "Choose a start date"
+                                                    )}
+                                                </strong>
+                                            </div>
+                                        )}
+                                        {selected?.structure_type ===
                                             "simple" && (
-                                            <>
-                                                <Field label="Schedule mode">
-                                                    <select
+                                            <Field label="Schedule mode">
+                                                <select
+                                                    value={
+                                                        choices.schedule_mode
+                                                    }
+                                                    onChange={(e) =>
+                                                        update({
+                                                            schedule_mode:
+                                                                e.target.value,
+                                                            time_overrides: {},
+                                                        })
+                                                    }
+                                                >
+                                                    <option value="fixed">
+                                                        Fixed
+                                                    </option>
+                                                    <option value="ongoing">
+                                                        Ongoing
+                                                    </option>
+                                                </select>
+                                            </Field>
+                                        )}
+                                        {selected?.structure_type ===
+                                            "simple" &&
+                                            choices.schedule_mode ===
+                                                "fixed" && (
+                                                <Field
+                                                    label="Training ends"
+                                                    required
+                                                >
+                                                    <input
+                                                        type="date"
+                                                        min={
+                                                            choices.start_date ||
+                                                            today
+                                                        }
                                                         value={
-                                                            choices.schedule_mode
+                                                            choices.end_date ||
+                                                            ""
                                                         }
                                                         onChange={(e) =>
-                                                            update(
-                                                                "schedule_mode",
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                    >
-                                                        <option value="fixed">
-                                                            Fixed
-                                                        </option>
-                                                        <option value="ongoing">
-                                                            Ongoing
-                                                        </option>
-                                                    </select>
-                                                </Field>
-                                                {choices.schedule_mode ===
-                                                    "fixed" && (
-                                                    <Field
-                                                        label="Training ends"
-                                                        required
-                                                    >
-                                                        <input
-                                                            type="date"
-                                                            min={
-                                                                choices.start_date ||
-                                                                today
-                                                            }
-                                                            value={
-                                                                choices.end_date ||
-                                                                ""
-                                                            }
-                                                            onChange={(e) =>
-                                                                update(
-                                                                    "end_date",
+                                                            update({
+                                                                end_date:
                                                                     e.target
                                                                         .value,
-                                                                )
-                                                            }
-                                                        />
-                                                    </Field>
-                                                )}
-                                            </>
-                                        )}
+                                                                time_overrides:
+                                                                    {},
+                                                            })
+                                                        }
+                                                    />
+                                                </Field>
+                                            )}
                                     </div>
+                                    <h3>Weekly schedule</h3>
                                     <p>
-                                        Coaching will start today. Training may
-                                        start later. Leave a workout time empty
-                                        for Anytime.
+                                        Choose the days each workout repeats.
+                                        Time is optional.
                                     </p>
                                     {days.map((day) => {
                                         const option = choices.day_options[
@@ -494,505 +516,320 @@ export default function SetupTrainee({
                                         };
                                         return (
                                             <div
-                                                className="setup-day-option"
+                                                className="assignment-day"
                                                 key={day.id}
                                             >
-                                                <h3>{day.title}</h3>
+                                                <div className="thumbnail-identity">
+                                                    <TrainingThumbnail
+                                                        item={day}
+                                                        compact
+                                                    />
+                                                    <h3>{day.title}</h3>
+                                                </div>
                                                 <WeekdayPicker
                                                     value={option.weekdays}
-                                                    onChange={(weekdays) => {
-                                                        setChoices((c) => ({
-                                                            ...c,
+                                                    onChange={(weekdays) =>
+                                                        update({
                                                             day_options: {
-                                                                ...c.day_options,
+                                                                ...choices.day_options,
                                                                 [day.id]: {
                                                                     ...option,
                                                                     weekdays,
                                                                 },
                                                             },
                                                             time_overrides: {},
-                                                        }));
-                                                        setPreview(null);
-                                                    }}
+                                                        })
+                                                    }
                                                 />
-                                                <Field
-                                                    label={`Time for ${day.title} (optional)`}
-                                                >
-                                                    <input
-                                                        type="time"
-                                                        value={
-                                                            option.time || ""
-                                                        }
-                                                        onChange={(e) =>
-                                                            update(
-                                                                "day_options",
-                                                                {
+                                                <div className="setup-time-correction">
+                                                    <Field
+                                                        label={`Time for ${day.title} (optional)`}
+                                                    >
+                                                        <input
+                                                            type="time"
+                                                            value={
+                                                                option.time ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) =>
+                                                                update({
+                                                                    day_options:
+                                                                        {
+                                                                            ...choices.day_options,
+                                                                            [day.id]:
+                                                                                {
+                                                                                    ...option,
+                                                                                    time:
+                                                                                        e
+                                                                                            .target
+                                                                                            .value ||
+                                                                                        null,
+                                                                                },
+                                                                        },
+                                                                    time_overrides:
+                                                                        {},
+                                                                })
+                                                            }
+                                                        />
+                                                    </Field>
+                                                    <Button
+                                                        variant="secondary"
+                                                        onClick={() =>
+                                                            update({
+                                                                day_options: {
                                                                     ...choices.day_options,
                                                                     [day.id]: {
                                                                         ...option,
-                                                                        time:
-                                                                            e
-                                                                                .target
-                                                                                .value ||
-                                                                            null,
+                                                                        time: null,
                                                                     },
                                                                 },
-                                                            )
+                                                                time_overrides:
+                                                                    {},
+                                                            })
                                                         }
-                                                    />
-                                                </Field>
+                                                    >
+                                                        Anytime
+                                                    </Button>
+                                                </div>
                                             </div>
                                         );
                                     })}
-                                </div>
-                                <aside
-                                    className="setup-week-preview"
-                                    aria-label="Weekly schedule preview"
-                                >
-                                    <h3>
-                                        <CalendarDays
-                                            size={18}
-                                            aria-hidden="true"
-                                        />{" "}
-                                        Weekly schedule
-                                    </h3>
-                                    <p>
-                                        Your weekly pattern. Review exact dates
-                                        before activation.
-                                    </p>
-                                    <ul>
-                                        {[1, 2, 3, 4, 5, 6, 0].map(
-                                            (weekday) => {
-                                                const workouts = days.filter(
-                                                    (day) =>
-                                                        (
-                                                            choices.day_options[
-                                                                day.id
-                                                            ]?.weekdays ||
-                                                            day.weekdays ||
-                                                            []
-                                                        ).includes(weekday),
-                                                );
-                                                return (
-                                                    <li key={weekday}>
-                                                        <span>
-                                                            {
-                                                                [
-                                                                    "Sun",
-                                                                    "Mon",
-                                                                    "Tue",
-                                                                    "Wed",
-                                                                    "Thu",
-                                                                    "Fri",
-                                                                    "Sat",
-                                                                ][weekday]
-                                                            }
-                                                        </span>
-                                                        <div>
-                                                            {workouts.length ? (
-                                                                workouts.map(
-                                                                    (day) => (
-                                                                        <p
-                                                                            key={
-                                                                                day.id
-                                                                            }
-                                                                        >
-                                                                            <strong>
-                                                                                {
-                                                                                    day.title
-                                                                                }
-                                                                            </strong>
-                                                                            <small>
-                                                                                {(
-                                                                                    choices
-                                                                                        .day_options[
-                                                                                        day
-                                                                                            .id
-                                                                                    ] ||
-                                                                                    day
-                                                                                )
-                                                                                    .time ||
-                                                                                    "Anytime"}
-                                                                            </small>
-                                                                        </p>
-                                                                    ),
-                                                                )
-                                                            ) : (
-                                                                <small>
-                                                                    No workout
-                                                                </small>
-                                                            )}
-                                                        </div>
-                                                    </li>
-                                                );
-                                            },
-                                        )}
-                                    </ul>
-                                    <p className="setup-preview-note">
-                                        <ShieldCheck
-                                            size={16}
-                                            aria-hidden="true"
-                                        />{" "}
-                                        Coaching starts today. Your training
-                                        dates stay separate.
-                                    </p>
-                                </aside>
-                            </div>
-                        )}
-                        <div className="form-actions">
-                            <Button
-                                variant="secondary"
-                                onClick={() => setStep(1)}
-                            >
-                                Back
-                            </Button>
-                            <Button disabled={busy} onClick={() => review()}>
-                                Review subscription & calendar
-                            </Button>
-                        </div>
-                    </section>
-                )}
-                {step === 3 && (
-                    <div className="setup-review-grid">
-                        <section className="panel coach-card setup-review-training">
-                            <div className="coach-card-title">
-                                <h2>
-                                    <Dumbbell size={20} aria-hidden="true" />{" "}
-                                    Training Program
-                                </h2>
+                                    {busy && !days.length && (
+                                        <p role="status">
+                                            Loading training days…
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                            <div className="form-actions">
                                 <Button
                                     variant="secondary"
                                     onClick={() => setStep(1)}
                                 >
                                     Change training
                                 </Button>
+                                <Button
+                                    disabled={!selected || !choices.start_date}
+                                    onClick={() => review(3)}
+                                >
+                                    Continue to Review <ArrowRight size={17} />
+                                </Button>
                             </div>
-                            <h3>{preview?.training?.name || selected?.name}</h3>
-                            {preview && (
-                                <p>
-                                    Training starts{" "}
-                                    {preview.start_date && (
-                                        <DateLabel date={preview.start_date} />
-                                    )}
-                                    {preview.ends_on && (
-                                        <>
-                                            {" "}
-                                            · Through{" "}
-                                            <DateLabel date={preview.ends_on} />
-                                        </>
-                                    )}
-                                </p>
-                            )}
                         </section>
-                        <section className="panel coach-card setup-review-summary">
-                            <h2>Coaching Subscription</h2>
-                            <p>
-                                {state.subscription?.effective_status ===
-                                "active"
-                                    ? "Existing coaching is active. Coverage will never be shortened."
-                                    : state.subscription_action?.label ===
-                                        "Resume Coaching"
-                                      ? "Coaching resumes today"
-                                      : "Coaching starts today"}{" "}
-                                · <DateLabel date={today} />
-                            </p>
-                            {(!state.subscription ||
-                                state.subscription_action?.label ===
-                                    "Renew Coaching") && (
+                        <aside className="assignment-side">
+                            {coverage}
+                            <section className="panel coach-card">
+                                <h2>
+                                    <CalendarDays size={19} /> Weekly Schedule
+                                </h2>
+                                <ul className="assignment-week">
+                                    {[1, 2, 3, 4, 5, 6, 0].map((weekday) => (
+                                        <li key={weekday}>
+                                            <strong>
+                                                {
+                                                    [
+                                                        "Sun",
+                                                        "Mon",
+                                                        "Tue",
+                                                        "Wed",
+                                                        "Thu",
+                                                        "Fri",
+                                                        "Sat",
+                                                    ][weekday]
+                                                }
+                                            </strong>
+                                            <div>
+                                                {days
+                                                    .filter((day) =>
+                                                        (
+                                                            choices.day_options[
+                                                                day.id
+                                                            ]?.weekdays ||
+                                                            day.weekdays ||
+                                                            []
+                                                        )
+                                                            .map(Number)
+                                                            .includes(weekday),
+                                                    )
+                                                    .map((day) => (
+                                                        <p key={day.id}>
+                                                            <span>
+                                                                {day.title}
+                                                            </span>
+                                                            <small>
+                                                                {(
+                                                                    choices
+                                                                        .day_options[
+                                                                        day.id
+                                                                    ] || day
+                                                                ).time ? (
+                                                                    <TimeLabel
+                                                                        time={
+                                                                            (
+                                                                                choices
+                                                                                    .day_options[
+                                                                                    day
+                                                                                        .id
+                                                                                ] ||
+                                                                                day
+                                                                            )
+                                                                                .time
+                                                                        }
+                                                                    />
+                                                                ) : (
+                                                                    "Anytime"
+                                                                )}
+                                                            </small>
+                                                        </p>
+                                                    ))}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                        </aside>
+                    </div>
+                )}
+                {step === 3 && (
+                    <div className="assignment-review-grid">
+                        <section className="panel coach-card">
+                            <h2>Review Assignment</h2>
+                            <TrainingSummary plan={selected} />
+                            {preview && (
                                 <>
-                                    <Field label="Coaching Package">
-                                        <select
-                                            value={choices.package_id || ""}
-                                            onChange={(e) =>
-                                                update(
-                                                    "package_id",
-                                                    e.target.value
-                                                        ? Number(e.target.value)
-                                                        : null,
-                                                )
-                                            }
-                                        >
-                                            <option value="">
-                                                Custom · match training coverage
-                                            </option>
-                                            {packages.map((p) => (
-                                                <option key={p.id} value={p.id}>
-                                                    {p.name} ·{" "}
-                                                    {p.duration_days
-                                                        ? `${p.duration_days} days`
-                                                        : "Ongoing"}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </Field>
-                                    {!choices.package_id && (
-                                        <>
-                                            <Field label="Subscription name">
-                                                <input
-                                                    maxLength={100}
-                                                    value={choices.package_name}
-                                                    onChange={(e) =>
-                                                        update(
-                                                            "package_name",
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                />
-                                            </Field>
-                                            <label className="checkbox">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={choices.open_ended}
-                                                    onChange={(e) =>
-                                                        update(
-                                                            "open_ended",
-                                                            e.target.checked,
-                                                        )
-                                                    }
-                                                />
-                                                Ongoing coaching
-                                            </label>
-                                            {!choices.open_ended && (
-                                                <Field label="Coverage end (blank matches training)">
-                                                    <input
-                                                        type="date"
-                                                        min={today}
-                                                        value={
-                                                            choices.coaching_ends_on ||
-                                                            ""
-                                                        }
-                                                        onChange={(e) =>
-                                                            update(
-                                                                "coaching_ends_on",
-                                                                e.target
-                                                                    .value ||
-                                                                    null,
-                                                            )
+                                    <dl className="assignment-facts">
+                                        <div>
+                                            <dt>Training starts</dt>
+                                            <dd>
+                                                {preview.start_date ? (
+                                                    <DateLabel
+                                                        date={
+                                                            preview.start_date
                                                         }
                                                     />
-                                                </Field>
-                                            )}
-                                        </>
-                                    )}
-                                </>
-                            )}
-                            {preview && (
-                                <>
-                                    <h3>{preview.subscription.package_name}</h3>
-                                    <p>
-                                        Starts{" "}
-                                        <DateLabel
-                                            date={
-                                                preview.subscription.starts_on
-                                            }
-                                        />{" "}
-                                        ·{" "}
-                                        {preview.subscription.ends_on ? (
-                                            <>
-                                                Ends{" "}
-                                                <DateLabel
-                                                    date={
-                                                        preview.subscription
-                                                            .ends_on
-                                                    }
-                                                />
-                                            </>
-                                        ) : (
-                                            "Ongoing"
-                                        )}
-                                    </p>
-                                    {operation === "resume" && (
-                                        <p className="coach-callout">
-                                            Coaching Subscription will be
-                                            resumed today.
-                                        </p>
-                                    )}
-                                    {operation === "renew" && (
-                                        <p className="coach-callout">
-                                            A new Coaching Subscription starts
-                                            today. The previous period is
-                                            preserved.
-                                        </p>
-                                    )}
-                                    {preview.subscription
-                                        .extension_required && (
-                                        <div className="coach-callout">
-                                            <p>
-                                                Current coverage:{" "}
-                                                <DateLabel
-                                                    date={
-                                                        preview.subscription
-                                                            .base_ends_on
-                                                    }
-                                                />
-                                                <br />
-                                                Required through:{" "}
-                                                <DateLabel
-                                                    date={
-                                                        preview.subscription
-                                                            .required_through
-                                                    }
-                                                />
-                                                <br />
-                                                Extension:{" "}
-                                                {
-                                                    preview.subscription
-                                                        .extension_days
-                                                }{" "}
-                                                days
-                                            </p>
-                                            <label className="checkbox">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={
-                                                        choices.include_extension
-                                                    }
-                                                    onChange={(e) => {
-                                                        const next = {
-                                                            ...choices,
-                                                            include_extension:
-                                                                e.target
-                                                                    .checked,
-                                                        };
-                                                        setChoices(next);
-                                                        review(3, next);
-                                                    }}
-                                                />
-                                                Include this subscription
-                                                extension
-                                            </label>
-                                            <small>
-                                                The reusable Coaching Package
-                                                stays unchanged.
-                                            </small>
+                                                ) : (
+                                                    "Choose a start date"
+                                                )}
+                                            </dd>
                                         </div>
-                                    )}
-                                </>
-                            )}
-                            {!preview && (
-                                <p>
-                                    Choices changed. Refresh the review before
-                                    activating.
-                                </p>
-                            )}
-                            <div className="setup-primary-actions">
-                                <Button
-                                    variant="secondary"
-                                    disabled={busy}
-                                    onClick={() => review()}
-                                >
-                                    {busy ? "Preparing…" : "Refresh review"}
-                                </Button>
-                                {preview && (
-                                    <Button
-                                        disabled={busy || !preview.valid}
-                                        onClick={activate}
-                                    >
-                                        {busy ? "Saving…" : label}
-                                    </Button>
-                                )}
-                            </div>
-                        </section>
-                        <section className="panel coach-card setup-review-schedule">
-                            <div className="coach-card-title">
-                                <h2>
-                                    <CalendarDays
-                                        size={20}
-                                        aria-hidden="true"
-                                    />{" "}
-                                    Training Schedule
-                                </h2>
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => setStep(2)}
-                                >
-                                    Change dates & schedule
-                                </Button>
-                            </div>
-                            {preview && (
-                                <>
-                                    <h3>
-                                        {preview.count} sessions ·{" "}
-                                        {preview.already_scheduled
-                                            ? "Schedule already active"
-                                            : "Proposed schedule"}
-                                    </h3>
+                                        <div>
+                                            <dt>
+                                                {choices.schedule_mode ===
+                                                    "ongoing" &&
+                                                selected?.structure_type ===
+                                                    "simple"
+                                                    ? "Schedule preview through"
+                                                    : "Training ends"}
+                                            </dt>
+                                            <dd>
+                                                {preview.ends_on ? (
+                                                    <DateLabel
+                                                        date={preview.ends_on}
+                                                    />
+                                                ) : (
+                                                    "Choose an end date"
+                                                )}
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>Schedule</dt>
+                                            <dd>
+                                                {preview.count} sessions
+                                                {preview.already_scheduled
+                                                    ? " · Already active"
+                                                    : ""}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                    <div className="coach-card-title">
+                                        <h3>Workouts</h3>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={() => setStep(2)}
+                                        >
+                                            Change schedule
+                                        </Button>
+                                    </div>
                                     {preview.issues.length > 0 && (
                                         <div
                                             className="setup-issues"
                                             role="alert"
                                         >
-                                            <h3>Review these items</h3>
+                                            <h3>Needs your attention</h3>
                                             {preview.issues
                                                 .filter(
-                                                    (i) =>
-                                                        i.code !==
+                                                    (issue) =>
+                                                        issue.code !==
                                                         "schedule_row",
                                                 )
-                                                .map((i, n) => (
-                                                    <p key={n}>{i.message}</p>
+                                                .map((issue, i) => (
+                                                    <p key={i}>
+                                                        {issue.message}
+                                                    </p>
                                                 ))}
                                         </div>
                                     )}
-                                    <ul className="setup-review-rows">
-                                        {preview.sessions.map(
-                                            (row, rowIndex) => {
-                                                const key = `${row.training_day_id}:${row.scheduled_date}`;
-                                                return (
-                                                    <li
-                                                        key={row.key}
-                                                        hidden={
-                                                            !reviewExpanded &&
-                                                            rowIndex >= 8 &&
-                                                            row.issues
-                                                                .length === 0
+                                    <ul className="assignment-review-rows">
+                                        {preview.sessions
+                                            .filter(
+                                                (row, i) =>
+                                                    expanded ||
+                                                    i < 8 ||
+                                                    row.issues.length,
+                                            )
+                                            .map((row) => (
+                                                <li key={row.key}>
+                                                    <TrainingThumbnail
+                                                        compact
+                                                        item={
+                                                            days.find(
+                                                                (day) =>
+                                                                    day.id ===
+                                                                    row.training_day_id,
+                                                            ) || row
                                                         }
-                                                    >
-                                                        <div>
-                                                            <strong>
-                                                                {row.title}
-                                                            </strong>
-                                                            {row.program_week && (
-                                                                <small>
-                                                                    Week{" "}
-                                                                    {
-                                                                        row.program_week
-                                                                    }{" "}
-                                                                    ·{" "}
-                                                                    {
-                                                                        row
-                                                                            .program_context
-                                                                            ?.block_name
+                                                    />
+                                                    <div>
+                                                        <strong>
+                                                            {row.title}
+                                                        </strong>
+                                                        <span>
+                                                            <DateLabel
+                                                                date={
+                                                                    row.scheduled_date
+                                                                }
+                                                            />{" "}
+                                                            ·{" "}
+                                                            {row.scheduled_time ? (
+                                                                <TimeLabel
+                                                                    time={
+                                                                        row.scheduled_time
                                                                     }
-                                                                </small>
+                                                                />
+                                                            ) : (
+                                                                "Anytime"
                                                             )}
-                                                            <span>
-                                                                <DateLabel
-                                                                    date={
-                                                                        row.scheduled_date
-                                                                    }
-                                                                />{" "}
+                                                        </span>
+                                                        {row.program_week && (
+                                                            <small>
+                                                                Week{" "}
+                                                                {
+                                                                    row.program_week
+                                                                }{" "}
                                                                 ·{" "}
-                                                                {row.scheduled_time ? (
-                                                                    <TimeLabel
-                                                                        time={
-                                                                            row.scheduled_time
-                                                                        }
-                                                                    />
-                                                                ) : row.scheduled_date ===
-                                                                  today ? (
-                                                                    "Anytime today"
-                                                                ) : (
-                                                                    "Anytime"
-                                                                )}
-                                                            </span>
-                                                            {row.reused && (
-                                                                <small>
-                                                                    Existing ·
-                                                                    preserved
-                                                                </small>
-                                                            )}
-                                                        </div>
+                                                                {
+                                                                    row
+                                                                        .program_context
+                                                                        ?.block_name
+                                                                }
+                                                            </small>
+                                                        )}
+                                                        {row.reused && (
+                                                            <small>
+                                                                Already
+                                                                scheduled · Kept
+                                                            </small>
+                                                        )}
                                                         {row.issues.map(
                                                             (message) => (
                                                                 <p
@@ -1005,41 +842,46 @@ export default function SetupTrainee({
                                                                 </p>
                                                             ),
                                                         )}
-                                                        {!row.reused &&
-                                                            row.scheduled_date >=
-                                                                today && (
+                                                    </div>
+                                                    {!row.reused &&
+                                                        row.scheduled_date >=
+                                                            today && (
+                                                            <details className="assignment-correction">
+                                                                <summary>
+                                                                    Change time
+                                                                </summary>
                                                                 <Field
                                                                     label={`Time for ${row.title} on ${row.scheduled_date}`}
                                                                 >
-                                                                    <div className="setup-time-correction">
-                                                                        <input
-                                                                            type="time"
-                                                                            value={
-                                                                                (Object.hasOwn(
-                                                                                    choices.time_overrides,
-                                                                                    key,
-                                                                                )
-                                                                                    ? choices
-                                                                                          .time_overrides[
-                                                                                          key
-                                                                                      ]
-                                                                                    : row.scheduled_time
-                                                                                )?.slice(
+                                                                    <input
+                                                                        type="time"
+                                                                        defaultValue={
+                                                                            row.scheduled_time?.slice(
+                                                                                0,
+                                                                                5,
+                                                                            ) ||
+                                                                            ""
+                                                                        }
+                                                                        onBlur={(
+                                                                            e,
+                                                                        ) => {
+                                                                            if (
+                                                                                e
+                                                                                    .target
+                                                                                    .value !==
+                                                                                (row.scheduled_time?.slice(
                                                                                     0,
                                                                                     5,
                                                                                 ) ||
-                                                                                ""
-                                                                            }
-                                                                            onChange={(
-                                                                                e,
-                                                                            ) => {
+                                                                                    "")
+                                                                            ) {
                                                                                 const next =
                                                                                     {
                                                                                         ...choices,
                                                                                         time_overrides:
                                                                                             {
                                                                                                 ...choices.time_overrides,
-                                                                                                [key]:
+                                                                                                [`${row.training_day_id}:${row.scheduled_date}`]:
                                                                                                     e
                                                                                                         .target
                                                                                                         .value ||
@@ -1053,112 +895,365 @@ export default function SetupTrainee({
                                                                                     3,
                                                                                     next,
                                                                                 );
-                                                                            }}
-                                                                        />
-                                                                        <Button
-                                                                            variant="secondary"
-                                                                            disabled={
-                                                                                busy
                                                                             }
-                                                                            onClick={() => {
-                                                                                const next =
-                                                                                    {
-                                                                                        ...choices,
-                                                                                        time_overrides:
-                                                                                            {
-                                                                                                ...choices.time_overrides,
-                                                                                                [key]: null,
-                                                                                            },
-                                                                                    };
-                                                                                setChoices(
-                                                                                    next,
-                                                                                );
-                                                                                review(
-                                                                                    3,
-                                                                                    next,
-                                                                                );
-                                                                            }}
-                                                                        >
-                                                                            {row.scheduled_date ===
-                                                                            today
-                                                                                ? "Anytime Today"
-                                                                                : "Anytime"}
-                                                                        </Button>
-                                                                    </div>
+                                                                        }}
+                                                                    />
                                                                 </Field>
-                                                            )}
-                                                    </li>
-                                                );
-                                            },
-                                        )}
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    onClick={() => {
+                                                                        const next =
+                                                                            {
+                                                                                ...choices,
+                                                                                time_overrides:
+                                                                                    {
+                                                                                        ...choices.time_overrides,
+                                                                                        [`${row.training_day_id}:${row.scheduled_date}`]:
+                                                                                            null,
+                                                                                    },
+                                                                            };
+                                                                        setChoices(
+                                                                            next,
+                                                                        );
+                                                                        review(
+                                                                            3,
+                                                                            next,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    Anytime
+                                                                    {row.scheduled_date ===
+                                                                    today
+                                                                        ? " Today"
+                                                                        : ""}
+                                                                </Button>
+                                                            </details>
+                                                        )}
+                                                </li>
+                                            ))}
                                     </ul>
                                     {preview.sessions.length > 8 && (
                                         <Button
                                             variant="secondary"
                                             onClick={() =>
-                                                setReviewExpanded(
-                                                    !reviewExpanded,
-                                                )
+                                                setExpanded(!expanded)
                                             }
                                         >
-                                            {reviewExpanded
-                                                ? "Show fewer sessions"
-                                                : `View all ${preview.sessions.length} sessions`}
+                                            {expanded
+                                                ? "Show fewer workouts"
+                                                : `View all ${preview.count} sessions`}
                                         </Button>
-                                    )}
-                                    {preview.valid && (
-                                        <div className="setup-ready">
-                                            <Check
-                                                size={22}
-                                                aria-hidden="true"
-                                            />
-                                            <div>
-                                                <strong>
-                                                    Ready to{" "}
-                                                    {operation === "resume"
-                                                        ? "resume"
-                                                        : operation === "renew"
-                                                          ? "renew"
-                                                          : "activate"}
-                                                </strong>
-                                                <p>
-                                                    {ctx.trainee.name} will have
-                                                    access to the reviewed
-                                                    training and schedule.
-                                                </p>
-                                            </div>
-                                        </div>
                                     )}
                                 </>
                             )}
-                            <Button
-                                variant="secondary"
-                                disabled={busy}
-                                onClick={() => setStep(2)}
-                            >
-                                Adjust dates & schedule
-                            </Button>
-                            <div className="setup-primary-actions">
-                                <Button
-                                    variant="secondary"
-                                    disabled={busy}
-                                    onClick={() => review()}
-                                >
-                                    Refresh review
-                                </Button>
-                                {preview && (
+                        </section>
+                        <aside className="assignment-side">
+                            {coverage}
+                            <section className="panel coach-card assignment-confirmation">
+                                <h2>Ready to Assign?</h2>
+                                <p>
+                                    <strong>{ctx.trainee.name}</strong>
+                                </p>
+                                <p>{selected?.name}</p>
+                                <p>
+                                    {preview?.already_scheduled
+                                        ? "Existing workouts and progress will be kept."
+                                        : `${preview?.count || 0} sessions will be scheduled.`}
+                                </p>
+                                {finalEnabled && (
+                                    <p className="assignment-success">
+                                        <ShieldCheck size={19} /> Ready to train
+                                    </p>
+                                )}
+                                {dirty && (
+                                    <p role="status">
+                                        Your choices changed. Refresh the review
+                                        before confirming.
+                                    </p>
+                                )}
+                                {(dirty || !preview) && (
                                     <Button
-                                        disabled={busy || !preview.valid}
-                                        onClick={activate}
+                                        variant="secondary"
+                                        onClick={() => review(3)}
                                     >
-                                        {busy ? "Saving…" : label}
+                                        Refresh review
                                     </Button>
                                 )}
-                            </div>
-                        </section>
+                                <Button
+                                    disabled={!finalEnabled}
+                                    onClick={activate}
+                                >
+                                    {busy
+                                        ? "Saving…"
+                                        : preview?.already_scheduled
+                                          ? "Confirm Training"
+                                          : "Assign & Schedule"}
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setStep(2)}
+                                >
+                                    Back to schedule
+                                </Button>
+                            </section>
+                        </aside>
                     </div>
                 )}
             </fieldset>
+            {packageOpen && <PackageForm close={() => setPackageOpen(false)} />}
         </div>
+    );
+}
+function TrainingSummary({ plan }) {
+    return (
+        <div className="assignment-training-summary">
+            <TrainingThumbnail item={plan} />
+            <div>
+                <strong>{plan?.name || "Choose training"}</strong>
+                <small>
+                    {plan?.duration_weeks
+                        ? `${plan.duration_weeks} weeks · `
+                        : ""}
+                    {plan?.training_days_count || 0} training days
+                </small>
+            </div>
+        </div>
+    );
+}
+function programEnd(start, weeks) {
+    const date = new Date(`${start}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + weeks * 7 - 1);
+    return date.toISOString().slice(0, 10);
+}
+function CoachingCoverage({
+    state,
+    preview,
+    choices,
+    packages,
+    today,
+    dirty,
+    acknowledged,
+    setAcknowledged,
+    update,
+    createPackage,
+    refresh,
+}) {
+    const sub = preview?.subscription;
+    const operation = sub?.operation;
+    const healthy = operation === "reuse" && !sub.extension_required;
+    const action =
+        operation === "resume"
+            ? "Resume coaching today"
+            : operation === "renew"
+              ? "Renew coaching today"
+              : "Activate coaching today";
+    return (
+        <section
+            className={`panel coach-card assignment-coverage ${healthy ? "coverage-healthy" : ""}`}
+        >
+            <h2>Coaching</h2>
+            {healthy ? (
+                <p className="assignment-success">
+                    <ShieldCheck size={19} />
+                    <span>
+                        Coaching active
+                        {sub.ends_on ? (
+                            <>
+                                {" "}
+                                until <DateLabel date={sub.ends_on} />
+                            </>
+                        ) : (
+                            " · Ongoing"
+                        )}
+                    </span>
+                </p>
+            ) : (
+                <>
+                    <p>
+                        {operation === "resume"
+                            ? "Coaching is paused."
+                            : operation === "renew"
+                              ? "Previous coaching has ended."
+                              : operation === "reuse"
+                                ? "Coaching ends before this training finishes."
+                                : "Coaching starts today. Training may start later."}
+                    </p>
+                    {(!state.subscription ||
+                        ["ended", "expired"].includes(
+                            state.subscription.effective_status,
+                        )) && (
+                        <>
+                            <Field label="Coaching Package">
+                                <select
+                                    value={choices.package_id || ""}
+                                    onChange={(e) =>
+                                        update({
+                                            package_id: e.target.value
+                                                ? Number(e.target.value)
+                                                : null,
+                                        })
+                                    }
+                                >
+                                    <option value="">
+                                        Custom · match training coverage
+                                    </option>
+                                    {packages.map((p) => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.name} ·{" "}
+                                            {p.duration_days
+                                                ? `${p.duration_days} days`
+                                                : "Ongoing"}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Field>
+                            {!choices.package_id && (
+                                <details>
+                                    <summary>
+                                        Customize coaching coverage
+                                    </summary>
+                                    <Field label="Coaching name">
+                                        <input
+                                            maxLength={100}
+                                            value={choices.package_name}
+                                            onChange={(e) =>
+                                                update({
+                                                    package_name:
+                                                        e.target.value,
+                                                })
+                                            }
+                                        />
+                                    </Field>
+                                    <label className="checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={choices.open_ended}
+                                            onChange={(e) =>
+                                                update({
+                                                    open_ended:
+                                                        e.target.checked,
+                                                })
+                                            }
+                                        />{" "}
+                                        Ongoing coaching
+                                    </label>
+                                    {!choices.open_ended && (
+                                        <Field label="Coverage end (blank matches training)">
+                                            <input
+                                                type="date"
+                                                min={today}
+                                                value={
+                                                    choices.coaching_ends_on ||
+                                                    ""
+                                                }
+                                                onChange={(e) =>
+                                                    update({
+                                                        coaching_ends_on:
+                                                            e.target.value ||
+                                                            null,
+                                                    })
+                                                }
+                                            />
+                                        </Field>
+                                    )}
+                                </details>
+                            )}
+                            <Button variant="secondary" onClick={createPackage}>
+                                <Plus size={15} /> Create Coaching Package
+                            </Button>
+                        </>
+                    )}
+                    {sub && (
+                        <dl className="assignment-facts">
+                            <div>
+                                <dt>Coaching starts</dt>
+                                <dd>
+                                    <DateLabel date={sub.starts_on} />
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Current coverage</dt>
+                                <dd>
+                                    {sub.base_ends_on ? (
+                                        <DateLabel date={sub.base_ends_on} />
+                                    ) : (
+                                        "Ongoing"
+                                    )}
+                                </dd>
+                            </div>
+                            {sub.extension_required && (
+                                <>
+                                    <div>
+                                        <dt>Required through</dt>
+                                        <dd>
+                                            <DateLabel
+                                                date={sub.required_through}
+                                            />
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt>Extension</dt>
+                                        <dd>+{sub.extension_days} days</dd>
+                                    </div>
+                                </>
+                            )}
+                        </dl>
+                    )}
+                    {sub?.extension_required && (
+                        <label className="checkbox">
+                            <input
+                                type="checkbox"
+                                checked={choices.include_extension}
+                                onChange={(e) =>
+                                    refresh({
+                                        ...choices,
+                                        include_extension: e.target.checked,
+                                    })
+                                }
+                            />
+                            <span>
+                                Extend coaching through{" "}
+                                <DateLabel date={sub.required_through} />
+                            </span>
+                        </label>
+                    )}
+                    {sub && operation !== "reuse" && (
+                        <label className="checkbox coaching-confirm">
+                            <input
+                                type="checkbox"
+                                checked={acknowledged}
+                                disabled={dirty}
+                                onChange={(e) =>
+                                    setAcknowledged(e.target.checked)
+                                }
+                            />
+                            <span>
+                                {action}
+                                {sub.ends_on ? (
+                                    <>
+                                        {" "}
+                                        · through{" "}
+                                        <DateLabel date={sub.ends_on} />
+                                    </>
+                                ) : (
+                                    " · Ongoing"
+                                )}
+                            </span>
+                        </label>
+                    )}
+                    {sub?.extension_included && (
+                        <p className="assignment-success">
+                            Coverage will extend to{" "}
+                            <DateLabel date={sub.ends_on} />.
+                        </p>
+                    )}
+                </>
+            )}
+            {dirty && sub && (
+                <p className="field-hint">
+                    Coverage will be checked again when you review.
+                </p>
+            )}
+        </section>
     );
 }

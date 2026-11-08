@@ -293,9 +293,9 @@ class StabilizationTest extends TestCase
         $assignedDay = $this->assigned()->trainingDays->first();
         $this->trainee->scheduleEntries()->update(['training_day_id' => $assignedDay->id]);
         $this->actingAs($this->coach);
-        foreach (['/coach/trainees', $this->base, $this->base.'/assign'] as $path) {
+        foreach (['/coach/trainees', $this->base, $this->base.'/setup'] as $path) {
             $props = json_decode(json_encode($this->props($path)), true);
-            $sub = $path === '/coach/trainees' ? $props['relationships']['data'][0]['subscription'] : $props['subscription'];
+            $sub = $path === '/coach/trainees' ? $props['relationships']['data'][0]['subscription'] : ($path === $this->base.'/setup' ? $props['state']['subscription'] : $props['subscription']);
             $this->assertSame('2026-10-28', $sub['starts_on']);
             $this->assertSame('2026-12-22', $sub['ends_on']);
             if ($path === '/coach/trainees') {

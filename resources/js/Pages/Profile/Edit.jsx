@@ -3,7 +3,8 @@ import { PageHeader, Button, ButtonLink } from "../../Components/UI";
 import ProfileFields, { profileDefaults } from "../../Features/ProfileFields";
 
 export default function Edit({ profile, options }) {
-    const { auth, today } = usePage().props;
+    const { auth, today, trainingContext } = usePage().props;
+    const coach = trainingContext?.workspace === "coach";
     const form = useForm(profileDefaults(profile, auth.user.name));
     return (
         <>
@@ -16,7 +17,9 @@ export default function Edit({ profile, options }) {
                 className="profile-edit"
                 onSubmit={(event) => {
                     event.preventDefault();
-                    form.put("/profile", { preserveScroll: true });
+                    form.put(coach ? "/coach/settings/account" : "/profile", {
+                        preserveScroll: true,
+                    });
                 }}
             >
                 {Object.keys(form.errors).length > 0 && (
@@ -49,7 +52,10 @@ export default function Edit({ profile, options }) {
                     />
                 </section>
                 <div className="form-actions">
-                    <ButtonLink href="/profile" variant="secondary">
+                    <ButtonLink
+                        href={coach ? "/coach/settings" : "/profile"}
+                        variant="secondary"
+                    >
                         Cancel
                     </ButtonLink>
                     <Button disabled={form.processing}>

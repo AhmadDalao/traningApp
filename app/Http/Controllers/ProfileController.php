@@ -50,7 +50,7 @@ class ProfileController extends Controller
     {
         $this->save($request, $history, false);
 
-        return to_route('profile.show')->with('success', 'Profile updated.');
+        return redirect($request->is('coach/settings/account') ? '/coach/settings' : route('profile.show'))->with('success', 'Profile updated.');
     }
 
     public function complete(SaveProfileRequest $request, BodyWeightHistory $history)

@@ -135,6 +135,18 @@ try {
     $run = $f[2]->assignments()->first()->plan->programRuns()->first();
     checkSetup($run->started_on->toDateString() === $draft['choices']['start_date'] && $f[2]->subscriptions()->count() === 1 && $f[1]->scheduleEntries()->count() === 3, 'No mixed revision, duplicate subscription or occurrence set');
 
+    // v2.3.9: a deliberate second program uses the same atomic coordinator.
+    $f = $fixture();
+    $input = $review($f);
+    app(CoachSetup::class)->activate($f[0], $f[1], $input);
+    $oldToken = $input['token'];
+    $newTemplate = app(TrainingPlanDuplicator::class)->plan($f[0], $f[3]);
+    $next = $review($f, ['training_plan_id' => $newTemplate->id], true);
+    checkSetup($oldToken !== $next['token'], 'Intentional new assignment rotates the completed activation token');
+    $results = $race($f, [['activate', $next], ['activate', $next]]);
+    checkSetup($results[0]['status'] === 'ok' && $results[0] === $results[1], 'Double Assign & Schedule for the next program returns one receipt');
+    checkSetup($f[2]->subscriptions()->count() === 1 && $f[2]->assignments()->count() === 2 && $f[1]->scheduleEntries()->count() === 6, 'Second assignment preserves the original schedule and reuses coaching coverage');
+
     $f = $fixture();
     $input = $review($f);
     $f[2]->update(['status' => 'disconnected']);

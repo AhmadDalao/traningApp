@@ -116,6 +116,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', CoachWorkspace::class])->prefix('coach')->group(function () {
+    Route::get('/settings', [CoachController::class, 'setup']);
+    Route::post('/settings', [CoachController::class, 'updateProfile']);
+    Route::get('/settings/account', [ProfileController::class, 'edit']);
+    Route::put('/settings/account', [ProfileController::class, 'update']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
     foreach (['' => 'coach.templates.', '/trainees/{trainee}' => 'coach.trainee.'] as $prefix => $name) {
         Route::prefix($prefix)->name($name)->group(function () {
             Route::resource('training-plans', TrainingPlanController::class)->parameters(['training-plans' => 'trainingPlan']);

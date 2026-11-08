@@ -1,7 +1,7 @@
 import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, router } from "@inertiajs/react";
 import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
 import PlanThumbnail from "../../Components/PlanThumbnail";
 import {
@@ -50,7 +50,11 @@ export default function Index({
                           ? "Training assigned by you"
                           : "Training plans"
                 }
-                description="Your goals, broken down into days you can show up for."
+                description={
+                    templates
+                        ? "Create, manage and assign your reusable training programs."
+                        : "Your goals, broken down into days you can show up for."
+                }
             >
                 {!coaching && (
                     <ButtonLink
@@ -66,11 +70,15 @@ export default function Index({
                     </ButtonLink>
                 )}
                 {canManage && (
-                    <Button onClick={() => setEditing({})}>
+                    <Button
+                        onClick={() =>
+                            templates
+                                ? router.visit("/coach/training-plans/create")
+                                : setEditing({})
+                        }
+                    >
                         <Plus size={17} />
-                        {templates
-                            ? "Create program or plan"
-                            : "Create training plan"}
+                        {templates ? "Create Program" : "Create training plan"}
                     </Button>
                 )}
             </PageHeader>
@@ -79,7 +87,7 @@ export default function Index({
                     className="panel coach-card live-filter-bar"
                     aria-busy={filter.processing}
                 >
-                    <Field label="Search templates">
+                    <Field label="Search programs">
                         <input
                             value={filter.data.search}
                             maxLength={100}
@@ -169,14 +177,7 @@ export default function Index({
                                     {templates && (
                                         <p>
                                             {plan.assigned_trainees_count}{" "}
-                                            assigned trainees ·{" "}
-                                            <a
-                                                href={url(
-                                                    `/training-plans/${plan.id}/assign`,
-                                                )}
-                                            >
-                                                Assign to trainee →
-                                            </a>
+                                            active trainees
                                         </p>
                                     )}
                                     {plan.coach_name && (
@@ -203,6 +204,13 @@ export default function Index({
                                             "A fresh plan, ready to make your own."}
                                     </p>
                                     <div className="plan-actions">
+                                        {templates && (
+                                            <ButtonLink
+                                                href={`/coach/training-plans/${plan.id}/assign`}
+                                            >
+                                                Assign
+                                            </ButtonLink>
+                                        )}
                                         <ButtonLink
                                             href={url(
                                                 `/training-plans/${plan.id}`,
@@ -222,7 +230,13 @@ export default function Index({
                                                         className="icon-btn"
                                                         aria-label={`Edit ${plan.name}`}
                                                         onClick={() =>
-                                                            setEditing(plan)
+                                                            templates
+                                                                ? router.visit(
+                                                                      `/coach/training-plans/${plan.id}/edit`,
+                                                                  )
+                                                                : setEditing(
+                                                                      plan,
+                                                                  )
                                                         }
                                                     >
                                                         <Pencil size={16} />
@@ -265,7 +279,15 @@ export default function Index({
                         description="Create your first plan, then add training days and exercises."
                     >
                         {canManage && (
-                            <Button onClick={() => setEditing({})}>
+                            <Button
+                                onClick={() =>
+                                    templates
+                                        ? router.visit(
+                                              "/coach/training-plans/create",
+                                          )
+                                        : setEditing({})
+                                }
+                            >
                                 <Plus size={16} />
                                 Create your first plan
                             </Button>

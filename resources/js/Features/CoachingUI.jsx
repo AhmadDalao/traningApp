@@ -100,7 +100,7 @@ export function TraineeNav() {
     const state = ctx.summary;
     const tabs = [
         ["", "Overview", LayoutDashboard],
-        ["/training-plans", "Program", Layers],
+        ["/training-plans", "Training", Layers],
         ["/calendar", "Calendar", CalendarDays],
         ["/training-history", "History", History],
         ["/progress", "Progress", TrendingUp],
@@ -178,7 +178,7 @@ export function TraineeNav() {
             {current.includes("/training-plans") &&
                 state?.display_state === "setup" && (
                     <Link className="trainee-back" href={ctx.url("/setup")}>
-                        Continue coaching setup →
+                        Continue Assignment →
                     </Link>
                 )}
         </section>
@@ -194,19 +194,29 @@ export async function coachingJson(path, data = {}, method = "POST") {
         method,
         credentials: "same-origin",
         headers: {
-            "Content-Type": "application/json",
+            ...(data instanceof FormData
+                ? {}
+                : { "Content-Type": "application/json" }),
             Accept: "application/json",
             "X-XSRF-TOKEN": cookie ? decodeURIComponent(cookie.slice(11)) : "",
         },
-        body: JSON.stringify(data),
+        body: data instanceof FormData ? data : JSON.stringify(data),
     });
     const result = await response.json();
-    if (!response.ok)
-        throw new Error(
+    if (!response.ok) {
+        const error = new Error(
             Object.values(result.errors || {}).flat()[0] ||
                 result.message ||
                 "Could not complete the request.",
         );
+        error.fields = Object.fromEntries(
+            Object.entries(result.errors || {}).map(([key, values]) => [
+                key,
+                Array.isArray(values) ? values[0] : values,
+            ]),
+        );
+        throw error;
+    }
     return result;
 }
 export const consentText =

@@ -1,3 +1,4 @@
+import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import PersonAvatar from "../../Components/PersonAvatar";
 import { Head } from "@inertiajs/react";
 import { Search, Users, ArrowRight } from "lucide-react";
@@ -23,26 +24,14 @@ export default function ChooseTrainee({ plan, relationships, search }) {
                 href={`/coach/trainees/${row.trainee.id}/${row.existing_plan_id ? `training-plans/${row.existing_plan_id}` : `setup?template=${plan.id}`}`}
                 variant={row.existing_plan_id ? "secondary" : "primary"}
             >
-                {row.existing_plan_id ? "View assignment" : "Assign"}
+                {row.existing_plan_id ? "View" : "Assign"}
                 <ArrowRight size={15} aria-hidden="true" />
             </ButtonLink>
-            {row.existing_plan_id &&
-                row.subscription?.effective_status === "active" && (
-                    <details>
-                        <summary>More options</summary>
-                        <ButtonLink
-                            variant="secondary"
-                            href={`/coach/trainees/${row.trainee.id}/assign?template=${plan.id}&another=1`}
-                        >
-                            Assign another copy
-                        </ButtonLink>
-                    </details>
-                )}
         </div>
     );
     const label = (row) =>
         row.existing_plan_id
-            ? "Already assigned this template"
+            ? "Already assigned"
             : row.subscription?.effective_status === "active"
               ? "Available"
               : row.subscription?.effective_status === "paused"
@@ -56,14 +45,15 @@ export default function ChooseTrainee({ plan, relationships, search }) {
         <>
             <Head title="Assign to trainee" />
             <PageHeader
-                title="Assign to trainee"
-                description={`Choose who should follow ${plan.name}. Review dates and coaching before activating.`}
+                title={`Assign ${plan.name}`}
+                thumbnail={<TrainingThumbnail item={plan} />}
+                description={`Choose who should follow ${plan.name}. Review the schedule and coaching together.`}
             >
                 <ButtonLink
                     variant="secondary"
                     href={`/coach/training-plans/${plan.id}`}
                 >
-                    Back to template
+                    Back to program
                 </ButtonLink>
             </PageHeader>
             <div
