@@ -2,7 +2,7 @@
     "release": "v2.3.9",
     "baseline_tag": "v2.3.8",
     "baseline_commit": "330cd754111da8cd952505e8f7892b799dc0c308",
-    "application_commit": "Resolved by immutable v2.3.9 tag; recorded after commit in the release report.",
+    "application_commit": "70aae87c520ebb2bcb0af16e3245358d2b34b831",
     "date": "2026-11-08",
     "sqlite": {
         "passed": 624,
@@ -331,5 +331,8 @@
     },
     "composer_advisories_remaining": 0,
     "deployed": false,
-    "physical_device_tested": false
+    "physical_device_tested": false,
+    "release_tag": "v2.3.9",
+    "tag_pushed": true,
+    "earlier_tags_preserved": true
 }
