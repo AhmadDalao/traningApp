@@ -1,0 +1,306 @@
+{
+    "release": "v2.3.9",
+    "status": "READY \u2014 DEPLOYED AND VERIFIED",
+    "commit": "70aae87c520ebb2bcb0af16e3245358d2b34b831",
+    "baseline": "v2.3.8",
+    "baseline_commit": "330cd754111da8cd952505e8f7892b799dc0c308",
+    "verified_at_utc": "2026-11-08T19:34:54.812287+00:00",
+    "php": "8.3.36",
+    "database": "11.8.9-MariaDB-log",
+    "runtime_packages": {
+        "symfony/http-foundation": "v7.4.23",
+        "symfony/http-kernel": "v7.4.23",
+        "symfony/routing": "v7.4.23"
+    },
+    "backup_identifier": "coach-v2.3.9-20261108-6edeeba3",
+    "backup_evidence": {
+        "created_at_utc": "2026-11-08T19:22:32+00:00",
+        "runtime_bytes": 67403038,
+        "runtime_sha256": "055fdb99ac0b7c402106a1f7ff1cf20fcdd00836ec60d619904f501a52c4ab0c",
+        "database_bytes": 48601,
+        "database_uncompressed_bytes": 720590,
+        "database_sha256": "96c274b08c510ad935869df7439eb0b995f59f97f85db998891127d31918f2ba",
+        "uploads_bytes": 32411438,
+        "uploads_sha256": "1c76b0ddaac0b0a3d24fb1cfb9b6e437fb6792f21cc0f48c7e7bfced2a8d1722",
+        "original_upload_files": 522,
+        "source_file_backups": 64,
+        "environment_backed_up": true,
+        "archives_verified": true
+    },
+    "patch_files": 131,
+    "origin_files_verified": 7733,
+    "public_assets_verified": 678,
+    "exact_public_hashes": 674,
+    "cdn_png_pixels_identical": 4,
+    "migrations_changed": false,
+    "applied_migrations": [
+        "0001_01_01_000000_create_users_table",
+        "2026_10_25_000001_create_training_tables",
+        "2026_10_25_000002_add_training_icons",
+        "2026_10_26_000003_add_workout_history",
+        "2026_10_26_000004_add_exercise_library_and_plan_schedule",
+        "2026_10_27_000005_add_profiles_progress_and_session_details",
+        "2026_10_27_000006_add_multiple_goals_and_calorie_estimates",
+        "2026_10_27_000007_add_active_workouts",
+        "2026_10_27_000008_index_exercise_progress_identity",
+        "2026_10_28_000009_add_schedule_management_guard",
+        "2026_10_28_000010_add_coaching_workspace",
+        "2026_10_28_000011_add_recurring_schedules",
+        "2026_10_29_000012_add_structured_programs",
+        "2026_10_29_000013_add_program_run_controls",
+        "2026_10_30_000014_add_web_push_notifications",
+        "2026_11_01_000015_add_coach_setup_draft"
+    ],
+    "push_enabled": false,
+    "cron_changed": false,
+    "browser_runs": [
+        {
+            "script": "program-card-layout",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 7.49,
+            "checks": 31
+        },
+        {
+            "script": "program-card-layout",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 8.7,
+            "checks": 31
+        },
+        {
+            "script": "thumbnail-preview",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 12.48,
+            "checks": 75
+        },
+        {
+            "script": "thumbnail-preview",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 14.18,
+            "checks": 75
+        },
+        {
+            "script": "thumbnail-coverage",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 15.11,
+            "checks": 63
+        },
+        {
+            "script": "thumbnail-coverage",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 16.5,
+            "checks": 63
+        },
+        {
+            "script": "coach-journey-live",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 14.12,
+            "checks": 84
+        },
+        {
+            "script": "coach-journey-live",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 15.3,
+            "checks": 84
+        },
+        {
+            "script": "coach-journey-coverage-live",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 9.68,
+            "checks": 12
+        },
+        {
+            "script": "coach-journey-coverage-live",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 9.97,
+            "checks": 12
+        },
+        {
+            "script": "pwa-live",
+            "engine": "chromium",
+            "exit_code": 0,
+            "seconds": 11.43,
+            "checks": 20
+        },
+        {
+            "script": "pwa-live",
+            "engine": "webkit",
+            "exit_code": 0,
+            "seconds": 10.75,
+            "checks": 19
+        }
+    ],
+    "browser_checks": 569,
+    "security_checks": [
+        "Unrelated Coach denied /setup",
+        "Unrelated Coach denied /setup/draft",
+        "Unrelated Coach denied /setup/preview",
+        "Unrelated Coach denied /setup/activate",
+        "Unrelated Coach denied /calendar",
+        "Unrelated Coach denied /progress",
+        "Unrelated Coach denied /training-history",
+        "Trainee denied /coach",
+        "Trainee denied /coach/settings",
+        "Trainee denied /coach/settings/account",
+        "Trainee denied /coach/notifications",
+        "Coach cannot write trainee performance: start",
+        "Coach cannot write trainee performance: finish",
+        "Coach cannot write trainee performance: status",
+        "Trainee self-upgrade remains denied"
+    ],
+    "coverage_checks": [
+        "chromium new: correct subscription, independent copy, one run, eight sessions",
+        "chromium paused: correct subscription, independent copy, one run, eight sessions",
+        "chromium ended: correct subscription, independent copy, one run, eight sessions",
+        "chromium short: correct subscription, independent copy, one run, eight sessions",
+        "chromium: reviewed extension did not change reusable seven-day package",
+        "chromium: two intentional new programs preserve original runs and reuse one subscription",
+        "webkit new: correct subscription, independent copy, one run, eight sessions",
+        "webkit paused: correct subscription, independent copy, one run, eight sessions",
+        "webkit ended: correct subscription, independent copy, one run, eight sessions",
+        "webkit short: correct subscription, independent copy, one run, eight sessions",
+        "webkit: reviewed extension did not change reusable seven-day package",
+        "webkit: two intentional new programs preserve original runs and reuse one subscription"
+    ],
+    "coverage_cases": [
+        {
+            "engine": "chromium",
+            "case": "new",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "chromium",
+            "case": "paused",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "chromium",
+            "case": "ended",
+            "subscriptions": 2,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "chromium",
+            "case": "short",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "new",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "paused",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "ended",
+            "subscriptions": 2,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        },
+        {
+            "engine": "webkit",
+            "case": "short",
+            "subscriptions": 1,
+            "assignments": 1,
+            "runs": 1,
+            "sessions": 8,
+            "coaching_starts": "2026-11-08",
+            "training_starts": "2026-11-15",
+            "verified": true
+        }
+    ],
+    "qa_accounts_removed": 12,
+    "qa_unreferenced_media_removed": 16,
+    "original_tables_verified": 22,
+    "original_rows_verified": 694,
+    "original_media_verified": 522,
+    "original_data_unchanged": true,
+    "original_media_unchanged": true,
+    "environment_unchanged": true,
+    "qa_remaining": 0,
+    "public_checks": [
+        {
+            "check": "Temporary deployment endpoint removed",
+            "status": 404
+        },
+        {
+            "check": "Temporary release archive removed",
+            "status": 404
+        },
+        {
+            "check": "/login",
+            "status": 200
+        },
+        {
+            "check": "/up",
+            "status": 200
+        },
+        {
+            "check": "/.env",
+            "status": 403
+        },
+        {
+            "check": "/storage/app/private/deploy-backups/",
+            "status": 404
+        }
+    ],
+    "physical_device_tested": false,
+    "real_push_tested": false,
+    "test_harness_corrections": [
+        "The first thumbnail-coverage run had only already-assigned templates. Added a disposable unassigned template and reran the complete suite successfully. No application change was required.",
+        "The initial draft authorization probe used PUT; corrected the harness to the actual PATCH route and reran all 15 security checks."
+    ],
+    "application_changed_after_tag": false
+}

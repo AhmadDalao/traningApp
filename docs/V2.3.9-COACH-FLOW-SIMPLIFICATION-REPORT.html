@@ -159,7 +159,13 @@
             .screens figure {
                 margin: 0;
             }
-            .screens img {
+            figure {
+                margin: 20px 0;
+            }
+            #release-commit {
+                overflow-wrap: anywhere;
+            }
+            figure img {
                 width: 100%;
                 height: auto;
                 border: 1px solid #dce5f2;
@@ -241,7 +247,7 @@
                     scheduling into one connected flow, while keeping the
                     existing training engines and safety rules.
                 </p>
-                <p class="status">READY · Verified source · Deployment held</p>
+                <p class="status">READY — DEPLOYED AND VERIFIED</p>
                 <div class="flow">
                     <span>Create</span><span>→ Assign</span
                     ><span>→ Schedule</span><span>→ Review &amp; done</span>
@@ -251,7 +257,10 @@
                 <div>
                     <strong>624 × 2</strong><span>SQLite + MySQL tests</span>
                 </div>
-                <div><strong>626</strong><span>Browser checkpoints</span></div>
+                <div>
+                    <strong>626 + 569</strong
+                    ><span>Local + live browser checkpoints</span>
+                </div>
                 <div><strong>89</strong><span>Concurrency checks</span></div>
                 <div><strong>0</strong><span>Composer advisories</span></div>
             </div>
@@ -1033,11 +1042,13 @@
                 <h2>Production build</h2>
                 <p>
                     <code>npm run build</code> passed. Vite generated the
-                    production assets successfully. No deployment was performed.
-                    PWA tests exercised actual service-worker registration,
-                    public-asset caches, offline fallback and reconnection; push
-                    permission/provider behavior was mocked where required, and
-                    no real push delivery is claimed.
+                    production assets successfully. The immutable tag was built
+                    again in an isolated release directory and deployed after
+                    the explicit production instruction. PWA tests exercised
+                    actual service-worker registration, public-asset caches,
+                    offline fallback and reconnection; push permission/provider
+                    behavior was mocked where required, and no real push
+                    delivery is claimed.
                 </p>
             </section>
             <section id="s48">
@@ -1073,7 +1084,11 @@
                     <strong>22 original table fingerprints</strong> and
                     <strong>44 original media SHA-256 hashes</strong> matched
                     the pre-test snapshot. Credential ledgers were removed.
-                    Production data/media/environment were not modified.
+                    Production verification subsequently removed 12 disposable
+                    QA accounts. All 22 original production table fingerprints,
+                    694 original rows, 522 original media hashes and the
+                    environment hash matched the fresh backup. Temporary
+                    deployment endpoints and archives were removed.
                 </p>
                 <p>
                     <a href="v2.3.9/evidence.json"
@@ -1158,16 +1173,209 @@
             </section>
             <section id="s53">
                 <p class="eyebrow">53 / 55</p>
-                <h2>Deployment status</h2>
+                <h2>Deployment evidence</h2>
                 <p>
-                    <strong>NOT DEPLOYED.</strong> Section 130 of the supplied
-                    v2.3.9 brief explicitly requires stopping after
-                    implementation, testing, report and tag until Ahmad says
-                    deploy. A read-only production check on 8 November returned
-                    HTTP 200 for login and health; both public app assets
-                    matched the archived v2.3.8 release. No production login,
-                    database migration, upload, environment, VAPID, cron or
-                    deployment change was made.
+                    <strong>READY — DEPLOYED AND VERIFIED.</strong> Ahmad’s
+                    subsequent instruction, “push to production once you
+                    finish,” authorized release. Production moved directly from
+                    verified v2.3.8 to immutable v2.3.9, commit
+                    <code>70aae87c520ebb2bcb0af16e3245358d2b34b831</code>, on 8
+                    November 2026. The application is live at
+                    <a href="https://training.ahmaddalao.com"
+                        >training.ahmaddalao.com</a
+                    >.
+                </p>
+                <h3>Fresh backups and exact release</h3>
+                <p>
+                    Hostinger preflight matched all 7,663 previous release
+                    files, PHP 8.3.36, MariaDB 11.8.9-MariaDB-log and all 17
+                    existing migrations. Backups were completed at
+                    <strong>2026-11-08T19:22:32+00:00</strong> (22:22 Riyadh):
+                    compressed database, runtime including vendor, uploads and
+                    the unchanged environment. Archives were reopened and
+                    checked before replacing release files. Private backup
+                    identifier: <code>coach-v2.3.9-20261108-6edeeba3</code>.
+                </p>
+                <p>
+                    The verified update contained 131 files, including 37
+                    changed dependency files from the production Composer
+                    install. Symfony HTTP Foundation, HTTP Kernel and Routing
+                    now report <strong>7.4.23</strong> on the server. No
+                    migration was needed or run. Existing environment, VAPID and
+                    scheduler configuration were preserved; Push remains
+                    disabled.
+                </p>
+                <p>
+                    After deployment,
+                    <strong>7,733 origin file hashes</strong> matched the
+                    release manifest. HTTPS verified
+                    <strong>678 public assets</strong> (674 exact hashes and 4
+                    CDN-reencoded PNGs with identical pixels), plus login,
+                    health, manifest, worker and offline endpoints. Maintenance
+                    mode is off.
+                </p>
+                <h3>Live behavior</h3>
+                <p>
+                    <strong>569 browser checkpoints</strong> passed in Chromium
+                    and WebKit. Widths included 320 × 480, 360, 375, 390, 430,
+                    768 and 1280. The real builder, exercise library and image
+                    previews, trainee selection, Schedule, Review, final
+                    assignment and intentional later assignment completed.
+                    Settings, account edit/save and Notifications stayed inside
+                    Coach Workspace. Calendar, History and Progress retained
+                    trainee context; Personal program cards and thumbnails
+                    remained intact.
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Production suite</th>
+                                <th>Engine</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>program-card-layout</td>
+                                <td>chromium</td>
+                                <td>31 passed</td>
+                            </tr>
+                            <tr>
+                                <td>program-card-layout</td>
+                                <td>webkit</td>
+                                <td>31 passed</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-preview</td>
+                                <td>chromium</td>
+                                <td>75 passed</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-preview</td>
+                                <td>webkit</td>
+                                <td>75 passed</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-coverage</td>
+                                <td>chromium</td>
+                                <td>63 passed</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-coverage</td>
+                                <td>webkit</td>
+                                <td>63 passed</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-live</td>
+                                <td>chromium</td>
+                                <td>84 passed</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-live</td>
+                                <td>webkit</td>
+                                <td>84 passed</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-coverage-live</td>
+                                <td>chromium</td>
+                                <td>12 passed</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-coverage-live</td>
+                                <td>webkit</td>
+                                <td>12 passed</td>
+                            </tr>
+                            <tr>
+                                <td>pwa-live</td>
+                                <td>chromium</td>
+                                <td>20 passed</td>
+                            </tr>
+                            <tr>
+                                <td>pwa-live</td>
+                                <td>webkit</td>
+                                <td>19 passed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    Eight live coaching scenarios covered new activation, paused
+                    resume, ended-period renewal and insufficient coverage in
+                    both engines. Twelve follow-up checks confirmed one
+                    assignment, one run and eight sessions per scenario,
+                    preserved ended history, subscription reuse and explicit
+                    extension without changing the seven-day package. Coaching
+                    starts today; training starts seven days later. Fifteen
+                    authorization checks denied unrelated-coach
+                    setup/draft/preview/activation access, trainee access to
+                    Coach settings and Coach writes to trainee performance.
+                </p>
+                <p>
+                    The production service worker installed and controlled the
+                    app; public-only caches, offline behavior, preferences and
+                    reconnection passed. Delivery stayed disabled. No physical
+                    phone, real Push delivery or production clock manipulation
+                    is claimed.
+                </p>
+                <p>
+                    Two test-harness corrections are recorded in the evidence:
+                    an unassigned QA template was added for the selection test,
+                    and the security probe was corrected from PUT to the actual
+                    PATCH draft route. Both complete checks then passed;
+                    production application code was unchanged after tagging.
+                </p>
+                <h3>Cleanup and integrity</h3>
+                <p>
+                    <strong>12 disposable QA accounts removed.</strong> Their
+                    relationships, subscriptions, assignments, program runs,
+                    sessions, preferences and copied images were cleaned. No QA
+                    accounts or extra media remain. All
+                    <strong>22 original table fingerprints</strong>,
+                    <strong>694 original rows</strong>,
+                    <strong>522 original media SHA-256 hashes</strong> and the
+                    environment hash match the fresh pre-deployment snapshot.
+                    There are no missing, changed or added original-domain rows.
+                    Migration history is unchanged.
+                </p>
+                <p>
+                    The temporary deployment endpoint and upload archive return
+                    404. Login and health return 200; the environment file
+                    remains forbidden and private backup paths remain
+                    inaccessible. Local temporary connection and QA credential
+                    ledgers were removed. All prior tags remain unchanged.
+                </p>
+                <p>
+                    <a href="v2.3.9/deployment.json"
+                        >Open complete deployment evidence and backup hashes</a
+                    >
+                </p>
+                <figure>
+                    <img
+                        src="v2.3.9/live-schedule-desktop.png"
+                        alt="Live desktop Schedule Training review with weekly workouts and coaching coverage"
+                        loading="lazy"
+                    />
+                    <figcaption>
+                        Production Schedule Training, Chromium at 1280 px;
+                        disposable QA account.
+                    </figcaption>
+                </figure>
+                <figure>
+                    <img
+                        src="v2.3.9/live-review-desktop.png"
+                        alt="Live desktop assignment review"
+                        loading="lazy"
+                    />
+                    <figcaption>
+                        Production review: training and coaching shown together.
+                    </figcaption>
+                </figure>
+                <p>
+                    <a href="v2.3.9/live-review-mobile.png"
+                        >View the full 320 px WebKit production review
+                        screenshot</a
+                    >
                 </p>
             </section>
             <section id="s54">
@@ -1181,29 +1389,26 @@
                     introduce new Level/Goal/Equipment metadata or a second
                     plan-discovery system. The protected legacy assignment POST
                     remains for compatibility, while the new UI exclusively uses
-                    atomic setup. Local timings are illustrative. Deployment and
-                    live smoke tests await the explicit deploy instruction.
+                    atomic setup. Local timings are illustrative. Live checks
+                    use disposable accounts and browser viewport emulation, not
+                    physical devices.
                 </p>
             </section>
             <section id="s55">
                 <p class="eyebrow">55 / 55</p>
                 <h2>READY / NOT READY</h2>
                 <p>
-                    <strong
-                        >READY — IMPLEMENTED, TESTED AND TAGGED. NOT
-                        DEPLOYED.</strong
-                    >
-                    No known BLOCKER or HIGH issue remains in the verified
-                    source. Release delivery is intentionally held. On an
-                    explicit deploy request, use the existing safe Hostinger
-                    procedure, fresh backups, live disposable smoke tests,
-                    cleanup and integrity verification. Stop here until that
-                    request.
+                    <strong>READY — DEPLOYED AND VERIFIED.</strong> v2.3.9 is
+                    live. The immutable release, fresh backups, production smoke
+                    checks, QA cleanup and original data/media/environment
+                    integrity are verified. No known BLOCKER or HIGH issue
+                    remains. Report-only documentation commits preserve the
+                    application tag.
                 </p>
             </section>
             <footer>
-                Training Planner v2.3.9 · Source verified locally · Production
-                deployment intentionally held
+                Training Planner v2.3.9 · Deployed to Hostinger · Live behavior
+                and integrity verified
             </footer>
         </main>
     </body>

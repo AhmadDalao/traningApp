@@ -330,9 +330,12 @@
         }
     },
     "composer_advisories_remaining": 0,
-    "deployed": false,
+    "deployed": true,
     "physical_device_tested": false,
     "release_tag": "v2.3.9",
     "tag_pushed": true,
-    "earlier_tags_preserved": true
+    "earlier_tags_preserved": true,
+    "deployment_evidence": "deployment.json",
+    "deployment_status": "READY \u2014 DEPLOYED AND VERIFIED",
+    "live_browser_checks": 569
 }
