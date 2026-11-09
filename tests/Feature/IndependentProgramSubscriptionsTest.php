@@ -115,6 +115,7 @@ class IndependentProgramSubscriptionsTest extends TestCase
         $this->patch('/coach/subscriptions/'.$a['subscription_id'], ['action' => 'resume'])->assertRedirect();
         $this->assertDatabaseCount('coach_subscriptions', 2);
         $this->patch('/coach/subscriptions/'.$a['subscription_id'], ['action' => 'end', 'confirmed' => true])->assertRedirect();
+        $this->get('/coach/trainees/'.$this->trainee->id.'/setup?assignment='.$a['assignment_id'])->assertInertia(fn (Assert $p) => $p->where('draft.choices.training_plan_id', $plan->id)->where('assignedPlans', fn ($rows) => collect($rows)->contains('id', $plan->id)));
         $renewed = $this->activate($plan, true);
         $this->assertNotSame($a['subscription_id'], $renewed['subscription_id']);
         $this->assertSame('ended', CoachSubscription::find($a['subscription_id'])->status);

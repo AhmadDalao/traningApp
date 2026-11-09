@@ -46,7 +46,7 @@ class CoachSetupController extends Controller
             'state' => $summary->one($this->context->actor(), $this->context->owner()), 'draft' => $draft, 'templates' => $templates,
             'assigning' => $assigning, 'startAtSchedule' => $request->filled('template'),
             'existingAssignments' => $relationship->assignments()->where('status', 'active')->whereHas('plan')->orderBy('id')->pluck('assigned_training_plan_id', 'source_training_plan_id'),
-            'assignedPlans' => $this->context->plans(true)->withThumbnail()->with('trainingDays:id,training_plan_id,training_block_id,type,weekdays')->withCount('trainingDays')->latest('id')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks', 'created_at'])->map(fn ($plan) => [...$plan->attributesToArray(), 'weekly_frequency' => $plan->weeklyFrequency()]),
+            'assignedPlans' => $this->context->plans()->whereHas('assignment', fn ($q) => $q->where('status', 'active'))->withThumbnail()->with('trainingDays:id,training_plan_id,training_block_id,type,weekdays')->withCount('trainingDays')->latest('id')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks', 'created_at'])->map(fn ($plan) => [...$plan->attributesToArray(), 'weekly_frequency' => $plan->weeklyFrequency()]),
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $this->context->actor()->id)->where('active', true)->orderBy('name')->get(),
         ]);
     }
