@@ -31,45 +31,60 @@ const button = (name) =>
     page.getByRole("button", { name, exact: true }).locator("visible=true");
 const props = async () =>
     JSON.parse(await page.locator("#app").getAttribute("data-page")).props;
+async function go(url) {
+    await page.goto(url, { waitUntil: "networkidle" });
+}
 try {
-    await page.goto(base + "/login");
+    await go(base + "/login");
     await page.getByLabel("Email address").fill(account.email);
     await page.getByLabel("Password", { exact: true }).fill(account.password);
     await button("Log in").click();
     await page.waitForURL(/\/(coach|dashboard)$/);
-    await page.goto(base + fixture.coach_urls[1]);
+    await go(base + fixture.coach_urls[1]);
     const before = (await props()).position.sessions.map((s) => [
         s.id,
         s.scheduled_date,
         s.scheduled_time,
         s.status,
     ]);
-    await page.goto(base + "/coach/subscriptions?search=Powerbuilding");
+    await go(base + "/coach/subscriptions?search=Powerbuilding");
     const rows = page.locator(".subscription-table tbody tr");
+    await rows.first().waitFor();
     const initial = await rows.count();
-    await rows
-        .first()
-        .getByRole("button", { name: "End", exact: true })
-        .click();
-    await page
-        .getByRole("dialog")
-        .getByRole("button", { name: "End subscription", exact: true })
-        .click();
-    await rows
-        .first()
+    const endedBefore = await rows
         .getByRole("link", { name: "Renew", exact: true })
+        .count();
+    const activeBefore = await rows
+        .getByRole("button", { name: "Pause", exact: true })
+        .count();
+    assert.ok(activeBefore === 1 || activeBefore === 2);
+    const endThisRun = activeBefore === 2;
+    if (endThisRun) {
+        await rows
+            .filter({
+                has: page.getByRole("button", { name: "Pause", exact: true }),
+            })
+            .first()
+            .getByRole("button", { name: "End", exact: true })
+            .click();
+        await page
+            .getByRole("dialog")
+            .getByRole("button", { name: "End subscription", exact: true })
+            .click();
+        await page.getByRole("dialog").waitFor({ state: "detached" });
+    }
+    await rows
+        .getByRole("link", { name: "Renew", exact: true })
+        .first()
         .waitFor();
     assert.equal(
-        await rows
-            .nth(1)
-            .getByRole("button", { name: "Pause", exact: true })
-            .count(),
+        await rows.getByRole("button", { name: "Pause", exact: true }).count(),
         1,
     );
-    pass("Ending one program leaves the other active");
+    pass("Ended program leaves the other subscription active");
     await rows
-        .first()
         .getByRole("link", { name: "Renew", exact: true })
+        .first()
         .click();
     await page.waitForURL(/setup\?assignment=/);
     assert.equal(
@@ -102,7 +117,7 @@ try {
     await page.getByRole("checkbox", { name: /Renew coaching today/ }).check();
     await button("Confirm Training").click();
     await page.waitForURL(new RegExp(`/coach/trainees/${fixture.trainee_id}$`));
-    await page.goto(base + fixture.coach_urls[1]);
+    await go(base + fixture.coach_urls[1]);
     assert.deepEqual(
         (await props()).position.sessions.map((s) => [
             s.id,
@@ -113,7 +128,8 @@ try {
         before,
     );
     pass("Renewal keeps the same run, session IDs, dates and status");
-    await page.goto(base + "/coach/subscriptions?search=Powerbuilding");
+    await go(base + "/coach/subscriptions?search=Powerbuilding");
+    await rows.first().waitFor();
     assert.equal(await rows.count(), initial + 1);
     assert.equal(
         await rows.getByRole("button", { name: "Pause", exact: true }).count(),
@@ -121,7 +137,7 @@ try {
     );
     assert.equal(
         await rows.getByRole("link", { name: "Renew", exact: true }).count(),
-        1,
+        endedBefore + (endThisRun ? 1 : 0),
     );
     pass(
         "New period created; previous ended period and other active program retained",

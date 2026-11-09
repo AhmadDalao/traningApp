@@ -64,6 +64,7 @@
             }
             p {
                 max-width: 100ch;
+                overflow-wrap: anywhere;
             }
             .table {
                 overflow: auto;
@@ -149,10 +150,12 @@
                 ><a href="#s16">16. Database, failure and security tests</a
                 ><a href="#s17">17. Local cleanup</a
                 ><a href="#s18">18. Production deployment</a
-                ><a href="#s19">19. PWA and notifications</a
-                ><a href="#s20">20. Known limits</a
-                ><a href="#s21">21. Changed source</a
-                ><a href="#s22">22. Status</a>
+                ><a href="#s19">19. Release sequence</a
+                ><a href="#s20">20. PWA and notifications</a
+                ><a href="#s21">21. Known limits</a
+                ><a href="#s22">22. Changed source</a
+                ><a href="#s23">23. Production access checks</a
+                ><a href="#s24">24. Status</a>
             </nav>
             <section id="s1">
                 <h2>1. Release and baseline</h2>
@@ -162,10 +165,7 @@
                     improvements with independent coverage for each assigned
                     training program. Earlier tags remain unchanged.
                 </p>
-                <p>
-                    Release commit: Recorded after the immutable release commit
-                    is created.
-                </p>
+                <p>Release commit: 42610958c73aeeaea968c302bb9640acc2eeb692</p>
             </section>
             <section id="s2">
                 <h2>2. Renewal correction</h2>
@@ -631,20 +631,133 @@
             </section>
             <section id="s18">
                 <h2>18. Production deployment</h2>
-                <p>
-                    NOT READY — local release gates passed; production
-                    deployment and live verification are still pending.
-                </p>
-                <p>
-                    Deployment uses the immutable tag, fresh
-                    database/runtime/uploads/environment backups, baseline
-                    release hashes, only the one pending migration, exact
-                    coverage-preservation checks, live disposable accounts and
-                    post-cleanup data/media/environment verification.
-                </p>
+                <p>READY — DEPLOYED AND VERIFIED</p>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Evidence</th>
+                                <th>Verified result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Commit</td>
+                                <td>
+                                    42610958c73aeeaea968c302bb9640acc2eeb692
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Tag</td>
+                                <td>v2.5.1 — immutable, pushed</td>
+                            </tr>
+                            <tr>
+                                <td>Runtime</td>
+                                <td>PHP 8.3.36 · 11.8.9-MariaDB-log</td>
+                            </tr>
+                            <tr>
+                                <td>Release files</td>
+                                <td>7887</td>
+                            </tr>
+                            <tr>
+                                <td>Fresh backup UTC</td>
+                                <td>2026-11-09T12:00:40+00:00</td>
+                            </tr>
+                            <tr>
+                                <td>Database backup</td>
+                                <td>
+                                    52092 bytes · SHA256
+                                    5178f3f9495bb3383e6ec13be7f8a980bc6d5a04a792f58c02bfb2e1b93630e8
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Runtime backup</td>
+                                <td>
+                                    68647922 bytes · SHA256
+                                    bb3e12e78e9a21161ab9247a092f306d01c1b4557c6b1838e99bc123a8c3ece8
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Uploads backup</td>
+                                <td>33517743 bytes · 546 original files</td>
+                            </tr>
+                            <tr>
+                                <td>Migration</td>
+                                <td>
+                                    2026_11_09_000016_scope_subscriptions_to_program_assignments
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Coverage split</td>
+                                <td>
+                                    1 periods → 7 independent periods; 7
+                                    assignments preserved
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Live browser checks</td>
+                                <td>1047 across 16 runs; Chromium + WebKit</td>
+                            </tr>
+                            <tr>
+                                <td>Live access-control checks</td>
+                                <td>18</td>
+                            </tr>
+                            <tr>
+                                <td>Coaching lifecycle checks</td>
+                                <td>12</td>
+                            </tr>
+                            <tr>
+                                <td>Original data after cleanup</td>
+                                <td>
+                                    22 tables / 795 rows match the migrated
+                                    baseline; no QA records remain
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Public assets</td>
+                                <td>825</td>
+                            </tr>
+                            <tr>
+                                <td>QA cleanup</td>
+                                <td>
+                                    14 accounts removed; media and all
+                                    migrated-baseline table hashes match
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Environment</td>
+                                <td>
+                                    Original .env hash unchanged; Push disabled;
+                                    no VAPID/cron changes
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Temporary files</td>
+                                <td>
+                                    Deployment endpoint and archive removed,
+                                    verified 404; private backups retained
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
             <section id="s19">
-                <h2>19. PWA and notifications</h2>
+                <h2>19. Release sequence</h2>
+                <p>
+                    The immutable v2.5.0 commit deployed the additive migration
+                    and UI changes. Its migration audit verified one original
+                    shared period became seven independent periods, preserving
+                    all seven assignments and all other data. The immutable
+                    v2.5.1 patch corrected renewal selection without another
+                    migration. Fresh backups were taken for both deployments. A
+                    final documentation and browser-driver-only commit records
+                    the completed verification; application source remains
+                    exactly v2.5.1.
+                </p>
+            </section>
+            <section id="s20">
+                <h2>20. PWA and notifications</h2>
                 <p>
                     Existing manifest, service worker, public-only asset cache,
                     offline fallback, preference persistence and private
@@ -654,8 +767,8 @@
                     approved.
                 </p>
             </section>
-            <section id="s20">
-                <h2>20. Known limits</h2>
+            <section id="s21">
+                <h2>21. Known limits</h2>
                 <p>
                     Subscriptions are coaching-service coverage, not billing or
                     payment processing. Program colours are stable automatic
@@ -665,8 +778,8 @@
                     delivery and physical-device installation are not claimed.
                 </p>
             </section>
-            <section id="s21">
-                <h2>21. Changed source</h2>
+            <section id="s22">
+                <h2>22. Changed source</h2>
                 <ul>
                     <li>
                         <code
@@ -816,9 +929,18 @@
                     </li>
                 </ul>
             </section>
-            <section id="s22">
-                <h2>22. Status</h2>
-                <p>NOT READY — deployment verification pending.</p>
+            <section id="s23">
+                <h2>23. Production access checks</h2>
+                <p>
+                    Live checks cover cross-coach subscription writes, foreign
+                    assignment IDs in an owned trainee context, trainee denial
+                    of Coach controls, performance-write restrictions and
+                    self-upgrade denial.
+                </p>
+            </section>
+            <section id="s24">
+                <h2>24. Status</h2>
+                <p>READY — DEPLOYED AND VERIFIED</p>
             </section>
         </main>
     </body>
