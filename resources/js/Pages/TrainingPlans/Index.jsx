@@ -14,6 +14,7 @@ import {
     EmptyState,
     Pagination,
     Field,
+    Breadcrumbs,
     DateLabel,
 } from "../../Components/UI";
 import TrainingPlanForm from "../../Features/TrainingPlanForm";
@@ -43,6 +44,14 @@ export default function Index({
                           : "Training plans"
                 }
             />
+            {(templates || coaching) && (
+                <Breadcrumbs
+                    items={[
+                        { label: "Coach Overview", href: "/coach" },
+                        { label: coaching ? "Trainee training" : "Programs" },
+                    ]}
+                />
+            )}
             <PageHeader
                 eyebrow="BUILD YOUR ROUTINE"
                 title={
@@ -86,7 +95,7 @@ export default function Index({
                     </Button>
                 )}
             </PageHeader>
-            {templates && (
+            {(templates || coaching) && (
                 <div
                     className="panel coach-card live-filter-bar"
                     aria-busy={filter.processing}
@@ -112,6 +121,23 @@ export default function Index({
                             <option value="simple">Simple plans</option>
                         </select>
                     </Field>
+                    <Field label="Items per page">
+                        <select
+                            value={filter.data.per_page || 10}
+                            onChange={(e) =>
+                                filter.setData(
+                                    "per_page",
+                                    Number(e.target.value),
+                                )
+                            }
+                        >
+                            {[10, 25, 50, 100].map((n) => (
+                                <option key={n} value={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
                     <span className="filter-feedback" role="status">
                         {filter.processing
                             ? "Updating…"
@@ -121,7 +147,11 @@ export default function Index({
                         <Button
                             variant="secondary"
                             onClick={() =>
-                                filter.setData({ search: "", type: "all" })
+                                filter.setData({
+                                    search: "",
+                                    type: "all",
+                                    per_page: 10,
+                                })
                             }
                         >
                             Clear all

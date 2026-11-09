@@ -19,7 +19,7 @@ class NotificationController extends Controller
 {
     public function index(Request $request, PushDevices $devices, PushTransport $push)
     {
-        $request->attributes->set('coach_workspace', $request->session()->get('workspace', 'coach') === 'coach' && $request->user()->isCoach());
+        $request->attributes->set('coach_workspace', ($request->is('coach/*') || (! $request->is('profile/*') && $request->session()->get('workspace', 'coach') === 'coach')) && $request->user()->isCoach());
         $response = Inertia::render('Notifications/Index', [
             'preferences' => NotificationPreference::settings($request->user()->id),
             'deviceEnabled' => (bool) $devices->current($request),

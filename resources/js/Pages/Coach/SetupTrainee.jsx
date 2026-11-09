@@ -1129,7 +1129,11 @@ function CoachingCoverage({
         <section
             className={`panel coach-card assignment-coverage ${healthy ? "coverage-healthy" : ""}`}
         >
-            <h2>Coaching</h2>
+            <h2>Program subscription</h2>
+            <p className="field-hint">
+                Coverage for this training only. Your trainee’s other
+                subscriptions stay unchanged.
+            </p>
             {healthy ? (
                 <p className="assignment-success">
                     <ShieldCheck size={19} />
@@ -1156,10 +1160,8 @@ function CoachingCoverage({
                                 ? "Coaching ends before this training finishes."
                                 : "Coaching starts today. Training may start later."}
                     </p>
-                    {(!state.subscription ||
-                        ["ended", "expired"].includes(
-                            state.subscription.effective_status,
-                        )) && (
+                    {(!sub?.current ||
+                        ["activate", "renew"].includes(operation)) && (
                         <>
                             <Field label="Coaching Package">
                                 <select

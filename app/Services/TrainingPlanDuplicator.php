@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CoachSubscription;
 use App\Models\TrainingDay;
 use App\Models\TrainingPlan;
 use App\Models\User;
@@ -34,11 +35,11 @@ class TrainingPlanDuplicator
         });
     }
 
-    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates, bool $resumeSetup = false, bool $notify = true, ?array &$sharedPaths = null, ?array &$dayMap = null): TrainingPlan
+    public function assign(User $coach, User $trainee, TrainingPlan $source, array $dates, bool $resumeSetup = false, bool $notify = true, ?array &$sharedPaths = null, ?array &$dayMap = null, ?CoachSubscription $reviewedSubscription = null): TrainingPlan
     {
         $paths = [];
         try {
-            $result = app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, $resumeSetup, $notify, &$paths, &$dayMap) {
+            $result = app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship, $subscription) use ($coach, $trainee, $source, $dates, $resumeSetup, $notify, &$paths, &$dayMap, $reviewedSubscription) {
                 $source = TrainingPlan::where('user_id', $coach->id)->where('workspace_type', 'coach_template')->lockForUpdate()->findOrFail($source->id);
                 if ($resumeSetup) {
                     $existing = $relationship->assignments()->where('source_training_plan_id', $source->id)->where('status', 'active')->whereHas('plan')->latest('id')->lockForUpdate()->first();
@@ -50,7 +51,11 @@ class TrainingPlanDuplicator
                 $copy->workspace_type = 'coach_assigned';
                 $copy->save();
                 $this->definitionCopy($source, $copy, $paths, $dayMap);
-                $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
+                $subscription = $reviewedSubscription ?? $subscription;
+                abort_unless($subscription && $subscription->coach_trainee_relationship_id === $relationship->id && $subscription->isEffective(), 403);
+                $assignment = $relationship->assignments()->create(['coach_subscription_id' => $subscription->id, 'source_training_plan_id' => $source->id, 'assigned_training_plan_id' => $copy->id, 'assigned_at' => now(), 'status' => 'active']);
+
+                app(CoachingSubscriptions::class)->bind($assignment, $subscription);
 
                 if (! $resumeSetup && $notify) {
                     app(CoachNotifications::class)->plan($coach, $copy, 'assigned', (string) $copy->id);

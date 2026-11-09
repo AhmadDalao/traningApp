@@ -65,7 +65,7 @@ class ScheduleChangeController extends Controller
                 throw ValidationException::withMessages(['scheduled_date' => 'Choose a different date or time.']);
             }
             if ($coach) {
-                app(CoachAccess::class)->scheduleDate(app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($coach, $this->context->owner())), $data['scheduled_date'], $time);
+                app(CoachAccess::class)->scheduleDate(app(CoachAccess::class)->subscriptionFor(app(CoachAccess::class)->assignment($coach, $this->context->owner(), $entry->trainingDay->trainingPlan, true)), $data['scheduled_date'], $time);
             }
             $before = $entry->getAttributes();
             $preview = ['add' => [], 'keep' => [], 'remove' => [], 'protected' => []];

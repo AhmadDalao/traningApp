@@ -17,6 +17,7 @@ import {
     Users,
     Bell,
     Settings,
+    CreditCard,
 } from "lucide-react";
 import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
 import { TraineeNav } from "../Features/CoachingUI";
@@ -36,7 +37,9 @@ export default function AppLayout({ children }) {
     const coach = trainingContext?.workspace === "coach";
     const home = coach ? "/coach" : "/dashboard";
     const settings = coach ? "/coach/settings" : "/profile";
-    const notifications = coach ? "/coach/notifications" : "/notifications";
+    const notifications = coach
+        ? "/coach/settings/notifications"
+        : "/profile/notifications";
     const nav = coach
         ? [
               {
@@ -151,16 +154,19 @@ export default function AppLayout({ children }) {
                             {active && <span className="nav-dot" />}
                         </Link>
                     ))}
-                    <Link
-                        href={notifications}
-                        className={`nav-item ${url.startsWith(notifications) ? "active" : ""}`}
-                        onClick={closeNavigation}
-                    >
-                        <Bell size={19} aria-hidden="true" /> Notifications
-                    </Link>
+                    {coach && (
+                        <Link
+                            href="/coach/subscriptions"
+                            className={`nav-item ${url.startsWith("/coach/subscriptions") ? "active" : ""}`}
+                            onClick={closeNavigation}
+                        >
+                            <CreditCard size={19} />
+                            Subscriptions
+                        </Link>
+                    )}
                     <Link
                         href={settings}
-                        className={`nav-item ${url.startsWith(settings) ? "active" : ""}`}
+                        className={`nav-item ${url.startsWith(settings) || url === "/coach/notifications" || url === "/notifications" ? "active" : ""}`}
                         onClick={closeNavigation}
                     >
                         <Settings size={19} aria-hidden="true" />{" "}

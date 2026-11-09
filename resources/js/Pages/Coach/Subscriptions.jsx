@@ -1,82 +1,190 @@
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
-import { PageHeader, Button, Pagination } from "../../Components/UI";
+import { CreditCard, Package, Plus, Users, Search } from "lucide-react";
 import {
-    PackageForm,
-    StartSubscription,
-    Subscription,
-} from "../../Features/CoachingForms";
+    PageHeader,
+    Button,
+    ButtonLink,
+    Pagination,
+    Field,
+    Breadcrumbs,
+} from "../../Components/UI";
+import { PackageForm } from "../../Features/CoachingForms";
+import SubscriptionTable from "../../Features/SubscriptionTable";
+import useLiveFilters from "../../Features/useLiveFilters";
+
 export default function Subscriptions({
     packages,
     relationships,
     subscriptions,
+    filters,
+    counts,
 }) {
-    const [editing, setEditing] = useState(false),
-        [starting, setStarting] = useState(false);
+    const [editing, setEditing] = useState(null);
+    const filter = useLiveFilters("/coach/subscriptions", filters, [
+        "subscriptions",
+        "filters",
+        "counts",
+    ]);
     return (
         <>
-            <Head title="Coaching subscriptions" />
+            <Head title="Subscriptions" />
+            <Breadcrumbs
+                items={[
+                    { label: "Coach Overview", href: "/coach" },
+                    { label: "Subscriptions" },
+                ]}
+            />
             <PageHeader
                 title="Subscriptions"
-                description="Manage coaching service periods. No payments or billing."
+                description="Independent coverage for every training program. Pause or end one without affecting the others."
             >
                 <Button variant="secondary" onClick={() => setEditing({})}>
+                    <Package size={17} />
                     Create package
                 </Button>
-                <Button onClick={() => setStarting(true)}>
-                    Start subscription
-                </Button>
+                <ButtonLink href="/coach/trainees">
+                    <Plus size={17} />
+                    Assign & activate training
+                </ButtonLink>
             </PageHeader>
-            <section className="panel coach-card">
-                <h2>Your service packages</h2>
-                <div className="coach-package-list">
+            <div className="subscription-counts">
+                {[
+                    [
+                        "all",
+                        "All",
+                        Object.values(counts).reduce(
+                            (n, v) => n + Number(v),
+                            0,
+                        ),
+                    ],
+                    ...["active", "paused", "upcoming", "expired", "ended"].map(
+                        (k) => [
+                            k,
+                            k[0].toUpperCase() + k.slice(1),
+                            counts[k] || 0,
+                        ],
+                    ),
+                ].map(([key, label, count]) => (
+                    <button
+                        key={key}
+                        type="button"
+                        className={filter.data.status === key ? "active" : ""}
+                        onClick={() => filter.setData("status", key)}
+                    >
+                        <CreditCard size={16} />
+                        {label}
+                        <span>{count}</span>
+                    </button>
+                ))}
+            </div>
+            <section
+                className="panel coach-card live-filter-bar"
+                aria-busy={filter.processing}
+            >
+                <Field label="Search subscriptions">
+                    <input
+                        placeholder="Name, ID, program or package"
+                        value={filter.data.search}
+                        onChange={(e) =>
+                            filter.setData("search", e.target.value)
+                        }
+                        maxLength={100}
+                    />
+                </Field>
+                <Field label="Trainee">
+                    <select
+                        value={filter.data.trainee}
+                        onChange={(e) =>
+                            filter.setData("trainee", e.target.value)
+                        }
+                    >
+                        <option value="">All trainees</option>
+                        {relationships.map((r) => (
+                            <option key={r.id} value={r.trainee.id}>
+                                {r.trainee.name} · {r.trainee.training_code}
+                            </option>
+                        ))}
+                    </select>
+                </Field>
+                <Field label="Items per page">
+                    <select
+                        value={filter.data.per_page}
+                        onChange={(e) =>
+                            filter.setData("per_page", Number(e.target.value))
+                        }
+                    >
+                        {[10, 25, 50, 100].map((n) => (
+                            <option key={n} value={n}>
+                                {n}
+                            </option>
+                        ))}
+                    </select>
+                </Field>
+                <span role="status">
+                    {filter.processing
+                        ? "Updating…"
+                        : `${subscriptions.total} subscriptions found`}
+                </span>
+                <Button
+                    variant="secondary"
+                    onClick={() =>
+                        filter.setData({
+                            search: "",
+                            status: "all",
+                            trainee: "",
+                            per_page: 10,
+                        })
+                    }
+                >
+                    Clear filters
+                </Button>
+            </section>
+            <SubscriptionTable items={subscriptions.data} />
+            <Pagination links={subscriptions.links} />
+            <details className="panel coach-card subscription-packages">
+                <summary>
+                    <Package size={19} />
+                    Coaching packages{" "}
+                    <span className="count-bubble">{packages.length}</span>
+                </summary>
+                <p>
+                    Reusable package definitions. Changing a package leaves
+                    existing subscriptions unchanged.
+                </p>
+                <ul>
                     {packages.map((p) => (
-                        <div key={p.id}>
-                            <strong>{p.name}</strong>
-                            <p>
-                                {p.duration_days
-                                    ? `${p.duration_days} days`
-                                    : "Custom duration"}{" "}
-                                · {p.active ? "Available" : "Archived"}
-                            </p>
+                        <li key={p.id}>
+                            <div>
+                                <strong>{p.name}</strong>
+                                <small>
+                                    {p.duration_days
+                                        ? `${p.duration_days} days`
+                                        : "Ongoing"}{" "}
+                                    · {p.active ? "Available" : "Archived"}
+                                </small>
+                                {p.description && <p>{p.description}</p>}
+                            </div>
                             <Button
                                 variant="secondary"
                                 onClick={() => setEditing(p)}
                             >
                                 Edit package
                             </Button>
-                        </div>
+                        </li>
                     ))}
-                </div>
+                </ul>
                 {!packages.length && (
                     <p>
-                        Create a reusable package, or start a custom
-                        subscription.
+                        Create your first package, or use custom coverage when
+                        assigning training.
                     </p>
                 )}
-            </section>
-            <div className="coach-grid">
-                {subscriptions.data.map((item) => (
-                    <Subscription key={item.id} item={item} />
-                ))}
-            </div>
-            {!subscriptions.data.length && (
-                <p className="panel coach-card">
-                    No subscriptions yet. Connect with a trainee first.
-                </p>
-            )}
-            <Pagination links={subscriptions.links} />
+            </details>
             {editing && (
                 <PackageForm
                     item={editing.id ? editing : null}
-                    close={() => setEditing(false)}
-                />
-            )}
-            {starting && (
-                <StartSubscription
-                    packages={packages}
-                    relationships={relationships}
-                    close={() => setStarting(false)}
+                    close={() => setEditing(null)}
                 />
             )}
         </>

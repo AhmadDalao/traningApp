@@ -1,3 +1,4 @@
+import SettingsNav from "../../Components/SettingsNav";
 import { Head, useForm } from "@inertiajs/react";
 import { PageHeader, Field, Button, ButtonLink } from "../../Components/UI";
 export default function Setup({ coachProfile, settings = false }) {
@@ -8,27 +9,12 @@ export default function Setup({ coachProfile, settings = false }) {
     });
     return (
         <>
+            <SettingsNav section="profile" />
             <Head title={settings ? "Settings" : "Coach profile"} />
             <PageHeader
                 title={settings ? "Settings" : "Coach profile"}
                 description="Manage your coaching name and information."
             />
-            {settings && (
-                <div className="coach-actions settings-links">
-                    <ButtonLink
-                        variant="secondary"
-                        href="/coach/settings/account"
-                    >
-                        Account & personal details
-                    </ButtonLink>
-                    <ButtonLink variant="secondary" href="/coach/notifications">
-                        Notifications & install
-                    </ButtonLink>
-                    <ButtonLink variant="secondary" href="/coach/subscriptions">
-                        Coaching packages & administration
-                    </ButtonLink>
-                </div>
-            )}
             <form
                 className="panel coach-form"
                 onSubmit={(e) => {

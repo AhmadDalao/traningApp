@@ -66,7 +66,7 @@ class ProgramSchedule
     public function preview(TrainingPlan $plan, string $start, string $nonce, ?User $coach = null, array $timeOverrides = []): array
     {
         $desired = $this->desired($plan, $start, 'preview', timeOverrides: $timeOverrides);
-        $subscription = $coach ? app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($coach, $plan->user)) : null;
+        $subscription = $coach ? app(CoachAccess::class)->subscriptionFor(app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true)) : null;
         if ($coach) {
             app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true);
             foreach ($desired['sessions'] as $session) {
@@ -108,7 +108,7 @@ class ProgramSchedule
         abort_unless($run->status === 'active', 422, 'Only an active program run can be updated.');
         $access = app(CoachAccess::class);
         $assignment = $coach ? $access->assignment($coach, $plan->user, $plan, true) : null;
-        $subscription = $assignment ? $access->subscription($assignment->relationship) : null;
+        $subscription = $assignment ? $access->subscriptionFor($assignment) : null;
         $desired = $this->desired($plan, $run->started_on->toDateString(), (string) $run->id);
         $entries = $run->sessions()->with('trainingDay')->withExists('sessionExercises')->lockForUpdate()->get();
         $entries->each(fn ($entry) => $entry->setRelation('programRun', $run));

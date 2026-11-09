@@ -90,7 +90,7 @@ class CoachJourneyTest extends TestCase
         [$two] = $this->template('Second');
         $next = $this->activate($two['id'], true);
         $this->assertNotSame($old['token'], $next['token']);
-        $this->assertDatabaseCount('coach_subscriptions', 1);
+        $this->assertDatabaseCount('coach_subscriptions', 2);
         $this->assertDatabaseCount('coach_plan_assignments', 2);
         $this->assertDatabaseCount('program_runs', 2);
         $this->assertDatabaseCount('schedule_entries', 8);

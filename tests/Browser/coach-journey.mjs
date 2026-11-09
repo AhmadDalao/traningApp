@@ -75,11 +75,8 @@ async function matrix(stage) {
 }
 async function addDay() {
     await button(page, "Add Training Day").click();
-    const day = page.getByRole("dialog", {
-        name: "Add Training Day",
-        exact: true,
-    });
-    await day.waitFor();
+    await page.waitForURL(/\/days\/create\?.*builder=1/);
+    const day = page;
     await day.getByLabel("Title", { exact: false }).fill("Full Body Strength");
     await day.getByRole("checkbox", { name: "Monday", exact: true }).check();
     await day.getByRole("checkbox", { name: "Wednesday", exact: true }).check();
@@ -96,21 +93,20 @@ async function addDay() {
         .locator(".plan-image-preview img")
         .evaluate((img) => img.decode());
     await page.keyboard.press("Escape");
-    assert.equal(await page.getByRole("dialog").count(), 2);
+    assert.equal(await page.getByRole("dialog").count(), 1);
     await exercise.locator(".library-card").first().click();
     await exercise.getByLabel("Reps / duration").fill("10");
     await button(exercise, "Add exercise").click();
     await exercise.waitFor({ state: "detached" });
-    await matrix("embedded-day");
+    await matrix("fullpage-day");
     await button(day, "Save training day").click();
-    await day.waitFor({ state: "detached" });
     await page.locator(".builder-day-list li").waitFor();
     assert.match(page.url(), /\/edit(?:\?|$)/);
     await page.reload();
     await page.locator(".builder-day-list li").waitFor();
     assert.equal(await page.locator(".builder-day-list li").count(), 1);
     pass(
-        "Existing exercise library, image preview and reload preserve the embedded day builder",
+        "Existing exercise library, image preview and reload preserve the full-page day builder",
     );
 }
 async function reviewAndAssign() {
@@ -170,7 +166,10 @@ try {
     assert.equal(await page.locator(".coach-workspace").count(), 1);
     pass("Settings stays in Coach Workspace");
     await page
-        .getByRole("link", { name: "Account & personal details", exact: true })
+        .getByRole("link", {
+            name: "Account & training preferences",
+            exact: true,
+        })
         .click();
     await page.waitForURL("**/coach/settings/account");
     await button(page, "Save profile").click();
@@ -178,10 +177,10 @@ try {
     assert.equal(await page.locator(".coach-workspace").count(), 1);
     pass("Account edit/save stays in Coach Workspace");
     await page
-        .getByRole("link", { name: "Notifications & install", exact: true })
+        .getByRole("link", { name: "Notifications & app", exact: true })
         .locator("visible=true")
         .click();
-    await page.waitForURL("**/coach/notifications");
+    await page.waitForURL("**/coach/settings/notifications");
     assert.equal(await page.locator(".coach-workspace").count(), 1);
     pass("Notifications stays in Coach Workspace");
     await page.goto(base + "/coach/training-plans");

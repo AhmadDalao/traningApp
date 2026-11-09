@@ -25,7 +25,7 @@ class CoachAccess
         return TrainingPlan::where('workspace_type', 'coach_assigned')
             ->when($trainee, fn ($q) => $q->where('user_id', $trainee->id))
             ->whereHas('assignment', fn ($q) => $q
-                ->when($manage, fn ($q) => $q->where('status', 'active'))
+                ->when($manage, fn ($q) => $q->where('status', 'active')->whereHas('subscription', fn ($s) => $s->whereColumn('coach_subscriptions.coach_trainee_relationship_id', 'coach_plan_assignments.coach_trainee_relationship_id')->where('status', 'active')->whereDate('starts_on', '<=', today())->where(fn ($s) => $s->whereNull('ends_on')->orWhereDate('ends_on', '>=', today()))))
                 ->whereHas('relationship', fn ($q) => $q->where('status', 'active')
                     ->where('coach_user_id', $coach->id)
                     ->whereColumn('trainee_user_id', 'training_plans.user_id')));
@@ -60,14 +60,23 @@ class CoachAccess
             ->when($lock, fn ($q) => $q->lockForUpdate())->first();
     }
 
+    public function subscriptionFor(CoachPlanAssignment $assignment, bool $lock = false): ?CoachSubscription
+    {
+        return $assignment->relationship->subscriptions()->whereKey($assignment->coach_subscription_id)
+            ->where('status', 'active')->whereDate('starts_on', '<=', today())
+            ->where(fn ($q) => $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', today()))
+            ->when($lock, fn ($q) => $q->lockForUpdate())->first();
+    }
+
     public function assignment(User $coach, User $trainee, TrainingPlan $plan, bool $manage = false, bool $lock = false): CoachPlanAssignment
     {
         $relationship = $this->relationship($coach, $trainee, $lock);
         abort_unless($plan->user_id === $trainee->id && $plan->workspace_type === 'coach_assigned', 403);
         $assignment = $relationship->assignments()->where('assigned_training_plan_id', $plan->id)
             ->when($lock, fn ($q) => $q->lockForUpdate())->firstOrFail();
+        $assignment->setRelation('relationship', $relationship);
         if ($manage) {
-            abort_unless($assignment->status === 'active' && $this->subscription($relationship, $lock), 403, 'An active coaching subscription and assignment are required.');
+            abort_unless($assignment->status === 'active' && $this->subscriptionFor($assignment, $lock), 403, 'An active coaching subscription and assignment are required.');
         }
 
         return $assignment->setRelation('relationship', $relationship);
@@ -79,7 +88,7 @@ class CoachAccess
         $plan = $entry->trainingDay?->trainingPlan ?? $entry->programRun?->trainingPlan;
         abort_unless($plan, 403);
         $assignment = $this->assignment($coach, $trainee, $plan, true);
-        $subscription = $this->subscription($assignment->relationship);
+        $subscription = $this->subscriptionFor($assignment);
         abort_unless($subscription, 403, 'An active coaching subscription is required.');
         $this->futureAssignedSession($entry, $assignment, $subscription);
     }
@@ -89,6 +98,7 @@ class CoachAccess
     {
         $relationship = $assignment->relationship;
         abort_unless($relationship->status === 'active' && $assignment->status === 'active'
+            && $subscription->id === $assignment->coach_subscription_id
             && $subscription->coach_trainee_relationship_id === $relationship->id && $subscription->status === 'active'
             && $subscription->starts_on->lte(today()) && (! $subscription->ends_on || $subscription->ends_on->gte(today())), 403);
         abort_unless($entry->user_id === $relationship->trainee_user_id && $entry->scheduled_by_user_id === $relationship->coach_user_id

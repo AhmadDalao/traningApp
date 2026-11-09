@@ -7,6 +7,7 @@ import {
     CurrentTraining,
     WeeklyTraining,
     WorkoutDate,
+    TrainingRow,
 } from "../../Features/CoachWorkspace";
 export default function Trainee({
     state,
@@ -16,6 +17,7 @@ export default function Trainee({
     profile,
     recentActivity = [],
     nextSession,
+    plans = [],
 }) {
     const ctx = useTraining(),
         needsAttention = ["attention", "paused", "setup"].includes(
@@ -33,6 +35,15 @@ export default function Trainee({
                         {state.subscription_action.label}
                     </ButtonLink>
                 )}
+                <ButtonLink href={ctx.url("/setup?assign=1")}>
+                    Assign & activate training
+                </ButtonLink>
+                <ButtonLink
+                    variant="secondary"
+                    href={`/coach/subscriptions?trainee=${ctx.trainee.id}`}
+                >
+                    Manage subscriptions
+                </ButtonLink>
                 <details className="trainee-more">
                     <summary>More</summary>
                     <div>
@@ -57,6 +68,43 @@ export default function Trainee({
                 />
                 <WeeklyTraining entries={thisWeek} />
             </div>
+            {plans.length > 1 && (
+                <section className="assigned-programs">
+                    <div className="coach-card-title">
+                        <h2>
+                            All assigned training{" "}
+                            <span className="count-bubble">{plans.length}</span>
+                        </h2>
+                        <Link href={ctx.url("/training-plans")}>
+                            View all training →
+                        </Link>
+                    </div>
+                    <div className="assigned-program-list">
+                        {plans.map((plan) => (
+                            <TrainingRow
+                                key={plan.id}
+                                plan={{
+                                    ...plan,
+                                    subscription: plan.subscription,
+                                }}
+                            >
+                                <ButtonLink
+                                    variant="secondary"
+                                    href={ctx.url(`/training-plans/${plan.id}`)}
+                                >
+                                    View training
+                                </ButtonLink>
+                                <ButtonLink
+                                    variant="secondary"
+                                    href={`/coach/subscriptions?trainee=${ctx.trainee.id}&search=${encodeURIComponent(plan.name)}`}
+                                >
+                                    Manage subscription
+                                </ButtonLink>
+                            </TrainingRow>
+                        ))}
+                    </div>
+                </section>
+            )}
             <div className="coach-overview-columns">
                 <section className="panel coach-card">
                     <h2>

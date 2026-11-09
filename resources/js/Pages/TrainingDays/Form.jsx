@@ -45,6 +45,8 @@ export default function Form({
     plan,
     day,
     selectedBlock,
+    returnToBuilder = false,
+    assignToId = null,
     customExercises = [],
     embedded = false,
     onSaved,
@@ -64,7 +66,12 @@ export default function Form({
     const [editor, setEditor] = useState(null);
     const [saving, setSaving] = useState(false);
     const form = useForm({
-        training_block_id: day?.training_block_id || selectedBlock || "",
+        return_to_builder: returnToBuilder,
+        assign_to: assignToId,
+        training_block_id:
+            day?.training_block_id ||
+            selectedBlock ||
+            (plan.blocks?.length === 1 ? plan.blocks[0].id : ""),
         icon: day?.icon || "",
         title: day?.title || "",
         type: day?.type || "training",
@@ -211,7 +218,16 @@ export default function Form({
                             day ? `Edit ${day.title}` : "Create a training day"
                         }
                         description="Build a workout you can use again and again."
-                    />
+                    >
+                        <ButtonLink
+                            variant="secondary"
+                            href={url(
+                                `/training-plans/${plan.id}${returnToBuilder ? `/edit${assignToId ? `?assign_to=${assignToId}` : ""}` : ""}`,
+                            )}
+                        >
+                            ← Back to program
+                        </ButtonLink>
+                    </PageHeader>
                 </>
             )}
             <form onSubmit={submit}>
@@ -577,9 +593,13 @@ export default function Form({
                         <ButtonLink
                             variant="secondary"
                             href={
-                                day
-                                    ? url(`/training-days/${day.id}`)
-                                    : url(`/training-plans/${plan.id}`)
+                                returnToBuilder
+                                    ? url(
+                                          `/training-plans/${plan.id}/edit${assignToId ? `?assign_to=${assignToId}` : ""}`,
+                                      )
+                                    : day
+                                      ? url(`/training-days/${day.id}`)
+                                      : url(`/training-plans/${plan.id}`)
                             }
                         >
                             Cancel

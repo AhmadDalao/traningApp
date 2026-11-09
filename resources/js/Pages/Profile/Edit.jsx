@@ -1,3 +1,4 @@
+import SettingsNav from "../../Components/SettingsNav";
 import { Head, useForm, usePage } from "@inertiajs/react";
 import { PageHeader, Button, ButtonLink } from "../../Components/UI";
 import ProfileFields, { profileDefaults } from "../../Features/ProfileFields";
@@ -8,6 +9,7 @@ export default function Edit({ profile, options }) {
     const form = useForm(profileDefaults(profile, auth.user.name));
     return (
         <>
+            <SettingsNav section="account" />
             <Head title="Edit profile" />
             <PageHeader
                 title="Edit profile"

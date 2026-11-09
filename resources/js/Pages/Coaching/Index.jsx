@@ -58,7 +58,14 @@ function Connection({ relationship: row }) {
                 <>
                     {row.subscriptions.map((sub) => (
                         <div className="coach-subscription" key={sub.id}>
-                            <strong>{sub.package_name}</strong>
+                            {sub.training && (
+                                <Link
+                                    href={`/training-plans/${sub.training.id}`}
+                                >
+                                    <strong>{sub.training.name}</strong>
+                                </Link>
+                            )}
+                            <span>{sub.package_name}</span>
                             <CoachStatus status={sub.effective_status} />
                             <p>
                                 <DateLabel date={sub.starts_on} /> —{" "}

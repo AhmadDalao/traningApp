@@ -57,7 +57,7 @@ class CoachSetup
             $old = $relationship->setup_draft;
             abort_unless(($old['revision'] ?? 0) === $data['revision'], 409, 'Setup changed in another tab. Reload to review the latest choices.');
             if (isset($old['result'])) {
-                $current = app(CoachingSubscriptions::class)->setupReview($relationship, [], null);
+                $current = app(CoachingSubscriptions::class)->setupReview($relationship, [], null, $this->selection($relationship, $data['choices'])[1]);
                 $newTraining = $data['choices']['selection_type'] !== $old['choices']['selection_type']
                     || (int) $data['choices']['training_plan_id'] !== (int) $old['choices']['training_plan_id'];
                 abort_unless(($data['begin'] ?? false) && ($current['operation'] !== 'reuse' || $newTraining), 409, 'This training is already assigned. View its training or adjust its existing schedule.');
@@ -213,7 +213,7 @@ class CoachSetup
         }
         $coverageDates = array_filter([$end, ...array_column($rows, 'scheduled_date')]);
         $required = $coverageDates ? max($coverageDates) : null;
-        $subscription = app(CoachingSubscriptions::class)->setupReview($relationship, $choices, $required);
+        $subscription = app(CoachingSubscriptions::class)->setupReview($relationship, $choices, $required, $assignment);
         array_push($issues, ...$subscription['issues']);
         foreach ($rows as &$row) {
             $row['issues'] = [];
@@ -264,13 +264,14 @@ class CoachSetup
                 if (! $assignment) {
                     $plan = app(TrainingPlanDuplicator::class)->assign($coach, $trainee, $source,
                         ['start_date' => $choices['start_date'], 'end_date' => $choices['schedule_mode'] === 'ongoing' ? null : $choices['end_date'], 'schedule_mode' => $choices['schedule_mode']],
-                        false, false, $paths, $map);
+                        false, false, $paths, $map, $subscription);
                     $assignment = $plan->assignment;
                 } else {
                     foreach ($plan->trainingDays()->get() as $day) {
                         $map[$day->id] = $day->id;
                     }
                 }
+                $subscription = app(CoachingSubscriptions::class)->bind($assignment, $subscription);
                 $run = $plan->programRuns()->latest('id')->lockForUpdate()->first();
                 $added = 0;
                 if (! $preview['already_scheduled']) {

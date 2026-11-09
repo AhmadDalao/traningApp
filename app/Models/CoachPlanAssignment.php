@@ -23,6 +23,16 @@ class CoachPlanAssignment extends Model
         return $this->belongsTo(TrainingPlan::class, 'assigned_training_plan_id');
     }
 
+    public function subscription()
+    {
+        return $this->belongsTo(CoachSubscription::class, 'coach_subscription_id');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(CoachSubscription::class, 'coach_plan_assignment_id');
+    }
+
     public function source()
     {
         return $this->belongsTo(TrainingPlan::class, 'source_training_plan_id');

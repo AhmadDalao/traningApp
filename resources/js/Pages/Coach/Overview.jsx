@@ -93,7 +93,7 @@ export default function Overview({
     pending = [],
 }) {
     return (
-        <>
+        <div className="coach-dashboard">
             <Head title="Coach Overview" />
             <PageHeader
                 title="Coach Overview"
@@ -135,40 +135,46 @@ export default function Overview({
                             View trainees →
                         </Link>
                     </div>
-                    {attention.slice(0, 5).map((row) => (
-                        <article className="coach-session" key={row.id}>
-                            <PersonAvatar name={row.trainee.name} />
-                            <div className="coach-session-copy">
-                                <Link
-                                    href={`/coach/trainees/${row.trainee.id}`}
+                    <div
+                        className="coach-panel-scroll"
+                        tabIndex={0}
+                        aria-label="Trainees needing attention"
+                    >
+                        {attention.map((row) => (
+                            <article className="coach-session" key={row.id}>
+                                <PersonAvatar name={row.trainee.name} />
+                                <div className="coach-session-copy">
+                                    <Link
+                                        href={`/coach/trainees/${row.trainee.id}`}
+                                    >
+                                        <strong>{row.trainee.name}</strong>
+                                    </Link>
+                                    <span>{row.reason}</span>
+                                </div>
+                                <ButtonLink
+                                    variant="secondary"
+                                    href={row.action.url}
                                 >
-                                    <strong>{row.trainee.name}</strong>
+                                    {row.action.label === "Continue Assignment"
+                                        ? "Assign Training"
+                                        : row.action.label}
+                                </ButtonLink>
+                            </article>
+                        ))}
+                        {!attention.length && (
+                            <p className="on-track">
+                                <CheckCircle2 size={18} aria-hidden="true" />{" "}
+                                Everyone is on track.
+                            </p>
+                        )}
+                        {pending.length > 0 && (
+                            <div className="coach-pending-summary">
+                                <Link href="/coach/trainees?status=pending">
+                                    {stats.pending} pending requests →
                                 </Link>
-                                <span>{row.reason}</span>
                             </div>
-                            <ButtonLink
-                                variant="secondary"
-                                href={row.action.url}
-                            >
-                                {row.action.label === "Continue Assignment"
-                                    ? "Assign Training"
-                                    : row.action.label}
-                            </ButtonLink>
-                        </article>
-                    ))}
-                    {!attention.length && (
-                        <p className="on-track">
-                            <CheckCircle2 size={18} aria-hidden="true" />{" "}
-                            Everyone is on track.
-                        </p>
-                    )}
-                    {pending.length > 0 && (
-                        <div className="coach-pending-summary">
-                            <Link href="/coach/trainees?status=pending">
-                                {stats.pending} pending requests →
-                            </Link>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </section>
                 <section className="panel coach-card">
                     <div className="coach-card-title">
@@ -179,7 +185,13 @@ export default function Overview({
                             {todaySessions.length}
                         </span>
                     </div>
-                    <TodayList entries={todaySessions} />
+                    <div
+                        className="coach-panel-scroll"
+                        tabIndex={0}
+                        aria-label="Today’s workouts"
+                    >
+                        <TodayList entries={todaySessions} />
+                    </div>
                 </section>
             </div>
             <div className="coach-overview-columns">
@@ -188,22 +200,34 @@ export default function Overview({
                         <h2>Upcoming · Next 7 days</h2>
                         <small>Next workout per trainee</small>
                     </div>
-                    <SessionList
-                        entries={upcomingGroups}
-                        grouped
-                        empty="No upcoming workouts in the next seven days."
-                    />
+                    <div
+                        className="coach-panel-scroll"
+                        tabIndex={0}
+                        aria-label="Upcoming workouts"
+                    >
+                        <SessionList
+                            entries={upcomingGroups}
+                            grouped
+                            empty="No upcoming workouts in the next seven days."
+                        />
+                    </div>
                 </section>
                 <section className="panel coach-card">
                     <h2>
                         <Clock size={19} aria-hidden="true" /> Recent activity
                     </h2>
-                    <SessionList
-                        entries={recent.slice(0, 5)}
-                        empty="Activity appears when trainees record their workouts."
-                    />
+                    <div
+                        className="coach-panel-scroll"
+                        tabIndex={0}
+                        aria-label="Recent activity"
+                    >
+                        <SessionList
+                            entries={recent}
+                            empty="Activity appears when trainees record their workouts."
+                        />
+                    </div>
                 </section>
             </div>
-        </>
+        </div>
     );
 }

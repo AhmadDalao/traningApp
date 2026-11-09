@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Controllers\CoachSubscriptionController;
+use App\Models\CoachSubscription;
 use App\Models\CoachTraineeRelationship;
 use App\Models\TrainingPlan;
 use App\Models\User;
+use App\Services\CoachAccess;
 use App\Services\CoachSetup;
 use App\Services\TrainingPlanDuplicator;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -24,6 +28,16 @@ if (($argv[1] ?? '') === 'worker') {
         usleep(1000);
     }
     try {
+        if ($job['mode'] === 'subscription') {
+            $request = Request::create('/coach/subscriptions/'.$job['input']['id'], 'PATCH', ['action' => $job['input']['action'], 'confirmed' => true]);
+            $request->setUserResolver(fn () => User::findOrFail($job['coach']));
+            $request->setLaravelSession(app('session')->driver());
+            app()->instance('request', $request);
+            $request->setUserResolver(fn () => User::findOrFail($job['coach']));
+            app(CoachSubscriptionController::class)->update($request, CoachSubscription::findOrFail($job['input']['id']), app(CoachAccess::class));
+            echo json_encode(['status' => 'ok', 'result' => $job['input']['action']]);
+            exit;
+        }
         $result = $job['mode'] === 'assign'
             ? app(TrainingPlanDuplicator::class)->assign(User::findOrFail($job['coach']), User::findOrFail($job['trainee']), TrainingPlan::findOrFail($job['input']['template']), [], resumeSetup: true)->id
             : app(CoachSetup::class)->{$job['mode']}(User::findOrFail($job['coach']), User::findOrFail($job['trainee']), $job['input']);
@@ -151,7 +165,25 @@ try {
     checkSetup($oldToken !== $next['token'], 'Intentional new assignment rotates the completed activation token');
     $results = $race($f, [['activate', $next], ['activate', $next]]);
     checkSetup($results[0]['status'] === 'ok' && $results[0] === $results[1], 'Double Assign & Schedule for the next program returns one receipt');
-    checkSetup($f[2]->subscriptions()->count() === 1 && $f[2]->assignments()->count() === 2 && $f[1]->scheduleEntries()->count() === 6, 'Second assignment preserves the original schedule and reuses coaching coverage');
+    checkSetup($f[2]->subscriptions()->count() === 2 && $f[2]->assignments()->count() === 2 && $f[1]->scheduleEntries()->count() === 6, 'Second assignment preserves the original schedule and has independent coverage');
+
+    // A second program activates concurrently with pausing the first one.
+    $f = $fixture();
+    $first = app(CoachSetup::class)->activate($f[0], $f[1], $review($f));
+    $newTemplate = app(TrainingPlanDuplicator::class)->plan($f[0], $f[3]);
+    $next = $review($f, ['training_plan_id' => $newTemplate->id], true);
+    $results = $race($f, [['subscription', ['id' => $first['subscription_id'], 'action' => 'pause']], ['activate', $next]]);
+    checkSetup($results[0]['status'] === 'ok' && $results[1]['status'] === 'ok', 'Pausing one program does not invalidate another program activation');
+    $second = $results[1]['result'];
+    checkSetup(CoachSubscription::find($first['subscription_id'])->status === 'paused' && CoachSubscription::find($second['subscription_id'])->status === 'active', 'Concurrent actions preserve independent service states');
+    $results = $race($f, [['subscription', ['id' => $first['subscription_id'], 'action' => 'resume']], ['subscription', ['id' => $first['subscription_id'], 'action' => 'resume']]]);
+    checkSetup($results[0]['status'] === 'ok' && $results[1]['status'] === 'ok' && $f[2]->subscriptions()->count() === 2, 'Double resume changes one existing period without creating duplicates');
+    CoachSubscription::find($first['subscription_id'])->update(['status' => 'ended', 'ended_at' => now()]);
+    $assigned = $f[2]->assignments()->findOrFail($first['assignment_id']);
+    $renew = $review($f, ['selection_type' => 'assigned', 'training_plan_id' => $assigned->assigned_training_plan_id], true);
+    $results = $race($f, [['activate', $renew], ['activate', $renew]]);
+    checkSetup($results[0]['status'] === 'ok' && $results[0] === $results[1] && $f[2]->subscriptions()->count() === 3, 'Double program renewal creates exactly one new period and one receipt');
+    checkSetup(CoachSubscription::find($first['subscription_id'])->status === 'ended' && CoachSubscription::find($second['subscription_id'])->status === 'active' && $f[1]->scheduleEntries()->count() === 6, 'Renewal preserves ended history, the other subscription and all six workouts');
 
     $f = $fixture();
     $input = $review($f);

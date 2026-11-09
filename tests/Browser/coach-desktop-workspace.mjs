@@ -223,9 +223,7 @@ try {
     await go(prefix + "/calendar");
     await matrix("calendar", true);
     await button("Add Workout").click();
-    await page
-        .getByRole("dialog", { name: "Add Workout", exact: true })
-        .waitFor();
+    await page.waitForURL(/\/schedule-entries\/create/);
     await page.getByLabel("Program block", { exact: true }).waitFor();
     assert.equal(
         await page

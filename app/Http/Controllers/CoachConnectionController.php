@@ -17,12 +17,12 @@ class CoachConnectionController extends Controller
     public function index(Request $request)
     {
         $relationships = CoachTraineeRelationship::where('trainee_user_id', $request->user()->id)
-            ->with('coach.coachProfile', 'subscriptions', 'assignments.plan')->latest()->get();
+            ->with('coach.coachProfile', 'subscriptions.assignment.plan', 'assignments.plan')->latest()->get();
 
         return Inertia::render('Coaching/Index', ['relationships' => $relationships->map(fn ($row) => [
             ...$row->only('id', 'status', 'requested_at', 'approved_at', 'ended_at', 'ended_reason'),
             'coach' => $row->coach->coachProfile?->only('display_name', 'specialization', 'bio'),
-            'subscriptions' => $row->subscriptions->map(fn ($sub) => $sub->summary()),
+            'subscriptions' => $row->subscriptions->map(fn ($sub) => [...$sub->summary(), 'training' => $sub->assignment?->plan?->only('id', 'name')]),
             'plans' => $row->assignments->filter(fn ($a) => $a->plan)->map(fn ($a) => ['id' => $a->plan->id, 'name' => $a->plan->name, 'status' => $a->status])->values(),
         ])]);
     }

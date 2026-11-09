@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CoachPlanAssignment;
 use App\Models\CoachSubscription;
 use App\Models\CoachSubscriptionPlan;
 use App\Models\CoachTraineeRelationship;
@@ -17,15 +18,17 @@ class CoachingSubscriptions
         return ['package_id' => 'nullable|integer', 'package_name' => 'required_without:package_id|nullable|string|max:100', 'starts_on' => 'required|date_format:Y-m-d', 'ends_on' => 'nullable|date_format:Y-m-d|after_or_equal:starts_on', 'open_ended' => 'sometimes|boolean', 'notes' => 'nullable|string|max:3000'];
     }
 
-    public function start(User $coach, User $trainee, array $data, bool $resumeSetup = false, ?int $expectedRelationshipId = null): CoachSubscription
+    public function start(User $coach, User $trainee, array $data, bool $resumeSetup = false, ?int $expectedRelationshipId = null, ?CoachPlanAssignment $assignment = null, bool $independent = false): CoachSubscription
     {
-        return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship) use ($coach, $data, $resumeSetup, $expectedRelationshipId) {
+        return app(CoachAccess::class)->transaction($coach, $trainee, function ($relationship) use ($coach, $data, $resumeSetup, $expectedRelationshipId, $assignment, $independent) {
             abort_if($expectedRelationshipId !== null && $relationship->id !== $expectedRelationshipId, 403);
-            $existing = $relationship->subscriptions()->whereIn('status', ['active', 'paused'])->lockForUpdate()->first();
+            $existing = $this->periods($relationship, $assignment)->whereIn('status', ['active', 'paused'])->lockForUpdate()->first();
             if ($resumeSetup && $existing) {
                 return $existing;
             }
-            $this->available($relationship);
+            if (! $independent) {
+                $this->available($relationship, assignment: $assignment);
+            }
             $package = ! empty($data['package_id']) ? CoachSubscriptionPlan::where('coach_user_id', $coach->id)->where('active', true)->lockForUpdate()->findOrFail($data['package_id']) : null;
             $ends = $data['ends_on'] ?? ($package?->duration_days ? Carbon::parse($data['starts_on'])->addDays($package->duration_days - 1)->toDateString() : null);
             if ($data['open_ended'] ?? false) {
@@ -35,16 +38,16 @@ class CoachingSubscriptions
                 throw ValidationException::withMessages(['ends_on' => 'Choose an end date or explicitly select open-ended coaching.']);
             }
 
-            return $relationship->subscriptions()->create(['coach_subscription_plan_id' => $package?->id, 'package_name' => $package?->name ?? $data['package_name'], 'starts_on' => $data['starts_on'], 'ends_on' => $ends, 'notes' => $data['notes'] ?? null, 'status' => 'active']);
+            return $relationship->subscriptions()->create(['coach_plan_assignment_id' => $assignment?->id, 'coach_subscription_plan_id' => $package?->id, 'package_name' => $package?->name ?? $data['package_name'], 'starts_on' => $data['starts_on'], 'ends_on' => $ends, 'notes' => $data['notes'] ?? null, 'status' => 'active']);
         }, false);
     }
 
     /** Read-only proposal. The package is never edited for an individual subscription. */
-    public function setupReview(CoachTraineeRelationship $relationship, array $choices, ?string $required): array
+    public function setupReview(CoachTraineeRelationship $relationship, array $choices, ?string $required, ?CoachPlanAssignment $assignment = null): array
     {
-        $current = $relationship->subscriptions()->whereIn('status', ['active', 'paused'])
+        $current = $this->periods($relationship, $assignment)->whereIn('status', ['active', 'paused'])
             ->where(fn ($q) => $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', today()))->latest('id')->lockForUpdate()->first()
-            ?? $relationship->subscriptions()->latest('id')->lockForUpdate()->first();
+            ?? $this->periods($relationship, $assignment)->latest('id')->lockForUpdate()->first();
         $valid = $current && in_array($current->status, ['active', 'paused'], true) && (! $current->ends_on || $current->ends_on->gte(today()));
         $operation = ! $valid ? ($current ? 'renew' : 'activate') : ($current->status === 'paused' ? 'resume' : ($current->starts_on->gt(today()) ? 'activate' : 'reuse'));
         $package = ! empty($choices['package_id']) ? CoachSubscriptionPlan::where('coach_user_id', $relationship->coach_user_id)->where('active', true)->lockForUpdate()->find($choices['package_id']) : null;
@@ -75,7 +78,7 @@ class CoachingSubscriptions
             'extension_required' => $extension, 'extension_included' => (bool) ($choices['include_extension'] ?? false),
             'package_id' => $valid ? $current->coach_subscription_plan_id : $package?->id,
             'package_name' => $valid ? $current->package_name : ($package?->name ?? ($choices['package_name'] ?? 'Coaching')),
-            'issues' => $issues, 'fingerprint' => [$current?->getAttributes(), $package?->getAttributes()]];
+            'assignment_id' => $assignment?->id, 'issues' => $issues, 'fingerprint' => [$current?->getAttributes(), $package?->getAttributes()]];
     }
 
     /** Caller holds the relationship lock and has revalidated the signed setup review. */
@@ -92,13 +95,35 @@ class CoachingSubscriptions
         }
 
         return $this->start($coach, $trainee, ['package_id' => $review['package_id'], 'package_name' => $review['package_name'],
-            'starts_on' => today()->toDateString(), 'ends_on' => $review['ends_on'], 'open_ended' => $review['ends_on'] === null], expectedRelationshipId: $relationship->id);
+            'starts_on' => today()->toDateString(), 'ends_on' => $review['ends_on'], 'open_ended' => $review['ends_on'] === null], expectedRelationshipId: $relationship->id, assignment: ! empty($review['assignment_id']) ? $relationship->assignments()->findOrFail($review['assignment_id']) : null, independent: true);
     }
 
-    public function available(CoachTraineeRelationship $relationship, ?int $except = null): void
+    private function periods(CoachTraineeRelationship $relationship, ?CoachPlanAssignment $assignment)
     {
-        if ($relationship->subscriptions()->whereIn('status', ['active', 'paused'])->where(fn ($q) => $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', today()))->when($except, fn ($q) => $q->whereKeyNot($except))->lockForUpdate()->exists()) {
-            throw ValidationException::withMessages(['subscription' => 'End the existing active or paused subscription before starting another.']);
+        return $relationship->subscriptions()->when($assignment,
+            fn ($q) => $q->where(fn ($q) => $q->where('coach_plan_assignment_id', $assignment->id)->orWhere('id', $assignment->coach_subscription_id)),
+            fn ($q) => $q->whereNull('coach_plan_assignment_id')->whereDoesntHave('assignments'));
+    }
+
+    /** Attach one independent period; legacy callers may reuse unused coverage once. */
+    public function bind(CoachPlanAssignment $assignment, CoachSubscription $subscription): CoachSubscription
+    {
+        abort_unless($subscription->coach_trainee_relationship_id === $assignment->coach_trainee_relationship_id, 403);
+        if (($subscription->coach_plan_assignment_id && $subscription->coach_plan_assignment_id !== $assignment->id)
+            || $subscription->assignments()->whereKeyNot($assignment->id)->exists()) {
+            $subscription = $subscription->replicate();
+        }
+        $subscription->coach_plan_assignment_id = $assignment->id;
+        $subscription->save();
+        $assignment->update(['coach_subscription_id' => $subscription->id]);
+
+        return $subscription;
+    }
+
+    public function available(CoachTraineeRelationship $relationship, ?int $except = null, ?CoachPlanAssignment $assignment = null): void
+    {
+        if ($this->periods($relationship, $assignment)->whereIn('status', ['active', 'paused'])->where(fn ($q) => $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', today()))->when($except, fn ($q) => $q->whereKeyNot($except))->lockForUpdate()->exists()) {
+            throw ValidationException::withMessages(['subscription' => 'This program already has active or paused coverage. Manage its existing subscription.']);
         }
     }
 }

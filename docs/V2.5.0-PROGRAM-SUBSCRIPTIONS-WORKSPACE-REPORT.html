@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Training Planner v2.5.0 Release Report</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font:
+                    16px/1.65 system-ui,
+                    sans-serif;
+                background: #f4f7fc;
+                color: #18304d;
+            }
+            header {
+                background: #0c2343;
+                color: white;
+                padding: 60px max(24px, calc((100vw - 1160px) / 2));
+            }
+            header p {
+                color: #c5d9fa;
+            }
+            h1 {
+                font-size: clamp(30px, 4vw, 48px);
+                line-height: 1.15;
+                margin: 8px 0 20px;
+            }
+            h2 {
+                font-size: 24px;
+                line-height: 1.3;
+                margin-top: 0;
+            }
+            main {
+                max-width: 1200px;
+                margin: 32px auto;
+                padding: 0 20px;
+            }
+            nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 9px;
+                margin: 20px 0 30px;
+            }
+            nav a {
+                font-size: 13px;
+                padding: 8px 12px;
+                background: white;
+                border: 1px solid #dce6f5;
+                border-radius: 8px;
+                text-decoration: none;
+                color: #185ac0;
+            }
+            section {
+                background: white;
+                padding: 30px;
+                border: 1px solid #dce6f5;
+                border-radius: 14px;
+                margin: 20px 0;
+                scroll-margin-top: 20px;
+            }
+            p {
+                max-width: 100ch;
+            }
+            .table {
+                overflow: auto;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            th,
+            td {
+                padding: 12px;
+                border-bottom: 1px solid #e4ebf5;
+                vertical-align: top;
+                overflow-wrap: anywhere;
+            }
+            th {
+                background: #f3f7fe;
+            }
+            figure {
+                margin: 24px 0;
+            }
+            img {
+                display: block;
+                max-width: 100%;
+                max-height: 1000px;
+                object-fit: contain;
+                border: 1px solid #dce6f5;
+                border-radius: 8px;
+            }
+            figcaption {
+                font-size: 14px;
+                color: #61768c;
+                margin-top: 8px;
+            }
+            code {
+                overflow-wrap: anywhere;
+                font-size: 13px;
+            }
+            li {
+                margin: 5px 0;
+            }
+            @media (max-width: 600px) {
+                section {
+                    padding: 20px;
+                }
+                header {
+                    padding: 36px 20px;
+                }
+                td,
+                th {
+                    padding: 8px;
+                    font-size: 14px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <p>TRAINING PLANNER · RELEASE REPORT · 9 NOVEMBER 2026</p>
+            <h1>v2.5.0 — Independent Program Subscriptions</h1>
+            <p>
+                Clearer settings. Full-page editors. A calmer coach workspace.
+            </p>
+        </header>
+        <main>
+            <nav>
+                <a href="#s1">1. Release and baseline</a
+                ><a href="#s2">2. What changed</a
+                ><a href="#s3">3. The daily coach journey</a
+                ><a href="#s4">4. Independent coverage</a
+                ><a href="#s5">5. Renewal and history</a
+                ><a href="#s6">6. Existing subscriptions and migration</a
+                ><a href="#s7">7. Atomic activation and access</a
+                ><a href="#s8">8. Pause semantics</a
+                ><a href="#s9">9. Navigation and editors</a
+                ><a href="#s10">10. Lists, cards and Calendar</a
+                ><a href="#s11">11. UI evidence</a
+                ><a href="#s12">12. Automated release gates</a
+                ><a href="#s13">13. Concurrency</a
+                ><a href="#s14">14. Browser regression</a
+                ><a href="#s15">15. Database, failure and security tests</a
+                ><a href="#s16">16. Local cleanup</a
+                ><a href="#s17">17. Production deployment</a
+                ><a href="#s18">18. PWA and notifications</a
+                ><a href="#s19">19. Known limits</a
+                ><a href="#s20">20. Changed source</a
+                ><a href="#s21">21. Status</a>
+            </nav>
+            <section id="s1">
+                <h2>1. Release and baseline</h2>
+                <p>
+                    v2.5.0 extends the live v2.4.0 Laravel / Inertia / React
+                    application. This release combines the requested workspace
+                    improvements with independent coverage for each assigned
+                    training program. Earlier tags remain unchanged.
+                </p>
+                <p>
+                    Release commit: Recorded after the immutable release commit
+                    is created.
+                </p>
+            </section>
+            <section id="s2">
+                <h2>2. What changed</h2>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Area</th>
+                                <th>Delivered</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Subscriptions</td>
+                                <td>
+                                    Visible sidebar entry; searchable, filtered,
+                                    paginated table; responsive cards; program,
+                                    trainee, package, coverage, status and
+                                    controls.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Independent programs</td>
+                                <td>
+                                    Each assignment has its own subscription
+                                    periods. Multiple programs can run at once
+                                    under one or several coaches.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Settings</td>
+                                <td>
+                                    Profile, account preferences and
+                                    Notifications &amp; app tabs with
+                                    breadcrumbs and Back navigation.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Training builder</td>
+                                <td>
+                                    Add/Edit Training Day opens a full page.
+                                    Saving and Back return to the same builder
+                                    and trainee context.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Add Workout</td>
+                                <td>
+                                    Full-page scheduling with a bounded day
+                                    agenda, thumbnails and Calendar return.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Overview</td>
+                                <td>
+                                    Four equal-height scrollable panels; larger
+                                    thumbnails; up to 100 attention/activity
+                                    rows.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Programs</td>
+                                <td>
+                                    List, search, counts and 10 / 25 / 50 / 100
+                                    page sizes; Coach default 10.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Calendar</td>
+                                <td>
+                                    Stable program colours, visible labels and
+                                    clickable legend filters; status indicators
+                                    remain separate.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="s3">
+                <h2>3. The daily coach journey</h2>
+                <p>
+                    Open a trainee → Assign &amp; activate training → choose a
+                    program → review dates and program-specific coverage →
+                    confirm. New assignments default to today; activation never
+                    waits for another program to finish. Weekly workout dates
+                    still follow the reviewed schedule.
+                </p>
+            </section>
+            <section id="s4">
+                <h2>4. Independent coverage</h2>
+                <p>
+                    The assignment points to its current subscription; each
+                    subscription period also records its assignment. Pause,
+                    resume and end operate on the selected period. Coverage from
+                    another program cannot authorize editing or scheduling.
+                    Separate coaches retain separate ownership and cannot view
+                    or change each other’s assignments.
+                </p>
+            </section>
+            <section id="s5">
+                <h2>5. Renewal and history</h2>
+                <p>
+                    Renewing an ended or expired subscription creates a new
+                    historical period for the same assignment. It reuses an
+                    existing run and its workouts instead of restarting the
+                    program. Ended assignments lead to an explicit new
+                    assignment. Old periods and recorded workout history remain
+                    intact.
+                </p>
+            </section>
+            <section id="s6">
+                <h2>6. Existing subscriptions and migration</h2>
+                <p>
+                    One additive migration adds nullable
+                    coach_plan_assignment_id to coach_subscriptions. Existing
+                    shared periods are split across their linked assignments.
+                    Original periods stay in place; copies retain dates,
+                    package, status, notes and timestamps. Only the subscription
+                    scope and affected assignment coverage links change. No
+                    plan, run, workout or media is recreated. Downgrade does not
+                    merge or delete periods.
+                </p>
+            </section>
+            <section id="s7">
+                <h2>7. Atomic activation and access</h2>
+                <p>
+                    The existing relationship/user locks, signed preview, draft
+                    revision, activation token and transaction coordinator are
+                    preserved. Program copy, subscription binding and scheduling
+                    commit together. Failure rolls back database writes and
+                    copied media. Replayed activation returns the same result.
+                    Trainee consent and CoachAccess remain authoritative;
+                    trainees cannot enable Coach Workspace or write Coach
+                    endpoints.
+                </p>
+            </section>
+            <section id="s8">
+                <h2>8. Pause semantics</h2>
+                <p>
+                    Pausing or ending a subscription stops that coach’s
+                    management of that program and its future schedule
+                    generation. Other program subscriptions remain active.
+                    Existing trainee-owned plans, already scheduled workouts and
+                    completed history are retained. Program pause remains a
+                    separate lifecycle action.
+                </p>
+            </section>
+            <section id="s9">
+                <h2>9. Navigation and editors</h2>
+                <p>
+                    Notifications now sit inside Settings in both workspaces.
+                    The Coach settings route never switches to Personal
+                    Workspace. Full-page day editing avoids a long nested dialog
+                    and preserves the existing exercise library, image preview,
+                    supersets and upload controls. Exercise dialogs can use
+                    1,040px desktop width and still fit small phones.
+                </p>
+            </section>
+            <section id="s10">
+                <h2>10. Lists, cards and Calendar</h2>
+                <p>
+                    Overview panels are 440px high on desktop and 390px on
+                    phones, with keyboard-focusable internal scrolling. A
+                    100-row stress check confirms the panel height stays fixed.
+                    Desktop thumbnails are 88×66px. Calendar colour is derived
+                    from program identity and is accompanied by program text;
+                    completed/skipped status continues to use its existing
+                    indicator.
+                </p>
+            </section>
+            <section id="s11">
+                <h2>11. UI evidence</h2>
+                <p>
+                    Screenshots use disposable QA accounts. Browser emulation
+                    covers responsive layouts; no physical-phone test is
+                    claimed.
+                </p>
+                <figure>
+                    <img
+                        src="assets/v2.5.0/overview-1440.png"
+                        alt="Coach Overview"
+                        loading="lazy"
+                    />
+                    <figcaption>Coach Overview</figcaption>
+                </figure>
+                <figure>
+                    <img
+                        src="assets/v2.5.0/subscriptions-1440.png"
+                        alt="Subscriptions table"
+                        loading="lazy"
+                    />
+                    <figcaption>Subscriptions table</figcaption>
+                </figure>
+                <figure>
+                    <img
+                        src="assets/v2.5.0/add-workout-1440.png"
+                        alt="Full-page Add Workout"
+                        loading="lazy"
+                    />
+                    <figcaption>Full-page Add Workout</figcaption>
+                </figure>
+                <figure>
+                    <img
+                        src="assets/v2.5.0/training-day-390.png"
+                        alt="Training-day editor on mobile"
+                        loading="lazy"
+                    />
+                    <figcaption>Training-day editor on mobile</figcaption>
+                </figure>
+            </section>
+            <section id="s12">
+                <h2>12. Automated release gates</h2>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Check</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>pint</td>
+                                <td>PASS · 1.28s</td>
+                            </tr>
+                            <tr>
+                                <td>prettier</td>
+                                <td>PASS · 0.41s</td>
+                            </tr>
+                            <tr>
+                                <td>sqlite</td>
+                                <td>PASS · 14.27s</td>
+                            </tr>
+                            <tr>
+                                <td>mysql</td>
+                                <td>PASS · 35.92s</td>
+                            </tr>
+                            <tr>
+                                <td>javascript</td>
+                                <td>PASS · 0.25s</td>
+                            </tr>
+                            <tr>
+                                <td>build</td>
+                                <td>PASS · 1.67s</td>
+                            </tr>
+                            <tr>
+                                <td>composer-validate</td>
+                                <td>PASS · 0.15s</td>
+                            </tr>
+                            <tr>
+                                <td>composer-audit</td>
+                                <td>PASS · 1.17s</td>
+                            </tr>
+                            <tr>
+                                <td>composer-platform</td>
+                                <td>PASS · 0.14s</td>
+                            </tr>
+                            <tr>
+                                <td>diff</td>
+                                <td>PASS · 0.02s</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    SQLite: 642 tests / 12,692 assertions. Isolated MySQL: 642
+                    tests / 12,692 assertions. JavaScript: 38 tests. Composer
+                    audit: zero advisories or abandoned packages. Build, Pint,
+                    Prettier, Composer validation/platform checks and git diff
+                    check pass.
+                </p>
+            </section>
+            <section id="s13">
+                <h2>13. Concurrency</h2>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Real-process suite</th>
+                                <th>Passed checks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Coaching</td>
+                                <td>17</td>
+                            </tr>
+                            <tr>
+                                <td>RecurringSchedule</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Program</td>
+                                <td>10</td>
+                            </tr>
+                            <tr>
+                                <td>ProgramControl</td>
+                                <td>15</td>
+                            </tr>
+                            <tr>
+                                <td>Notification</td>
+                                <td>10</td>
+                            </tr>
+                            <tr>
+                                <td>CoachSetup</td>
+                                <td>53</td>
+                            </tr>
+                            <tr>
+                                <td>WeeklySchedule</td>
+                                <td>5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    114 checks include two simultaneous activations, stale
+                    revisions, pausing program A while activating program B,
+                    double Resume and double Renew. Exactly one reviewed result
+                    is committed; other subscriptions, runs and sessions remain
+                    unchanged.
+                </p>
+            </section>
+            <section id="s14">
+                <h2>14. Browser regression</h2>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Suite</th>
+                                <th>Engine</th>
+                                <th>Checks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>independent-subscriptions</td>
+                                <td>chromium</td>
+                                <td>89</td>
+                            </tr>
+                            <tr>
+                                <td>independent-subscriptions</td>
+                                <td>webkit</td>
+                                <td>89</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey</td>
+                                <td>chromium</td>
+                                <td>84</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey</td>
+                                <td>webkit</td>
+                                <td>84</td>
+                            </tr>
+                            <tr>
+                                <td>coach-desktop-workspace</td>
+                                <td>chromium</td>
+                                <td>173</td>
+                            </tr>
+                            <tr>
+                                <td>coach-desktop-workspace</td>
+                                <td>webkit</td>
+                                <td>173</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-coverage</td>
+                                <td>chromium</td>
+                                <td>12</td>
+                            </tr>
+                            <tr>
+                                <td>coach-journey-coverage</td>
+                                <td>webkit</td>
+                                <td>12</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-preview</td>
+                                <td>chromium</td>
+                                <td>75</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-preview</td>
+                                <td>webkit</td>
+                                <td>75</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-coverage</td>
+                                <td>chromium</td>
+                                <td>63</td>
+                            </tr>
+                            <tr>
+                                <td>thumbnail-coverage</td>
+                                <td>webkit</td>
+                                <td>63</td>
+                            </tr>
+                            <tr>
+                                <td>pwa-live</td>
+                                <td>chromium</td>
+                                <td>20</td>
+                            </tr>
+                            <tr>
+                                <td>pwa-live</td>
+                                <td>webkit</td>
+                                <td>19</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    1,031 checks across 14 successful browser runs. Widths
+                    include 320×480, 360, 375, 390, 430, 768, 1280, 1366, 1440,
+                    1920 and 2560 where applicable. Tested complete creation,
+                    trainee-first return, assignment, coverage extension,
+                    renewal/resume, weekly editing, manual scheduling, filters,
+                    image previews, Personal pages and actual service-worker
+                    behavior.
+                </p>
+            </section>
+            <section id="s15">
+                <h2>15. Database, failure and security tests</h2>
+                <p>
+                    Focused tests cover same-coach and cross-coach
+                    subscriptions, forged IDs, unauthorized trainee writes,
+                    program-specific date coverage, rollback after schedule
+                    failure, migration of shared coverage, new-assignment date
+                    defaults and Settings context. The complete pre-existing
+                    suite retains media-failure, stale-preview, revoked-consent,
+                    lifecycle, History, Progress, PWA and notification checks.
+                </p>
+            </section>
+            <section id="s16">
+                <h2>16. Local cleanup</h2>
+                <p>
+                    Removed 14 disposable accounts and 137 QA images. All 22
+                    original table fingerprints match the verified
+                    post-migration baseline, and all 44 original local media
+                    hashes match. The migration’s intentional scope/link changes
+                    are tested separately.
+                </p>
+            </section>
+            <section id="s17">
+                <h2>17. Production deployment</h2>
+                <p>
+                    NOT READY — local release gates passed; production
+                    deployment and live verification are still pending.
+                </p>
+                <p>
+                    Deployment uses the immutable tag, fresh
+                    database/runtime/uploads/environment backups, baseline
+                    release hashes, only the one pending migration, exact
+                    coverage-preservation checks, live disposable accounts and
+                    post-cleanup data/media/environment verification.
+                </p>
+            </section>
+            <section id="s18">
+                <h2>18. PWA and notifications</h2>
+                <p>
+                    Existing manifest, service worker, public-only asset cache,
+                    offline fallback, preference persistence and private
+                    no-store responses are preserved. No Push credentials are
+                    generated and no scheduler is enabled by this release. Push
+                    delivery remains disabled unless separately configured and
+                    approved.
+                </p>
+            </section>
+            <section id="s19">
+                <h2>19. Known limits</h2>
+                <p>
+                    Subscriptions are coaching-service coverage, not billing or
+                    payment processing. Program colours are stable automatic
+                    colours, not a custom palette editor. A subscription pause
+                    does not erase existing sessions. Browser checks use
+                    Chromium and WebKit with responsive viewports; real Push
+                    delivery and physical-device installation are not claimed.
+                </p>
+            </section>
+            <section id="s20">
+                <h2>20. Changed source</h2>
+                <ul>
+                    <li>
+                        <code
+                            >app/Http/Controllers/CoachConnectionController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code>app/Http/Controllers/CoachController.php</code>
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/CoachScheduleController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/CoachSetupController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/CoachSubscriptionController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/NotificationController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/ScheduleChangeController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/ScheduleEntryController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/TrainingDayController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Controllers/TrainingPlanController.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Middleware/HandleInertiaRequests.php</code
+                        >
+                    </li>
+                    <li>
+                        <code
+                            >app/Http/Requests/StoreScheduleEntryRequest.php</code
+                        >
+                    </li>
+                    <li><code>app/Models/CoachPlanAssignment.php</code></li>
+                    <li><code>app/Models/CoachSubscription.php</code></li>
+                    <li><code>app/Services/CoachAccess.php</code></li>
+                    <li><code>app/Services/CoachSetup.php</code></li>
+                    <li><code>app/Services/CoachWorkspaceSummary.php</code></li>
+                    <li><code>app/Services/CoachingSubscriptions.php</code></li>
+                    <li><code>app/Services/ExerciseProgression.php</code></li>
+                    <li><code>app/Services/PlanSchedule.php</code></li>
+                    <li><code>app/Services/ProgramControl.php</code></li>
+                    <li><code>app/Services/ProgramSchedule.php</code></li>
+                    <li>
+                        <code>app/Services/TrainingPlanDuplicator.php</code>
+                    </li>
+                    <li>
+                        <code
+                            >database/migrations/2026_11_09_000016_scope_subscriptions_to_program_assignments.php</code
+                        >
+                    </li>
+                    <li><code>resources/css/app.css</code></li>
+                    <li><code>resources/css/coach-workspace.css</code></li>
+                    <li><code>resources/js/Components/AppLayout.jsx</code></li>
+                    <li>
+                        <code>resources/js/Components/SettingsNav.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Features/CoachWorkspace.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Features/ScheduleEntryForm.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Features/SubscriptionTable.jsx</code>
+                    </li>
+                    <li><code>resources/js/Features/programColors.js</code></li>
+                    <li><code>resources/js/Pages/Calendar/Index.jsx</code></li>
+                    <li>
+                        <code>resources/js/Pages/Coach/ManageCoaching.jsx</code>
+                    </li>
+                    <li><code>resources/js/Pages/Coach/Overview.jsx</code></li>
+                    <li>
+                        <code>resources/js/Pages/Coach/ProgramBuilder.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Pages/Coach/SetupTrainee.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Pages/Coach/Subscriptions.jsx</code>
+                    </li>
+                    <li><code>resources/js/Pages/Coach/Trainee.jsx</code></li>
+                    <li><code>resources/js/Pages/Coaching/Index.jsx</code></li>
+                    <li><code>resources/js/Pages/Coaching/Setup.jsx</code></li>
+                    <li>
+                        <code>resources/js/Pages/Notifications/Index.jsx</code>
+                    </li>
+                    <li><code>resources/js/Pages/Profile/Edit.jsx</code></li>
+                    <li><code>resources/js/Pages/Profile/Show.jsx</code></li>
+                    <li>
+                        <code>resources/js/Pages/ScheduleEntries/Form.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Pages/TrainingDays/Form.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Pages/TrainingPlans/Index.jsx</code>
+                    </li>
+                    <li><code>routes/web.php</code></li>
+                    <li>
+                        <code>tests/Browser/coach-desktop-workspace.mjs</code>
+                    </li>
+                    <li><code>tests/Browser/coach-journey.mjs</code></li>
+                    <li>
+                        <code>tests/Browser/independent-subscriptions.mjs</code>
+                    </li>
+                    <li><code>tests/Browser/thumbnail-coverage.mjs</code></li>
+                    <li>
+                        <code>tests/Concurrency/CoachSetupConcurrency.php</code>
+                    </li>
+                    <li><code>tests/Feature/CoachJourneyTest.php</code></li>
+                    <li>
+                        <code
+                            >tests/Feature/IndependentProgramSubscriptionsTest.php</code
+                        >
+                    </li>
+                </ul>
+            </section>
+            <section id="s21">
+                <h2>21. Status</h2>
+                <p>NOT READY — deployment verification pending.</p>
+            </section>
+        </main>
+    </body>
+</html>

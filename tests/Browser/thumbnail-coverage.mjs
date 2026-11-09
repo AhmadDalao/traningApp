@@ -258,13 +258,12 @@ try {
         .locator(`[data-date="${calendarProps.today}"] .fc-daygrid-day-number`)
         .click();
     await page
-        .locator(".calendar-date-sessions .training-thumbnail")
+        .locator(".schedule-day-agenda .training-thumbnail")
         .first()
         .click();
-    assert.equal(await page.getByRole("dialog").count(), 2);
-    await page.keyboard.press("Escape");
     assert.equal(await page.getByRole("dialog").count(), 1);
     await page.keyboard.press("Escape");
+    assert.equal(await page.getByRole("dialog").count(), 0);
     pass("Calendar date photos open and return to the session list");
     // Library previews are separate from the exercise selection control.
     await page.goto(base + "/coach/training-plans");

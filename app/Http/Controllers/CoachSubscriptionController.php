@@ -15,11 +15,31 @@ class CoachSubscriptionController extends Controller
 {
     public function index(Request $request)
     {
+        $filters = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:all,active,paused,ended,expired,upcoming', 'per_page' => 'nullable|in:10,25,50,100', 'trainee' => 'nullable|integer|min:1']);
+        $filters = [...['search' => '', 'status' => 'all', 'per_page' => 10, 'trainee' => ''], ...$filters];
+        $query = CoachSubscription::whereHas('relationship', fn ($q) => $q->where('coach_user_id', $request->user()->id));
+        $state = "CASE WHEN status <> 'active' THEN status WHEN starts_on > ? THEN 'upcoming' WHEN ends_on < ? THEN 'expired' ELSE 'active' END";
+        $counts = (clone $query)->selectRaw("$state as effective, COUNT(*) as total", [today()->toDateString(), today()->toDateString()])->groupBy('effective')->pluck('total', 'effective');
+        $query->when($filters['status'] !== 'all', fn ($q) => $q->whereRaw("($state) = ?", [today()->toDateString(), today()->toDateString(), $filters['status']]))
+            ->when($filters['trainee'], fn ($q) => $q->whereHas('relationship', fn ($q) => $q->where('trainee_user_id', $filters['trainee'])))
+            ->when($filters['search'], fn ($q) => $q->where(fn ($q) => $q->where('package_name', 'like', '%'.$filters['search'].'%')
+                ->orWhereHas('relationship.trainee', fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%')->orWhere('training_code', 'like', '%'.$filters['search'].'%'))
+                ->orWhereHas('assignment.plan', fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))));
+
         return Inertia::render('Coach/Subscriptions', [
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $request->user()->id)->latest()->get(),
             'relationships' => CoachTraineeRelationship::where('coach_user_id', $request->user()->id)->where('status', 'active')->with('trainee:id,name,training_code')->get(['id', 'trainee_user_id']),
-            'subscriptions' => CoachSubscription::whereHas('relationship', fn ($q) => $q->where('coach_user_id', $request->user()->id))->with('relationship.trainee:id,name,training_code')->latest()->paginate(20)->through(fn ($s) => [...$s->toArray(), 'effective_status' => $s->effective_status]),
+            'filters' => $filters, 'counts' => $counts,
+            'subscriptions' => $query->with(['relationship.trainee:id,name,training_code', 'assignment.plan' => fn ($q) => $q->withThumbnail()])->latest('id')->paginate((int) $filters['per_page'])->withQueryString()->through(fn ($s) => $this->row($s)),
         ]);
+    }
+
+    public function row(CoachSubscription $subscription): array
+    {
+        return [...$subscription->summary(), 'notes' => $subscription->notes,
+            'assignment_id' => $subscription->coach_plan_assignment_id, 'assignment_status' => $subscription->assignment?->status,
+            'plan' => $subscription->assignment?->plan?->only('id', 'name', 'structure_type', 'duration_weeks', 'thumbnail_url'),
+            'relationship' => ['status' => $subscription->relationship->status, 'trainee' => $subscription->relationship->trainee->only('id', 'name', 'training_code')]];
     }
 
     public function package(Request $request, ?CoachSubscriptionPlan $package = null)
@@ -51,7 +71,7 @@ class CoachSubscriptionController extends Controller
                 throw ValidationException::withMessages(['subscription' => 'This subscription has ended. Start a new one.']);
             }
             if ($data['action'] === 'resume') {
-                app(CoachingSubscriptions::class)->available($relationship, $row->id);
+                app(CoachingSubscriptions::class)->available($relationship, $row->id, $row->assignment);
                 if ($row->ends_on && $row->ends_on->lt(today())) {
                     throw ValidationException::withMessages(['subscription' => 'This subscription has expired. End it and start a new one.']);
                 }

@@ -20,7 +20,7 @@ class CoachSetupController extends Controller
         $templates = $this->context->actor()->trainingPlans()->where('workspace_type', 'coach_template')
             ->withThumbnail()->with('trainingDays:id,training_plan_id,training_block_id,type,weekdays')->withCount('trainingDays')->orderBy('name')->get(['id', 'name', 'description', 'structure_type', 'duration_weeks'])->map(fn ($plan) => [...$plan->attributesToArray(), 'weekly_frequency' => $plan->weeklyFrequency()]);
         $draft = $setup->publicDraft($relationship);
-        $assigning = $request->boolean('assign') || $request->filled('template');
+        $assigning = $request->boolean('assign') || $request->filled('template') || $request->filled('assignment');
         if ($request->filled('template')) {
             abort_unless($templates->contains('id', $request->integer('template')), 404);
         }
@@ -31,7 +31,11 @@ class CoachSetupController extends Controller
             // Entering a new assignment changes only the page's choices. Saving remains
             // revision-checked and activation remains the sole domain commit.
             $base = $draft['saved_at'] && ! $draft['completed'] ? $draft['choices'] : $setup->defaults($relationship);
-            $draft['choices'] = [...$base, 'selection_type' => 'template', 'training_plan_id' => null, 'day_options' => [], 'time_overrides' => []];
+            $draft['choices'] = [...$base, 'selection_type' => 'template', 'training_plan_id' => null, 'start_date' => today()->toDateString(), 'end_date' => null, 'day_options' => [], 'time_overrides' => []];
+        }
+        if ($request->filled('assignment')) {
+            $assignment = $relationship->assignments()->where('status', 'active')->whereHas('plan')->findOrFail($request->integer('assignment'));
+            $draft['choices'] = [...$setup->defaults($relationship), 'selection_type' => 'assigned', 'training_plan_id' => $assignment->assigned_training_plan_id];
         }
         if ($request->filled('template')) {
             $draft['choices']['selection_type'] = 'template';
@@ -80,7 +84,7 @@ class CoachSetupController extends Controller
         return Inertia::render('Coach/ManageCoaching', [
             'relationship' => $relationship->only('id', 'status'),
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $this->context->actor()->id)->orderBy('name')->get(),
-            'subscriptions' => $relationship->subscriptions()->latest('id')->get()->map(fn ($s) => [...$s->toArray(), 'effective_status' => $s->effective_status, 'relationship' => ['status' => $relationship->status, 'trainee' => $this->context->owner()->only('name')]]),
+            'subscriptions' => $relationship->subscriptions()->with(['relationship.trainee', 'assignment.plan' => fn ($q) => $q->withThumbnail()])->latest('id')->get()->map(fn ($s) => app(CoachSubscriptionController::class)->row($s)),
         ]);
     }
 }

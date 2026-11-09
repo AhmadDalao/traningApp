@@ -18,6 +18,10 @@ class StoreScheduleEntryRequest extends FormRequest
                 app(CoachAccess::class)->futureSession($this->user(), $context->owner(), $entry);
             }
 
+            if ($this->filled('training_day_id') && ($day = TrainingDay::whereIn('training_plan_id', $context->plans()->select('training_plans.id'))->find($this->integer('training_day_id')))) {
+                app(CoachAccess::class)->assignment($this->user(), $context->owner(), $day->trainingPlan, true);
+            }
+
             return true;
         }
 

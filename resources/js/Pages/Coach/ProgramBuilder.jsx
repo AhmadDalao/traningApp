@@ -1,24 +1,13 @@
 import { useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { Plus, Pencil, Save, ArrowRight, Layers } from "lucide-react";
-import {
-    PageHeader,
-    Field,
-    Button,
-    ButtonLink,
-    Modal,
-} from "../../Components/UI";
+import { PageHeader, Field, Button, ButtonLink } from "../../Components/UI";
 import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import PersonAvatar from "../../Components/PersonAvatar";
-import TrainingDayForm from "../TrainingDays/Form";
 import { coachingJson } from "../../Features/CoachingUI";
 import { weekdaySummary } from "../../Components/WeekdayPicker";
 
-export default function ProgramBuilder({
-    plan: initial,
-    assignTo,
-    customExercises,
-}) {
+export default function ProgramBuilder({ plan: initial, assignTo }) {
     const [plan, setPlan] = useState(initial);
     const [data, setData] = useState({
         name: initial?.name || "",
@@ -28,11 +17,10 @@ export default function ProgramBuilder({
         schedule_mode: initial?.schedule_mode || "fixed",
     });
     const [busy, setBusy] = useState(false),
-        [errors, setErrors] = useState({}),
-        [editor, setEditor] = useState(null);
+        [errors, setErrors] = useState({});
     const change = (key, value) =>
         setData((current) => ({ ...current, [key]: value }));
-    async function save(action) {
+    async function save(action, day = null) {
         setBusy(true);
         setErrors({});
         try {
@@ -45,14 +33,11 @@ export default function ProgramBuilder({
             );
             setPlan(result.plan);
             if (action === "day") {
-                if (!plan)
-                    router.replace({
-                        url: `/coach/training-plans/${result.plan.id}/edit${assignTo ? `?assign_to=${assignTo.id}` : ""}`,
-                        props: (props) => ({ ...props, plan: result.plan }),
-                        preserveState: true,
-                        preserveScroll: true,
-                    });
-                setEditor({});
+                router.visit(
+                    day
+                        ? `/coach/training-days/${day.id}/edit?builder=1${assignTo ? `&assign_to=${assignTo.id}` : ""}`
+                        : `/coach/training-plans/${result.plan.id}/days/create?builder=1${assignTo ? `&assign_to=${assignTo.id}` : ""}`,
+                );
             } else if (action === "assign")
                 router.visit(
                     assignTo
@@ -237,7 +222,7 @@ export default function ProgramBuilder({
                                         <Button
                                             type="button"
                                             variant="secondary"
-                                            onClick={() => setEditor(day)}
+                                            onClick={() => save("day", day)}
                                             aria-label={`Edit ${day.title}`}
                                         >
                                             <Pencil size={15} /> Edit
@@ -279,35 +264,6 @@ export default function ProgramBuilder({
                     </div>
                 </fieldset>
             </form>
-            {editor && plan && (
-                <Modal
-                    title={
-                        editor.id ? `Edit ${editor.title}` : "Add Training Day"
-                    }
-                    wide
-                    onClose={() => setEditor(null)}
-                >
-                    <TrainingDayForm
-                        embedded
-                        plan={plan}
-                        day={editor.id ? editor : undefined}
-                        selectedBlock={plan.blocks?.[0]?.id}
-                        customExercises={customExercises}
-                        onCancel={() => setEditor(null)}
-                        onSaved={(day) => {
-                            setPlan((current) => ({
-                                ...current,
-                                training_days: editor.id
-                                    ? current.training_days.map((item) =>
-                                          item.id === day.id ? day : item,
-                                      )
-                                    : [...current.training_days, day],
-                            }));
-                            setEditor(null);
-                        }}
-                    />
-                </Modal>
-            )}
         </div>
     );
 }

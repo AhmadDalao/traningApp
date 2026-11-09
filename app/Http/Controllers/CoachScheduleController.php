@@ -19,7 +19,16 @@ class CoachScheduleController extends Controller
 
     public function create(Request $request)
     {
-        return Inertia::render('ScheduleEntries/Form', ['plans' => $this->context->schedulingPlans(), 'selectedDay' => $request->integer('day'), 'selectedDate' => $request->input('date', today()->toDateString())]);
+        $request->validate(['date' => 'nullable|date_format:Y-m-d']);
+
+        return Inertia::render('ScheduleEntries/Form', ['sameDayEntries' => $this->sameDay($request->input('date', today()->toDateString())), 'plans' => $this->context->schedulingPlans(), 'selectedDay' => $request->integer('day'), 'selectedDate' => $request->input('date', today()->toDateString())]);
+    }
+
+    private function sameDay(string $date)
+    {
+        return $this->context->sessions()->whereDate('scheduled_date', $date)->withThumbnail()->orderBy('scheduled_time')->get()->map(fn ($entry) => [
+            ...$entry->only('id', 'title', 'scheduled_time', 'status', 'thumbnail_url'), 'scheduled_date' => $entry->scheduled_date->toDateString(),
+        ]);
     }
 
     public function edit(ScheduleEntry $scheduleEntry)
@@ -35,12 +44,13 @@ class CoachScheduleController extends Controller
 
         return $this->context->write(function ($relationship, $subscription) use ($request, $entry) {
             $data = $request->validated();
-            $this->access->scheduleDate($subscription, $data['scheduled_date'], $data['scheduled_time'] ?? null);
             $day = TrainingDay::whereIn('training_plan_id', $this->context->plans(true)->select('training_plans.id'))->findOrFail($data['training_day_id']);
             // Use the same plan/day order as template editors and bulk scheduling.
             $plan = $day->trainingPlan()->lockForUpdate()->firstOrFail();
             $day = TrainingDay::lockForUpdate()->findOrFail($day->id);
-            $this->access->assignment($request->user(), $this->context->owner(), $plan, true);
+            $assignment = $this->access->assignment($request->user(), $this->context->owner(), $plan, true, true);
+            $subscription = $this->access->subscriptionFor($assignment, true);
+            $this->access->scheduleDate($subscription, $data['scheduled_date'], $data['scheduled_time'] ?? null);
             if ($entry) {
                 $entry = ScheduleEntry::lockForUpdate()->findOrFail($entry->id);
                 $entry->unsetRelation('trainingDay');

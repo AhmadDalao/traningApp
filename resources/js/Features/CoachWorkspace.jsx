@@ -223,7 +223,16 @@ export function TrainingRow({ plan, children }) {
                     </small>
                 )}
             </div>
-            <div className="coach-row-actions">{children}</div>
+            <div className="coach-row-actions">
+                {plan.subscription && (
+                    <span
+                        className={`badge ${plan.subscription.effective_status === "active" ? "completed" : "planned"}`}
+                    >
+                        {plan.subscription.effective_status} subscription
+                    </span>
+                )}
+                {children}
+            </div>
         </article>
     );
 }

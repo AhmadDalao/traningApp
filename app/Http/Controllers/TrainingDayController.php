@@ -24,7 +24,7 @@ class TrainingDayController extends Controller
     {
         $this->context->plan($trainingPlan, 'update');
 
-        return Inertia::render('TrainingDays/Form', ['plan' => $trainingPlan->load('blocks'), 'selectedBlock' => request()->integer('block'), 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
+        return Inertia::render('TrainingDays/Form', ['assignToId' => request()->integer('assign_to') ?: null, 'returnToBuilder' => $this->context->templates() && request()->boolean('builder'), 'plan' => $trainingPlan->load('blocks'), 'selectedBlock' => request()->integer('block'), 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
     }
 
     public function store(StoreTrainingDayRequest $request, TrainingPlan $trainingPlan)
@@ -33,6 +33,10 @@ class TrainingDayController extends Controller
 
         if ($request->expectsJson() && $this->context->templates()) {
             return response()->json(['day' => $day->load('exercises')], 201);
+        }
+
+        if ($this->context->templates() && $request->boolean('return_to_builder')) {
+            return $this->context->redirect('/training-plans/'.$trainingPlan->id.'/edit'.($request->integer('assign_to') ? '?assign_to='.$request->integer('assign_to') : ''))->with('success', 'Training day saved.');
         }
 
         return $this->context->redirect('/training-days/'.$day->id)->with('success', 'Training day created.')
@@ -52,7 +56,7 @@ class TrainingDayController extends Controller
     {
         $this->context->day($trainingDay, 'update');
 
-        return Inertia::render('TrainingDays/Form', ['day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan->load('blocks'), 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
+        return Inertia::render('TrainingDays/Form', ['assignToId' => request()->integer('assign_to') ?: null, 'returnToBuilder' => $this->context->templates() && request()->boolean('builder'), 'day' => $trainingDay->load('exercises'), 'plan' => $trainingDay->trainingPlan->load('blocks'), 'customExercises' => app(ExerciseLibrary::class)->customItems($this->context->actor()->id)]);
     }
 
     public function update(UpdateTrainingDayRequest $request, TrainingDay $trainingDay)
@@ -63,6 +67,10 @@ class TrainingDayController extends Controller
 
         if ($request->expectsJson() && ($this->context->templates() || $request->boolean('schedule_only'))) {
             return response()->json(['day' => $trainingDay->fresh()->load('exercises')]);
+        }
+
+        if ($this->context->templates() && $request->boolean('return_to_builder')) {
+            return $this->context->redirect('/training-plans/'.$trainingDay->training_plan_id.'/edit'.($request->integer('assign_to') ? '?assign_to='.$request->integer('assign_to') : ''))->with('success', 'Training day saved.');
         }
 
         return $this->context->redirect('/training-days/'.$trainingDay->id)->with('success', 'Training day updated.')

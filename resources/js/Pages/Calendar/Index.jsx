@@ -1,3 +1,4 @@
+import { programColors } from "../../Features/programColors";
 import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
@@ -24,6 +25,15 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
     const ref = useRef(null);
     const [title, setTitle] = useState("");
     const [view, setView] = useState(calendarView);
+    const [programFilter, setProgramFilter] = useState("all");
+    const programOptions = [
+        ...new Map(
+            entries.map((e) => [
+                String(e.training_plan_id || "other"),
+                e.training_plan_name || "Independent workout",
+            ]),
+        ).entries(),
+    ];
     const [filter, setFilter] = useState("all");
     const [moving, setMoving] = useState(null);
     const [adding, setAdding] = useState(false);
@@ -52,10 +62,17 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
     }
     const visible = entries.filter(
         (e) =>
-            filter === "all" || e.entry_type === filter || e.status === filter,
+            (filter === "all" ||
+                e.entry_type === filter ||
+                e.status === filter) &&
+            (programFilter === "all" ||
+                String(e.training_plan_id || "other") === programFilter),
     );
     const events = visible.map((e) => ({
         id: String(e.id),
+        backgroundColor: programColors(e.training_plan_id).background,
+        borderColor: programColors(e.training_plan_id).border,
+        textColor: programColors(e.training_plan_id).text,
         title: e.title,
         startEditable: e.can_move && !moving,
         durationEditable: false,
@@ -66,6 +83,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
         allDay: !e.scheduled_time,
         classNames: [`event-${e.entry_type}`, `event-${e.status}`],
         extendedProps: {
+            trainingName: e.training_plan_name,
             program: e.program_run_id
                 ? `Week ${e.program_week} · ${e.program_context?.block_name}${["paused", "ended"].includes(e.program_status) ? ` · ${e.program_status === "paused" ? "Paused" : "Ended early"}` : ""}`
                 : null,
@@ -91,8 +109,16 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                 {canManage && (
                     <Button
                         onClick={() => {
-                            setAdding(true);
-                            setSchedule({ date: today });
+                            if (coaching)
+                                router.visit(
+                                    url(
+                                        `/schedule-entries/create?date=${today}`,
+                                    ),
+                                );
+                            else {
+                                setAdding(true);
+                                setSchedule({ date: today });
+                            }
                         }}
                     >
                         <Plus size={17} />
@@ -150,6 +176,45 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                             </button>
                         ))}
                     </div>
+                </div>
+                <div
+                    className="program-legend"
+                    aria-label="Filter by training program"
+                >
+                    <button
+                        type="button"
+                        className={programFilter === "all" ? "active" : ""}
+                        onClick={() => setProgramFilter("all")}
+                    >
+                        All programs <span>{entries.length}</span>
+                    </button>
+                    {programOptions.map(([id, name]) => (
+                        <button
+                            type="button"
+                            key={id}
+                            className={programFilter === id ? "active" : ""}
+                            onClick={() => setProgramFilter(id)}
+                        >
+                            <i
+                                style={{
+                                    background: programColors(
+                                        id === "other" ? null : id,
+                                    ).border,
+                                }}
+                            />
+                            {name}
+                            <span>
+                                {
+                                    entries.filter(
+                                        (e) =>
+                                            String(
+                                                e.training_plan_id || "other",
+                                            ) === id,
+                                    ).length
+                                }
+                            </span>
+                        </button>
+                    ))}
                 </div>
                 <div className="calendar-filters" aria-label="Calendar filters">
                     {[
@@ -212,8 +277,14 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                         datesSet={(info) => setTitle(info.view.title)}
                         dateClick={(info) =>
                             canManage &&
-                            (setAdding(false),
-                            setSchedule({ date: info.dateStr }))
+                            (coaching
+                                ? router.visit(
+                                      url(
+                                          `/schedule-entries/create?date=${info.dateStr}`,
+                                      ),
+                                  )
+                                : (setAdding(false),
+                                  setSchedule({ date: info.dateStr })))
                         }
                         eventClick={(info) => {
                             info.jsEvent.preventDefault();
@@ -224,7 +295,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                         eventContent={({ event }) => (
                             <div
                                 className="calendar-event-content"
-                                title={`${event.title}${event.extendedProps.time ? ` · ${event.extendedProps.time}` : ""} · ${event.extendedProps.status}`}
+                                title={`${event.extendedProps.trainingName || "Workout"} · ${event.title}${event.extendedProps.time ? ` · ${event.extendedProps.time}` : ""} · ${event.extendedProps.status}`}
                             >
                                 {event.extendedProps.status === "completed" ? (
                                     <Check size={12} />
@@ -239,6 +310,9 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                                     />
                                 )}
                                 <span>
+                                    <small className="calendar-program-label">
+                                        {event.extendedProps.trainingName}
+                                    </small>
                                     {event.extendedProps.program && (
                                         <small className="calendar-program-label">
                                             {event.extendedProps.program}

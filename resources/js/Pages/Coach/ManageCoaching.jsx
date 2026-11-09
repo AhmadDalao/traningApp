@@ -1,35 +1,24 @@
+import SubscriptionTable from "../../Features/SubscriptionTable";
 import { Head } from "@inertiajs/react";
 import { useState } from "react";
 import { PageHeader, Button, ButtonLink } from "../../Components/UI";
-import {
-    PackageForm,
-    StartSubscription,
-    Subscription,
-} from "../../Features/CoachingForms";
+import { PackageForm } from "../../Features/CoachingForms";
 import { useTraining, EndRelationship } from "../../Features/CoachingUI";
-export default function ManageCoaching({
-    relationship,
-    subscriptions,
-    packages,
-}) {
+export default function ManageCoaching({ relationship, subscriptions }) {
     const ctx = useTraining();
-    const [starting, setStarting] = useState(false),
-        [creating, setCreating] = useState(false);
-    const existing = subscriptions.some((s) =>
-        ["active", "paused"].includes(s.status),
-    );
+    const [creating, setCreating] = useState(false);
     return (
         <>
             <Head title={`Coaching · ${ctx.trainee.name}`} />
             <PageHeader
                 title="Manage coaching"
-                description="Coaching periods control access to managing this trainee’s training."
+                description="Each program has its own coaching coverage and controls."
             >
-                {!existing && (
-                    <Button onClick={() => setStarting(true)}>
-                        Start coaching
-                    </Button>
-                )}
+                {
+                    <ButtonLink href={ctx.url("/setup?assign=1")}>
+                        Assign & activate training
+                    </ButtonLink>
+                }
                 <ButtonLink href={ctx.url("")} variant="secondary">
                     Back to trainee
                 </ButtonLink>
@@ -37,14 +26,13 @@ export default function ManageCoaching({
             {!subscriptions.length && (
                 <section className="panel coach-card">
                     <h2>No coaching period yet</h2>
-                    <p>Choose a Coaching Package and dates to get started.</p>
+                    <p>
+                        Choose training, review its dates, then assign and
+                        activate.
+                    </p>
                 </section>
             )}
-            <div className="coach-grid">
-                {subscriptions.map((s) => (
-                    <Subscription key={s.id} item={s} />
-                ))}
-            </div>
+            <SubscriptionTable items={subscriptions} />
             <section className="panel coach-card">
                 <h2>Coaching Packages</h2>
                 <p>Use a reusable package or a custom coaching period.</p>
@@ -63,13 +51,6 @@ export default function ManageCoaching({
                     label="Disconnect trainee"
                 />
             </details>
-            {starting && (
-                <StartSubscription
-                    packages={packages}
-                    relationship={relationship}
-                    close={() => setStarting(false)}
-                />
-            )}
             {creating && <PackageForm close={() => setCreating(false)} />}
         </>
     );

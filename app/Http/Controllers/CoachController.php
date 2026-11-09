@@ -61,11 +61,11 @@ class CoachController extends Controller
         $firstIds = (clone $nextWeek)->reorder()->select('id')->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY scheduled_date, scheduled_time, id) as sequence');
         $nextEntries = (clone $sessions)->whereIn('id', DB::query()->fromSub($firstIds, 'ranked')->where('sequence', 1)->select('id'))->with('user:id,name')->orderBy('scheduled_date')->orderBy('scheduled_time')->get()->keyBy('user_id');
         $todaySessions = (clone $sessions)->whereDate('scheduled_date', today())->with('user:id,name')->orderBy('user_id')->orderBy('scheduled_time')->get();
-        $recent = (clone $sessions)->whereIn('status', ['completed', 'skipped'])->with('user:id,name')->latest('updated_at')->limit(8)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'scheduled_date', 'scheduled_time', 'updated_at', 'training_day_id', 'workout_snapshot', 'program_prescription']);
+        $recent = (clone $sessions)->whereIn('status', ['completed', 'skipped'])->with('user:id,name')->latest('updated_at')->limit(100)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'scheduled_date', 'scheduled_time', 'updated_at', 'training_day_id', 'workout_snapshot', 'program_prescription']);
 
         return Inertia::render('Coach/Overview', [
             'stats' => ['trainees' => array_sum($counts->except(['pending', 'ended'])->all()), 'today' => (clone $sessions)->whereDate('scheduled_date', today())->where('entry_type', 'training')->whereIn('status', ['planned', 'completed'])->distinct()->count('user_id'), 'completed' => (clone $sessions)->whereDate('scheduled_date', today())->where('entry_type', 'training')->where('status', 'completed')->count(), 'attention' => ($counts['attention'] ?? 0) + ($counts['setup'] ?? 0) + ($counts['paused'] ?? 0), 'pending' => $counts['pending'] ?? 0, 'upcoming' => (clone $sessions)->upcoming()->whereNull('started_at')->whereBetween('scheduled_date', [today()->addDay(), today()->addDays(7)])->count()],
-            'attention' => $summary->rows((clone $query)->whereIn('display_state', ['attention', 'setup', 'paused'])->orderByRaw("CASE display_state WHEN 'attention' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END")->orderBy('id')->limit(8)->get()),
+            'attention' => $summary->rows((clone $query)->whereIn('display_state', ['attention', 'setup', 'paused'])->orderByRaw("CASE display_state WHEN 'attention' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END")->orderBy('id')->limit(100)->get()),
             'pending' => $summary->rows((clone $query)->where('status', 'pending')->orderByDesc('id')->limit(6)->get()),
             'todaySessions' => $todaySessions->map($describe),
             'upcomingGroups' => $groups->map(fn ($group) => [...$describe($nextEntries[$group->user_id]), 'session_count' => (int) $group->session_count])->sortBy(fn ($row) => $row['scheduled_date'].' '.$row['scheduled_time'])->values(),
@@ -108,7 +108,7 @@ class CoachController extends Controller
             'profile' => $owner->profile?->only('training_goals', 'experience_level', 'training_days_per_week', 'session_duration_minutes', 'equipment_access', 'body_weight_goal'),
             'body' => $body->summary($owner), 'recentRecords' => $progress->overview($owner)['recentRecords'],
             'subscription' => $relationship->subscriptions()->latest()->first()?->summary(),
-            'plans' => $context->plans()->withThumbnail()->with('assignment', 'programRuns')->latest()->get(['id', 'name', 'structure_type', 'duration_weeks', 'start_date', 'end_date']),
+            'plans' => $context->plans()->withThumbnail()->with('assignment.subscription', 'programRuns')->latest()->get(['id', 'name', 'structure_type', 'duration_weeks', 'start_date', 'end_date'])->map(fn ($plan) => [...$plan->toArray(), 'subscription' => $plan->assignment?->subscription?->summary()]),
             'nextSession' => $context->sessions()->withThumbnail()->upcoming()->orderBy('scheduled_date')->orderBy('scheduled_time')->whereNull('started_at')->first(),
             'recentWorkout' => $context->sessions()->where('entry_type', 'training')->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->first(['id', 'title', 'scheduled_date', 'entry_type', 'status', 'workout_snapshot', 'program_prescription']),
             'completion' => $total ? round((clone $month)->where('status', 'completed')->count() / $total * 100) : null,

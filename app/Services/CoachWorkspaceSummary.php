@@ -17,15 +17,15 @@ class CoachWorkspaceSummary
 
     public function query(User $coach)
     {
-        $subscriptions = CoachSubscription::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->latest('id')->limit(1);
-        $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused'])->whereDate('started_on', '<=', today()))->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused']))->latest('id')->limit(1);
+        $subscriptions = CoachSubscription::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->orderByRaw("CASE WHEN status = 'active' AND starts_on <= ? AND (ends_on IS NULL OR ends_on >= ?) THEN 0 WHEN status = 'paused' THEN 1 ELSE 2 END", [today()->toDateString(), today()->toDateString()])->latest('id')->limit(1);
+        $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->orderByDesc(CoachSubscription::selectRaw('COUNT(*)')->whereColumn('id', 'coach_plan_assignments.coach_subscription_id')->where('status', 'active')->whereDate('starts_on', '<=', today())->where(fn ($q) => $q->whereNull('ends_on')->orWhereDate('ends_on', '>=', today())))->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused'])->whereDate('started_on', '<=', today()))->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused']))->latest('id')->limit(1);
         $base = CoachTraineeRelationship::where('coach_user_id', $coach->id)->select('coach_trainee_relationships.id', 'coach_trainee_relationships.coach_user_id', 'coach_trainee_relationships.trainee_user_id', 'coach_trainee_relationships.status')
             ->selectSub($subscriptions, 'subscription_id')->selectSub($assignments, 'assignment_id');
         $facts = DB::query()->fromSub($base, 'r')
-            ->leftJoin('coach_subscriptions as s', 's.id', '=', 'r.subscription_id')
             ->leftJoin('coach_plan_assignments as a', 'a.id', '=', 'r.assignment_id')
+            ->leftJoin('coach_subscriptions as s', 's.id', '=', DB::raw('COALESCE(a.coach_subscription_id, r.subscription_id)'))
             ->leftJoin('training_plans as p', 'p.id', '=', 'a.assigned_training_plan_id')
-            ->select('r.*', 'p.id as plan_id', 'p.name as plan_name', 'p.structure_type', 'p.duration_weeks', 's.package_name', 's.status as subscription_status')
+            ->select('r.id', 'r.coach_user_id', 'r.trainee_user_id', 'r.status', 'r.assignment_id', 's.id as subscription_id', 'p.id as plan_id', 'p.name as plan_name', 'p.structure_type', 'p.duration_weeks', 's.package_name', 's.status as subscription_status')
             ->selectRaw('DATE(s.starts_on) as starts_on, DATE(s.ends_on) as ends_on')
             ->selectSub(ProgramRun::select('id')->whereColumn('training_plan_id', 'p.id')->currentFirst()->limit(1), 'run_id');
         $sessions = app(CoachAccess::class)->sessions($coach)->whereColumn('schedule_entries.user_id', 'f.trainee_user_id')->where('scheduled_by_user_id', $coach->id);

@@ -39,6 +39,7 @@ Route::middleware('guest')->group(function () {
 });
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/profile/notifications', [NotificationController::class, 'index']);
     Route::put('/notifications/preferences', [NotificationController::class, 'preferences'])->middleware('throttle:30,1,push-preferences:');
     Route::post('/notifications/subscription', [NotificationController::class, 'subscribe'])->middleware('throttle:10,1,push-subscribe:');
     Route::delete('/notifications/subscription', [NotificationController::class, 'unsubscribe'])->middleware('throttle:20,1,push-unsubscribe:');
@@ -116,6 +117,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', CoachWorkspace::class])->prefix('coach')->group(function () {
+    Route::get('/settings/notifications', [NotificationController::class, 'index']);
     Route::get('/settings', [CoachController::class, 'setup']);
     Route::post('/settings', [CoachController::class, 'updateProfile']);
     Route::get('/settings/account', [ProfileController::class, 'edit']);

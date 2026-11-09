@@ -1,3 +1,4 @@
+import SettingsNav from "../../Components/SettingsNav";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Head } from "@inertiajs/react";
 import { Bell, Smartphone } from "lucide-react";
@@ -101,6 +102,7 @@ export default function Index({
             : "Off on this device";
     return (
         <>
+            <SettingsNav section="notifications" />
             <Head title="Notifications" />
             <PageHeader
                 title="Notifications"

@@ -21,7 +21,7 @@ class PlanSchedule
         abort_if($plan->isProgram(), 422, 'Use Start Program or review the active run’s changes for a structured program.');
         $plan->loadMissing('trainingDays');
         $assignment = $coach ? app(CoachAccess::class)->assignment($coach, $plan->user, $plan, true, $lock) : null;
-        $subscription = $assignment ? app(CoachAccess::class)->subscription($assignment->relationship, $lock) : null;
+        $subscription = $assignment ? app(CoachAccess::class)->subscriptionFor($assignment, $lock) : null;
         $desired = $this->desired($plan, timeOverrides: $timeOverrides);
         $keys = array_column($desired, 'key');
         $entries = ScheduleEntry::where('user_id', $plan->user_id)

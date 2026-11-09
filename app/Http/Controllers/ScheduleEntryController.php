@@ -30,11 +30,16 @@ class ScheduleEntryController extends Controller
         $context = app(TrainingContext::class);
         $schedule = app(PlanSchedule::class);
         $schedule->ensureWindow($context->owner(), $context->coaching() ? $context->actor() : null);
-        $subscription = $context->coaching() ? app(CoachAccess::class)->subscription(app(CoachAccess::class)->relationship($context->actor(), $context->owner())) : null;
-        $managedPlans = $context->coaching() && $subscription ? $context->plans(true)->pluck('training_plans.id')->all() : [];
-        $coachCanMove = fn ($entry) => ! $context->coaching() || ($subscription &&
-            $entry->scheduled_by_user_id === $context->actor()->id && in_array($entry->trainingDay?->training_plan_id, $managedPlans, true) &&
-            $entry->scheduled_date->gte($subscription->starts_on) && (! $subscription->ends_on || $entry->scheduled_date->lte($subscription->ends_on)));
+        $managedPlans = $context->coaching() ? $context->plans(true)->with('assignment.subscription')->get()->keyBy('id') : collect();
+        $coachCanMove = function ($entry) use ($context, $managedPlans) {
+            if (! $context->coaching()) {
+                return true;
+            }
+            $subscription = $managedPlans->get($entry->trainingDay?->training_plan_id ?? $entry->programRun?->training_plan_id)?->assignment?->subscription;
+
+            return $subscription && $entry->scheduled_by_user_id === $context->actor()->id
+                && $entry->scheduled_date->gte($subscription->starts_on) && (! $subscription->ends_on || $entry->scheduled_date->lte($subscription->ends_on));
+        };
         $date = Carbon::parse($request->input('date', now()->toDateString()));
         $start = $date->copy()->startOfMonth()->subWeek();
         $end = $date->copy()->endOfMonth()->addWeek();
@@ -44,6 +49,8 @@ class ScheduleEntryController extends Controller
                 ...$entry->only('id', 'title', 'entry_type', 'focus_area', 'icon', 'scheduled_time', 'status', 'plan_occurrence_key', 'program_run_id', 'program_week', 'program_context', 'thumbnail_url'),
                 'scheduled_date' => $entry->scheduled_date->toDateString(),
                 'program_status' => $entry->programRun?->status,
+                'training_plan_id' => $entry->trainingDay?->training_plan_id ?? $entry->programRun?->training_plan_id ?? ($entry->workout_snapshot['training_plan_id'] ?? null),
+                'training_plan_name' => $entry->trainingDay?->trainingPlan?->name ?? ($entry->program_context['name'] ?? $entry->workout_snapshot['training_plan_name'] ?? 'Independent workout'),
                 'can_move' => $schedule->canMove($entry, $context->owner()) && $coachCanMove($entry),
                 'can_move_series' => $schedule->canMoveSeries($entry),
                 'source' => $entry->trainingDay?->trainingPlan?->workspace_type === 'coach_assigned' ? 'Coach assigned' : 'Personal',

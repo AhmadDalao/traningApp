@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CoachSubscription extends Model
 {
-    protected $fillable = ['coach_trainee_relationship_id', 'coach_subscription_plan_id', 'package_name', 'starts_on', 'ends_on', 'status', 'notes', 'ended_at'];
+    protected $fillable = ['coach_trainee_relationship_id', 'coach_plan_assignment_id', 'coach_subscription_plan_id', 'package_name', 'starts_on', 'ends_on', 'status', 'notes', 'ended_at'];
 
     protected function casts(): array
     {
@@ -16,6 +16,16 @@ class CoachSubscription extends Model
     public function relationship()
     {
         return $this->belongsTo(CoachTraineeRelationship::class, 'coach_trainee_relationship_id');
+    }
+
+    public function assignment()
+    {
+        return $this->belongsTo(CoachPlanAssignment::class, 'coach_plan_assignment_id');
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(CoachPlanAssignment::class, 'coach_subscription_id');
     }
 
     public function package()

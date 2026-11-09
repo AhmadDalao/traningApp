@@ -24,7 +24,7 @@ class ProgramControl
         abort_if($position['all_resolved'], 422, 'This program is already resolved. Refresh to see its completion.');
         $access = app(CoachAccess::class);
         $assignment = $coach ? $access->assignment($coach, $run->user, $run->trainingPlan, true, true) : null;
-        $subscription = $assignment ? $access->subscription($assignment->relationship, true) : null;
+        $subscription = $assignment ? $access->subscriptionFor($assignment, true) : null;
         $result = ['move' => [], 'keep' => [], 'remove' => [], 'protected' => [], 'days' => 0];
         $eligible = collect();
         foreach ($entries as $entry) {

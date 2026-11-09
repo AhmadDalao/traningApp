@@ -8,6 +8,7 @@ export default function ScheduleEntryForm({
     entry,
     selectedDay,
     selectedDate,
+    onDateChange,
     onCancel,
     onSaved,
 }) {
@@ -281,9 +282,10 @@ export default function ScheduleEntryForm({
                         type="date"
                         required
                         value={form.data.scheduled_date}
-                        onInput={(e) =>
-                            form.setData("scheduled_date", e.target.value)
-                        }
+                        onInput={(e) => {
+                            form.setData("scheduled_date", e.target.value);
+                            onDateChange?.(e.target.value);
+                        }}
                     />
                 </Field>
                 <Field

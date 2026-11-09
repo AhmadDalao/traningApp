@@ -101,7 +101,7 @@ class ExerciseProgression
         if ($coach) {
             $assignment = app(CoachAccess::class)->assignment($coach, $user, $template->trainingDay->trainingPlan, false, $lock);
             $relationship = app(CoachAccess::class)->relationship($coach, $user, $lock);
-            $subscription = app(CoachAccess::class)->subscription($relationship, $lock);
+            $subscription = app(CoachAccess::class)->subscriptionFor($assignment, $lock);
             $block = $template->trainingDay->trainingBlock;
             $result['can_apply'] = $result['can_apply'] && $assignment->status === 'active' && $subscription !== null
                 && (! $block || app(ProgramDefinition::class)->coachCanEditBlock($block));
