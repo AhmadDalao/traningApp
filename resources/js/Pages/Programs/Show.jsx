@@ -64,10 +64,10 @@ export default function Show({ plan, blocks, runs }) {
                                 : setEditing(true)
                         }
                     >
-                        Edit details
+                        {templates ? "Edit Program" : "Edit details"}
                     </Button>
                 )}
-                {canManage && !coaching && (
+                {canManage && !coaching && !templates && (
                     <Button
                         variant="secondary"
                         onClick={() => setDuplicate(true)}
@@ -171,6 +171,9 @@ export default function Show({ plan, blocks, runs }) {
                             {block.training_days.map((day) => (
                                 <details className="program-day" key={day.id}>
                                     <summary>
+                                        {(templates || coaching) && (
+                                            <TrainingThumbnail item={day} />
+                                        )}
                                         <strong>{day.title}</strong>
                                         <span>
                                             {weekdaySummary(day.weekdays || [])}{" "}
@@ -178,7 +181,9 @@ export default function Show({ plan, blocks, runs }) {
                                         </span>
                                     </summary>
                                     <div className="program-actions">
-                                        <TrainingThumbnail item={day} />
+                                        {!templates && !coaching && (
+                                            <TrainingThumbnail item={day} />
+                                        )}
                                         <ButtonLink
                                             variant="secondary"
                                             href={url(

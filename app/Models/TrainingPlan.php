@@ -29,6 +29,13 @@ class TrainingPlan extends Model
 
     protected $fillable = ['name', 'description', 'start_date', 'end_date', 'schedule_mode', 'structure_type', 'duration_weeks'];
 
+    public function weeklyFrequency(): ?array
+    {
+        $frequency = $this->relationLoaded('trainingDays') ? $this->trainingDays->where('type', 'training')->groupBy('training_block_id')->map(fn ($days) => $days->pluck('weekdays')->flatten()->unique()->count())->filter() : collect();
+
+        return $frequency->isNotEmpty() ? ['min' => $frequency->min(), 'max' => $frequency->max()] : null;
+    }
+
     public function isProgram(): bool
     {
         return $this->structure_type === 'program';

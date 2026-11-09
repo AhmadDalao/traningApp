@@ -61,7 +61,7 @@ class TrainingDayController extends Controller
         $before = $trainingDay->only($fields);
         $this->saveDay($request, $trainingDay->trainingPlan, $trainingDay);
 
-        if ($request->expectsJson() && $this->context->templates()) {
+        if ($request->expectsJson() && ($this->context->templates() || $request->boolean('schedule_only'))) {
             return response()->json(['day' => $trainingDay->fresh()->load('exercises')]);
         }
 
@@ -95,6 +95,27 @@ class TrainingDayController extends Controller
                 }
                 if ($day) {
                     app(ProgramDefinition::class)->dayWritable($day, $this->context->coaching());
+                }
+                if ($day && ($data['schedule_only'] ?? false)) {
+                    $normalizeDays = function ($days) {
+                        $days = array_map('intval', $days ?? []);
+                        sort($days);
+
+                        return $days;
+                    };
+                    if ($normalizeDays($day->weekdays) !== $normalizeDays($data['expected_weekdays']) || substr($day->default_time ?? '', 0, 5) !== ($data['expected_default_time'] ?? '')) {
+                        throw ValidationException::withMessages(['schedule' => 'This weekly schedule changed. Refresh before editing it again.']);
+                    }
+                    if ($normalizeDays($day->weekdays) !== $normalizeDays($data['weekdays'])) {
+                        $day->schedule_rules = null;
+                    }
+                    $day->fill(collect($data)->only('weekdays', 'default_time')->all());
+                    if ($day->isDirty()) {
+                        $day->save();
+                        $plan->forceFill(['schedule_enabled' => false])->save();
+                    }
+
+                    return $day;
                 }
                 if ($plan->isProgram()) {
                     $blockId = $day?->training_block_id ?? ($data['training_block_id'] ?? null);

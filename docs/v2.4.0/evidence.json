@@ -1,0 +1,394 @@
+{
+  "quality": [
+    {
+      "check": "pint",
+      "exit_code": 0,
+      "seconds": 0.32
+    },
+    {
+      "check": "prettier",
+      "exit_code": 0,
+      "seconds": 0.46
+    },
+    {
+      "check": "sqlite",
+      "exit_code": 0,
+      "seconds": 16.21
+    },
+    {
+      "check": "mysql",
+      "exit_code": 0,
+      "seconds": 46.51
+    },
+    {
+      "check": "javascript",
+      "exit_code": 0,
+      "seconds": 0.28
+    },
+    {
+      "check": "build",
+      "exit_code": 0,
+      "seconds": 1.85
+    },
+    {
+      "check": "composer-validate",
+      "exit_code": 0,
+      "seconds": 0.15
+    },
+    {
+      "check": "composer-audit",
+      "exit_code": 0,
+      "seconds": 2.61
+    },
+    {
+      "check": "composer-platform",
+      "exit_code": 0,
+      "seconds": 0.14
+    },
+    {
+      "check": "diff",
+      "exit_code": 0,
+      "seconds": 0.02
+    }
+  ],
+  "concurrency": [
+    {
+      "suite": "Coaching",
+      "exit_code": 0,
+      "checks": 17,
+      "seconds": 0.67
+    },
+    {
+      "suite": "RecurringSchedule",
+      "exit_code": 0,
+      "checks": 4,
+      "seconds": 0.51
+    },
+    {
+      "suite": "Program",
+      "exit_code": 0,
+      "checks": 10,
+      "seconds": 0.53
+    },
+    {
+      "suite": "ProgramControl",
+      "exit_code": 0,
+      "checks": 15,
+      "seconds": 1.44
+    },
+    {
+      "suite": "Notification",
+      "exit_code": 0,
+      "checks": 10,
+      "seconds": 1.23
+    },
+    {
+      "suite": "CoachSetup",
+      "exit_code": 0,
+      "checks": 39,
+      "seconds": 9.25
+    },
+    {
+      "suite": "WeeklySchedule",
+      "exit_code": 0,
+      "checks": 5,
+      "seconds": 1.57
+    }
+  ],
+  "browsers": [
+    {
+      "script": "program-card-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 3.03,
+      "checks": 22
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 4.0,
+      "checks": 22
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 8.5,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 10.03,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-coverage",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 9.85,
+      "checks": 63
+    },
+    {
+      "script": "thumbnail-coverage",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 10.29,
+      "checks": 63
+    },
+    {
+      "script": "coach-journey",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 7.14,
+      "checks": 84
+    },
+    {
+      "script": "coach-journey",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 8.85,
+      "checks": 84
+    },
+    {
+      "script": "coach-journey-coverage",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 6.37,
+      "checks": 12
+    },
+    {
+      "script": "coach-journey-coverage",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 5.04,
+      "checks": 12
+    },
+    {
+      "script": "pwa-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 3.87,
+      "checks": 20
+    },
+    {
+      "script": "pwa-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 5.77,
+      "checks": 19
+    },
+    {
+      "script": "coach-weekly-schedule",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 2.19,
+      "checks": 6
+    },
+    {
+      "script": "coach-weekly-schedule",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 4.09,
+      "checks": 6
+    },
+    {
+      "script": "coach-desktop-workspace",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 14.63,
+      "checks": 173
+    },
+    {
+      "script": "coach-desktop-workspace",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 15.3,
+      "checks": 173
+    }
+  ],
+  "performance": {
+    "programs": {
+      "queries": 7,
+      "milliseconds": 16.95
+    },
+    "builder": {
+      "queries": 8,
+      "milliseconds": 5.43
+    },
+    "choose_trainee": {
+      "queries": 13,
+      "milliseconds": 20.88
+    },
+    "schedule": {
+      "queries": 24,
+      "milliseconds": 14.89
+    },
+    "overview": {
+      "queries": 38,
+      "milliseconds": 25.34
+    },
+    "preview": {
+      "queries": 18,
+      "milliseconds": 13.11
+    },
+    "activation": {
+      "queries": 144,
+      "milliseconds": 84.4
+    },
+    "coach_overview": {
+      "queries": 25,
+      "milliseconds": 34.4
+    },
+    "trainees": {
+      "queries": 10,
+      "milliseconds": 24.75
+    },
+    "trainee_overview_active": {
+      "queries": 49,
+      "milliseconds": 54.2
+    },
+    "training": {
+      "queries": 27,
+      "milliseconds": 23.87
+    },
+    "calendar": {
+      "queries": 30,
+      "milliseconds": 21.25
+    },
+    "history": {
+      "queries": 22,
+      "milliseconds": 20.1
+    },
+    "progress": {
+      "queries": 41,
+      "milliseconds": 49.96
+    }
+  },
+  "integrity": {
+    "original_data_and_media_unchanged": true,
+    "tables": 22,
+    "original_media_files": 44,
+    "qa_accounts_removed": 14,
+    "ledger_entries": 14,
+    "qa_images_removed": 129
+  },
+  "screenshots": [
+    {
+      "name": "overview",
+      "width": 1440,
+      "file": "overview.webp",
+      "sha256": "b58b51d03c40903a5cdddea165b421a754f0e530300c125ed333fd3a27f3f9e7"
+    },
+    {
+      "name": "trainees",
+      "width": 1440,
+      "file": "trainees.webp",
+      "sha256": "7ed66ffe2925edea14c81c6be0664201a84c2e4f632892ca84cf43180d272854"
+    },
+    {
+      "name": "trainee-overview",
+      "width": 1440,
+      "file": "trainee-overview.webp",
+      "sha256": "a30dc23a70189a945b80372a4b74ec202ebfbabf3eefcc57b3545e4868f3069b"
+    },
+    {
+      "name": "training",
+      "width": 1440,
+      "file": "training.webp",
+      "sha256": "f691ebbf03aed53ecab845af5b6e033a345d38aaf6c89f8300801ca2d156466d"
+    },
+    {
+      "name": "programs",
+      "width": 1440,
+      "file": "programs.webp",
+      "sha256": "b4fb4884a52e60f7f70870ceea2b9f94a046c08c107d753d08d1960f45dbb6b6"
+    },
+    {
+      "name": "program-detail",
+      "width": 1440,
+      "file": "program-detail.webp",
+      "sha256": "67a892b390b6e2b259235d53b37cb3bae951899e2129ee6762065435cfc707fb"
+    },
+    {
+      "name": "program-builder",
+      "width": 1440,
+      "file": "program-builder.webp",
+      "sha256": "89028b760690af5504155fefdb6547242d35d66a60569b39fbdd6a090918d7a2"
+    },
+    {
+      "name": "choose-training",
+      "width": 1440,
+      "file": "choose-training.webp",
+      "sha256": "d4248a40163420265e91c78f696d34eadbd90f321463d2a765c28134b428e057"
+    },
+    {
+      "name": "assignment-schedule",
+      "width": 1440,
+      "file": "assignment-schedule.webp",
+      "sha256": "753fe4a2d89e36e56e0ffc1daacaecab2256c3840c5acedcc8ad02b468122397"
+    },
+    {
+      "name": "assignment-review",
+      "width": 1440,
+      "file": "assignment-review.webp",
+      "sha256": "5e7d123ccd881fe9054bbe81b3a9d9bae7b9e5f5c60a2769005d31e2bc0273ab"
+    },
+    {
+      "name": "edit-schedule",
+      "width": 1440,
+      "file": "edit-schedule.webp",
+      "sha256": "9ea774d8a35533f3e3469c469595a9fb194b0582d99b8bbe15cef1e32047a6cd"
+    },
+    {
+      "name": "calendar",
+      "width": 1440,
+      "file": "calendar.webp",
+      "sha256": "d5991191e5b38daed0c46680d4a27cc48ffd4c17e73736d6691d1d49c6fb7289"
+    },
+    {
+      "name": "add-workout",
+      "width": 1440,
+      "file": "add-workout.webp",
+      "sha256": "65456da7771270ed888f425bc1263adfc1e09df0f35f12bf7239d07bf64e0d6c"
+    },
+    {
+      "name": "history",
+      "width": 1440,
+      "file": "history.webp",
+      "sha256": "4a6114085e1f175bf4f03616a197c220212e4a7ef15682f6e5543563aa8d2f76"
+    },
+    {
+      "name": "progress",
+      "width": 1440,
+      "file": "progress.webp",
+      "sha256": "8b67e814ae6718921ef2da98c1b3cf25068e4199eb142d09cbabc9e17f9ed86e"
+    },
+    {
+      "name": "trainee-overview",
+      "width": 320,
+      "file": "trainee-overview-320.webp",
+      "sha256": "aed0a7ea3c9cc3f8658eb1b1d4ed4df2a5a17a4446ecd8a1084ffd26f785decc"
+    },
+    {
+      "name": "assignment-review",
+      "width": 320,
+      "file": "assignment-review-320.webp",
+      "sha256": "86dd46efaf23f89c82e25375030f0017e75367b2ab6ae386ec31c7fae6da2967"
+    },
+    {
+      "name": "programs",
+      "width": 1920,
+      "file": "programs-1920.webp",
+      "sha256": "6fafca296d1fe01b4f9e43ec7a36ee31eba221e18c09eb236baa9e73221c8c6e"
+    },
+    {
+      "name": "overview",
+      "width": 2560,
+      "file": "overview-2560.webp",
+      "sha256": "056123dbf67d5ad220076f0d8b122d73f0e89a4be3acc161c9b82f80351251d4"
+    }
+  ]
+}

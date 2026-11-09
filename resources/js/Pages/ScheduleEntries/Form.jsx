@@ -18,7 +18,7 @@ export default function Form({ plans, entry, selectedDay, selectedDate }) {
                     coaching
                         ? entry
                             ? "Edit workout"
-                            : "Schedule workout"
+                            : "Add Workout"
                         : entry
                           ? "Edit your session"
                           : "Schedule a session"

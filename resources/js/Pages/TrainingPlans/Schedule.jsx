@@ -1,3 +1,4 @@
+import WeeklyScheduleEditor from "../../Features/WeeklyScheduleEditor";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
@@ -82,7 +83,7 @@ function Sessions({ rows, label }) {
     );
 }
 export default function Schedule({ plan, preview }) {
-    const { url } = useTraining();
+    const { url, coaching } = useTraining();
     const { today } = usePage().props;
     const stopped = plan.end_date && plan.end_date <= today;
     const windowEnd =
@@ -163,7 +164,10 @@ export default function Schedule({ plan, preview }) {
                     { label: "Manage schedule" },
                 ]}
             />
-            <PageHeader title="Manage schedule" description={plan.name}>
+            <PageHeader
+                title={coaching ? "Edit Schedule" : "Manage schedule"}
+                description={plan.name}
+            >
                 <ButtonLink
                     href={url(`/training-plans/${plan.id}`)}
                     variant="secondary"
@@ -226,22 +230,32 @@ export default function Schedule({ plan, preview }) {
                         </Button>
                     </>
                 )}
-                <div className="schedule-days">
-                    {plan.training_days.map((day) => (
-                        <div key={day.id}>
-                            <strong>{day.title}</strong>
-                            <span>
-                                {weekdaySummary(day.weekdays || [])}
-                                {day.default_time && (
-                                    <>
-                                        {" "}
-                                        · <TimeLabel time={day.default_time} />
-                                    </>
-                                )}
-                            </span>
-                        </div>
-                    ))}
-                </div>
+                {coaching ? (
+                    <>
+                        <h2>Weekly schedule</h2>
+                        <WeeklyScheduleEditor days={plan.training_days} />
+                    </>
+                ) : (
+                    <div className="schedule-days">
+                        {plan.training_days.map((day) => (
+                            <div key={day.id}>
+                                <strong>{day.title}</strong>
+                                <span>
+                                    {weekdaySummary(day.weekdays || [])}
+                                    {day.default_time && (
+                                        <>
+                                            {" "}
+                                            ·{" "}
+                                            <TimeLabel
+                                                time={day.default_time}
+                                            />
+                                        </>
+                                    )}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <p className="field-hint">
                     Schedule changes require review and confirmation. Active
                     ongoing schedules add missing future sessions automatically.
@@ -285,73 +299,132 @@ export default function Schedule({ plan, preview }) {
                         {preview.message}
                     </p>
                 )}
-                <div
-                    className="schedule-diff-tabs"
-                    aria-label="Schedule change categories"
+                {coaching && (
+                    <div className="panel-padding">
+                        <div className="schedule-human-summary">
+                            <span>
+                                <strong>{preview.keep.length}</strong> workouts
+                                stay unchanged
+                            </span>
+                            <span>
+                                <strong>{preview.add.length}</strong> new or
+                                revised dates
+                            </span>
+                            <span>
+                                <strong>{preview.remove.length}</strong> old
+                                dates to review
+                            </span>
+                            <span>
+                                <strong>{preview.protected.length}</strong>{" "}
+                                protected sessions stay untouched
+                            </span>
+                        </div>
+                        <div className="coach-actions">
+                            <Button
+                                disabled={
+                                    !preview.add.length &&
+                                    !preview.remove.length
+                                }
+                                onClick={() => {
+                                    setRemoveObsolete(false);
+                                    setAction("regenerate");
+                                }}
+                            >
+                                Review changes
+                            </Button>
+                            {plan.schedule_mode === "ongoing" &&
+                                !plan.schedule_enabled && (
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => setAction("add")}
+                                    >
+                                        Activate rolling schedule
+                                    </Button>
+                                )}
+                        </div>
+                    </div>
+                )}
+                <details
+                    className={
+                        coaching ? "schedule-advanced panel-padding" : undefined
+                    }
+                    open={coaching ? undefined : true}
                 >
-                    {groups.map(({ key, name, icon: Icon, description }) => (
-                        <button
-                            type="button"
-                            key={key}
-                            aria-pressed={group === key}
-                            onClick={() => setGroup(key)}
-                            className={group === key ? "active" : ""}
+                    <summary hidden={!coaching}>
+                        Advanced schedule details
+                    </summary>
+                    <div
+                        className="schedule-diff-tabs"
+                        aria-label="Schedule change categories"
+                    >
+                        {groups.map(
+                            ({ key, name, icon: Icon, description }) => (
+                                <button
+                                    type="button"
+                                    key={key}
+                                    aria-pressed={group === key}
+                                    onClick={() => setGroup(key)}
+                                    className={group === key ? "active" : ""}
+                                >
+                                    <Icon size={18} aria-hidden="true" />
+                                    <strong>{preview[key].length}</strong>
+                                    <span>{name}</span>
+                                    <small>{description}</small>
+                                </button>
+                            ),
+                        )}
+                    </div>
+                    <p className="panel-padding field-hint">
+                        {group === "add"
+                            ? `${preview.new_count} missing sessions${preview.replacement_count ? ` and ${preview.replacement_count} replacements` : ""}.`
+                            : group === "keep"
+                              ? "These future generated sessions already match and will stay unchanged."
+                              : group === "remove"
+                                ? "These eligible generated sessions no longer match the plan. Nothing is removed until you confirm."
+                                : "Completed, skipped, active, saved, historical and independent sessions stay untouched. Older generated sessions are kept because their individual edit history is unknown."}
+                    </p>
+                    <Sessions
+                        key={group}
+                        rows={preview[group]}
+                        label={`${group} sessions preview`}
+                    />
+                    <div className="schedule-manager-actions">
+                        <Button
+                            disabled={
+                                !preview.new_count &&
+                                !(
+                                    plan.schedule_mode === "ongoing" &&
+                                    !plan.schedule_enabled
+                                )
+                            }
+                            onClick={() => setAction("add")}
                         >
-                            <Icon size={18} aria-hidden="true" />
-                            <strong>{preview[key].length}</strong>
-                            <span>{name}</span>
-                            <small>{description}</small>
-                        </button>
-                    ))}
-                </div>
-                <p className="panel-padding field-hint">
-                    {group === "add"
-                        ? `${preview.new_count} missing sessions${preview.replacement_count ? ` and ${preview.replacement_count} replacements` : ""}.`
-                        : group === "keep"
-                          ? "These future generated sessions already match and will stay unchanged."
-                          : group === "remove"
-                            ? "These eligible generated sessions no longer match the plan. Nothing is removed until you confirm."
-                            : "Completed, skipped, active, saved, historical and independent sessions stay untouched. Older generated sessions are kept because their individual edit history is unknown."}
-                </p>
-                <Sessions
-                    key={group}
-                    rows={preview[group]}
-                    label={`${group} sessions preview`}
-                />
-                <div className="schedule-manager-actions">
-                    <Button
-                        disabled={
-                            !preview.new_count &&
-                            !(
-                                plan.schedule_mode === "ongoing" &&
-                                !plan.schedule_enabled
-                            )
-                        }
-                        onClick={() => setAction("add")}
-                    >
-                        <CalendarPlus size={16} />
-                        Add missing sessions
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        disabled={!preview.add.length && !preview.remove.length}
-                        onClick={() => {
-                            setRemoveObsolete(false);
-                            setAction("regenerate");
-                        }}
-                    >
-                        <RefreshCw size={16} />
-                        Regenerate future schedule
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        disabled={!preview.eligible.length}
-                        onClick={() => setAction("remove")}
-                    >
-                        <Trash2 size={16} />
-                        Remove future sessions
-                    </Button>
-                </div>
+                            <CalendarPlus size={16} />
+                            Add missing sessions
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            disabled={
+                                !preview.add.length && !preview.remove.length
+                            }
+                            onClick={() => {
+                                setRemoveObsolete(false);
+                                setAction("regenerate");
+                            }}
+                        >
+                            <RefreshCw size={16} />
+                            Regenerate future schedule
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            disabled={!preview.eligible.length}
+                            onClick={() => setAction("remove")}
+                        >
+                            <Trash2 size={16} />
+                            Remove future sessions
+                        </Button>
+                    </div>
+                </details>
             </section>
             {stopping && (
                 <ScheduleChangeModal
@@ -361,7 +434,11 @@ export default function Schedule({ plan, preview }) {
             )}
             {action && (
                 <Modal
-                    title={actionTitle}
+                    title={
+                        coaching && action === "regenerate"
+                            ? "Review schedule changes"
+                            : actionTitle
+                    }
                     onClose={() => !form.processing && setAction(null)}
                     wide
                 >

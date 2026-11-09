@@ -106,7 +106,10 @@ class ProgramController extends Controller
         $this->authorizeRun($programRun);
         $run = $lifecycle->sync($programRun->id);
 
-        return Inertia::render('Programs/Run', ['run' => $run, 'position' => $lifecycle->position($run),
+        return Inertia::render('Programs/Run', ['scheduleDefinition' => $this->context->coaching() && $run->training_plan_id ? [
+            'id' => $run->training_plan_id,
+            'blocks' => $run->trainingPlan->blocks()->with(['trainingDays' => fn ($q) => $q->withThumbnail()])->get()->map(fn ($block) => [...$block->toArray(), 'editable' => app(ProgramDefinition::class)->coachCanEditBlock($block)]),
+        ] : null, 'run' => $run, 'position' => $lifecycle->position($run),
             'summary' => $run->status === 'completed' ? $lifecycle->summary($run) : null]);
     }
 

@@ -81,8 +81,12 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
             <Head title="Calendar" />
             <PageHeader
                 eyebrow="MAKE TIME FOR YOURSELF"
-                title="Your training calendar"
-                description="A little structure for your strongest weeks."
+                title={coaching ? "Calendar" : "Your training calendar"}
+                description={
+                    coaching
+                        ? "Scheduled training and one-off workouts."
+                        : "A little structure for your strongest weeks."
+                }
             >
                 {canManage && (
                     <Button
@@ -92,7 +96,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                         }}
                     >
                         <Plus size={17} />
-                        Schedule session
+                        {coaching ? "Add Workout" : "Schedule session"}
                     </Button>
                 )}
             </PageHeader>
@@ -265,7 +269,7 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
             )}
             {schedule && (
                 <Modal
-                    title="Schedule a session"
+                    title={coaching ? "Add Workout" : "Schedule a session"}
                     onClose={() => setSchedule(null)}
                 >
                     <p>
@@ -325,12 +329,20 @@ export default function Index({ entries, plans, calendarDate, calendarView }) {
                             Add another session
                         </Button>
                     ) : (
-                        <ScheduleEntryForm
-                            plans={plans}
-                            selectedDate={schedule.date}
-                            onSaved={() => setSchedule(null)}
-                            onCancel={() => setSchedule(null)}
-                        />
+                        <>
+                            {coaching && (
+                                <p className="copy-description">
+                                    Add a one-off workout. The regular weekly
+                                    schedule stays unchanged.
+                                </p>
+                            )}
+                            <ScheduleEntryForm
+                                plans={plans}
+                                selectedDate={schedule.date}
+                                onSaved={() => setSchedule(null)}
+                                onCancel={() => setSchedule(null)}
+                            />
+                        </>
                     )}
                 </Modal>
             )}

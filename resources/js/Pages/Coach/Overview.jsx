@@ -8,21 +8,24 @@ import {
     Clock,
 } from "lucide-react";
 import { Head, Link } from "@inertiajs/react";
-import {
-    PageHeader,
-    ButtonLink,
-    DateLabel,
-    TimeLabel,
-} from "../../Components/UI";
-import { CoachStatus, TraineeState } from "../../Features/CoachingUI";
-function SessionList({ entries, empty }) {
+import { PageHeader, ButtonLink } from "../../Components/UI";
+import { CoachStatus } from "../../Features/CoachingUI";
+import { WorkoutDate } from "../../Features/CoachWorkspace";
+function SessionList({ entries, empty, grouped = false, showTrainee = true }) {
     return (
-        <div className="coach-bounded-list">
-            {entries.slice(0, 6).map((entry) => (
-                <article className="coach-session" key={entry.id}>
-                    <PersonAvatar name={entry.trainee_name} />
+        <div className="coach-daily-list">
+            {entries.map((entry) => (
+                <article
+                    className="coach-session"
+                    key={grouped ? entry.user_id : entry.id}
+                >
+                    {showTrainee && <PersonAvatar name={entry.trainee_name} />}
                     <div className="coach-session-copy">
-                        <strong>{entry.trainee_name}</strong>
+                        {showTrainee && (
+                            <Link href={`/coach/trainees/${entry.user_id}`}>
+                                <strong>{entry.trainee_name}</strong>
+                            </Link>
+                        )}
                         <div className="thumbnail-identity">
                             <TrainingThumbnail item={entry} />
                             <Link
@@ -33,25 +36,58 @@ function SessionList({ entries, empty }) {
                         </div>
                         {entry.scheduled_date && (
                             <small>
-                                <DateLabel date={entry.scheduled_date} />{" "}
-                                {entry.scheduled_time ? (
-                                    <TimeLabel time={entry.scheduled_time} />
-                                ) : (
-                                    " · Anytime"
-                                )}
+                                <WorkoutDate entry={entry} />
                             </small>
                         )}
                     </div>
-                    <CoachStatus status={entry.status} />
+                    {grouped ? (
+                        <div className="coach-upcoming-count">
+                            <strong>{entry.session_count} workouts</strong>
+                            <Link
+                                href={`/coach/trainees/${entry.user_id}/calendar`}
+                            >
+                                Calendar →
+                            </Link>
+                        </div>
+                    ) : (
+                        <CoachStatus status={entry.status} />
+                    )}
                 </article>
             ))}
-            {!entries.length && <p>{empty}</p>}
+            {!entries.length && <p className="coach-quiet-empty">{empty}</p>}
         </div>
+    );
+}
+function TodayList({ entries }) {
+    const groups = new Map();
+    for (const entry of entries)
+        groups.set(entry.user_id, [
+            ...(groups.get(entry.user_id) || []),
+            entry,
+        ]);
+    return entries.length ? (
+        [...groups].map(([user, rows]) => (
+            <section className="coach-today-group" key={user}>
+                <div className="person-identity">
+                    <PersonAvatar name={rows[0].trainee_name} />
+                    <Link href={`/coach/trainees/${user}`}>
+                        <strong>{rows[0].trainee_name}</strong>
+                    </Link>
+                    <small>
+                        {rows.length} workout{rows.length === 1 ? "" : "s"}
+                    </small>
+                </div>
+                <SessionList entries={rows} showTrainee={false} />
+            </section>
+        ))
+    ) : (
+        <p className="coach-quiet-empty">No workouts scheduled today.</p>
     );
 }
 export default function Overview({
     stats,
-    upcoming,
+    todaySessions = [],
+    upcomingGroups = [],
     recent,
     attention = [],
     pending = [],
@@ -61,106 +97,109 @@ export default function Overview({
             <Head title="Coach Overview" />
             <PageHeader
                 title="Coach Overview"
-                description="Who needs your attention today?"
+                description="Your coaching day, at a glance."
             >
                 <ButtonLink href="/coach/trainees">Manage trainees</ButtonLink>
             </PageHeader>
-            <div className="coach-operational">
-                <section className="panel coach-card coach-attention">
+            <div className="coach-stats coach-desktop-metrics">
+                {[
+                    ["Active trainees", stats.trainees, Users, "green"],
+                    ["Training today", stats.today, CalendarDays, "blue"],
+                    ["Completed today", stats.completed, CheckCircle2, "green"],
+                    [
+                        "Need attention",
+                        stats.attention,
+                        AlertTriangle,
+                        "orange",
+                    ],
+                ].map(([label, count, Icon, color]) => (
+                    <div className="panel coach-stat" key={label}>
+                        <span className="metric-label">
+                            {label}
+                            <span className={`stat-icon ${color}`}>
+                                <Icon size={18} aria-hidden="true" />
+                            </span>
+                        </span>
+                        <strong>{count}</strong>
+                    </div>
+                ))}
+            </div>
+            <div className="coach-overview-columns">
+                <section className="panel coach-card">
                     <div className="coach-card-title">
                         <h2>
-                            <AlertTriangle size={20} aria-hidden="true" /> Needs
+                            <AlertTriangle size={19} aria-hidden="true" /> Needs
                             attention
                         </h2>
                         <Link href="/coach/trainees?status=attention">
                             View trainees →
                         </Link>
                     </div>
-                    <div className="coach-bounded-list">
-                        {attention.slice(0, 5).map((row) => (
-                            <Link
-                                className="coach-session"
-                                key={row.id}
+                    {attention.slice(0, 5).map((row) => (
+                        <article className="coach-session" key={row.id}>
+                            <PersonAvatar name={row.trainee.name} />
+                            <div className="coach-session-copy">
+                                <Link
+                                    href={`/coach/trainees/${row.trainee.id}`}
+                                >
+                                    <strong>{row.trainee.name}</strong>
+                                </Link>
+                                <span>{row.reason}</span>
+                            </div>
+                            <ButtonLink
+                                variant="secondary"
                                 href={row.action.url}
                             >
-                                <PersonAvatar name={row.trainee.name} />
-                                <div className="coach-session-copy">
-                                    <strong>{row.trainee.name}</strong>
-                                    <span>{row.reason}</span>
-                                    <small>{row.action.label} →</small>
-                                </div>
-                                <TraineeState state={row.display_state} />
+                                {row.action.label === "Continue Assignment"
+                                    ? "Assign Training"
+                                    : row.action.label}
+                            </ButtonLink>
+                        </article>
+                    ))}
+                    {!attention.length && (
+                        <p className="on-track">
+                            <CheckCircle2 size={18} aria-hidden="true" />{" "}
+                            Everyone is on track.
+                        </p>
+                    )}
+                    {pending.length > 0 && (
+                        <div className="coach-pending-summary">
+                            <Link href="/coach/trainees?status=pending">
+                                {stats.pending} pending requests →
                             </Link>
-                        ))}
-                        {!attention.length && (
-                            <p className="on-track">
-                                <CheckCircle2 size={18} aria-hidden="true" />{" "}
-                                Everyone is on track.
-                            </p>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </section>
-                <section className="panel coach-card coach-today">
-                    <h2>
-                        <CalendarDays size={20} aria-hidden="true" /> Today &
-                        coming up
-                    </h2>
-                    <p>Upcoming sessions over the next seven days.</p>
+                <section className="panel coach-card">
+                    <div className="coach-card-title">
+                        <h2>
+                            <CalendarDays size={19} aria-hidden="true" /> Today
+                        </h2>
+                        <span className="count-bubble">
+                            {todaySessions.length}
+                        </span>
+                    </div>
+                    <TodayList entries={todaySessions} />
+                </section>
+            </div>
+            <div className="coach-overview-columns">
+                <section className="panel coach-card">
+                    <div className="coach-card-title">
+                        <h2>Upcoming · Next 7 days</h2>
+                        <small>Next workout per trainee</small>
+                    </div>
                     <SessionList
-                        entries={upcoming}
-                        empty="No upcoming sessions. Open a trainee to schedule their next workout."
+                        entries={upcomingGroups}
+                        grouped
+                        empty="No upcoming workouts in the next seven days."
                     />
                 </section>
-                {pending.length > 0 && (
-                    <section className="panel coach-card coach-pending">
-                        <div className="coach-card-title">
-                            <h2>Pending requests</h2>
-                            <Link href="/coach/trainees?status=pending">
-                                View requests →
-                            </Link>
-                        </div>
-                        {pending.map((row) => (
-                            <p key={row.id}>
-                                <strong>{row.trainee.name}</strong> · Waiting
-                                for acceptance
-                            </p>
-                        ))}
-                    </section>
-                )}
-                <div className="coach-stats coach-summary">
-                    {[
-                        ["Active trainees", stats.trainees, Users, "green"],
-                        ["Training today", stats.today, CalendarDays, "blue"],
-                        [
-                            "Completed today",
-                            stats.completed,
-                            CheckCircle2,
-                            "green",
-                        ],
-                        [
-                            "Need attention",
-                            stats.attention,
-                            AlertTriangle,
-                            "orange",
-                        ],
-                    ].map(([label, count, Icon, color]) => (
-                        <div className="panel coach-stat" key={label}>
-                            <span className="metric-label">
-                                {label}
-                                <span className={`stat-icon ${color}`}>
-                                    <Icon size={18} aria-hidden="true" />
-                                </span>
-                            </span>
-                            <strong>{count}</strong>
-                        </div>
-                    ))}
-                </div>
-                <section className="panel coach-card coach-recent">
+                <section className="panel coach-card">
                     <h2>
-                        <Clock size={20} aria-hidden="true" /> Recent activity
+                        <Clock size={19} aria-hidden="true" /> Recent activity
                     </h2>
                     <SessionList
-                        entries={recent}
+                        entries={recent.slice(0, 5)}
                         empty="Activity appears when trainees record their workouts."
                     />
                 </section>

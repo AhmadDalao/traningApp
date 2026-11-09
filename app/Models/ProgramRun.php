@@ -28,6 +28,12 @@ class ProgramRun extends Model
         return $this->status === 'ended' || ($this->status === 'paused' && $this->paused_from && $entry->scheduled_date->gte($this->paused_from));
     }
 
+    /** Prefer a started live run, then upcoming runs, then historical runs. */
+    public function scopeCurrentFirst($query)
+    {
+        return $query->reorder()->orderByRaw("CASE WHEN status IN ('active', 'paused') AND started_on <= ? THEN 0 WHEN status IN ('active', 'paused') THEN 1 ELSE 2 END", [today()->toDateString()])->orderByDesc('id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

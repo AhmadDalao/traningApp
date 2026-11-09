@@ -55,6 +55,10 @@ class ScheduleEntryController extends Controller
 
     private function plans(Request $request)
     {
+        if (app(TrainingContext::class)->coaching()) {
+            return app(TrainingContext::class)->schedulingPlans();
+        }
+
         return app(TrainingContext::class)->plans(true)->with(['trainingDays' => fn ($day) => $day->withThumbnail(), 'assignment.relationship.coach.coachProfile'])->orderBy('name')->get()->map(fn ($plan) => [...$plan->only('id', 'name', 'workspace_type'), 'training_days' => $plan->trainingDays, 'coach_name' => $plan->assignment?->relationship?->coach?->coachProfile?->display_name]);
     }
 

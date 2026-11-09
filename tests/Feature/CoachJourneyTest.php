@@ -170,6 +170,10 @@ class CoachJourneyTest extends TestCase
         $measure('activation', fn () => $this->postJson('/coach/trainees/'.$this->trainee->id.'/setup/activate', ['revision' => $saved['revision'], 'token' => $saved['token'], 'signature' => $preview['signature'], 'confirmed' => true]));
         $this->assertDatabaseCount('schedule_entries', 48);
         $this->assertDatabaseCount('program_runs', 1);
+        foreach (['coach_overview' => '/coach', 'trainees' => '/coach/trainees', 'trainee_overview_active' => '/coach/trainees/'.$this->trainee->id, 'training' => '/coach/trainees/'.$this->trainee->id.'/training-plans', 'calendar' => '/coach/trainees/'.$this->trainee->id.'/calendar', 'history' => '/coach/trainees/'.$this->trainee->id.'/training-history', 'progress' => '/coach/trainees/'.$this->trainee->id.'/progress'] as $label => $url) {
+            $measure($label, fn () => $this->get($url));
+            $this->assertLessThan(75, $metrics[$label]['queries'], $label.' bounded query count');
+        }
         if ($output = getenv('QA_METRICS_FILE')) {
             file_put_contents($output, json_encode($metrics, JSON_PRETTY_PRINT));
         }

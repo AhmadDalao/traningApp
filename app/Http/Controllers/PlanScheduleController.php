@@ -21,7 +21,7 @@ class PlanScheduleController extends Controller
         $schedule->ensureWindow($this->context->owner(), $this->context->coaching() ? $this->context->actor() : null, $trainingPlan->id);
         $preview = $schedule->preview($trainingPlan, coach: $this->context->coaching() ? $this->context->actor() : null);
 
-        return Inertia::render('TrainingPlans/Schedule', ['plan' => $trainingPlan, 'preview' => $preview]);
+        return Inertia::render('TrainingPlans/Schedule', ['plan' => $this->context->coaching() ? $trainingPlan->load(['trainingDays' => fn ($q) => $q->withThumbnail()]) : $trainingPlan, 'preview' => $preview]);
     }
 
     public function store(Request $request, TrainingPlan $trainingPlan, PlanSchedule $schedule)

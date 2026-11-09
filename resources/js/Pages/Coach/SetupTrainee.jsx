@@ -61,6 +61,30 @@ export default function SetupTrainee({
     ).find((p) => p.id === Number(choices.training_plan_id));
     const days = preview?.days || [];
     const scheduled = preview?.already_scheduled || false;
+    const [weekBlock, setWeekBlock] = useState("");
+    const dayBlocks = new Map(
+        (preview?.sessions || [])
+            .filter((row) => row.program_context?.block_id)
+            .map((row) => [row.training_day_id, row.program_context]),
+    );
+    const weekBlocks = [
+        ...new Map(
+            [...dayBlocks.values()].map((block) => [
+                String(block.block_id),
+                block,
+            ]),
+        ).values(),
+    ];
+    const selectedWeekBlock =
+        weekBlocks.find((block) => String(block.block_id) === weekBlock) ||
+        weekBlocks[0];
+    const weekDays = selectedWeekBlock
+        ? days.filter(
+              (day) =>
+                  dayBlocks.get(day.id)?.block_id ===
+                  selectedWeekBlock.block_id,
+          )
+        : days;
     const categories = [
         {
             value: "program",
@@ -340,8 +364,10 @@ export default function SetupTrainee({
                                                     {plan.duration_weeks
                                                         ? `${plan.duration_weeks} weeks`
                                                         : "Simple plan"}{" "}
-                                                    · {plan.training_days_count}{" "}
-                                                    training days
+                                                    ·{" "}
+                                                    <TrainingFrequency
+                                                        plan={plan}
+                                                    />
                                                 </small>
                                                 {plan.description && (
                                                     <span className="assignment-description">
@@ -524,7 +550,34 @@ export default function SetupTrainee({
                                                         item={day}
                                                         compact
                                                     />
-                                                    <h3>{day.title}</h3>
+                                                    <h3>
+                                                        {day.title}
+                                                        {dayBlocks.get(
+                                                            day.id,
+                                                        ) && (
+                                                            <small className="field-hint">
+                                                                {" "}
+                                                                ·{" "}
+                                                                {
+                                                                    dayBlocks.get(
+                                                                        day.id,
+                                                                    ).block_name
+                                                                }{" "}
+                                                                · Weeks{" "}
+                                                                {
+                                                                    dayBlocks.get(
+                                                                        day.id,
+                                                                    ).start_week
+                                                                }
+                                                                –
+                                                                {
+                                                                    dayBlocks.get(
+                                                                        day.id,
+                                                                    ).end_week
+                                                                }
+                                                            </small>
+                                                        )}
+                                                    </h3>
                                                 </div>
                                                 <WeekdayPicker
                                                     value={option.weekdays}
@@ -622,6 +675,31 @@ export default function SetupTrainee({
                                 <h2>
                                     <CalendarDays size={19} /> Weekly Schedule
                                 </h2>
+                                {weekBlocks.length > 1 && (
+                                    <Field label="Preview program block">
+                                        <select
+                                            value={String(
+                                                selectedWeekBlock.block_id,
+                                            )}
+                                            onChange={(e) =>
+                                                setWeekBlock(e.target.value)
+                                            }
+                                        >
+                                            {weekBlocks.map((block) => (
+                                                <option
+                                                    key={block.block_id}
+                                                    value={String(
+                                                        block.block_id,
+                                                    )}
+                                                >
+                                                    {block.block_name} · Weeks{" "}
+                                                    {block.start_week}–
+                                                    {block.end_week}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </Field>
+                                )}
                                 <ul className="assignment-week">
                                     {[1, 2, 3, 4, 5, 6, 0].map((weekday) => (
                                         <li key={weekday}>
@@ -639,7 +717,7 @@ export default function SetupTrainee({
                                                 }
                                             </strong>
                                             <div>
-                                                {days
+                                                {weekDays
                                                     .filter((day) =>
                                                         (
                                                             choices.day_options[
@@ -1014,7 +1092,7 @@ function TrainingSummary({ plan }) {
                     {plan?.duration_weeks
                         ? `${plan.duration_weeks} weeks · `
                         : ""}
-                    {plan?.training_days_count || 0} training days
+                    <TrainingFrequency plan={plan} />
                 </small>
             </div>
         </div>
@@ -1255,5 +1333,14 @@ function CoachingCoverage({
                 </p>
             )}
         </section>
+    );
+}
+
+function TrainingFrequency({ plan }) {
+    const f = plan?.weekly_frequency;
+    return f ? (
+        <>{f.min === f.max ? f.min : `${f.min}–${f.max}`} days/week</>
+    ) : (
+        <>{plan?.training_days_count || 0} workout definitions</>
     );
 }

@@ -191,7 +191,7 @@ try {
     await surface(
         prefix,
         "coach-overview",
-        ".current-training .training-thumbnail",
+        ".coach-current-training .training-thumbnail",
     );
     await surface(
         prefix + "/setup?assign=1",
@@ -269,7 +269,7 @@ try {
     // Library previews are separate from the exercise selection control.
     await page.goto(base + "/coach/training-plans");
     const template = await page
-        .locator('.plan-actions a[href$="/assign"] + a')
+        .getByRole("link", { name: "View", exact: true })
         .first()
         .getAttribute("href");
     const templateProps = await props(template);

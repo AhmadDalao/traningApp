@@ -18,7 +18,7 @@ class CoachWorkspaceSummary
     public function query(User $coach)
     {
         $subscriptions = CoachSubscription::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->latest('id')->limit(1);
-        $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused']))->latest('id')->limit(1);
+        $assignments = CoachPlanAssignment::select('id')->whereColumn('coach_trainee_relationship_id', 'coach_trainee_relationships.id')->where('status', 'active')->whereHas('plan')->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused'])->whereDate('started_on', '<=', today()))->orderByDesc(ProgramRun::selectRaw('COUNT(*)')->whereColumn('training_plan_id', 'coach_plan_assignments.assigned_training_plan_id')->whereIn('status', ['active', 'paused']))->latest('id')->limit(1);
         $base = CoachTraineeRelationship::where('coach_user_id', $coach->id)->select('coach_trainee_relationships.id', 'coach_trainee_relationships.coach_user_id', 'coach_trainee_relationships.trainee_user_id', 'coach_trainee_relationships.status')
             ->selectSub($subscriptions, 'subscription_id')->selectSub($assignments, 'assignment_id');
         $facts = DB::query()->fromSub($base, 'r')
@@ -27,7 +27,7 @@ class CoachWorkspaceSummary
             ->leftJoin('training_plans as p', 'p.id', '=', 'a.assigned_training_plan_id')
             ->select('r.*', 'p.id as plan_id', 'p.name as plan_name', 'p.structure_type', 'p.duration_weeks', 's.package_name', 's.status as subscription_status')
             ->selectRaw('DATE(s.starts_on) as starts_on, DATE(s.ends_on) as ends_on')
-            ->selectSub(ProgramRun::select('id')->whereColumn('training_plan_id', 'p.id')->latest('id')->limit(1), 'run_id');
+            ->selectSub(ProgramRun::select('id')->whereColumn('training_plan_id', 'p.id')->currentFirst()->limit(1), 'run_id');
         $sessions = app(CoachAccess::class)->sessions($coach)->whereColumn('schedule_entries.user_id', 'f.trainee_user_id')->where('scheduled_by_user_id', $coach->id);
         $available = (clone $sessions)->availableOnSchedule();
         $flags = DB::query()->fromSub($facts, 'f')->leftJoin('program_runs as run', 'run.id', '=', 'f.run_id')->select('f.*', 'run.status as run_status')

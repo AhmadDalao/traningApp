@@ -7,6 +7,7 @@ use App\Services\BodyWeightHistory;
 use App\Services\ExerciseProgress;
 use App\Services\ProgramLifecycle;
 use App\Services\TrainingContext;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -42,10 +43,11 @@ class ProgressController extends Controller
             ->select([])->selectRaw('SUM(actual.actual_weight_kg * actual.actual_reps) as volume')->first()->volume;
 
         return Inertia::render('Progress/Index', [
+            'currentTraining' => $context->currentTraining(),
             'range' => $range, 'summary' => $history->summary($user),
             'trend' => $user->bodyWeightEntries()->when($from, fn ($q) => $q->whereDate('recorded_date', '>=', $from))->orderBy('recorded_date')->orderBy('id')->get(['id', 'weight_kg', 'recorded_date']),
             'entries' => $user->bodyWeightEntries()->orderByDesc('recorded_date')->orderByDesc('id')->paginate(10)->withQueryString(),
-            'training' => ['completed' => $completed, 'skipped' => $skipped, 'due' => $total, 'completion_rate' => $total ? round($completed / $total * 100) : null, 'streak' => $streak, 'weighted_volume' => $volume === null ? null : round((float) $volume, 2)],
+            'training' => ['workouts_per_week' => round($completed / max(1, ($from ?? Carbon::parse((clone $sessions)->min('scheduled_date') ?? today()))->diffInDays(today()->addDay()) / 7), 1), 'missed' => (clone $due)->where('status', 'planned')->whereNull('started_at')->count(), 'completed' => $completed, 'skipped' => $skipped, 'due' => $total, 'completion_rate' => $total ? round($completed / $total * 100) : null, 'streak' => $streak, 'weighted_volume' => $volume === null ? null : round((float) $volume, 2)],
             'highlights' => $exerciseSummary['highlights'],
             'recentRecords' => $exerciseSummary['recentRecords'], 'recentRecordCount' => $exerciseSummary['recentRecordCount'],
             'recentWorkouts' => (clone $sessions)->where('status', 'completed')->latest('scheduled_date')->latest('scheduled_time')->limit(5)->get(['id', 'title', 'status', 'scheduled_date', 'duration_minutes', 'entry_type', 'workout_snapshot', 'program_prescription']),

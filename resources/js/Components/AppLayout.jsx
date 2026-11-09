@@ -41,7 +41,7 @@ export default function AppLayout({ children }) {
         ? [
               {
                   href: "/coach",
-                  label: "Overview",
+                  label: "Coach Overview",
                   icon: LayoutDashboard,
                   active: url === "/coach",
               },
@@ -164,7 +164,7 @@ export default function AppLayout({ children }) {
                         onClick={closeNavigation}
                     >
                         <Settings size={19} aria-hidden="true" />{" "}
-                        {coach ? "Settings" : "Profile & settings"}
+                        {coach ? "Profile & Settings" : "Profile & settings"}
                     </Link>
                 </nav>
                 <div className="sidebar-bottom">

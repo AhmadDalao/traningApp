@@ -58,8 +58,9 @@ function Next({ entry }) {
             <span>{entry.title}</span>
             <small>
                 <DateLabel date={entry.scheduled_date} />
-                {entry.scheduled_time &&
-                    ` · ${entry.scheduled_time.slice(0, 5)}`}
+                {entry.scheduled_time
+                    ? ` · ${entry.scheduled_time.slice(0, 5)}`
+                    : " · Anytime"}
             </small>
         </div>
     ) : (
@@ -161,8 +162,8 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                     {[
                                         "Trainee",
                                         "Coaching",
-                                        "Program",
-                                        "Assigned this week",
+                                        "Current Training",
+                                        "This Week",
                                         "Next workout",
                                         "Status",
                                         "Next action",

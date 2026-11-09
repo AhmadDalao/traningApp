@@ -175,15 +175,33 @@ try {
     await page.waitForURL(base + "/login");
     await login(fixture.coach);
     await page.goto(base + `/coach/trainees/${fixture.trainee_id}/progress`);
-    await loaded();
+    const current = page.locator(".coach-current-training");
+    await current.waitFor();
+    assert.equal(await current.count(), 1);
     assert.equal(
-        await cards().locator('img[src="/images/gym.jpg"]').count(),
+        await current.locator('img[src="/images/gym.jpg"]').count(),
         0,
     );
-    pass(
-        "Coach Progress uses assigned covers without the trainee's private program",
+    assert.equal(await cards().count(), 0);
+    await page
+        .getByRole("link", {
+            name: "Program history · View all runs",
+            exact: true,
+        })
+        .click();
+    await page.waitForURL(/\/program-runs$/);
+    await page
+        .getByRole("heading", { name: "Program runs", exact: true })
+        .waitFor();
+    assert.equal(
+        await page
+            .getByRole("link", { name: "View program run", exact: true })
+            .count(),
+        2,
     );
-    await matrix("coach-progress", 2);
+    pass(
+        "Coach Progress has one current assigned cover; both independent runs remain in program history and personal training stays private",
+    );
     assert.deepEqual(errors, []);
     pass("No browser runtime errors");
 } finally {

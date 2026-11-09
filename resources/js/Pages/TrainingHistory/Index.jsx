@@ -24,7 +24,7 @@ import {
 } from "../../Components/UI";
 
 export default function Index({ entries, summary, filters, plans }) {
-    const { url } = useTraining();
+    const { url, coaching } = useTraining();
     const { errors } = usePage().props;
     const live = useLiveFilters(
         url("/training-history"),
@@ -74,7 +74,11 @@ export default function Index({ entries, summary, filters, plans }) {
             <PageHeader
                 eyebrow="LOOK BACK AT YOUR TRAINING"
                 title="Training History"
-                description="Your past sessions, saved one workout at a time."
+                description={
+                    coaching
+                        ? "Past workouts from training assigned by you."
+                        : "Your past sessions, saved one workout at a time."
+                }
             >
                 <ButtonLink variant="secondary" href={url("/calendar")}>
                     <CalendarDays size={16} />
@@ -344,19 +348,24 @@ export default function Index({ entries, summary, filters, plans }) {
                                             )}
                                         </td>
                                         <td data-label="Duration">
-                                            {entry.duration_minutes != null
+                                            {entry.status === "completed" &&
+                                            entry.duration_minutes != null
                                                 ? `${entry.duration_minutes} min`
                                                 : "—"}
                                         </td>
                                         <td data-label="Calories">
-                                            {calorieDisplay(entry).value}
+                                            {entry.status === "completed"
+                                                ? calorieDisplay(entry).value
+                                                : "—"}
                                         </td>
                                         <td data-label="Workout summary">
-                                            {entry.detailed_workout
-                                                ? `${entry.completed_sets_count}/${entry.sets_count} sets completed`
-                                                : entry.weights_logged
-                                                  ? `${entry.weights_logged}/${entry.exercises_count} weights logged`
-                                                  : "—"}
+                                            {entry.status !== "completed"
+                                                ? "—"
+                                                : entry.detailed_workout
+                                                  ? `${entry.completed_sets_count}/${entry.sets_count} sets completed`
+                                                  : entry.weights_logged
+                                                    ? `${entry.weights_logged}/${entry.exercises_count} weights logged`
+                                                    : "—"}
                                         </td>
                                         <td className="history-link-cell">
                                             <Link

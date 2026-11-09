@@ -1,3 +1,5 @@
+import WeeklyScheduleEditor from "../../Features/WeeklyScheduleEditor";
+import { WorkoutDate } from "../../Features/CoachWorkspace";
 import TrainingThumbnail from "../../Components/TrainingThumbnail";
 import ProgramControlModal from "../../Features/ProgramControlModal";
 import ScheduleChangeModal from "../../Features/ScheduleChangeModal";
@@ -19,13 +21,18 @@ import {
     ProgramSessions,
     BlockTimeline,
 } from "../../Features/ProgramUI";
-export default function Run({ run, position, summary }) {
+export default function Run({ run, position, summary, scheduleDefinition }) {
     const { url, canManage, coaching } = useTraining();
     const [preview, setPreview] = useState(null),
         [busy, setBusy] = useState(false),
         [error, setError] = useState("");
     const [control, setControl] = useState(null);
     const [moving, setMoving] = useState(null);
+    const Details = coaching ? "details" : "div";
+    const lastScheduledDate = position.sessions
+        .map((s) => s.scheduled_date)
+        .sort()
+        .at(-1);
     const definition = run.definition_snapshot,
         next = position.next_workout;
     function skip(entry) {
@@ -56,8 +63,10 @@ export default function Run({ run, position, summary }) {
                 apply ? { signature: preview.signature, confirmed: true } : {},
             );
             if (apply) {
+                await new Promise((resolve) =>
+                    router.reload({ onFinish: resolve }),
+                );
                 setPreview(null);
-                router.reload();
             } else setPreview(result.preview);
         } catch (e) {
             setError(e.message);
@@ -121,6 +130,59 @@ export default function Run({ run, position, summary }) {
                 <p className="field-error" role="alert">
                     {error}
                 </p>
+            )}
+            {coaching && scheduleDefinition && (
+                <section className="panel program-card coach-schedule-definition">
+                    <div className="coach-card-title">
+                        <h2>Edit Schedule</h2>
+                        <Button
+                            variant="secondary"
+                            disabled={busy || run.status !== "active"}
+                            onClick={() => changes()}
+                        >
+                            Review changes
+                        </Button>
+                    </div>
+                    <p>
+                        Started <DateLabel date={run.started_on} />
+                        {lastScheduledDate && (
+                            <>
+                                {" "}
+                                · Last workout{" "}
+                                <DateLabel date={lastScheduledDate} />
+                            </>
+                        )}{" "}
+                        · {definition.duration_weeks} weeks ·{" "}
+                        {position.total_workouts} workouts
+                    </p>
+                    <p className="field-hint">
+                        Current and completed blocks are protected. Edit future
+                        weekly patterns, then review the affected dates. Use
+                        Calendar to move an eligible individual workout.
+                    </p>
+                    {scheduleDefinition.blocks.map((block) => (
+                        <details
+                            key={block.id}
+                            className="coach-secondary-details"
+                            open={
+                                block.id === position.current_block?.id ||
+                                undefined
+                            }
+                        >
+                            <summary>
+                                {block.name} · Weeks {block.start_week}–
+                                {block.end_week}
+                                {!block.editable ? " · Protected" : ""}
+                            </summary>
+                            <WeeklyScheduleEditor
+                                days={block.training_days}
+                                editable={
+                                    block.editable && run.status === "active"
+                                }
+                            />
+                        </details>
+                    ))}
+                </section>
             )}
             {next &&
                 !next.held &&
@@ -261,92 +323,181 @@ export default function Run({ run, position, summary }) {
                     onClose={() => setMoving(null)}
                 />
             )}
-            {position.current_week && (
-                <section className="panel program-card">
-                    <h2>This program week</h2>
-                    <ProgramSessions
-                        {...recovery}
-                        sessions={position.sessions.filter(
-                            (row) => row.program_week === position.current_week,
+            <Details className={coaching ? "program-run-details" : undefined}>
+                {coaching && (
+                    <summary>Program progress & all scheduled weeks</summary>
+                )}
+                {position.current_week && (
+                    <section className="panel program-card">
+                        <h2>This program week</h2>
+                        <ProgramSessions
+                            {...recovery}
+                            sessions={position.sessions.filter(
+                                (row) =>
+                                    row.program_week === position.current_week,
+                            )}
+                        />
+                    </section>
+                )}
+                <ProgramStats position={position} />
+                {summary && (
+                    <section className="panel program-card">
+                        <h2>Your program summary</h2>
+                        <p>
+                            {position.completed_workouts} /{" "}
+                            {position.total_workouts} workouts completed ·{" "}
+                            {position.skipped_workouts} skipped
+                        </p>
+                        <p>
+                            {summary.pr_count
+                                ? `${summary.pr_count} new personal records`
+                                : "No new PRs recorded"}
+                        </p>
+                        {summary.weight_gains.map((gain, i) => (
+                            <p key={i}>
+                                <a href={gain.url}>{gain.name}</a>:{" "}
+                                {gain.change_kg > 0 ? "+" : ""}
+                                {gain.change_kg} kg · first to last weighted
+                                performance in this run
+                            </p>
+                        ))}
+                        {summary.body_weight_change !== null && (
+                            <p>
+                                Body weight change:{" "}
+                                {summary.body_weight_change > 0 ? "+" : ""}
+                                {summary.body_weight_change} kg
+                            </p>
                         )}
+                        <ButtonLink href="/recommendations" variant="secondary">
+                            Find next program
+                        </ButtonLink>
+                    </section>
+                )}
+                <section>
+                    <h2>Block timeline</h2>
+                    <BlockTimeline
+                        blocks={definition.blocks}
+                        currentWeek={position.current_week}
                     />
                 </section>
-            )}
-            <ProgramStats position={position} />
-            {summary && (
-                <section className="panel program-card">
-                    <h2>Your program summary</h2>
-                    <p>
-                        {position.completed_workouts} /{" "}
-                        {position.total_workouts} workouts completed ·{" "}
-                        {position.skipped_workouts} skipped
-                    </p>
-                    <p>
-                        {summary.pr_count
-                            ? `${summary.pr_count} new personal records`
-                            : "No new PRs recorded"}
-                    </p>
-                    {summary.weight_gains.map((gain, i) => (
-                        <p key={i}>
-                            <a href={gain.url}>{gain.name}</a>:{" "}
-                            {gain.change_kg > 0 ? "+" : ""}
-                            {gain.change_kg} kg · first to last weighted
-                            performance in this run
-                        </p>
-                    ))}
-                    {summary.body_weight_change !== null && (
-                        <p>
-                            Body weight change:{" "}
-                            {summary.body_weight_change > 0 ? "+" : ""}
-                            {summary.body_weight_change} kg
-                        </p>
+                {!coaching &&
+                    canManage &&
+                    run.status === "active" &&
+                    run.training_plan_id && (
+                        <section className="panel program-card">
+                            <h2>Update future sessions</h2>
+                            <p>
+                                After editing the definition, review updates,
+                                additions and removals. Completed, skipped,
+                                active, past and individually moved sessions
+                                stay protected.
+                            </p>
+                            <Button
+                                variant="secondary"
+                                disabled={busy}
+                                onClick={() => changes()}
+                            >
+                                Review program changes
+                            </Button>
+                        </section>
                     )}
-                    <ButtonLink href="/recommendations" variant="secondary">
-                        Find next program
-                    </ButtonLink>
+                <section>
+                    <h2>All program weeks</h2>
+                    <ProgramWeeks
+                        {...recovery}
+                        sessions={position.sessions}
+                        initialWeek={position.current_week}
+                    />
                 </section>
-            )}
-            <section>
-                <h2>Block timeline</h2>
-                <BlockTimeline
-                    blocks={definition.blocks}
-                    currentWeek={position.current_week}
-                />
-            </section>
-            {canManage && run.status === "active" && run.training_plan_id && (
-                <section className="panel program-card">
-                    <h2>Update future sessions</h2>
-                    <p>
-                        After editing the definition, review updates, additions
-                        and removals. Completed, skipped, active, past and
-                        individually moved sessions stay protected.
-                    </p>
-                    <Button
-                        variant="secondary"
-                        disabled={busy}
-                        onClick={() => changes()}
-                    >
-                        Review program changes
-                    </Button>
-                </section>
-            )}
-            <section>
-                <h2>All program weeks</h2>
-                <ProgramWeeks
-                    {...recovery}
-                    sessions={position.sessions}
-                    initialWeek={position.current_week}
-                />
-            </section>
+            </Details>
             {preview && (
                 <Modal
                     title="Review future program changes"
                     onClose={() => setPreview(null)}
                 >
-                    <p>Only eligible future generated sessions change.</p>
-                    <div className="program-stack">
-                        {["update", "add", "remove", "keep", "protected"].map(
-                            (group) => (
+                    {coaching ? (
+                        <>
+                            <p>Review the proposed Calendar changes.</p>
+                            <div className="schedule-human-summary">
+                                <span>
+                                    <strong>{preview.keep.length}</strong>{" "}
+                                    unchanged
+                                </span>
+                                <span>
+                                    <strong>{preview.update.length}</strong>{" "}
+                                    updated
+                                </span>
+                                <span>
+                                    <strong>{preview.add.length}</strong> added
+                                </span>
+                                <span>
+                                    <strong>{preview.remove.length}</strong>{" "}
+                                    removed
+                                </span>
+                                <span>
+                                    <strong>{preview.protected.length}</strong>{" "}
+                                    protected, untouched
+                                </span>
+                            </div>
+                            {preview.update.map((row) => {
+                                const before = position.sessions.find(
+                                    (s) => s.id === row.id,
+                                );
+                                return (
+                                    <article
+                                        className="coach-session"
+                                        key={row.id}
+                                    >
+                                        <div className="coach-session-copy">
+                                            <strong>{row.title}</strong>
+                                            {before && (
+                                                <small>
+                                                    <WorkoutDate
+                                                        entry={before}
+                                                    />{" "}
+                                                    →
+                                                </small>
+                                            )}
+                                            <small>
+                                                <WorkoutDate entry={row} />
+                                            </small>
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                            {preview.add.length > 0 && (
+                                <>
+                                    <h3>New dates</h3>
+                                    <ProgramSessions sessions={preview.add} />
+                                </>
+                            )}
+                            {preview.remove.length > 0 && (
+                                <>
+                                    <h3>Dates to remove</h3>
+                                    <ProgramSessions
+                                        sessions={preview.remove}
+                                    />
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <p>Only eligible future generated sessions change.</p>
+                    )}
+                    <details
+                        className={coaching ? "schedule-advanced" : undefined}
+                        open={coaching ? undefined : true}
+                    >
+                        <summary hidden={!coaching}>
+                            Advanced schedule details
+                        </summary>
+                        <div className="program-stack">
+                            {[
+                                "update",
+                                "add",
+                                "remove",
+                                "keep",
+                                "protected",
+                            ].map((group) => (
                                 <details key={group} className="program-day">
                                     <summary>
                                         {group.toUpperCase()} ·{" "}
@@ -356,9 +507,9 @@ export default function Run({ run, position, summary }) {
                                         sessions={preview[group]}
                                     />
                                 </details>
-                            ),
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    </details>
                     <div className="form-actions">
                         <Button
                             variant="secondary"

@@ -88,7 +88,13 @@ $race = function ($f, array $jobs) use (&$files) {
         $process->wait();
         checkSetup($process->isSuccessful(), 'Independent PHP process finished: '.$process->getErrorOutput());
         try {
-            return json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+            $result = json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+            // MySQL canonicalizes JSON object key order; receipts must match values and types.
+            if (isset($result['result']) && is_array($result['result'])) {
+                ksort($result['result']);
+            }
+
+            return $result;
         } catch (JsonException $error) {
             throw new RuntimeException($process->getOutput().$process->getErrorOutput());
         }

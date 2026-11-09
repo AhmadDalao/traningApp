@@ -30,6 +30,7 @@ import {
 import BodyWeightForm from "../../Features/BodyWeightForm";
 import BodyWeightChart from "../../Features/BodyWeightChart";
 import { RecordList, RecordValue } from "../../Features/ExerciseRecords";
+import { CurrentTraining } from "../../Features/CoachWorkspace";
 import { ProgramRunCards } from "../../Features/ProgramUI";
 import Thumbnail from "../../Components/ExerciseThumbnail";
 
@@ -44,6 +45,7 @@ export default function Index({
     recentRecordCount = 0,
     recentWorkouts = [],
     programRuns = [],
+    currentTraining,
 }) {
     const { url, coaching } = useTraining();
     const live = useLiveFilters(url("/progress"), { range }, [
@@ -57,12 +59,18 @@ export default function Index({
         "recentRecordCount",
         "recentWorkouts",
         "programRuns",
+        "currentTraining",
     ]);
     const [editing, setEditing] = useState(null),
         [deleting, setDeleting] = useState(null);
     const hasTraining = training.due > 0 || highlights.length > 0;
     const cards = [
-        ["Completed workouts", training.completed, CheckCircle2, "green"],
+        [
+            coaching ? "Workouts per week" : "Completed workouts",
+            coaching ? training.workouts_per_week : training.completed,
+            CheckCircle2,
+            "green",
+        ],
         [
             "Completion rate",
             training.completion_rate === null
@@ -74,6 +82,7 @@ export default function Index({
         ["Current streak", `${training.streak} workouts`, Flame, "orange"],
         ["Recent PRs", recentRecordCount, Trophy, "purple"],
     ];
+    if (coaching) [cards[0], cards[1]] = [cards[1], cards[0]];
     return (
         <div className="unified-progress" aria-busy={live.processing}>
             <Head title="Progress" />
@@ -109,7 +118,8 @@ export default function Index({
                     ? "Updating progress"
                     : `${training.completed} completed workouts in this period`}
             </span>
-            {hasTraining ? (
+
+            {hasTraining || coaching ? (
                 <>
                     <div className="stats-grid progress-stats">
                         {cards.map(([label, value, Icon, color]) => (
@@ -127,7 +137,20 @@ export default function Index({
                             </div>
                         ))}
                     </div>
-                    <ProgramRunCards runs={programRuns} />
+                    {coaching && (
+                        <>
+                            <CurrentTraining training={currentTraining} />
+                            <div className="coach-program-history-link">
+                                <ButtonLink
+                                    variant="secondary"
+                                    href={url("/program-runs")}
+                                >
+                                    Program history · View all runs
+                                </ButtonLink>
+                            </div>
+                        </>
+                    )}
+                    {!coaching && <ProgramRunCards runs={programRuns} />}
                     <section className="panel coach-card consistency-panel">
                         <div className="coach-card-title">
                             <h2>
@@ -144,6 +167,7 @@ export default function Index({
                         <p>
                             {training.completed} of {training.due} due workouts
                             completed · {training.skipped} skipped
+                            {coaching ? ` · ${training.missed} missed` : ""}
                         </p>
                         {training.due > 0 && (
                             <progress

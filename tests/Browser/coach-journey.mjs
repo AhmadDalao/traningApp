@@ -163,7 +163,9 @@ try {
     await button(page, "Log in").click();
     await page.waitForURL(/\/(coach|dashboard)$/);
     await page.goto(base + "/coach");
-    await page.getByRole("link", { name: "Settings", exact: true }).click();
+    await page
+        .getByRole("link", { name: "Profile & Settings", exact: true })
+        .click();
     await page.waitForURL("**/coach/settings");
     assert.equal(await page.locator(".coach-workspace").count(), 1);
     pass("Settings stays in Coach Workspace");

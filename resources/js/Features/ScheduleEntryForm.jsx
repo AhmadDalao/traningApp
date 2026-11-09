@@ -26,6 +26,9 @@ export default function ScheduleEntryForm({
     const [planId, setPlanId] = useState(
         initialDay?.training_plan_id || singlePlan?.id || "",
     );
+    const [blockId, setBlockId] = useState(
+        initialDay?.training_block_id || singlePlan?.default_block_id || "",
+    );
     const [directRest, setDirectRest] = useState(
         entry?.entry_type === "rest" && !entry?.training_day_id,
     );
@@ -37,8 +40,11 @@ export default function ScheduleEntryForm({
         scheduled_time: entry?.scheduled_time?.slice(0, 5) || "",
         notes: entry?.notes || "",
     });
-    const days =
-        plans.find((p) => p.id === Number(planId))?.training_days || [];
+    const selectedPlan = plans.find((p) => p.id === Number(planId));
+    const blocks = coaching ? selectedPlan?.workout_blocks || [] : [];
+    const days = (selectedPlan?.training_days || []).filter(
+        (day) => !blocks.length || day.training_block_id === Number(blockId),
+    );
     const historical =
         entry && !entry.training_day_id && entry.entry_type === "training";
     const recorded = Boolean(entry?.workout_snapshot);
@@ -97,7 +103,9 @@ export default function ScheduleEntryForm({
                     <button
                         type="button"
                         className={!directRest ? "active" : ""}
-                        disabled={recorded}
+                        disabled={
+                            recorded || (coaching && !!entry?.program_run_id)
+                        }
                         onClick={() => changeMode(false)}
                     >
                         From a training plan
@@ -105,7 +113,9 @@ export default function ScheduleEntryForm({
                     <button
                         type="button"
                         className={directRest ? "active" : ""}
-                        disabled={recorded}
+                        disabled={
+                            recorded || (coaching && !!entry?.program_run_id)
+                        }
                         onClick={() => changeMode(true)}
                     >
                         Rest day
@@ -115,20 +125,40 @@ export default function ScheduleEntryForm({
             {!directRest && (
                 <>
                     <div className="form-grid">
-                        <Field label="Training plan">
+                        <Field label={coaching ? "Training" : "Training plan"}>
                             <select
+                                aria-label={
+                                    coaching ? "Training" : "Training plan"
+                                }
                                 value={planId}
-                                disabled={recorded}
+                                disabled={
+                                    recorded ||
+                                    (coaching && !!entry?.program_run_id)
+                                }
                                 onChange={(e) => {
                                     setPlanId(e.target.value);
+                                    const nextPlan = plans.find(
+                                        (p) => p.id === Number(e.target.value),
+                                    );
+                                    setBlockId(
+                                        nextPlan?.default_block_id || "",
+                                    );
                                     const nextDays =
                                         plans.find(
                                             (p) =>
                                                 p.id === Number(e.target.value),
                                         )?.training_days || [];
+                                    const eligible =
+                                        coaching && nextPlan?.default_block_id
+                                            ? nextDays.filter(
+                                                  (d) =>
+                                                      d.training_block_id ===
+                                                      nextPlan.default_block_id,
+                                              )
+                                            : nextDays;
                                     const single =
-                                        nextDays.length === 1
-                                            ? nextDays[0]
+                                        eligible.length === 1
+                                            ? eligible[0]
                                             : null;
                                     form.setData({
                                         ...form.data,
@@ -143,22 +173,61 @@ export default function ScheduleEntryForm({
                                 {plans.map((p) => (
                                     <option key={p.id} value={p.id}>
                                         {p.name}
-                                        {p.workspace_type === "coach_assigned"
-                                            ? ` · Coach assigned${p.coach_name ? ` — ${p.coach_name}` : ""}`
-                                            : " · Personal"}
+                                        {!coaching &&
+                                            (p.workspace_type ===
+                                            "coach_assigned"
+                                                ? ` · Coach assigned${p.coach_name ? ` — ${p.coach_name}` : ""}`
+                                                : " · Personal")}
                                     </option>
                                 ))}
                             </select>
                         </Field>
+                        {blocks.length > 1 && (
+                            <Field label="Program block">
+                                <select
+                                    aria-label="Program block"
+                                    value={blockId}
+                                    disabled={
+                                        recorded || !!entry?.program_run_id
+                                    }
+                                    onChange={(e) => {
+                                        setBlockId(e.target.value);
+                                        form.setData({
+                                            ...form.data,
+                                            training_day_id: "",
+                                            title: "",
+                                        });
+                                    }}
+                                >
+                                    {blocks.map((b) => (
+                                        <option key={b.id} value={b.id}>
+                                            {b.name} · Weeks {b.start_week}–
+                                            {b.end_week}
+                                        </option>
+                                    ))}
+                                </select>
+                                <small className="field-hint">
+                                    Each block has its own workout
+                                    prescriptions.
+                                </small>
+                            </Field>
+                        )}
                         <Field
-                            label="Training day"
+                            label={coaching ? "Workout" : "Training day"}
                             error={form.errors.training_day_id}
                         >
                             <select
+                                aria-label={
+                                    coaching ? "Workout" : "Training day"
+                                }
                                 value={form.data.training_day_id}
                                 required={!historical && !recorded}
                                 onChange={(e) => selectDay(e.target.value)}
-                                disabled={!planId || recorded}
+                                disabled={
+                                    !planId ||
+                                    recorded ||
+                                    (coaching && !!entry?.program_run_id)
+                                }
                             >
                                 <option value="">Select a day</option>
                                 {days.map((d) => (

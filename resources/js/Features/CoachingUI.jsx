@@ -133,7 +133,12 @@ export function TraineeNav() {
                     </div>
                 </div>
                 <div>
-                    <TraineeState state={state?.display_state} />
+                    <span className="coaching-service-state">
+                        <CoachStatus
+                            status={state?.subscription?.effective_status}
+                        />{" "}
+                        Coaching
+                    </span>
                     <small>
                         {state?.subscription?.package_name ||
                             "Coaching not configured"}
