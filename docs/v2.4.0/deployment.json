@@ -1,0 +1,235 @@
+{
+  "status": "READY \u2014 DEPLOYED AND VERIFIED",
+  "release": "v2.4.0",
+  "commit": "2848e9e189c221de3473a60e7e3510ae32474c2a",
+  "tag_object": "98095f95d40d2f7c00a976522f991feae322fb04",
+  "baseline_commit": "70aae87c520ebb2bcb0af16e3245358d2b34b831",
+  "host": "training.ahmaddalao.com",
+  "runtime": {
+    "php": "8.3.36",
+    "database": "11.8.9-MariaDB-log",
+    "packages": {
+      "symfony/http-foundation": "v7.4.23",
+      "symfony/http-kernel": "v7.4.23",
+      "symfony/routing": "v7.4.23"
+    }
+  },
+  "backup": {
+    "identifier": "coach-v2.4.0-20261109-7d5e86fa",
+    "created_at_utc": "2026-11-09T09:17:33+00:00",
+    "runtime_bytes": 67813220,
+    "runtime_sha256": "58fb7181edf5361bb156e9b59e8a9a9f572ae74ef93dec05b52c2879c71a41b4",
+    "database_bytes": 48603,
+    "database_uncompressed_bytes": 720592,
+    "database_sha256": "6b74f501d9e5b65ecfdb57d0bc13196e6905c144edf227a9df79f6195d8dce78",
+    "uploads_bytes": 32411438,
+    "uploads_sha256": "318f23b5397d3d29dd2c78e627706027883f37981e062d4d1e0a116f36052390",
+    "original_upload_files": 522,
+    "source_file_backups": 37,
+    "environment_backed_up": true,
+    "archives_verified": true
+  },
+  "deployment": {
+    "runtime_files_changed": 108,
+    "verified_files": 7807,
+    "schema_changes": false,
+    "pending_migrations": 0,
+    "migration_count": 16,
+    "migrations_unchanged": true,
+    "environment_unchanged": true,
+    "web_push_enabled": false,
+    "cron_changed": false
+  },
+  "data": {
+    "original_tables": 22,
+    "original_rows": 694,
+    "counts": {
+      "users": 3,
+      "training_plans": 13,
+      "training_days": 88,
+      "training_exercises": 336,
+      "schedule_entries": 205,
+      "exercise_library_items": 1,
+      "user_profiles": 3,
+      "body_weight_entries": 3,
+      "session_exercises": 4,
+      "session_sets": 12,
+      "coach_profiles": 1,
+      "coach_trainee_relationships": 1,
+      "coach_subscription_plans": 1,
+      "coach_subscriptions": 1,
+      "coach_plan_assignments": 6,
+      "coach_pairing_tokens": 1,
+      "schedule_occurrence_cancellations": 0,
+      "training_blocks": 12,
+      "program_runs": 2,
+      "notification_preferences": 1,
+      "web_push_subscriptions": 0,
+      "notification_deliveries": 0
+    },
+    "original_data_unchanged": true,
+    "original_upload_files": 522,
+    "uploads_preserved": true,
+    "qa_accounts_removed": 14,
+    "remaining_qa_accounts": 0,
+    "missing_original_rows": 0,
+    "changed_original_rows": 0,
+    "extra_rows": 0,
+    "extra_media": 0
+  },
+  "browser_runs": [
+    {
+      "script": "program-card-layout",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 25.01,
+      "checks": 22
+    },
+    {
+      "script": "program-card-layout",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 7.35,
+      "checks": 22
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 13.55,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-preview",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 19.66,
+      "checks": 75
+    },
+    {
+      "script": "thumbnail-coverage",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 70.37,
+      "checks": 63
+    },
+    {
+      "script": "thumbnail-coverage",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 19.09,
+      "checks": 63
+    },
+    {
+      "script": "coach-journey-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 16.97,
+      "checks": 84
+    },
+    {
+      "script": "coach-journey-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 17.54,
+      "checks": 84
+    },
+    {
+      "script": "coach-journey-coverage-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 9.62,
+      "checks": 12
+    },
+    {
+      "script": "coach-journey-coverage-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 9.56,
+      "checks": 12
+    },
+    {
+      "script": "pwa-live",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 10.69,
+      "checks": 20
+    },
+    {
+      "script": "pwa-live",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 13.27,
+      "checks": 19
+    },
+    {
+      "script": "coach-desktop-workspace",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 24.51,
+      "checks": 173
+    },
+    {
+      "script": "coach-desktop-workspace",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 22.29,
+      "checks": 173
+    },
+    {
+      "script": "coach-weekly-schedule",
+      "engine": "chromium",
+      "exit_code": 0,
+      "seconds": 5.39,
+      "checks": 6
+    },
+    {
+      "script": "coach-weekly-schedule",
+      "engine": "webkit",
+      "exit_code": 0,
+      "seconds": 4.84,
+      "checks": 6
+    }
+  ],
+  "browser_checks": 909,
+  "http_fixture_checks": 12,
+  "security_checks": 15,
+  "lifecycle_checks": 12,
+  "public_assets": {
+    "public_assets_verified": 749,
+    "exact_hash_matches": 745,
+    "cdn_png_reencodings": 4,
+    "public_smokes": 5
+  },
+  "temporary_endpoints": {
+    "checks": [
+      {
+        "check": "Temporary deployment endpoint removed",
+        "status": 404
+      },
+      {
+        "check": "Temporary release archive removed",
+        "status": 404
+      },
+      {
+        "check": "/login",
+        "status": 200
+      },
+      {
+        "check": "/up",
+        "status": 200
+      },
+      {
+        "check": "/.env",
+        "status": 403
+      },
+      {
+        "check": "/storage/app/private/deploy-backups/",
+        "status": 404
+      }
+    ],
+    "count": 6
+  },
+  "physical_device_tested": false,
+  "real_push_delivery_tested": false
+}
