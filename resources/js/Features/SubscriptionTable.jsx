@@ -1,10 +1,61 @@
 import { useState } from "react";
 import { Link, useForm, usePage } from "@inertiajs/react";
 import { Pause, Play, RotateCcw, Square, ArrowUpRight } from "lucide-react";
-import { Button, ButtonLink, ConfirmDialog, DateLabel } from "../Components/UI";
+import { Button, ButtonLink, ConfirmDialog } from "../Components/UI";
 import TrainingThumbnail from "../Components/TrainingThumbnail";
 import PersonAvatar from "../Components/PersonAvatar";
 import { CoachStatus, Errors } from "./CoachingUI";
+
+function SubscriptionDate({ date }) {
+    return date ? (
+        <time className="subscription-date" dateTime={date}>
+            {new Date(`${date}T12:00:00`).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+            })}
+        </time>
+    ) : (
+        <span className="subscription-date">Ongoing</span>
+    );
+}
+
+function CoverageRemaining({ item }) {
+    const days = item.days_until_end;
+    if (item.effective_status === "ended") return <span>Ended</span>;
+    if (days !== null && days < 0)
+        return (
+            <span>
+                Ended {Math.abs(days)} {days === -1 ? "day" : "days"} ago
+            </span>
+        );
+    if (item.effective_status === "upcoming")
+        return (
+            <span>
+                Starts in {item.days_until_start}{" "}
+                {item.days_until_start === 1 ? "day" : "days"}
+            </span>
+        );
+    if (days === null) return <span>No end date</span>;
+    return (
+        <span
+            className={
+                item.effective_status === "active" && days <= 7
+                    ? "subscription-ending-soon"
+                    : ""
+            }
+        >
+            {days === 0
+                ? "Ends today"
+                : days === 1
+                  ? "Ends tomorrow"
+                  : `${days} days until end`}
+            {item.effective_status === "paused" && (
+                <small>Coverage is paused</small>
+            )}
+        </span>
+    );
+}
 
 function Actions({ item }) {
     const { today } = usePage().props;
@@ -96,8 +147,10 @@ export default function SubscriptionTable({ items }) {
                             "Trainee",
                             "Training program",
                             "Package",
-                            "Coverage",
+                            "Start date",
+                            "End date",
                             "Status",
+                            "Time remaining",
                             "Actions",
                         ].map((label) => (
                             <th key={label} scope="col">
@@ -160,19 +213,17 @@ export default function SubscriptionTable({ items }) {
                                     </details>
                                 )}
                             </td>
-                            <td data-label="Coverage">
-                                <DateLabel date={item.starts_on} />
-                                <small>
-                                    to{" "}
-                                    {item.ends_on ? (
-                                        <DateLabel date={item.ends_on} />
-                                    ) : (
-                                        "Ongoing"
-                                    )}
-                                </small>
+                            <td data-label="Start date">
+                                <SubscriptionDate date={item.starts_on} />
+                            </td>
+                            <td data-label="End date">
+                                <SubscriptionDate date={item.ends_on} />
                             </td>
                             <td data-label="Status">
                                 <CoachStatus status={item.effective_status} />
+                            </td>
+                            <td data-label="Time remaining">
+                                <CoverageRemaining item={item} />
                             </td>
                             <td data-label="Actions">
                                 <Actions item={item} />

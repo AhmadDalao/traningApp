@@ -208,6 +208,37 @@ class IndependentProgramSubscriptionsTest extends TestCase
         $this->get('/profile/notifications')->assertInertia(fn (Assert $p) => $p->where('trainingContext.workspace', 'personal'));
     }
 
+    public function test_subscription_dates_and_ending_filters_use_local_calendar_days(): void
+    {
+        $this->travelTo(now()->setTime(23, 59));
+        foreach ([['Today', 0, 'active'], ['Seven', 7, 'active'], ['Thirty', 30, 'active'], ['Later', 31, 'active'], ['Past', -1, 'active'], ['Paused', 2, 'paused'], ['Ended', 3, 'ended'], ['Ongoing', null, 'active']] as [$name, $days, $status]) {
+            CoachSubscription::create(['coach_trainee_relationship_id' => $this->relationship->id, 'package_name' => $name, 'starts_on' => '2026-11-01', 'ends_on' => $days === null ? null : today()->addDays($days)->toDateString(), 'status' => $status]);
+        }
+        $this->get('/coach/subscriptions?coverage=ending_7&sort=ending_first')->assertInertia(fn (Assert $p) => $p
+            ->where('subscriptions.total', 2)->where('subscriptions.data.0.package_name', 'Today')
+            ->where('subscriptions.data.0.starts_on', '2026-11-01')->where('subscriptions.data.0.ends_on', '2026-11-09')
+            ->where('subscriptions.data.0.days_until_end', 0)->where('subscriptions.data.0.effective_status', 'active')
+            ->where('subscriptions.data.1.days_until_end', 7));
+        $this->get('/coach/subscriptions?coverage=ending_30')->assertInertia(fn (Assert $p) => $p->where('subscriptions.total', 3));
+        $this->get('/coach/subscriptions?coverage=ongoing')->assertInertia(fn (Assert $p) => $p->where('subscriptions.total', 1)->where('subscriptions.data.0.days_until_end', null));
+        $this->get('/coach/subscriptions?coverage=ending_7&status=paused')->assertInertia(fn (Assert $p) => $p->where('subscriptions.total', 0));
+        $this->travelTo(now()->addMinute());
+        $this->get('/coach/subscriptions?search=Today')->assertInertia(fn (Assert $p) => $p->where('subscriptions.data.0.effective_status', 'expired')->where('subscriptions.data.0.days_until_end', -1));
+    }
+
+    public function test_subscription_sort_pagination_and_filters_remain_coach_scoped(): void
+    {
+        for ($i = 0; $i < 12; $i++) {
+            CoachSubscription::create(['coach_trainee_relationship_id' => $this->relationship->id, 'package_name' => 'Period '.$i, 'starts_on' => today()->addDays($i)->toDateString(), 'ends_on' => $i === 0 ? null : today()->addDays(15 + $i)->toDateString(), 'status' => 'active']);
+        }
+        $this->get('/coach/subscriptions?sort=ending_first')->assertInertia(fn (Assert $p) => $p->where('subscriptions.total', 12)->where('subscriptions.per_page', 10)->where('subscriptions.data.0.package_name', 'Period 1')->where('subscriptions.data.0.effective_status', 'upcoming')->where('subscriptions.data.0.days_until_start', 1));
+        $this->get('/coach/subscriptions?sort=ending_first&page=2')->assertInertia(fn (Assert $p) => $p->where('subscriptions.from', 11)->where('subscriptions.to', 12)->where('subscriptions.data.1.package_name', 'Period 0'));
+        $this->get('/coach/subscriptions?sort=starting_first&per_page=25')->assertInertia(fn (Assert $p) => $p->has('subscriptions.data', 12)->where('subscriptions.data.0.package_name', 'Period 0'));
+        $other = User::factory()->create(['account_type' => 'coach']);
+        $other->coachProfile()->create(['display_name' => 'Other Coach']);
+        $this->actingAs($other)->get('/coach/subscriptions?coverage=ongoing&trainee='.$this->trainee->id)->assertInertia(fn (Assert $p) => $p->where('subscriptions.total', 0)->where('counts', fn ($counts) => count($counts) === 0));
+    }
+
     public function test_migration_splits_legacy_shared_coverage_without_changing_training(): void
     {
         $a = $this->activate($this->template('Strength'));

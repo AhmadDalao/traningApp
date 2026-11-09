@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
-import { CreditCard, Package, Plus, Users, Search } from "lucide-react";
+import { CreditCard, Package, Plus } from "lucide-react";
 import {
     PageHeader,
     Button,
@@ -69,6 +69,7 @@ export default function Subscriptions({
                     <button
                         key={key}
                         type="button"
+                        aria-pressed={filter.data.status === key}
                         className={filter.data.status === key ? "active" : ""}
                         onClick={() => filter.setData("status", key)}
                     >
@@ -79,7 +80,7 @@ export default function Subscriptions({
                 ))}
             </div>
             <section
-                className="panel coach-card live-filter-bar"
+                className="panel coach-card subscription-filters"
                 aria-busy={filter.processing}
             >
                 <Field label="Search subscriptions">
@@ -107,6 +108,37 @@ export default function Subscriptions({
                         ))}
                     </select>
                 </Field>
+                <Field label="Coverage">
+                    <select
+                        value={filter.data.coverage}
+                        onChange={(e) =>
+                            filter.setData("coverage", e.target.value)
+                        }
+                    >
+                        <option value="all">All coverage</option>
+                        <option value="ending_7">
+                            Active · ending within 7 days
+                        </option>
+                        <option value="ending_30">
+                            Active · ending within 30 days
+                        </option>
+                        <option value="ongoing">Ongoing · no end date</option>
+                    </select>
+                </Field>
+                <Field label="Sort by">
+                    <select
+                        value={filter.data.sort}
+                        onChange={(e) => filter.setData("sort", e.target.value)}
+                    >
+                        <option value="newest">Newest first</option>
+                        <option value="ending_first">
+                            End date · earliest first
+                        </option>
+                        <option value="starting_first">
+                            Start date · earliest first
+                        </option>
+                    </select>
+                </Field>
                 <Field label="Items per page">
                     <select
                         value={filter.data.per_page}
@@ -121,27 +153,37 @@ export default function Subscriptions({
                         ))}
                     </select>
                 </Field>
-                <span role="status">
-                    {filter.processing
-                        ? "Updating…"
-                        : `${subscriptions.total} subscriptions found`}
-                </span>
-                <Button
-                    variant="secondary"
-                    onClick={() =>
-                        filter.setData({
-                            search: "",
-                            status: "all",
-                            trainee: "",
-                            per_page: 10,
-                        })
-                    }
-                >
-                    Clear filters
-                </Button>
+                <div className="subscription-filter-actions">
+                    <span role="status">
+                        {filter.processing
+                            ? "Updating…"
+                            : `${subscriptions.total} subscriptions found`}
+                    </span>
+                    <Button
+                        variant="secondary"
+                        onClick={() =>
+                            filter.setData({
+                                search: "",
+                                status: "all",
+                                trainee: "",
+                                per_page: 10,
+                                coverage: "all",
+                                sort: "newest",
+                            })
+                        }
+                    >
+                        Clear filters
+                    </Button>
+                </div>
             </section>
             <SubscriptionTable items={subscriptions.data} />
-            <Pagination links={subscriptions.links} />
+            <div className="subscription-results-footer">
+                <p>
+                    Showing {subscriptions.from || 0}–{subscriptions.to || 0} of{" "}
+                    {subscriptions.total} subscriptions
+                </p>
+                <Pagination links={subscriptions.links} />
+            </div>
             <details className="panel coach-card subscription-packages">
                 <summary>
                     <Package size={19} />

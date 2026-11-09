@@ -15,8 +15,8 @@ class CoachSubscriptionController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:all,active,paused,ended,expired,upcoming', 'per_page' => 'nullable|in:10,25,50,100', 'trainee' => 'nullable|integer|min:1']);
-        $filters = [...['search' => '', 'status' => 'all', 'per_page' => 10, 'trainee' => ''], ...$filters];
+        $filters = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:all,active,paused,ended,expired,upcoming', 'per_page' => 'nullable|in:10,25,50,100', 'trainee' => 'nullable|integer|min:1', 'coverage' => 'nullable|in:all,ending_7,ending_30,ongoing', 'sort' => 'nullable|in:newest,ending_first,starting_first']);
+        $filters = [...['search' => '', 'status' => 'all', 'per_page' => 10, 'trainee' => '', 'coverage' => 'all', 'sort' => 'newest'], ...array_filter($filters, fn ($value) => $value !== null)];
         $query = CoachSubscription::whereHas('relationship', fn ($q) => $q->where('coach_user_id', $request->user()->id));
         $state = "CASE WHEN status <> 'active' THEN status WHEN starts_on > ? THEN 'upcoming' WHEN ends_on < ? THEN 'expired' ELSE 'active' END";
         $counts = (clone $query)->selectRaw("$state as effective, COUNT(*) as total", [today()->toDateString(), today()->toDateString()])->groupBy('effective')->pluck('total', 'effective');
@@ -25,6 +25,17 @@ class CoachSubscriptionController extends Controller
             ->when($filters['search'], fn ($q) => $q->where(fn ($q) => $q->where('package_name', 'like', '%'.$filters['search'].'%')
                 ->orWhereHas('relationship.trainee', fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%')->orWhere('training_code', 'like', '%'.$filters['search'].'%'))
                 ->orWhereHas('assignment.plan', fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))));
+        if (in_array($filters['coverage'], ['ending_7', 'ending_30'])) {
+            $query->whereRaw("($state) = 'active'", [today()->toDateString(), today()->toDateString()])
+                ->whereBetween('ends_on', [today()->toDateString(), today()->addDays($filters['coverage'] === 'ending_7' ? 7 : 30)->toDateString()]);
+        } elseif ($filters['coverage'] === 'ongoing') {
+            $query->whereNull('ends_on')->whereIn('status', ['active', 'paused']);
+        }
+        match ($filters['sort']) {
+            'ending_first' => $query->orderByRaw('CASE WHEN ends_on IS NULL THEN 1 ELSE 0 END')->orderBy('ends_on'),
+            'starting_first' => $query->orderBy('starts_on'),
+            default => null,
+        };
 
         return Inertia::render('Coach/Subscriptions', [
             'packages' => CoachSubscriptionPlan::where('coach_user_id', $request->user()->id)->latest()->get(),
@@ -37,6 +48,8 @@ class CoachSubscriptionController extends Controller
     public function row(CoachSubscription $subscription): array
     {
         return [...$subscription->summary(), 'notes' => $subscription->notes,
+            'days_until_end' => $subscription->ends_on ? (int) today()->diffInDays($subscription->ends_on, false) : null,
+            'days_until_start' => (int) today()->diffInDays($subscription->starts_on, false),
             'assignment_id' => $subscription->coach_plan_assignment_id, 'assignment_status' => $subscription->assignment?->status,
             'plan' => $subscription->assignment?->plan?->only('id', 'name', 'structure_type', 'duration_weeks', 'thumbnail_url'),
             'relationship' => ['status' => $subscription->relationship->status, 'trainee' => $subscription->relationship->trainee->only('id', 'name', 'training_code')]];

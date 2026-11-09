@@ -586,6 +586,51 @@
     overflow-x: auto;
     margin-bottom: 20px;
 }
+.subscription-filters {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+.subscription-filters .field {
+    min-width: 0;
+    margin: 0;
+}
+.subscription-filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 44px;
+}
+.subscription-filter-actions > [role="status"] {
+    color: var(--muted);
+    font-size: 13px;
+    align-self: center;
+}
+.subscription-date {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.subscription-ending-soon {
+    color: #965700;
+    font-weight: 650;
+}
+.subscription-results-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    color: var(--muted);
+    font-size: 13px;
+}
+.subscription-results-footer .pagination {
+    margin: 0;
+}
 .subscription-table {
     width: 100%;
     border-collapse: collapse;
@@ -593,14 +638,14 @@
 }
 .subscription-table th {
     background: #f8faff;
-    padding: 15px 18px;
+    padding: 15px 12px;
     font-size: 12px;
     font-weight: 650;
     color: var(--muted);
     white-space: nowrap;
 }
 .subscription-table td {
-    padding: 20px 18px;
+    padding: 20px 12px;
     border-top: 1px solid var(--border);
     vertical-align: middle;
     font-size: 13px;
@@ -610,6 +655,9 @@
     color: var(--muted);
     font-size: 12px;
     margin-top: 6px;
+}
+.subscription-table tbody tr:hover {
+    background: #fafcff;
 }
 .subscription-table .thumbnail-identity {
     min-width: 190px;
@@ -640,6 +688,50 @@
 }
 .subscription-table details p {
     overflow-wrap: anywhere;
+}
+@media (min-width: 1201px) {
+    .subscription-table {
+        table-layout: fixed;
+    }
+    .subscription-table th,
+    .subscription-table td {
+        padding-left: 8px;
+        padding-right: 8px;
+        overflow-wrap: anywhere;
+    }
+    .subscription-table th {
+        font-size: 11px;
+    }
+    .subscription-table th:nth-child(1) {
+        width: 14%;
+    }
+    .subscription-table th:nth-child(2) {
+        width: 21%;
+    }
+    .subscription-table th:nth-child(3),
+    .subscription-table th:nth-child(4),
+    .subscription-table th:nth-child(5),
+    .subscription-table th:nth-child(6) {
+        width: 10%;
+    }
+    .subscription-table th:nth-child(7) {
+        width: 13%;
+    }
+    .subscription-table th:nth-child(8) {
+        width: 12%;
+    }
+    .subscription-table .thumbnail-identity {
+        min-width: 0;
+        gap: 8px;
+    }
+    .subscription-table .training-thumbnail {
+        width: 60px;
+        height: 52px;
+        flex-basis: 60px;
+    }
+    .subscription-table .subscription-date {
+        font-size: 12px;
+    }
 }
 .subscription-packages {
     margin-top: 24px;
@@ -702,7 +794,10 @@
 .coach-workspace .schedule-workout-panel {
     max-width: none;
 }
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
+    .subscription-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .subscription-table thead {
         display: none;
     }
@@ -739,6 +834,9 @@
     }
 }
 @media (max-width: 600px) {
+    .subscription-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
     .settings-tabs {
         display: grid;
     }
@@ -758,10 +856,12 @@
         flex-wrap: wrap;
     }
     .subscription-table tr {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .subscription-table td[data-label="Trainee"],
-    .subscription-table td[data-label="Training program"] {
+    .subscription-table td[data-label="Training program"],
+    .subscription-table td[data-label="Package"],
+    .subscription-table td[data-label="Actions"] {
         grid-column: 1 / -1;
     }
     .subscription-actions .btn {
