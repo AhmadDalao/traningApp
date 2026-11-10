@@ -52,8 +52,8 @@
         }
         .status {
             display: inline-block;
-            background: #f6dda1;
-            color: #69501d;
+            background: #d4f7e6;
+            color: #176343;
             padding: 7px 14px;
             border-radius: 8px;
             font-weight: 700;
@@ -128,7 +128,7 @@
                 application and its real data.
             </p>
             <span id="release-status" class="status"
-                >NOT READY — production verification pending</span
+                >READY — DEPLOYED AND VERIFIED</span
             >
         </header>
         <section>
@@ -272,6 +272,13 @@
                 Chromium/WebKit are automated browser engines; no physical-phone
                 test or real push delivery is claimed.
             </p>
+            <p>
+                The first live WebKit run exposed a test timing issue:
+                navigation canceled a pending search request. The test now waits
+                for the actual search response before navigating. All six live
+                browser suites passed on rerun. This test-only correction does
+                not change the immutable deployed application release.
+            </p>
         </section>
         <section>
             <h2>Data integrity and limits</h2>
@@ -296,19 +303,114 @@
             </p>
         </section>
         <section id="deployment">
-            <h2>Production deployment</h2>
+            <h2>Production deployment — verified</h2>
             <p>
-                Pending immutable release commit/tag, fresh backups,
-                exact-release Hostinger deployment, live smoke tests and cleanup
-                verification. This section will be replaced with actual
-                deployment evidence.
+                <strong>READY — DEPLOYED AND VERIFIED</strong> on
+                <a href="https://training.ahmaddalao.com/coach"
+                    >training.ahmaddalao.com</a
+                >. Immutable tag <code>v2.6.0</code>, commit
+                <code>6a76aa5821008047adef9c197cfd643457dc342b</code>, pushed to
+                <code>origin/main</code>. Earlier release tags remain unchanged.
+            </p>
+            <p>
+                Production’s v2.5.2 runtime matched all 7,963 expected source
+                hashes before modification. Fresh database, runtime, uploads and
+                environment backups were taken at
+                <strong>2026-11-10T08:40:54+00:00</strong>. Archives were
+                verified before replacing any release file. Only the immutable
+                v2.6.0 artifact was deployed using the existing Hostinger
+                maintenance/backup/stage/cache/verify procedure.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Backup</th>
+                        <th>Bytes</th>
+                        <th>SHA-256</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Database (gzip)</td>
+                        <td>54,252</td>
+                        <td>
+                            <code
+                                >4ccdcab6cb93f298ff72536f0191831c9b2f813bd9e1eb274d87d98c61868489</code
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Runtime (ZIP)</td>
+                        <td>69,060,204</td>
+                        <td>
+                            <code
+                                >7920e9210e7103ef6fe92a9fc0f3e0ab952cd93641f5050cde74edab31ed9285</code
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Uploads (ZIP)</td>
+                        <td>34,565,564</td>
+                        <td>
+                            <code
+                                >06cd2a14b09b385cd8bcb3198618b4df12f6fab883e8aed0add68cc10e98f634</code
+                            >
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Environment was copied separately with restricted permissions
+                and its hash matched after deployment. Backups remain in private
+                server storage, outside public access.
+            </p>
+            <p>
+                Release archive: 97 files, 469,381 bytes. Final runtime
+                validation checked 8,043 file hashes. PHP 8.3.36; database
+                11.8.9-MariaDB-log. All 17 existing migrations remained
+                unchanged; no migration ran. Production is out of maintenance.
+            </p>
+            <p>
+                Live QA: all <strong>155 browser checks</strong> passed across
+                Chromium and WebKit, plus 8 HTTP ownership/privacy/filter
+                checks. Verified Overview, roster, Programs list/grid/readiness,
+                image preview, subscription
+                dates/filtering/pagination/pause/resume, package tabs, profile
+                save, notifications, device/install guidance, workspace
+                switching and mobile layouts. Real service-worker
+                installation/control, public-only cache, offline mutations,
+                Chromium offline navigation, CSRF and reconnection also passed.
+                No physical-device or real push-delivery test is claimed.
+            </p>
+            <p>
+                HTTPS verification: 979 public assets checked by SHA-256 or
+                equivalent decoded PNG pixels, plus five public endpoint checks.
+                Final checks confirmed login/health remain available,
+                environment access is denied, and temporary deployment
+                helpers/archives return 404.
+            </p>
+            <p>
+                Cleanup removed all disposable QA users and their related
+                coaching, training, schedule and notification records and copied
+                media. All
+                <strong>875 original rows across 22 domain tables</strong> and
+                <strong>567 original media files</strong> matched the fresh
+                pre-deployment fingerprints. Read-only diagnostics found no
+                changed, missing or additional original records/media, and no
+                remaining QA accounts. The environment hash also matched.
+            </p>
+            <p>
+                Push stayed disabled, with no VAPID or cron changes. Temporary
+                deployment endpoint, release archive directory and local
+                credential ledgers were removed. No known BLOCKER or HIGH issue
+                remains.
             </p>
         </section>
         <section>
             <h2>Visual evidence</h2>
             <p>
-                Local disposable QA data, using the implemented application.
-                Sample people and counts are not production data.
+                Live disposable QA data, using the deployed application. Sample
+                people and counts are not production data.
             </p>
             <div class="screens">
                 <figure>

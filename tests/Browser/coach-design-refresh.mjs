@@ -124,12 +124,22 @@ try {
         names,
         [...names].sort((a, b) => a.localeCompare(b)),
     );
+    const searchResponse = page.waitForResponse(
+        (response) =>
+            new URL(response.url()).searchParams.get("search") ===
+                "Full Body Strength" && response.request().method() === "GET",
+    );
     await page
         .getByLabel("Search connected trainees")
         .fill("Full Body Strength");
-    await page.waitForTimeout(500);
-    await page.waitForLoadState("networkidle");
-    assert.ok((await page.locator(".trainee-table tbody tr").count()) > 0);
+    await (await searchResponse).finished();
+    await page.waitForFunction(
+        () =>
+            document
+                .querySelector(".live-filter-bar")
+                ?.getAttribute("aria-busy") === "false",
+    );
+    assert.equal(await page.locator(".trainee-table tbody tr").count(), 12);
     pass("Roster name sorting and current-program search");
     await go("/coach/training-plans");
     await matrix("programs-list");
