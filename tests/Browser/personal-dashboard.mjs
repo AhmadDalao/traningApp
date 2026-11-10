@@ -197,7 +197,10 @@ try {
         await evening
             .getByRole("button", { name: "Mark completed", exact: true })
             .click();
-        await page.waitForLoadState("networkidle");
+        await evening
+            .getByText("Completed", { exact: true })
+            .first()
+            .waitFor({ state: "visible" });
         await go("/dashboard");
     }
     assert(

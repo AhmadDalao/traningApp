@@ -1,0 +1,12 @@
+{
+  "base": "https://training.ahmaddalao.com",
+  "checks": [
+    "Empty personal dashboard uses zero actual sessions",
+    "Dashboard counts match all scheduled training and recovery rows",
+    "Recent completion and weekly check-in remain available",
+    "Untimed today remains planned and available",
+    "Incomplete profile still offers completion",
+    "Existing program lifecycle supplies the current program card"
+  ],
+  "count": 6
+}

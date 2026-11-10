@@ -1,0 +1,30 @@
+[
+  {
+    "script": "personal-dashboard",
+    "engine": "chromium",
+    "exit_code": 0,
+    "seconds": 21.48,
+    "checks": 35
+  },
+  {
+    "script": "personal-dashboard",
+    "engine": "webkit",
+    "exit_code": 0,
+    "seconds": 21.04,
+    "checks": 35
+  },
+  {
+    "script": "pwa-smoke",
+    "engine": "chromium",
+    "exit_code": 0,
+    "seconds": 15.4,
+    "checks": 20
+  },
+  {
+    "script": "pwa-smoke",
+    "engine": "webkit",
+    "exit_code": 0,
+    "seconds": 15.15,
+    "checks": 19
+  }
+]

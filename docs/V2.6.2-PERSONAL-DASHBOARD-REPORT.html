@@ -97,7 +97,7 @@
     <main>
         <header>
             <span class="badge" id="release-status"
-                >NOT READY — production verification pending</span
+                >READY — DEPLOYED AND VERIFIED</span
             >
             <h1>Personal Dashboard<br />Reference design · v2.6.2</h1>
             <p>
@@ -276,23 +276,126 @@
                 <li>tests/Browser/personal-dashboard.mjs</li>
             </ul>
             <p>
-                Immutable tag: <code>v2.6.2</code>. Commit and deployment
-                evidence will be recorded after verification; earlier tags
-                remain unchanged.
+                Immutable tag: <code>v2.6.2</code>. Release commit:
+                <code>e7a3a986a511e4526f1121e3375ae7de91f2aa7e</code>. Pushed to
+                origin/main and tagged without changing earlier tags.
             </p>
         </section>
         <section id="deployment">
-            <h2>Production deployment</h2>
+            <h2>Production — deployed and verified</h2>
             <p>
-                Pending. The existing Hostinger procedure will verify the live
-                baseline, take fresh database/runtime/uploads/environment
-                backups, deploy the immutable release, exercise disposable live
-                data, clean it, and compare original data/media/environment
-                fingerprints.
+                <strong>READY — DEPLOYED AND VERIFIED.</strong>
+                <a href="https://training.ahmaddalao.com/dashboard"
+                    >Open Personal Dashboard</a
+                >.
             </p>
             <p>
-                No migration is required. Existing push configuration will be
-                preserved.
+                Hostinger’s live baseline matched all 8,124 v2.6.1 runtime
+                fingerprints. The release was built from the immutable v2.6.2
+                tag, installed from an allowlisted checksum-verified archive,
+                and checked against 8,207 runtime hashes after activation. PHP
+                8.3.36; MariaDB 11.8.9-MariaDB-log. All 17 migrations stayed
+                unchanged; this release required no schema change.
+            </p>
+            <p>
+                Fresh database, runtime, uploads and environment backups were
+                taken at 2026-11-10T10:32:53+00:00 before runtime replacement.
+                Database decompression and both ZIP archives were checked.
+                Backups remain in protected production storage.
+            </p>
+            <div class="scroll">
+                <table>
+                    <tr>
+                        <th>Live gate</th>
+                        <th>Verified result</th>
+                    </tr>
+                    <tr>
+                        <td>Browser workflows</td>
+                        <td>109 passed · Chromium and WebKit</td>
+                    </tr>
+                    <tr>
+                        <td>HTTP data setup checks</td>
+                        <td>6 passed using disposable accounts</td>
+                    </tr>
+                    <tr>
+                        <td>Public assets / endpoints</td>
+                        <td>1,141 assets; 5 health, login and PWA endpoints</td>
+                    </tr>
+                    <tr>
+                        <td>Original records</td>
+                        <td>875 rows across 22 tables unchanged</td>
+                    </tr>
+                    <tr>
+                        <td>Original uploads</td>
+                        <td>
+                            567 hashes unchanged; no missing, changed or extra
+                            media
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>QA cleanup</td>
+                        <td>
+                            4 accounts removed, including associated sessions,
+                            plans, run, logs, preferences and copied images;
+                            zero remaining QA accounts
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Environment and Push</td>
+                        <td>
+                            Environment hash unchanged. Push remains disabled;
+                            no VAPID or cron changes
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Temporary files</td>
+                        <td>
+                            Deployment helper and archive removed; public paths
+                            return 404. Credential ledgers removed
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <p>
+                The live test initially checked completion before the response
+                had rendered; saved server state was correct. The browser
+                assertion now waits for the visible Completed status. Both
+                engines passed the corrected check. This changes test
+                synchronization only; deployed runtime and immutable tag are
+                unchanged.
+            </p>
+            <p>
+                Evidence:
+                <a href="v2.6.2/deployment.json"
+                    >production verification and backup hashes</a
+                >
+                ·
+                <a href="v2.6.2/production-browser-runs.json"
+                    >live browser checks</a
+                >
+                ·
+                <a href="v2.6.2/production-http-checks.json"
+                    >live HTTP checks</a
+                >
+                · <a href="v2.6.2/immutable-build.json">immutable build</a>.
+            </p>
+            <p>
+                <a
+                    href="assets/v2.6.2/live-chromium-personal-dashboard-1440.png"
+                    >Live desktop screenshot</a
+                >
+                ·
+                <a href="assets/v2.6.2/live-chromium-personal-dashboard-390.png"
+                    >Live phone-width screenshot</a
+                >
+                ·
+                <a href="assets/v2.6.2/live-chromium-personal-empty-1440.png"
+                    >Live empty state</a
+                >
+                ·
+                <a href="assets/v2.6.2/live-chromium-coach-regression-1440.png"
+                    >Coach regression screenshot</a
+                >.
             </p>
         </section>
         <section>
