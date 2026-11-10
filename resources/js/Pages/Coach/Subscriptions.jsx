@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Head } from "@inertiajs/react";
-import { CreditCard, Package, Plus } from "lucide-react";
+import {
+    CreditCard,
+    Package,
+    Plus,
+    Search,
+    SlidersHorizontal,
+} from "lucide-react";
 import {
     PageHeader,
     Button,
@@ -21,6 +27,7 @@ export default function Subscriptions({
     counts,
 }) {
     const [tab, setTab] = useState("subscriptions");
+    const [moreFilters, setMoreFilters] = useState(false);
     const [editing, setEditing] = useState(null);
     const filter = useLiveFilters("/coach/subscriptions", filters, [
         "subscriptions",
@@ -42,12 +49,12 @@ export default function Subscriptions({
                 description="One clear view of who is covered, what they train, and when it starts and ends."
             >
                 <Button variant="secondary" onClick={() => setEditing({})}>
-                    <Package size={17} />
+                    <Plus size={17} />
                     Create package
                 </Button>
                 <ButtonLink href="/coach/trainees">
                     <Plus size={17} />
-                    Assign & activate training
+                    Assign training
                 </ButtonLink>
             </PageHeader>
             <div
@@ -132,114 +139,131 @@ export default function Subscriptions({
                             }
                             onClick={() => filter.setData("status", key)}
                         >
-                            <CreditCard size={16} />
                             {label}
                             <span>{count}</span>
                         </button>
                     ))}
                 </div>
                 <section
-                    className="panel coach-card subscription-filters"
+                    className="panel coach-card subscription-filters reference-subscription-filters"
                     aria-busy={filter.processing}
                 >
                     <Field label="Search subscriptions">
-                        <input
-                            placeholder="Name, ID, program or package"
-                            value={filter.data.search}
-                            onChange={(e) =>
-                                filter.setData("search", e.target.value)
-                            }
-                            maxLength={100}
-                        />
+                        <div className="search-input">
+                            <Search size={18} />
+                            <input
+                                type="search"
+                                placeholder="Search trainee, program or package"
+                                value={filter.data.search}
+                                onChange={(e) =>
+                                    filter.setData("search", e.target.value)
+                                }
+                                maxLength={100}
+                            />
+                        </div>
                     </Field>
-                    <Field label="Trainee">
-                        <select
-                            value={filter.data.trainee}
-                            onChange={(e) =>
-                                filter.setData("trainee", e.target.value)
-                            }
-                        >
-                            <option value="">All trainees</option>
-                            {relationships.map((r) => (
-                                <option key={r.id} value={r.trainee.id}>
-                                    {r.trainee.name} · {r.trainee.training_code}
+                    <Button
+                        variant="secondary"
+                        aria-expanded={moreFilters}
+                        onClick={() => setMoreFilters(!moreFilters)}
+                    >
+                        <SlidersHorizontal size={18} />
+                        More filters
+                    </Button>
+                    <div
+                        className="directory-advanced-filters"
+                        hidden={!moreFilters}
+                    >
+                        <Field label="Trainee">
+                            <select
+                                value={filter.data.trainee}
+                                onChange={(e) =>
+                                    filter.setData("trainee", e.target.value)
+                                }
+                            >
+                                <option value="">All trainees</option>
+                                {relationships.map((r) => (
+                                    <option key={r.id} value={r.trainee.id}>
+                                        {r.trainee.name} ·{" "}
+                                        {r.trainee.training_code}
+                                    </option>
+                                ))}
+                            </select>
+                        </Field>
+                        <Field label="Coverage">
+                            <select
+                                value={filter.data.coverage}
+                                onChange={(e) =>
+                                    filter.setData("coverage", e.target.value)
+                                }
+                            >
+                                <option value="all">All coverage</option>
+                                <option value="ending_7">
+                                    Active · ending within 7 days
                                 </option>
-                            ))}
-                        </select>
-                    </Field>
-                    <Field label="Coverage">
-                        <select
-                            value={filter.data.coverage}
-                            onChange={(e) =>
-                                filter.setData("coverage", e.target.value)
-                            }
-                        >
-                            <option value="all">All coverage</option>
-                            <option value="ending_7">
-                                Active · ending within 7 days
-                            </option>
-                            <option value="ending_30">
-                                Active · ending within 30 days
-                            </option>
-                            <option value="ongoing">
-                                Ongoing · no end date
-                            </option>
-                        </select>
-                    </Field>
-                    <Field label="Sort by">
-                        <select
-                            value={filter.data.sort}
-                            onChange={(e) =>
-                                filter.setData("sort", e.target.value)
-                            }
-                        >
-                            <option value="newest">Newest first</option>
-                            <option value="ending_first">
-                                End date · earliest first
-                            </option>
-                            <option value="starting_first">
-                                Start date · earliest first
-                            </option>
-                        </select>
-                    </Field>
-                    <Field label="Items per page">
-                        <select
-                            value={filter.data.per_page}
-                            onChange={(e) =>
-                                filter.setData(
-                                    "per_page",
-                                    Number(e.target.value),
-                                )
-                            }
-                        >
-                            {[10, 25, 50, 100].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
+                                <option value="ending_30">
+                                    Active · ending within 30 days
                                 </option>
-                            ))}
-                        </select>
-                    </Field>
-                    <div className="subscription-filter-actions">
-                        <span role="status">
-                            {filter.processing
-                                ? "Updating…"
-                                : `${subscriptions.total} subscriptions found`}
-                        </span>
-                        <Button
-                            variant="secondary"
-                            onClick={() =>
-                                filter.setData({
-                                    search: "",
-                                    status: "all",
-                                    trainee: "",
-                                    per_page: 10,
-                                    coverage: "all",
-                                    sort: "newest",
-                                })
-                            }
-                        >
-                            Clear filters
-                        </Button>
+                                <option value="ongoing">
+                                    Ongoing · no end date
+                                </option>
+                            </select>
+                        </Field>
+                        <Field label="Sort by">
+                            <select
+                                value={filter.data.sort}
+                                onChange={(e) =>
+                                    filter.setData("sort", e.target.value)
+                                }
+                            >
+                                <option value="newest">Newest first</option>
+                                <option value="ending_first">
+                                    End date · earliest first
+                                </option>
+                                <option value="starting_first">
+                                    Start date · earliest first
+                                </option>
+                            </select>
+                        </Field>
+                        <Field label="Items per page">
+                            <select
+                                value={filter.data.per_page}
+                                onChange={(e) =>
+                                    filter.setData(
+                                        "per_page",
+                                        Number(e.target.value),
+                                    )
+                                }
+                            >
+                                {[10, 25, 50, 100].map((n) => (
+                                    <option key={n} value={n}>
+                                        {n}
+                                    </option>
+                                ))}
+                            </select>
+                        </Field>
+                        <div className="subscription-filter-actions">
+                            <span role="status">
+                                {filter.processing
+                                    ? "Updating…"
+                                    : `${subscriptions.total} subscriptions found`}
+                            </span>
+                            <Button
+                                variant="secondary"
+                                onClick={() =>
+                                    filter.setData({
+                                        search: "",
+                                        status: "all",
+                                        trainee: "",
+                                        per_page: 10,
+                                        coverage: "all",
+                                        sort: "newest",
+                                    })
+                                }
+                            >
+                                Clear filters
+                            </Button>
+                        </div>
                     </div>
                 </section>
                 <SubscriptionTable items={subscriptions.data} />

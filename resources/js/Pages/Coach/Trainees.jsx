@@ -1,8 +1,8 @@
 import PersonAvatar from "../../Components/PersonAvatar";
 import useLiveFilters from "../../Features/useLiveFilters";
-import { Search, UserPlus } from "lucide-react";
+import { Search, Plus, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { Head, useForm, Link, router } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import {
     PageHeader,
     Button,
@@ -43,7 +43,7 @@ function Program({ row }) {
     return (
         <div className="trainee-cell">
             <span title={row.plan?.name}>
-                {row.plan?.name || "Not assigned"}
+                {row.plan?.name || "No program assigned"}
             </span>
             <small>
                 {row.subscription?.package_name || "No coaching package"}
@@ -99,7 +99,10 @@ function CoachingState({ row }) {
 function Actions({ row }) {
     return row.action ? (
         <Link className="btn btn-secondary" href={row.action.url}>
-            {row.action.label} →
+            {["attention", "setup"].includes(row.display_state)
+                ? "Review"
+                : "Open"}{" "}
+            <ChevronRight size={17} />
         </Link>
     ) : row.status === "pending" ? (
         <EndRelationship relationship={row} label="Cancel request" />
@@ -107,35 +110,68 @@ function Actions({ row }) {
         <span>Access ended</span>
     );
 }
-export default function Trainees({ relationships, filters, counts = {} }) {
+export default function Trainees({
+    relationships,
+    filters,
+    counts = {},
+    rosterStats = {},
+}) {
     const form = useLiveFilters("/coach/trainees", filters, [
             "relationships",
             "filters",
             "counts",
+            "rosterStats",
         ]),
         [adding, setAdding] = useState(false);
+    const { url } = usePage();
+    const [moreFilters, setMoreFilters] = useState(false);
     return (
         <>
             <Head title="Trainees" />
             <PageHeader
                 eyebrow="PEOPLE & PERFORMANCE"
                 title="Your trainees"
-                description="Your people, their training, and the next useful action."
+                description="A focused roster with progress, context and the next useful action."
             >
                 <Button onClick={() => setAdding(true)}>
-                    <UserPlus size={17} aria-hidden="true" /> Add trainee
+                    <Plus size={17} aria-hidden="true" /> Add trainee
                 </Button>
             </PageHeader>
             <p className="roster-summary">
-                <strong>
-                    {Object.values(counts).reduce((a, b) => a + Number(b), 0)}
-                </strong>{" "}
-                connections <span /> <strong>{counts.attention || 0}</strong>{" "}
-                need attention <span /> <strong>{counts.setup || 0}</strong>{" "}
-                need setup
+                <strong>{rosterStats.connected || 0}</strong> connected trainees{" "}
+                <span />
+                <strong>{rosterStats.coaching || 0}</strong> active coaching{" "}
+                <span />
+                <strong>{rosterStats.review || 0}</strong> need attention
             </p>
+            <nav className="trainee-filters" aria-label="Trainee filters">
+                {[
+                    ["all", "All"],
+                    ["review", "Attention"],
+                    ["coaching", "Active"],
+                    ["setup", "Needs setup"],
+                    ["paused", "Paused"],
+                ].map(([key, label]) => (
+                    <button
+                        key={key}
+                        type="button"
+                        aria-pressed={form.data.status === key}
+                        onClick={() => form.setData("status", key)}
+                    >
+                        {key === "active" ? "On track" : label}{" "}
+                        <span>
+                            {key === "all"
+                                ? Object.values(counts).reduce(
+                                      (a, b) => a + Number(b),
+                                      0,
+                                  )
+                                : (rosterStats[key] ?? counts[key] ?? 0)}
+                        </span>
+                    </button>
+                ))}
+            </nav>
             <div
-                className="panel coach-card live-filter-bar"
+                className="panel coach-card live-filter-bar roster-search-bar"
                 aria-busy={form.processing}
             >
                 <Field label="Search connected trainees">
@@ -143,6 +179,11 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                         <Search size={18} aria-hidden="true" />
                         <input
                             type="search"
+                            autoFocus={
+                                new URLSearchParams(url.split("?")[1]).get(
+                                    "focus",
+                                ) === "search"
+                            }
                             value={form.data.search}
                             maxLength={100}
                             onChange={(e) =>
@@ -161,63 +202,69 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                         <option value="name">Name A–Z</option>
                     </select>
                 </Field>
-                <Field label="Items per page">
-                    <select
-                        value={form.data.per_page}
-                        onChange={(e) =>
-                            form.setData("per_page", Number(e.target.value))
-                        }
-                    >
-                        {[10, 25, 50, 100].map((n) => (
-                            <option value={n} key={n}>
-                                {n}
-                            </option>
-                        ))}
-                    </select>
-                </Field>
-                {(form.data.search ||
-                    form.data.status !== "all" ||
-                    form.data.sort !== "newest") && (
-                    <Button
-                        variant="secondary"
-                        onClick={() =>
-                            form.setData({
-                                search: "",
-                                status: "all",
-                                sort: "newest",
-                                per_page: 25,
-                            })
-                        }
-                    >
-                        Clear all
-                    </Button>
-                )}
-                <p className="filter-feedback" role="status">
-                    {form.processing
-                        ? "Updating…"
-                        : `${relationships.total} trainees found`}
-                </p>
+                <Button
+                    variant="secondary"
+                    aria-expanded={moreFilters}
+                    onClick={() => setMoreFilters(!moreFilters)}
+                >
+                    <SlidersHorizontal size={18} />
+                    Filters
+                </Button>
+                <div
+                    className="directory-advanced-filters"
+                    hidden={!moreFilters}
+                >
+                    <Field label="Items per page">
+                        <select
+                            value={form.data.per_page}
+                            onChange={(e) =>
+                                form.setData("per_page", Number(e.target.value))
+                            }
+                        >
+                            {[10, 25, 50, 100].map((n) => (
+                                <option value={n} key={n}>
+                                    {n}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
+                    {(form.data.search ||
+                        form.data.status !== "all" ||
+                        form.data.sort !== "newest") && (
+                        <Button
+                            variant="secondary"
+                            onClick={() =>
+                                form.setData({
+                                    search: "",
+                                    status: "all",
+                                    sort: "newest",
+                                    per_page: 25,
+                                })
+                            }
+                        >
+                            Clear all
+                        </Button>
+                    )}
+                    <Field label="Connection status">
+                        <select
+                            value={form.data.status}
+                            onChange={(e) =>
+                                form.setData("status", e.target.value)
+                            }
+                        >
+                            {Object.entries({
+                                ...traineeStates,
+                                coaching: "Active coaching",
+                                review: "Needs attention (all)",
+                            }).map(([key, label]) => (
+                                <option key={key} value={key}>
+                                    {key === "active" ? "On track" : label}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
+                </div>
             </div>
-            <nav className="trainee-filters" aria-label="Trainee filters">
-                {Object.entries(traineeStates).map(([key, label]) => (
-                    <button
-                        key={key}
-                        type="button"
-                        aria-pressed={form.data.status === key}
-                        onClick={() => form.setData("status", key)}
-                    >
-                        {key === "active" ? "On track" : label}{" "}
-                        <span>
-                            {key === "all"
-                                ? Object.values(counts).reduce(
-                                      (a, b) => a + Number(b),
-                                      0,
-                                  )
-                                : counts[key] || 0}
-                        </span>
-                    </button>
-                ))}
-            </nav>
             {relationships.data.length ? (
                 <>
                     <div className="panel trainee-table">
@@ -229,11 +276,11 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                 <tr>
                                     {[
                                         "Trainee",
-                                        "Current Training",
+                                        "Current program",
                                         "This Week",
                                         "Next workout",
-                                        "Status",
-                                        "Next action",
+                                        "Coaching",
+                                        "Next step",
                                     ].map((h) => (
                                         <th key={h} scope="col">
                                             {h}
@@ -251,17 +298,31 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                             <Program row={row} />
                                         </td>
                                         <td>
-                                            {row.status === "active"
-                                                ? `${row.week.completed} / ${row.week.total}`
-                                                : "—"}
-                                            {row.week.total > 0 && (
-                                                <progress
-                                                    className="roster-progress"
-                                                    max={row.week.total}
-                                                    value={row.week.completed}
-                                                    aria-label="Assigned workouts completed this week"
-                                                />
-                                            )}
+                                            <div
+                                                className={`roster-week ${row.week.total && row.week.completed / row.week.total < 0.5 ? "low" : ""}`}
+                                            >
+                                                <div>
+                                                    <progress
+                                                        className="roster-progress"
+                                                        max={
+                                                            row.week.total || 1
+                                                        }
+                                                        value={
+                                                            row.week.completed
+                                                        }
+                                                        aria-label="Assigned workouts completed this week"
+                                                    />
+                                                    <strong>
+                                                        {row.week.completed}/
+                                                        {row.week.total}
+                                                    </strong>
+                                                </div>
+                                                <small>
+                                                    {row.week.total
+                                                        ? `${Math.round((row.week.completed / row.week.total) * 100)}% completion`
+                                                        : "Not scheduled"}
+                                                </small>
+                                            </div>
                                         </td>
                                         <td>
                                             <Next entry={row.next_session} />
@@ -276,6 +337,14 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                 ))}
                             </tbody>
                         </table>
+                        <footer className="directory-table-footer">
+                            <span>
+                                Showing {relationships.from || 0}–
+                                {relationships.to || 0} of {relationships.total}{" "}
+                                trainees
+                            </span>
+                            <span>One profile · all the context</span>
+                        </footer>
                     </div>
                     <div className="trainee-mobile-cards">
                         {relationships.data.map((row) => (

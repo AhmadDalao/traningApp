@@ -1,7 +1,7 @@
 import SettingsLayout from "../../Components/SettingsLayout";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Head, usePage } from "@inertiajs/react";
-import { Bell, Smartphone } from "lucide-react";
+import { Bell, Smartphone, Laptop, Settings } from "lucide-react";
 import { Button, Field, PageHeader } from "../../Components/UI";
 import InstallCard from "../../Features/Notifications/InstallCard";
 import {
@@ -18,10 +18,14 @@ export default function Index({
     deviceCount,
     pushConfigured,
     publicKey,
+    embedded = false,
 }) {
     const { url, props } = usePage();
     const coach = props.trainingContext?.workspace === "coach";
-    const devices = coach && url.includes("section=devices");
+    const devices = embedded || (coach && url.includes("section=devices"));
+    const Wrapper = embedded
+        ? ({ children }) => <>{children}</>
+        : SettingsLayout;
     const [settings, setSettings] = useState(preferences);
     const [enabled, setEnabled] = useState(deviceEnabled);
     const [count, setCount] = useState(deviceCount);
@@ -31,6 +35,7 @@ export default function Index({
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [deviceDetails, setDeviceDetails] = useState(false);
     const { online, registration, registrationError } = useSyncExternalStore(
         subscribePwa,
         pwaSnapshot,
@@ -104,12 +109,14 @@ export default function Index({
             ? "Enabled on this device"
             : "Off on this device";
     return (
-        <SettingsLayout section={devices ? "devices" : "notifications"}>
-            <Head title="Notifications" />
-            <PageHeader
-                title={devices ? "App & devices" : "Notifications"}
-                description="Choose what reaches you. These settings apply to your account in both workspaces."
-            />
+        <Wrapper section={devices ? "devices" : "notifications"}>
+            {!embedded && <Head title="Notifications" />}
+            {!embedded && (
+                <PageHeader
+                    title={devices ? "App & devices" : "Notifications"}
+                    description="Choose what reaches you. These settings apply to your account in both workspaces."
+                />
+            )}
             {coach && !devices && (
                 <p className="settings-note">
                     {pushConfigured
@@ -131,11 +138,45 @@ export default function Index({
                 className={`notification-grid ${coach ? (devices ? "settings-devices" : "settings-notifications") : ""}`}
             >
                 <div>
-                    <section className="panel notification-panel device-panel">
+                    <section
+                        className={`panel notification-panel device-panel ${embedded ? "compact-device" : ""} ${deviceDetails ? "expanded" : ""}`}
+                    >
                         <div className="notification-title">
-                            <Smartphone size={22} />
-                            <h2>This device</h2>
+                            {embedded ? (
+                                <Laptop size={22} />
+                            ) : (
+                                <Smartphone size={22} />
+                            )}
+                            <h2>
+                                {embedded ? "Connected devices" : "This device"}
+                            </h2>
                         </div>
+                        {embedded && (
+                            <>
+                                <div className="device-summary">
+                                    <Laptop size={24} />
+                                    <div>
+                                        <strong>This device</strong>
+                                        <small>{status}</small>
+                                    </div>
+                                    <span className="badge completed">
+                                        Current
+                                    </span>
+                                </div>
+                                <Button
+                                    variant="secondary"
+                                    aria-expanded={deviceDetails}
+                                    onClick={() =>
+                                        setDeviceDetails(!deviceDetails)
+                                    }
+                                >
+                                    <Settings size={17} />
+                                    {deviceDetails
+                                        ? "Hide device options"
+                                        : "Manage devices"}
+                                </Button>
+                            </>
+                        )}
                         <strong className="notification-state">{status}</strong>
                         <p>
                             {count} {count === 1 ? "device is" : "devices are"}{" "}
@@ -247,106 +288,113 @@ export default function Index({
                             must explicitly enable its own notifications.
                         </p>
                     </section>
-                    <section className="panel notification-panel preferences-panel">
-                        <div className="notification-title">
-                            <Bell size={22} />
-                            <h2>What you receive</h2>
-                        </div>
-                        <form
-                            onSubmit={(event) => {
-                                event.preventDefault();
-                                action(async () => {
-                                    await jsonRequest(
-                                        "/notifications/preferences",
-                                        settings,
-                                        "PUT",
-                                    );
-                                    setMessage(
-                                        "Notification preferences saved.",
-                                    );
-                                });
-                            }}
-                        >
-                            <label className="notification-toggle">
-                                <input
-                                    type="checkbox"
-                                    role="switch"
-                                    checked={settings.workout_reminders}
-                                    onChange={(event) =>
-                                        setSettings({
-                                            ...settings,
-                                            workout_reminders:
-                                                event.target.checked,
-                                        })
-                                    }
-                                />
-                                <span>
-                                    <strong>Workout reminders</strong>
-                                    <small>
-                                        One reminder before a planned workout
-                                        with a start time. No rest-day or
-                                        missed-workout messages.
-                                    </small>
-                                </span>
-                            </label>
-                            <Field label="Remind me before my workout">
-                                <select
-                                    value={settings.reminder_minutes}
-                                    onChange={(event) =>
-                                        setSettings({
-                                            ...settings,
-                                            reminder_minutes: Number(
-                                                event.target.value,
-                                            ),
-                                        })
-                                    }
+                    {!embedded && (
+                        <section className="panel notification-panel preferences-panel">
+                            <div className="notification-title">
+                                <Bell size={22} />
+                                <h2>What you receive</h2>
+                            </div>
+                            <form
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+                                    action(async () => {
+                                        await jsonRequest(
+                                            "/notifications/preferences",
+                                            settings,
+                                            "PUT",
+                                        );
+                                        setMessage(
+                                            "Notification preferences saved.",
+                                        );
+                                    });
+                                }}
+                            >
+                                <label className="notification-toggle">
+                                    <input
+                                        type="checkbox"
+                                        role="switch"
+                                        checked={settings.workout_reminders}
+                                        onChange={(event) =>
+                                            setSettings({
+                                                ...settings,
+                                                workout_reminders:
+                                                    event.target.checked,
+                                            })
+                                        }
+                                    />
+                                    <span>
+                                        <strong>Workout reminders</strong>
+                                        <small>
+                                            One reminder before a planned
+                                            workout with a start time. No
+                                            rest-day or missed-workout messages.
+                                        </small>
+                                    </span>
+                                </label>
+                                <Field label="Remind me before my workout">
+                                    <select
+                                        value={settings.reminder_minutes}
+                                        onChange={(event) =>
+                                            setSettings({
+                                                ...settings,
+                                                reminder_minutes: Number(
+                                                    event.target.value,
+                                                ),
+                                            })
+                                        }
+                                    >
+                                        <option value={15}>15 minutes</option>
+                                        <option value={30}>30 minutes</option>
+                                        <option value={60}>1 hour</option>
+                                        <option value={120}>2 hours</option>
+                                    </select>
+                                </Field>
+                                <label className="notification-toggle">
+                                    <input
+                                        type="checkbox"
+                                        role="switch"
+                                        checked={settings.coach_updates}
+                                        onChange={(event) =>
+                                            setSettings({
+                                                ...settings,
+                                                coach_updates:
+                                                    event.target.checked,
+                                            })
+                                        }
+                                    />
+                                    <span>
+                                        <strong>Coach updates</strong>
+                                        <small>
+                                            Connection requests, accepted
+                                            requests, assigned plans, and
+                                            important schedule or program
+                                            changes.
+                                        </small>
+                                    </span>
+                                </label>
+                                {!enabled &&
+                                    (settings.workout_reminders ||
+                                        settings.coach_updates) && (
+                                        <p className="notification-help">
+                                            Preferences can be on while this
+                                            device is off.{" "}
+                                            {coach
+                                                ? "Enable this device in App & devices to receive messages."
+                                                : "Enable a device above to receive messages here."}
+                                        </p>
+                                    )}
+                                <Button
+                                    type="submit"
+                                    disabled={busy || !online}
                                 >
-                                    <option value={15}>15 minutes</option>
-                                    <option value={30}>30 minutes</option>
-                                    <option value={60}>1 hour</option>
-                                    <option value={120}>2 hours</option>
-                                </select>
-                            </Field>
-                            <label className="notification-toggle">
-                                <input
-                                    type="checkbox"
-                                    role="switch"
-                                    checked={settings.coach_updates}
-                                    onChange={(event) =>
-                                        setSettings({
-                                            ...settings,
-                                            coach_updates: event.target.checked,
-                                        })
-                                    }
-                                />
-                                <span>
-                                    <strong>Coach updates</strong>
-                                    <small>
-                                        Connection requests, accepted requests,
-                                        assigned plans, and important schedule
-                                        or program changes.
-                                    </small>
-                                </span>
-                            </label>
-                            {!enabled &&
-                                (settings.workout_reminders ||
-                                    settings.coach_updates) && (
-                                    <p className="notification-help">
-                                        Preferences can be on while this device
-                                        is off.{" "}
-                                        {coach
-                                            ? "Enable this device in App & devices to receive messages."
-                                            : "Enable a device above to receive messages here."}
-                                    </p>
-                                )}
-                            <Button type="submit" disabled={busy || !online}>
-                                {busy ? "Saving…" : "Save preferences"}
-                            </Button>
-                        </form>
-                    </section>
+                                    {busy ? "Saving…" : "Save preferences"}
+                                </Button>
+                            </form>
+                        </section>
+                    )}
                 </div>
-                <InstallCard />
+                <InstallCard compact={embedded} />
             </div>
-        </SettingsLayout>
+        </Wrapper>
     );
 }

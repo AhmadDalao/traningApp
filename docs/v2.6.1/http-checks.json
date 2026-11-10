@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "Other Coach cannot list subscriptions",
+    "Other Coach cannot change subscription",
+    "Trainee cannot open Coach subscription list",
+    "Fourteen independent periods visible",
+    "Trainee email remains private",
+    "Ending within seven days includes today and boundary",
+    "Thirty-day filter excludes paused, ended, expired and upcoming",
+    "Ongoing filter selects no-end-date period"
+  ],
+  "count": 8
+}

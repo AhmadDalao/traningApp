@@ -336,4 +336,47 @@ class CoachWorkspaceTest extends TestCase
         $this->relationship->update(['status' => 'ended']);
         $this->get('/coach/trainees?search=Strength')->assertInertia(fn (Assert $p) => $p->where('relationships.total', 0));
     }
+
+    public function test_reference_settings_save_all_sections_without_changing_personal_history_or_ownership(): void
+    {
+        $this->coach->profile()->create(['height_cm' => 180, 'current_weight_kg' => 80, 'body_weight_goal' => 'gain', 'target_body_weight_kg' => 85]);
+        $this->post('/coach/settings', [
+            'display_name' => 'My Coaching', 'specialization' => 'Strength', 'bio' => 'Consistent training.',
+            'user_id' => $this->trainee->id,
+            'training_preferences' => ['training_goals' => ['build_muscle', 'get_stronger'], 'body_weight_goal' => 'maintain', 'target_body_weight_kg' => 90, 'experience_level' => 'intermediate', 'training_days_per_week' => 4, 'session_duration_minutes' => 60, 'equipment_access' => ['bodyweight']],
+            'notifications' => ['workout_reminders' => true, 'coach_updates' => true, 'reminder_minutes' => 30],
+        ])->assertSessionHasNoErrors()->assertRedirect('/coach/settings');
+        $this->assertSame('My Coaching', $this->coach->coachProfile->fresh()->display_name);
+        $profile = $this->coach->profile()->first();
+        $this->assertSame(['build_muscle', 'get_stronger'], $profile->training_goals);
+        $this->assertSame('build_muscle', $profile->training_goal);
+        $this->assertNull($profile->target_body_weight_kg);
+        $this->assertEquals(80, $profile->current_weight_kg);
+        $this->assertEquals(180, $profile->height_cm);
+        $this->assertDatabaseCount('body_weight_entries', 0);
+        $this->assertDatabaseHas('notification_preferences', ['user_id' => $this->coach->id, 'reminder_minutes' => 30]);
+        $this->assertDatabaseMissing('notification_preferences', ['user_id' => $this->trainee->id]);
+        $this->get('/coach/settings')->assertInertia(fn (Assert $p) => $p->component('Coach/Settings')->where('trainingContext.workspace', 'coach')->where('preferences.reminder_minutes', 30)->where('profile.training_days_per_week', 4));
+    }
+
+    public function test_reference_settings_reject_invalid_sections_without_partial_saves(): void
+    {
+        $this->post('/coach/settings', ['display_name' => 'Must not save', 'training_preferences' => ['training_days_per_week' => 12], 'notifications' => ['workout_reminders' => true, 'coach_updates' => true, 'reminder_minutes' => 9]])->assertSessionHasErrors(['training_preferences.training_days_per_week', 'notifications.reminder_minutes']);
+        $this->assertSame('Coach', $this->coach->coachProfile->fresh()->display_name);
+        $this->assertDatabaseCount('user_profiles', 0);
+        $this->assertDatabaseCount('notification_preferences', 0);
+        $this->post('/coach/settings', ['display_name' => 'Must not save', 'training_preferences' => ['current_weight_kg' => 100]])->assertSessionHasErrors('training_preferences');
+        $this->actingAs($this->trainee)->post('/coach/settings', ['display_name' => 'Forbidden'])->assertForbidden();
+        $this->assertSame('Coach', $this->coach->coachProfile->fresh()->display_name);
+    }
+
+    public function test_reference_roster_active_coverage_filter_is_separate_from_attention(): void
+    {
+        $this->assign();
+        // Assigned but unstarted: active coaching and unfinished setup can coexist.
+        $this->get('/coach/trainees?status=coaching')->assertInertia(fn (Assert $p) => $p->where('rosterStats.coaching', 1)->where('relationships.total', 1)->where('relationships.data.0.display_state', 'setup'));
+        $this->get('/coach/trainees?status=review')->assertInertia(fn (Assert $p) => $p->where('relationships.total', 1));
+        $this->relationship->update(['status' => 'ended']);
+        $this->get('/coach/trainees?status=coaching')->assertInertia(fn (Assert $p) => $p->where('rosterStats.coaching', 0)->where('relationships.total', 0));
+    }
 }

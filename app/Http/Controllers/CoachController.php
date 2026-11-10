@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaveProfileRequest;
+use App\Models\NotificationPreference;
 use App\Models\ProgramRun;
 use App\Models\User;
+use App\Models\UserProfile;
+use App\Models\WebPushSubscription;
 use App\Services\BodyWeightHistory;
 use App\Services\CoachAccess;
 use App\Services\CoachWorkspaceSummary;
 use App\Services\ExerciseProgress;
+use App\Services\Notifications\PushDevices;
+use App\Services\Notifications\PushTransport;
 use App\Services\ProgramLifecycle;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
@@ -20,21 +26,67 @@ class CoachController extends Controller
     {
         abort_unless($request->user()->isCoach(), 403);
 
-        return Inertia::render('Coaching/Setup', ['coachProfile' => $request->user()->coachProfile, 'settings' => $request->is('coach/settings')]);
+        if (! $request->is('coach/settings')) {
+            return Inertia::render('Coaching/Setup', ['coachProfile' => $request->user()->coachProfile, 'settings' => false]);
+        }
+        $devices = app(PushDevices::class);
+        $push = app(PushTransport::class);
+        $response = Inertia::render('Coach/Settings', [
+            'coachProfile' => $request->user()->coachProfile,
+            'profile' => $request->user()->profile,
+            'options' => UserProfile::options(),
+            'preferences' => NotificationPreference::settings($request->user()->id),
+            'deviceEnabled' => (bool) $devices->current($request),
+            'deviceCount' => WebPushSubscription::where('user_id', $request->user()->id)->count(),
+            'pushConfigured' => $push->configured(),
+            'publicKey' => $push->configured() ? config('webpush.vapid.publicKey') : null,
+        ])->toResponse($request);
+        if (! $devices->hash($request)) {
+            $response->withCookie(cookie(PushDevices::COOKIE, bin2hex(random_bytes(32)), 525600, '/', null, $request->isSecure(), true, false, 'lax'));
+        }
+
+        return $response->header('Cache-Control', 'private, no-store');
     }
 
     public function updateProfile(Request $request)
     {
         abort_unless($request->user()->isCoach(), 403);
-        $data = $request->validate(['display_name' => 'required|string|max:100', 'specialization' => 'nullable|string|max:150', 'bio' => 'nullable|string|max:2000']);
+        $rules = ['display_name' => 'required|string|max:100', 'specialization' => 'nullable|string|max:150', 'bio' => 'nullable|string|max:2000'];
+        $preferenceKeys = ['training_goals', 'body_weight_goal', 'target_body_weight_kg', 'experience_level', 'training_days_per_week', 'session_duration_minutes', 'equipment_access'];
+        $rules['training_preferences'] = 'sometimes|array:'.implode(',', $preferenceKeys);
+        foreach ((new SaveProfileRequest)->rules() as $key => $rule) {
+            if (in_array(explode('.', $key)[0], $preferenceKeys, true)) {
+                $rules['training_preferences.'.$key] = $rule;
+            }
+        }
+        $rules['notifications'] = 'sometimes|array:workout_reminders,coach_updates,reminder_minutes';
+        $rules['notifications.workout_reminders'] = 'required_with:notifications|boolean';
+        $rules['notifications.coach_updates'] = 'required_with:notifications|boolean';
+        $rules['notifications.reminder_minutes'] = 'required_with:notifications|integer|in:15,30,60,120';
+        $data = $request->validate($rules);
         DB::transaction(function () use ($request, $data) {
             $user = User::lockForUpdate()->findOrFail($request->user()->id);
             abort_unless($user->isCoach(), 403);
-            $user->coachProfile()->firstOrFail()->update($data);
+            $user->coachProfile()->firstOrFail()->update(collect($data)->only(['display_name', 'specialization', 'bio'])->all());
+            if (isset($data['training_preferences'])) {
+                $preferences = $data['training_preferences'];
+                $profile = $user->profile()->firstOrCreate();
+                if (array_key_exists('training_goals', $preferences)) {
+                    $preferences['training_goals'] ??= [];
+                    $preferences['training_goal'] = $preferences['training_goals'][0] ?? null;
+                }
+                if (! in_array(array_key_exists('body_weight_goal', $preferences) ? $preferences['body_weight_goal'] : $profile->body_weight_goal, ['lose', 'gain'], true)) {
+                    $preferences['target_body_weight_kg'] = null;
+                }
+                $profile->update($preferences);
+            }
+            if (isset($data['notifications'])) {
+                NotificationPreference::updateOrCreate(['user_id' => $user->id], $data['notifications']);
+            }
         });
         $request->session()->put('workspace', 'coach');
 
-        return redirect($request->is('coach/settings') ? '/coach/settings' : '/coach')->with('success', 'Coach profile updated.');
+        return redirect($request->is('coach/settings') ? '/coach/settings' : '/coach')->with('success', isset($data['training_preferences']) || isset($data['notifications']) ? 'Settings saved.' : 'Coach profile updated.');
     }
 
     public function switch(Request $request)
@@ -85,11 +137,17 @@ class CoachController extends Controller
 
     public function trainees(Request $request, CoachWorkspaceSummary $summary)
     {
-        $data = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:active,pending,ended,all,setup,attention,paused', 'sort' => 'nullable|in:newest,name', 'per_page' => 'nullable|in:10,25,50,100']);
+        $data = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:active,coaching,review,pending,ended,all,setup,attention,paused', 'sort' => 'nullable|in:newest,name', 'per_page' => 'nullable|in:10,25,50,100']);
         $status = $data['status'] ?? 'all';
         $query = $summary->query($request->user());
         $counts = (clone $query)->select('display_state')->selectRaw('COUNT(*) as total')->groupBy('display_state')->pluck('total', 'display_state');
-        if ($status !== 'all') {
+        $covered = fn ($q) => $q->where('status', 'active')->where('subscription_status', 'active')->where('starts_on', '<=', today()->toDateString())->where(fn ($dates) => $dates->whereNull('ends_on')->orWhere('ends_on', '>=', today()->toDateString()));
+        $rosterStats = ['connected' => (clone $query)->where('status', 'active')->count(), 'coaching' => $covered(clone $query)->count(), 'review' => ($counts['attention'] ?? 0) + ($counts['setup'] ?? 0) + ($counts['paused'] ?? 0)];
+        if ($status === 'coaching') {
+            $covered($query);
+        } elseif ($status === 'review') {
+            $query->whereIn('display_state', ['attention', 'setup', 'paused']);
+        } elseif ($status !== 'all') {
             $query->where('display_state', $status);
         }
         if (! empty($data['search'])) {
@@ -98,7 +156,7 @@ class CoachController extends Controller
         $relationships = $query->when(($data['sort'] ?? 'newest') === 'name', fn ($q) => $q->orderBy(User::select('name')->whereColumn('users.id', 'summaries.trainee_user_id')->limit(1)))->orderByDesc('id')->paginate((int) ($data['per_page'] ?? 25))->withQueryString();
         $relationships->setCollection(collect($summary->rows($relationships->items())));
 
-        return Inertia::render('Coach/Trainees', ['counts' => $counts, 'filters' => ['status' => $status, 'search' => $data['search'] ?? '', 'sort' => $data['sort'] ?? 'newest', 'per_page' => (int) ($data['per_page'] ?? 25)], 'relationships' => $relationships]);
+        return Inertia::render('Coach/Trainees', ['rosterStats' => $rosterStats, 'counts' => $counts, 'filters' => ['status' => $status, 'search' => $data['search'] ?? '', 'sort' => $data['sort'] ?? 'newest', 'per_page' => (int) ($data['per_page'] ?? 25)], 'relationships' => $relationships]);
     }
 
     public function trainee(TrainingContext $context, BodyWeightHistory $body, CoachAccess $access, ExerciseProgress $progress)

@@ -70,6 +70,12 @@ function Actions({ item }) {
     return (
         <>
             <div className="subscription-actions">
+                <ButtonLink
+                    variant="secondary"
+                    href={`/coach/trainees/${item.relationship.trainee.id}/coaching`}
+                >
+                    Details
+                </ButtonLink>
                 {renewable ? (
                     <ButtonLink variant="secondary" href={setup}>
                         <RotateCcw size={15} />
@@ -80,6 +86,14 @@ function Actions({ item }) {
                     </ButtonLink>
                 ) : (
                     <Button
+                        aria-label={
+                            item.status === "paused" ? "Resume" : "Pause"
+                        }
+                        title={
+                            item.status === "paused"
+                                ? "Resume subscription"
+                                : "Pause subscription"
+                        }
                         variant="secondary"
                         disabled={form.processing}
                         onClick={() => {
@@ -99,14 +113,26 @@ function Actions({ item }) {
                         ) : (
                             <Pause size={15} />
                         )}
-                        {item.status === "paused" ? "Resume" : "Pause"}
+                        <span className="subscription-action-label">
+                            {item.status === "paused" ? "Resume" : "Pause"}
+                        </span>
                     </Button>
                 )}
                 {item.status !== "ended" && (
-                    <Button variant="secondary" onClick={() => setEnding(true)}>
-                        <Square size={14} />
-                        End
-                    </Button>
+                    <details className="trainee-more">
+                        <summary aria-label="More subscription actions">
+                            •••
+                        </summary>
+                        <div>
+                            <Button
+                                variant="secondary"
+                                onClick={() => setEnding(true)}
+                            >
+                                <Square size={14} />
+                                End
+                            </Button>
+                        </div>
+                    </details>
                 )}
             </div>
             <Errors errors={form.errors} />
@@ -147,10 +173,8 @@ export default function SubscriptionTable({ items }) {
                             "Trainee",
                             "Training program",
                             "Package",
-                            "Start date",
-                            "End date",
+                            "Coverage",
                             "Status",
-                            "Time remaining",
                             "Actions",
                         ].map((label) => (
                             <th key={label} scope="col">
@@ -193,6 +217,9 @@ export default function SubscriptionTable({ items }) {
                                         >
                                             {item.plan.name}
                                             <ArrowUpRight size={13} />
+                                            <small>
+                                                Independent assignment
+                                            </small>
                                         </Link>
                                     </div>
                                 ) : (
@@ -213,17 +240,23 @@ export default function SubscriptionTable({ items }) {
                                     </details>
                                 )}
                             </td>
-                            <td data-label="Start date">
-                                <SubscriptionDate date={item.starts_on} />
-                            </td>
-                            <td data-label="End date">
-                                <SubscriptionDate date={item.ends_on} />
+                            <td data-label="Coverage">
+                                <span data-label="End date">
+                                    <SubscriptionDate date={item.ends_on} />
+                                </span>
+                                <small
+                                    className="coverage-start"
+                                    data-label="Start date"
+                                >
+                                    Starts{" "}
+                                    <SubscriptionDate date={item.starts_on} />
+                                </small>
+                                <small data-label="Time remaining">
+                                    <CoverageRemaining item={item} />
+                                </small>
                             </td>
                             <td data-label="Status">
                                 <CoachStatus status={item.effective_status} />
-                            </td>
-                            <td data-label="Time remaining">
-                                <CoverageRemaining item={item} />
                             </td>
                             <td data-label="Actions">
                                 <Actions item={item} />

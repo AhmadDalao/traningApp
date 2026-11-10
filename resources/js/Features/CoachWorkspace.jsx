@@ -193,6 +193,71 @@ export function WeeklyTraining({ entries = [] }) {
 
 export function TrainingRow({ plan, children }) {
     const ctx = useTraining();
+    if (ctx.templates) {
+        const ready = plan.workout_days_count > 0 && !plan.empty_workouts_count;
+        const frequency = plan.weekly_frequency;
+        return (
+            <article className="panel coach-training-row reference-program-card">
+                <div className="program-card-main">
+                    {plan.thumbnail_url ? (
+                        <TrainingThumbnail item={plan} />
+                    ) : (
+                        <span className={`program-symbol tone-${plan.id % 6}`}>
+                            <Dumbbell size={34} />
+                        </span>
+                    )}
+                    <div className="coach-row-copy">
+                        <div className="program-card-labels">
+                            <span
+                                className={`badge ${ready ? "completed" : "draft"}`}
+                            >
+                                {ready ? "Ready to assign" : "Draft"}
+                            </span>
+                            <span>
+                                {plan.structure_type === "program"
+                                    ? `${plan.duration_weeks}-week program`
+                                    : "Simple plan"}
+                            </span>
+                        </div>
+                        <Link href={ctx.url(`/training-plans/${plan.id}`)}>
+                            <h3>{plan.name}</h3>
+                        </Link>
+                        <p className="coach-row-description">
+                            {plan.description ||
+                                (ready
+                                    ? "Your reusable training program"
+                                    : "Awaiting training days and exercise setup")}
+                        </p>
+                    </div>
+                </div>
+                <div className="program-card-footer">
+                    <div className="program-card-stats">
+                        <span>
+                            <strong>
+                                {frequency
+                                    ? frequency.min === frequency.max
+                                        ? frequency.min
+                                        : `${frequency.min}–${frequency.max}`
+                                    : "—"}
+                            </strong>{" "}
+                            days/week
+                        </span>
+                        <span>
+                            <strong>{plan.workout_days_count ?? 0}</strong>{" "}
+                            {plan.workout_days_count === 1
+                                ? "workout"
+                                : "workouts"}
+                        </span>
+                        <span>
+                            <strong>{plan.assigned_trainees_count ?? 0}</strong>{" "}
+                            assigned
+                        </span>
+                    </div>
+                    <div className="coach-row-actions">{children}</div>
+                </div>
+            </article>
+        );
+    }
     return (
         <article className="panel coach-training-row">
             <TrainingThumbnail item={plan} />

@@ -1,0 +1,44 @@
+[
+  {
+    "suite": "CoachSetupConcurrency",
+    "exit_code": 0,
+    "seconds": 11.91,
+    "checks": 53
+  },
+  {
+    "suite": "CoachingConcurrency",
+    "exit_code": 0,
+    "seconds": 0.53,
+    "checks": 17
+  },
+  {
+    "suite": "NotificationConcurrency",
+    "exit_code": 0,
+    "seconds": 1.23,
+    "checks": 10
+  },
+  {
+    "suite": "ProgramConcurrency",
+    "exit_code": 0,
+    "seconds": 0.39,
+    "checks": 10
+  },
+  {
+    "suite": "ProgramControlConcurrency",
+    "exit_code": 0,
+    "seconds": 1.55,
+    "checks": 15
+  },
+  {
+    "suite": "RecurringScheduleConcurrency",
+    "exit_code": 0,
+    "seconds": 0.49,
+    "checks": 4
+  },
+  {
+    "suite": "WeeklyScheduleConcurrency",
+    "exit_code": 0,
+    "seconds": 1.5,
+    "checks": 5
+  }
+]

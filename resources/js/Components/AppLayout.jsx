@@ -21,6 +21,7 @@ import {
     ChevronRight,
     Smartphone,
     Check,
+    Search,
 } from "lucide-react";
 import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
 import { TraineeNav } from "../Features/CoachingUI";
@@ -56,7 +57,7 @@ export default function AppLayout({ children }) {
     const home = coach ? "/coach" : "/dashboard";
     const settings = coach ? "/coach/settings" : "/profile";
     const notifications = coach
-        ? "/coach/settings/notifications"
+        ? "/coach/settings?section=notifications"
         : "/profile/notifications";
     const nav = coach
         ? [
@@ -155,10 +156,6 @@ export default function AppLayout({ children }) {
                 Skip to content
             </a>
             <div className="mobile-top">
-                <Link href={home} className="brand">
-                    <Dumbbell />
-                    Training Planner
-                </Link>
                 <button
                     className="icon-btn"
                     aria-label="Toggle menu"
@@ -167,6 +164,23 @@ export default function AppLayout({ children }) {
                 >
                     {open ? <X /> : <Menu />}
                 </button>
+                <Link href={home} className="brand">
+                    <span className="brand-mark">
+                        <Dumbbell size={24} />
+                    </span>
+                    <span>
+                        Training<span className="brand-second">Planner</span>
+                    </span>
+                </Link>
+                {coach && (
+                    <Link
+                        className="icon-btn"
+                        href={notifications}
+                        aria-label="Notification settings"
+                    >
+                        <Bell size={23} />
+                    </Link>
+                )}
             </div>
             {open && (
                 <div className="nav-backdrop" onClick={() => setOpen(false)} />
@@ -257,6 +271,18 @@ export default function AppLayout({ children }) {
                                     closeNavigation();
                             }}
                         >
+                            {coach && (
+                                <div className="mobile-switch-heading">
+                                    <strong>Switch workspace</strong>
+                                    <button
+                                        className="icon-btn"
+                                        aria-label="Close workspace switcher"
+                                        onClick={() => setUserOpen(false)}
+                                    >
+                                        <X size={22} />
+                                    </button>
+                                </div>
+                            )}
                             {auth.user.is_coach && (
                                 <>
                                     <span className="menu-heading">
@@ -359,6 +385,23 @@ export default function AppLayout({ children }) {
                         <span>YOUR PERSONAL TRAINING SPACE</span>
                     )}
                     <div className="topbar-right">
+                        {coach && (
+                            <>
+                                <Link
+                                    href="/coach/trainees"
+                                    className="topbar-team"
+                                >
+                                    Your trainees <ChevronDown size={16} />
+                                </Link>
+                                <Link
+                                    href="/coach/trainees?focus=search"
+                                    className="icon-btn"
+                                    aria-label="Search trainees"
+                                >
+                                    <Search size={20} />
+                                </Link>
+                            </>
+                        )}
                         {coach ? (
                             <Link
                                 href={notifications}

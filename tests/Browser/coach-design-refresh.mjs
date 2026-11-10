@@ -104,8 +104,9 @@ try {
     await matrix("overview");
     assert.equal(await page.locator(".workload-day").count(), 7);
     assert.ok((await page.locator(".momentum-row").count()) > 0);
-    await page.getByRole("link", { name: "Review priority inbox" }).click();
-    assert.ok((await page.url()).includes("#priority-inbox"));
+    await page.getByRole("link", { name: "Review priority queue" }).click();
+    await page.waitForURL("**/coach/trainees?status=review");
+    assert.ok((await page.url()).includes("status=review"));
     pass("Actual weekly workload, momentum and priority navigation");
     await go("/coach/trainees");
     await matrix("trainees");
@@ -142,9 +143,9 @@ try {
     assert.equal(await page.locator(".trainee-table tbody tr").count(), 12);
     pass("Roster name sorting and current-program search");
     await go("/coach/training-plans");
-    await matrix("programs-list");
-    await page.getByRole("button", { name: "Grid view", exact: true }).click();
     await matrix("programs-grid");
+    await page.getByRole("button", { name: "List view", exact: true }).click();
+    await matrix("programs-list");
     await page.getByRole("button", { name: /^Draft/ }).click();
     await page.waitForLoadState("networkidle");
     await page.waitForFunction(
@@ -158,7 +159,7 @@ try {
             .getByRole("link", { name: "Finish program", exact: true })
             .count()) > 0,
     );
-    await page.getByRole("button", { name: /^Workouts ready/ }).click();
+    await page.getByRole("button", { name: /^Ready/ }).click();
     await page.waitForLoadState("networkidle");
     await page.waitForFunction(
         () =>
@@ -195,14 +196,8 @@ try {
     );
     await go("/coach/settings");
     await matrix("settings");
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page
-        .getByRole("navigation", { name: "Settings sections", exact: true })
-        .getByRole("link", { name: /Coach profile/ })
-        .click();
-    await page.waitForURL("**/coach/settings?section=profile");
-    assert.ok(await page.getByLabel("Coach display name").isVisible());
-    await matrix("coach-profile");
+    for (const id of ["profile", "preferences", "notifications", "devices"])
+        assert.ok(await page.locator(`#settings-${id}`).isVisible());
     const name = await page.getByLabel("Coach display name").inputValue();
     await page
         .getByLabel("Specialization (optional)")
@@ -212,9 +207,14 @@ try {
         .fill(
             "Helping trainees build consistent, sustainable training habits.",
         );
-    await page.getByRole("button", { name: "Save coach profile" }).click();
-    await page.waitForURL("**/coach/settings");
-    await page.waitForLoadState("networkidle");
+    await page.getByLabel("Experience level").selectOption("intermediate");
+    await page.getByRole("switch", { name: /Workout reminders/ }).check();
+    await page.getByRole("switch", { name: /Coach updates/ }).check();
+    await page
+        .getByRole("button", { name: "Save changes", exact: true })
+        .click();
+    await page.getByText("Settings saved.", { exact: true }).waitFor();
+    await page.reload();
     assert.equal(
         await page.getByLabel("Coach display name").inputValue(),
         name,
@@ -223,46 +223,85 @@ try {
         await page.getByLabel("Specialization (optional)").inputValue(),
         "Strength & conditioning",
     );
-    pass("Coach profile saves without switching workspace");
-    await go("/coach/settings/account");
-    await matrix("preferences");
-    await go("/coach/settings/notifications");
-    await matrix("notifications");
-    await page.getByRole("switch", { name: /Workout reminders/ }).check();
-    await page.getByRole("switch", { name: /Coach updates/ }).check();
-    await page
-        .getByRole("button", { name: "Save preferences", exact: true })
-        .click();
-    await page
-        .getByText("Notification preferences saved.", { exact: true })
-        .waitFor();
-    await page.reload();
-    await page.getByRole("switch", { name: /Workout reminders/ }).waitFor();
+    assert.equal(
+        await page.getByLabel("Experience level").inputValue(),
+        "intermediate",
+    );
     assert.ok(
         await page
             .getByRole("switch", { name: /Workout reminders/ })
             .isChecked(),
     );
-    pass("Notification preferences save and reload");
-    await go("/coach/settings/notifications?section=devices");
-    await matrix("devices");
+    await page.getByLabel("Coach display name").fill("Unsaved test");
+    await page
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
+    assert.equal(
+        await page.getByLabel("Coach display name").inputValue(),
+        name,
+    );
+    pass(
+        "One Settings save persists profile, preferences and notifications; discard restores saved values",
+    );
+    for (const [section, label] of [
+        ["profile", "Coach profile"],
+        ["preferences", "Training preferences"],
+        ["notifications", "Notifications"],
+        ["devices", "App & devices"],
+    ]) {
+        await go("/coach/settings");
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page
+            .getByRole("navigation", { name: "Settings sections", exact: true })
+            .getByRole("button", { name: new RegExp(label.replace("&", "&")) })
+            .click();
+        assert.ok(await page.locator(`#settings-${section}`).isVisible());
+        await matrix("settings-" + section);
+        await page.setViewportSize({ width: 320, height: 480 });
+        await page
+            .getByRole("button", { name: "Back to settings", exact: true })
+            .click();
+        assert.ok(
+            await page
+                .getByRole("navigation", {
+                    name: "Settings sections",
+                    exact: true,
+                })
+                .isVisible(),
+        );
+    }
+    pass(
+        "All four mobile sections open independently and return with Back at 320×480",
+    );
+    await go("/coach/settings?section=devices");
+    await page.setViewportSize({ width: 1440, height: 1000 });
     assert.ok(
         await page
-            .getByRole("heading", { name: "This device", exact: true })
+            .getByRole("heading", { name: "Connected devices", exact: true })
             .isVisible(),
     );
+    await page
+        .getByRole("button", { name: "Manage devices", exact: true })
+        .click();
+    assert.ok(await page.locator(".compact-device.expanded").isVisible());
+    await page
+        .getByRole("button", { name: "Install Training Planner", exact: true })
+        .click();
     assert.ok(
         await page
             .getByText("An internet connection is required", { exact: false })
             .count(),
     );
-    pass("App/device page accurately describes online requirements");
+    pass("App installation guidance and device controls remain available");
     await page.locator(".user-menu-toggle").click();
     assert.ok(
         await page
             .getByRole("link", { name: "Coaching administration", exact: true })
             .isVisible(),
     );
+    await page.screenshot({
+        path: path.join(out, `${engine}-workspace-menu-1440.png`),
+    });
     await page.keyboard.press("Escape");
     assert.equal(await page.locator("#user-menu").count(), 0);
     pass("Grouped workspace menu opens and dismisses with Escape");

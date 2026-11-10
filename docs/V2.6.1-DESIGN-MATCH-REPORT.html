@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.6.1 — Reference Design Implementation</title
+    ><style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #f6f5fc;
+            color: #171b35;
+            font:
+                16px/1.65 system-ui,
+                sans-serif;
+        }
+        main {
+            max-width: 1160px;
+            margin: auto;
+            padding: 48px 24px;
+        }
+        header {
+            background: #242148;
+            color: white;
+            border-radius: 22px;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 36px;
+            line-height: 1.15;
+            margin: 12px 0;
+        }
+        h2 {
+            font-size: 24px;
+            margin-top: 0;
+        }
+        h3 {
+            font-size: 18px;
+        }
+        p {
+            margin: 12px 0;
+        }
+        section {
+            background: white;
+            border: 1px solid #e4e3f1;
+            border-radius: 18px;
+            padding: 28px;
+            margin-top: 22px;
+        }
+        .badge {
+            display: inline-block;
+            background: #eee8ff;
+            color: #5138b9;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-weight: 700;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        td,
+        th {
+            text-align: left;
+            border-bottom: 1px solid #e5e4ef;
+            padding: 12px;
+        }
+        th {
+            background: #f7f6fc;
+        }
+        a {
+            color: #6043e8;
+        }
+        code {
+            word-break: break-all;
+            font-size: 12px;
+        }
+        figure {
+            margin: 24px 0;
+        }
+        figure img {
+            display: block;
+            width: 100%;
+            border: 1px solid #e2e1ef;
+            border-radius: 12px;
+        }
+        figure.mobile {
+            max-width: 390px;
+        }
+        figcaption {
+            font-size: 13px;
+            color: #596178;
+            margin-top: 8px;
+        }
+        .gallery-mobile {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+        details {
+            margin: 12px 0;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+        }
+        @media (max-width: 650px) {
+            main {
+                padding: 18px 12px;
+            }
+            header,
+            section {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            table {
+                font-size: 12px;
+            }
+            td,
+            th {
+                padding: 8px;
+            }
+            .gallery-mobile {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <main>
+        <header>
+            <span class="badge">v2.6.1 · 10 November 2026</span>
+            <h1>Your Coach Workspace design, implemented</h1>
+            <p>
+                The seven supplied references now define the page structure,
+                hierarchy, colors, cards, tables, navigation and mobile settings
+                flow.
+            </p>
+            <p id="release-status">
+                <strong>NOT READY — production verification pending</strong>
+            </p>
+        </header>
+        <section>
+            <h2>Baseline and scope</h2>
+            <p>
+                Extends the live v2.6.0 application
+                (6a76aa5821008047adef9c197cfd643457dc342b); implementation
+                started from main at 78e8d7d. This release corrects the earlier
+                approximation and applies the actual reference layouts. Existing
+                Laravel/Inertia/React architecture, independent program
+                subscriptions, activation, scheduling and ownership remain in
+                place. No migration or new dependency.
+            </p>
+        </section>
+        <section>
+            <h2>Reference-by-reference delivery</h2>
+            <table>
+                <tr>
+                    <th>Reference</th>
+                    <th>Implemented behavior</th>
+                </tr>
+                <tr>
+                    <td>Coach Overview</td>
+                    <td>
+                        Greeting and date, navy focus banner, four metrics and
+                        four compact panels: Priority inbox, Today’s training,
+                        Coaching workload and Trainee momentum. Bounded lists
+                        with explicit View all; real account metrics.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Trainees</td>
+                    <td>
+                        Summary counts, status chips before search, six-column
+                        roster, weekly progress bars, separate coverage and
+                        attention states, next actions, live search/sort,
+                        pagination and mobile cards.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Programs</td>
+                    <td>
+                        Two-column cards by default, Ready/Draft filters,
+                        search, grid/list toggle, thumbnails with full-image
+                        previews, footer statistics and Preview/Assign controls.
+                        Existing edit/duplicate/delete actions retained.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Subscriptions</td>
+                    <td>
+                        Subscriptions/Coaching packages tabs, status counts,
+                        search and More filters, six-column table with program,
+                        package, coverage start/end dates, remaining time,
+                        status and compact actions. Pause/resume/end remain
+                        independent per program.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Workspace switcher</td>
+                    <td>
+                        Dark desktop sidebar and grouped white popover for
+                        workspace, coaching and account links. Mobile switcher
+                        and bottom navigation remain usable.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mobile settings</td>
+                    <td>
+                        Profile summary, four section buttons, focused
+                        profile/preferences/notifications/devices screens, large
+                        controls and Back navigation, including 320 × 480.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Desktop settings</td>
+                    <td>
+                        Blue settings accents, profile summary with real counts,
+                        left section navigation and all four sections stacked.
+                        One Save changes action persists profile, training
+                        preferences and notification preferences together;
+                        Discard restores saved values.
+                    </td>
+                </tr>
+            </table>
+        </section>
+        <section>
+            <h2>Functional details and preserved behavior</h2>
+            <p>
+                Settings validates all submitted sections before writing and
+                updates only the authenticated Coach under a user lock and
+                database transaction. Unknown ownership/result fields never
+                become authoritative. Personal body-weight history is untouched.
+                Active coaching and attention are distinct roster filters. Ready
+                to assign means authored training days contain exercises; dates
+                and subscription coverage remain validated during assignment.
+            </p>
+            <p>
+                Original subscription periods, independent assignments, plan
+                thumbnails, Calendar, active workouts, History, Progress/PRs,
+                program controls and Personal Workspace continue using their
+                existing services. The dedicated account page remains available
+                inside Coach context. No user data was migrated.
+            </p>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <table>
+                <tr>
+                    <th>Gate</th>
+                    <th>Result</th>
+                </tr>
+                <tr>
+                    <td>Full SQLite</td>
+                    <td>650 tests · 13,022 assertions passed</td>
+                </tr>
+                <tr>
+                    <td>Full isolated MySQL</td>
+                    <td>650 tests · 13,022 assertions passed</td>
+                </tr>
+                <tr>
+                    <td>JavaScript</td>
+                    <td>38 tests passed</td>
+                </tr>
+                <tr>
+                    <td>Real-process concurrency</td>
+                    <td>
+                        114 checks across CoachSetup, Coaching, Program,
+                        ProgramControl, RecurringSchedule, WeeklySchedule and
+                        Notifications
+                    </td>
+                </tr>
+                <tr>
+                    <td>Chromium / WebKit</td>
+                    <td>
+                        155 checks: reference screens, combined settings
+                        save/reload/discard, four mobile sections and Back,
+                        filters, subscription pause/resume, workspace switch,
+                        full-image preview and PWA. Layout widths 320, 360, 375,
+                        390, 430, 768, 1024, 1100, 1280, 1440 and 1920; relevant
+                        suites cover their specified subsets.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Production build / formatting</td>
+                    <td>Vite, Pint, Prettier and git diff checks passed</td>
+                </tr>
+                <tr>
+                    <td>Composer</td>
+                    <td>
+                        Validation and platform requirements passed; locked
+                        audit: zero advisories, zero abandoned dependencies
+                    </td>
+                </tr>
+                <tr>
+                    <td>HTTP security/privacy/filter checks</td>
+                    <td>8 passed using disposable accounts</td>
+                </tr>
+            </table>
+            <p>
+                Three focused backend tests cover combined settings writes,
+                validation/ownership isolation and active-coverage filtering.
+                Browser testing caught and fixed an incompatible form-reset
+                callback. No runtime browser errors remain.
+            </p>
+            <p>
+                Machine-readable evidence:
+                <a href="v2.6.1/release-checks.json">release gates</a>,
+                <a href="v2.6.1/browser-commands.json">browser checks</a>,
+                <a href="v2.6.1/concurrency.json">concurrency</a>,
+                <a href="v2.6.1/integrity.json">local data/media integrity</a>.
+            </p>
+        </section>
+        <section>
+            <h2>Implementation screenshots</h2>
+            <p id="image-origin">
+                Local disposable QA data, using the implemented application.
+            </p>
+            <details>
+                <summary>Coach Overview</summary>
+                <figure>
+                    <img
+                        src="assets/v2.6.1/overview-1440.png"
+                        alt="Coach Overview"
+                        loading="lazy"
+                    />
+                    <figcaption>Coach Overview · Chromium, 1440 px</figcaption>
+                </figure>
+            </details>
+            <details>
+                <summary>Trainees</summary>
+                <figure>
+                    <img
+                        src="assets/v2.6.1/trainees-1440.png"
+                        alt="Trainees"
+                        loading="lazy"
+                    />
+                    <figcaption>Trainees · Chromium, 1440 px</figcaption>
+                </figure>
+            </details>
+            <details>
+                <summary>Programs</summary>
+                <figure>
+                    <img
+                        src="assets/v2.6.1/programs-grid-1440.png"
+                        alt="Programs"
+                        loading="lazy"
+                    />
+                    <figcaption>Programs · Chromium, 1440 px</figcaption>
+                </figure>
+            </details>
+            <details>
+                <summary>Subscriptions</summary>
+                <figure>
+                    <img
+                        src="assets/v2.6.1/subscriptions-1440.png"
+                        alt="Subscriptions"
+                        loading="lazy"
+                    />
+                    <figcaption>Subscriptions · Chromium, 1440 px</figcaption>
+                </figure>
+            </details>
+            <details>
+                <summary>Desktop Profile & Settings</summary>
+                <figure>
+                    <img
+                        src="assets/v2.6.1/settings-1440.png"
+                        alt="Desktop Profile & Settings"
+                        loading="lazy"
+                    />
+                    <figcaption>
+                        Desktop Profile & Settings · Chromium, 1440 px
+                    </figcaption>
+                </figure>
+            </details>
+            <details>
+                <summary>Workspace menu</summary>
+                <figure>
+                    <img
+                        src="assets/v2.6.1/workspace-menu-1440.png"
+                        alt="Workspace menu"
+                        loading="lazy"
+                    />
+                    <figcaption>Workspace menu · Chromium, 1440 px</figcaption>
+                </figure>
+            </details>
+            <div class="gallery-mobile">
+                <figure class="mobile">
+                    <img
+                        src="assets/v2.6.1/settings-390.png"
+                        alt="Settings directory"
+                        loading="lazy"
+                    />
+                    <figcaption>Settings directory · 390 px</figcaption>
+                </figure>
+                <figure class="mobile">
+                    <img
+                        src="assets/v2.6.1/settings-profile-390.png"
+                        alt="Coach profile"
+                        loading="lazy"
+                    />
+                    <figcaption>Coach profile · 390 px</figcaption>
+                </figure>
+                <figure class="mobile">
+                    <img
+                        src="assets/v2.6.1/settings-preferences-390.png"
+                        alt="Training preferences"
+                        loading="lazy"
+                    />
+                    <figcaption>Training preferences · 390 px</figcaption>
+                </figure>
+                <figure class="mobile">
+                    <img
+                        src="assets/v2.6.1/settings-notifications-390.png"
+                        alt="Notifications"
+                        loading="lazy"
+                    />
+                    <figcaption>Notifications · 390 px</figcaption>
+                </figure>
+                <figure class="mobile">
+                    <img
+                        src="assets/v2.6.1/settings-devices-390.png"
+                        alt="App & devices"
+                        loading="lazy"
+                    />
+                    <figcaption>App & devices · 390 px</figcaption>
+                </figure>
+                <figure class="mobile">
+                    <img
+                        src="assets/v2.6.1/workspace-menu-390.png"
+                        alt="Workspace switcher"
+                        loading="lazy"
+                    />
+                    <figcaption>Workspace switcher · 390 px</figcaption>
+                </figure>
+            </div>
+        </section>
+        <section>
+            <h2>Deliberate differences from concept data</h2>
+            <p>
+                All names, counts, dates and progress come from the signed-in
+                account. The concept/sample-team badge and fictional data are
+                not shown. Photos use existing training media and retain
+                full-image viewing. The app has no team selector or Coach avatar
+                upload, so those are not presented as working features.
+            </p>
+            <p>
+                Notifications exposes the two supported preferences: workout
+                reminders and Coach updates. Activity digests and product-news
+                delivery are not implemented. App installation uses
+                browser-supported installation or instructions. Offline fallback
+                is preserved; authenticated offline program access is not
+                promised. Push delivery remains disabled in the approved
+                production configuration. No physical-device testing is claimed.
+            </p>
+        </section>
+        <section>
+            <h2>Files and release</h2>
+            <p>
+                Target tag: <code>v2.6.1</code>. Existing tags are preserved.
+                Runtime source is deployed from the immutable release archive;
+                report-only deployment evidence is recorded afterward.
+            </p>
+            <details>
+                <summary>Changed application and test files</summary>
+                <ul>
+                    <li>
+                        <code>app/Http/Controllers/CoachController.php</code>
+                    </li>
+                    <li><code>resources/css/coach-refresh.css</code></li>
+                    <li><code>resources/js/Components/AppLayout.jsx</code></li>
+                    <li>
+                        <code>resources/js/Features/CoachWorkspace.jsx</code>
+                    </li>
+                    <li>
+                        <code
+                            >resources/js/Features/Notifications/InstallCard.jsx</code
+                        >
+                    </li>
+                    <li>
+                        <code>resources/js/Features/SubscriptionTable.jsx</code>
+                    </li>
+                    <li><code>resources/js/Pages/Coach/Overview.jsx</code></li>
+                    <li>
+                        <code>resources/js/Pages/Coach/Subscriptions.jsx</code>
+                    </li>
+                    <li><code>resources/js/Pages/Coach/Trainees.jsx</code></li>
+                    <li>
+                        <code>resources/js/Pages/Notifications/Index.jsx</code>
+                    </li>
+                    <li>
+                        <code>resources/js/Pages/TrainingPlans/Index.jsx</code>
+                    </li>
+                    <li><code>tests/Browser/coach-design-refresh.mjs</code></li>
+                    <li>
+                        <code>tests/Browser/subscription-directory.mjs</code>
+                    </li>
+                    <li><code>tests/Feature/CoachWorkspaceTest.php</code></li>
+                    <li><code>resources/js/Pages/Coach/Settings.jsx</code></li>
+                </ul>
+            </details>
+        </section>
+        <section id="deployment">
+            <h2>Production deployment</h2>
+            <p>
+                NOT READY — deployment and live verification are pending. Fresh
+                database, runtime, uploads and environment backups are required
+                before replacing release files. The final report will include
+                the immutable commit, live checks, cleanup and
+                original-data/media/environment comparison.
+            </p>
+        </section>
+    </main>
+</html>

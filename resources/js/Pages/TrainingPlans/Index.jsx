@@ -11,6 +11,8 @@ import {
     LayoutGrid,
     List,
     ShieldCheck,
+    Search,
+    SlidersHorizontal,
 } from "lucide-react";
 import PlanThumbnail from "../../Components/PlanThumbnail";
 import {
@@ -40,7 +42,8 @@ export default function Index({
         "filters",
         "libraryCounts",
     ]);
-    const [view, setView] = useState("list");
+    const [view, setView] = useState("grid");
+    const [moreFilters, setMoreFilters] = useState(false);
     const [duplicating, setDuplicating] = useState(null);
     const [editing, setEditing] = useState(null);
     const [deleting, setDeleting] = useState(null);
@@ -89,7 +92,7 @@ export default function Index({
                         href={url("/recommendations")}
                         variant="secondary"
                     >
-                        Find a training plan
+                        {templates ? "Explore plans" : "Find a training plan"}
                     </ButtonLink>
                 )}
                 {!templates && !coaching && (
@@ -117,7 +120,7 @@ export default function Index({
                 >
                     {[
                         ["all", "All"],
-                        ["ready", "Workouts ready"],
+                        ["ready", "Ready"],
                         ["draft", "Draft"],
                     ].map(([key, label]) => (
                         <button
@@ -134,69 +137,108 @@ export default function Index({
             )}
             {(templates || coaching) && (
                 <div
-                    className="panel coach-card live-filter-bar"
+                    className={`panel coach-card live-filter-bar ${templates ? "program-search-bar" : ""}`}
                     aria-busy={filter.processing}
                 >
                     <Field label="Search programs">
-                        <input
-                            value={filter.data.search}
-                            maxLength={100}
-                            onChange={(e) =>
-                                filter.setData("search", e.target.value)
-                            }
-                        />
+                        <div className="search-input">
+                            <Search size={18} />
+                            <input
+                                placeholder="Find a program or training focus"
+                                type="search"
+                                value={filter.data.search}
+                                maxLength={100}
+                                onChange={(e) =>
+                                    filter.setData("search", e.target.value)
+                                }
+                            />
+                        </div>
                     </Field>
-                    <Field label="Training type">
-                        <select
-                            value={filter.data.type}
-                            onChange={(e) =>
-                                filter.setData("type", e.target.value)
-                            }
-                        >
-                            <option value="all">Programs & plans</option>
-                            <option value="program">Structured programs</option>
-                            <option value="simple">Simple plans</option>
-                        </select>
-                    </Field>
-                    <Field label="Items per page">
-                        <select
-                            value={filter.data.per_page || 10}
-                            onChange={(e) =>
-                                filter.setData(
-                                    "per_page",
-                                    Number(e.target.value),
-                                )
-                            }
-                        >
-                            {[10, 25, 50, 100].map((n) => (
-                                <option key={n} value={n}>
-                                    {n}
-                                </option>
-                            ))}
-                        </select>
-                    </Field>
-                    <span className="filter-feedback" role="status">
-                        {filter.processing
-                            ? "Updating…"
-                            : `${plans.total} plans found`}
-                    </span>
-                    {(filter.data.search ||
-                        filter.data.type !== "all" ||
-                        filter.data.readiness !== "all") && (
-                        <Button
-                            variant="secondary"
-                            onClick={() =>
-                                filter.setData({
-                                    search: "",
-                                    type: "all",
-                                    readiness: "all",
-                                    per_page: 10,
-                                })
-                            }
-                        >
-                            Clear all
-                        </Button>
+                    {templates && (
+                        <>
+                            <Button
+                                variant="secondary"
+                                aria-expanded={moreFilters}
+                                onClick={() => setMoreFilters(!moreFilters)}
+                            >
+                                <SlidersHorizontal size={17} />
+                                Filters
+                            </Button>
+                            <div
+                                className="view-switch"
+                                role="group"
+                                aria-label="Program layout"
+                            >
+                                <button
+                                    aria-label="Grid view"
+                                    aria-pressed={view === "grid"}
+                                    onClick={() => setView("grid")}
+                                >
+                                    <LayoutGrid size={19} />
+                                </button>
+                                <button
+                                    aria-label="List view"
+                                    aria-pressed={view === "list"}
+                                    onClick={() => setView("list")}
+                                >
+                                    <List size={19} />
+                                </button>
+                            </div>
+                        </>
                     )}
+                    <div
+                        className="directory-advanced-filters"
+                        hidden={templates && !moreFilters}
+                    >
+                        <Field label="Training type">
+                            <select
+                                value={filter.data.type}
+                                onChange={(e) =>
+                                    filter.setData("type", e.target.value)
+                                }
+                            >
+                                <option value="all">Programs & plans</option>
+                                <option value="program">
+                                    Structured programs
+                                </option>
+                                <option value="simple">Simple plans</option>
+                            </select>
+                        </Field>
+                        <Field label="Items per page">
+                            <select
+                                value={filter.data.per_page || 10}
+                                onChange={(e) =>
+                                    filter.setData(
+                                        "per_page",
+                                        Number(e.target.value),
+                                    )
+                                }
+                            >
+                                {[10, 25, 50, 100].map((n) => (
+                                    <option key={n} value={n}>
+                                        {n}
+                                    </option>
+                                ))}
+                            </select>
+                        </Field>
+                        {(filter.data.search ||
+                            filter.data.type !== "all" ||
+                            filter.data.readiness !== "all") && (
+                            <Button
+                                variant="secondary"
+                                onClick={() =>
+                                    filter.setData({
+                                        search: "",
+                                        type: "all",
+                                        readiness: "all",
+                                        per_page: 10,
+                                    })
+                                }
+                            >
+                                Clear all
+                            </Button>
+                        )}
+                    </div>
                 </div>
             )}
             {templates && (
@@ -205,26 +247,6 @@ export default function Index({
                         {plans.total} programs · showing {plans.from || 0}–
                         {plans.to || 0}
                     </span>
-                    <div
-                        className="view-switch"
-                        role="group"
-                        aria-label="Program layout"
-                    >
-                        <button
-                            aria-label="Grid view"
-                            aria-pressed={view === "grid"}
-                            onClick={() => setView("grid")}
-                        >
-                            <LayoutGrid size={19} />
-                        </button>
-                        <button
-                            aria-label="List view"
-                            aria-pressed={view === "list"}
-                            onClick={() => setView("list")}
-                        >
-                            <List size={19} />
-                        </button>
-                    </div>
                 </div>
             )}
             {coaching && <CurrentTraining training={currentTraining} />}
@@ -235,6 +257,12 @@ export default function Index({
                     {templates ? (
                         plans.data.map((plan) => (
                             <TrainingRow key={plan.id} plan={plan}>
+                                <ButtonLink
+                                    href={url(`/training-plans/${plan.id}`)}
+                                    variant="secondary"
+                                >
+                                    Preview
+                                </ButtonLink>
                                 {plan.workout_days_count > 0 &&
                                 !plan.empty_workouts_count ? (
                                     <ButtonLink
@@ -250,12 +278,6 @@ export default function Index({
                                         Finish program
                                     </ButtonLink>
                                 )}
-                                <ButtonLink
-                                    href={url(`/training-plans/${plan.id}`)}
-                                    variant="secondary"
-                                >
-                                    View
-                                </ButtonLink>
                                 <details className="trainee-more">
                                     <summary
                                         aria-label={`More actions for ${plan.name}`}
@@ -391,9 +413,9 @@ export default function Index({
             {templates && (
                 <p className="library-guidance">
                     <ShieldCheck size={19} />
-                    Assignments create independent trainee copies. Workouts
-                    ready means training days have exercises; dates and coverage
-                    are checked during assignment.
+                    Assignments create independent trainee copies. Ready to
+                    assign means training days have exercises; dates and
+                    coverage are checked during assignment.
                 </p>
             )}
             {!templates && !coaching && (

@@ -34,6 +34,10 @@ async function go(url) {
     await page.waitForLoadState("networkidle");
 }
 async function change(label, value) {
+    if (!(await page.getByLabel(label).and(page.locator("select")).isVisible()))
+        await page
+            .getByRole("button", { name: "More filters", exact: true })
+            .click();
     const response = page.waitForResponse(
         (r) =>
             r.url().includes("/coach/subscriptions?") &&
@@ -41,7 +45,7 @@ async function change(label, value) {
     );
     const [received] = await Promise.all([
         response,
-        page.getByLabel(label).selectOption(value),
+        page.getByLabel(label).and(page.locator("select")).selectOption(value),
     ]);
     await received.finished();
     await page.waitForFunction(
@@ -52,6 +56,14 @@ async function change(label, value) {
     );
 }
 async function clear() {
+    if (
+        !(await page
+            .getByRole("button", { name: "Clear filters", exact: true })
+            .isVisible())
+    )
+        await page
+            .getByRole("button", { name: "More filters", exact: true })
+            .click();
     await page
         .getByRole("button", { name: "Clear filters", exact: true })
         .click();
@@ -156,10 +168,12 @@ try {
     );
     pass("Default ten rows and accurate result range");
     for (const heading of [
-        "Start date",
-        "End date",
+        "Trainee",
+        "Training program",
+        "Package",
+        "Coverage",
         "Status",
-        "Time remaining",
+        "Actions",
     ])
         assert.ok(
             await page
