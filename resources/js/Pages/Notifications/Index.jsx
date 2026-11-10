@@ -1,6 +1,6 @@
-import SettingsNav from "../../Components/SettingsNav";
+import SettingsLayout from "../../Components/SettingsLayout";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import { Bell, Smartphone } from "lucide-react";
 import { Button, Field, PageHeader } from "../../Components/UI";
 import InstallCard from "../../Features/Notifications/InstallCard";
@@ -19,6 +19,9 @@ export default function Index({
     pushConfigured,
     publicKey,
 }) {
+    const { url, props } = usePage();
+    const coach = props.trainingContext?.workspace === "coach";
+    const devices = coach && url.includes("section=devices");
     const [settings, setSettings] = useState(preferences);
     const [enabled, setEnabled] = useState(deviceEnabled);
     const [count, setCount] = useState(deviceCount);
@@ -101,13 +104,19 @@ export default function Index({
             ? "Enabled on this device"
             : "Off on this device";
     return (
-        <>
-            <SettingsNav section="notifications" />
+        <SettingsLayout section={devices ? "devices" : "notifications"}>
             <Head title="Notifications" />
             <PageHeader
-                title="Notifications"
+                title={devices ? "App & devices" : "Notifications"}
                 description="Choose what reaches you. These settings apply to your account in both workspaces."
             />
+            {coach && !devices && (
+                <p className="settings-note">
+                    {pushConfigured
+                        ? "Choose your preferences below, then enable this device in App & devices."
+                        : "Push delivery is currently off. You can save your preferences now and enable a device when delivery is available."}
+                </p>
+            )}
             {error && (
                 <p className="field-error notification-feedback" role="alert">
                     {error}
@@ -118,9 +127,11 @@ export default function Index({
                     {message}
                 </p>
             )}
-            <div className="notification-grid">
+            <div
+                className={`notification-grid ${coach ? (devices ? "settings-devices" : "settings-notifications") : ""}`}
+            >
                 <div>
-                    <section className="panel notification-panel">
+                    <section className="panel notification-panel device-panel">
                         <div className="notification-title">
                             <Smartphone size={22} />
                             <h2>This device</h2>
@@ -236,7 +247,7 @@ export default function Index({
                             must explicitly enable its own notifications.
                         </p>
                     </section>
-                    <section className="panel notification-panel">
+                    <section className="panel notification-panel preferences-panel">
                         <div className="notification-title">
                             <Bell size={22} />
                             <h2>What you receive</h2>
@@ -259,6 +270,7 @@ export default function Index({
                             <label className="notification-toggle">
                                 <input
                                     type="checkbox"
+                                    role="switch"
                                     checked={settings.workout_reminders}
                                     onChange={(event) =>
                                         setSettings({
@@ -298,6 +310,7 @@ export default function Index({
                             <label className="notification-toggle">
                                 <input
                                     type="checkbox"
+                                    role="switch"
                                     checked={settings.coach_updates}
                                     onChange={(event) =>
                                         setSettings({
@@ -320,8 +333,10 @@ export default function Index({
                                     settings.coach_updates) && (
                                     <p className="notification-help">
                                         Preferences can be on while this device
-                                        is off. Enable a device above to receive
-                                        messages here.
+                                        is off.{" "}
+                                        {coach
+                                            ? "Enable this device in App & devices to receive messages."
+                                            : "Enable a device above to receive messages here."}
                                     </p>
                                 )}
                             <Button type="submit" disabled={busy || !online}>
@@ -332,6 +347,6 @@ export default function Index({
                 </div>
                 <InstallCard />
             </div>
-        </>
+        </SettingsLayout>
     );
 }

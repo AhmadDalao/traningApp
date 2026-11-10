@@ -18,6 +18,9 @@ import {
     Bell,
     Settings,
     CreditCard,
+    ChevronRight,
+    Smartphone,
+    Check,
 } from "lucide-react";
 import ScheduleReviewNotice from "../Features/ScheduleReviewNotice";
 import { TraineeNav } from "../Features/CoachingUI";
@@ -34,6 +37,21 @@ export default function AppLayout({ children }) {
         setUserOpen(false);
         setOpen(false);
     }, [url]);
+    useEffect(() => {
+        if (!userOpen && !open) return;
+        const escape = (event) => {
+            if (event.key === "Escape") closeNavigation();
+        };
+        const outside = (event) => {
+            if (!event.target.closest(".sidebar-bottom")) setUserOpen(false);
+        };
+        document.addEventListener("keydown", escape);
+        document.addEventListener("pointerdown", outside);
+        return () => {
+            document.removeEventListener("keydown", escape);
+            document.removeEventListener("pointerdown", outside);
+        };
+    }, [userOpen, open]);
     const coach = trainingContext?.workspace === "coach";
     const home = coach ? "/coach" : "/dashboard";
     const settings = coach ? "/coach/settings" : "/profile";
@@ -105,6 +123,30 @@ export default function AppLayout({ children }) {
                   active: url.startsWith("/my-coaching"),
               },
           ];
+    const currentLabel =
+        url.startsWith("/coach/settings") ||
+        url.startsWith("/coach/notifications")
+            ? "Profile & Settings"
+            : url.startsWith("/coach/subscriptions")
+              ? "Subscriptions"
+              : nav.find((item) => item.active)?.label || "Coaching";
+    const mobileNav = [
+        ...nav,
+        {
+            href: "/coach/subscriptions",
+            label: "Subs",
+            icon: CreditCard,
+            active: url.startsWith("/coach/subscriptions"),
+        },
+        {
+            href: settings,
+            label: "Settings",
+            icon: Settings,
+            active:
+                url.startsWith(settings) ||
+                url.startsWith("/coach/notifications"),
+        },
+    ];
     return (
         <div
             className={`app journey-app ${coach ? "coach-workspace" : "personal-workspace"}`}
@@ -175,11 +217,15 @@ export default function AppLayout({ children }) {
                 </nav>
                 <div className="sidebar-bottom">
                     <div className="sidebar-note">
-                        <span className="small-line" />
+                        <strong>
+                            {coach
+                                ? "Make every session count."
+                                : "A little progress."}
+                        </strong>
                         <p>
-                            A little progress.
-                            <br />
-                            Every single day.
+                            {coach
+                                ? "Plan training, monitor progress and keep your trainees moving forward."
+                                : "Every single day."}
                         </p>
                     </div>
                     <button
@@ -213,30 +259,39 @@ export default function AppLayout({ children }) {
                         >
                             {auth.user.is_coach && (
                                 <>
+                                    <span className="menu-heading">
+                                        Switch workspace
+                                    </span>
                                     <Link
                                         href="/workspace"
                                         method="post"
                                         data={{ workspace: "personal" }}
                                         as="button"
-                                        className="nav-item"
+                                        className={`nav-item ${!coach ? "selected" : ""}`}
                                     >
                                         <UserRound size={17} />
-                                        Personal Workspace
+                                        Personal Workspace{" "}
+                                        {!coach && <Check size={16} />}
                                     </Link>
                                     <Link
                                         href="/workspace"
                                         method="post"
                                         data={{ workspace: "coach" }}
                                         as="button"
-                                        className="nav-item"
+                                        className={`nav-item ${coach ? "selected" : ""}`}
                                     >
                                         <Users size={17} />
-                                        Coach Workspace
+                                        Coach Workspace{" "}
+                                        {coach && <Check size={16} />}
                                     </Link>
+                                    <span className="menu-heading">
+                                        Coaching
+                                    </span>
                                     <Link
-                                        href="/coach/settings"
+                                        href="/coach/settings?section=profile"
                                         className="nav-item"
                                     >
+                                        <UserRound size={17} />
                                         Coach profile
                                     </Link>
                                 </>
@@ -245,16 +300,27 @@ export default function AppLayout({ children }) {
                                 <Link
                                     href="/coach/subscriptions"
                                     onClick={closeNavigation}
+                                    className="nav-item"
                                 >
+                                    <Layers size={17} />
                                     Coaching administration
                                 </Link>
                             )}
                             <Link href={notifications} className="nav-item">
+                                <Bell size={17} />
                                 Notifications & install
                             </Link>
-                            <Link href={settings} className="nav-item">
+                            <span className="menu-heading">Account</span>
+                            <Link
+                                href={
+                                    coach
+                                        ? "/coach/settings/account"
+                                        : "/profile/edit"
+                                }
+                                className="nav-item"
+                            >
                                 <UserRound size={17} />
-                                Profile
+                                Account profile
                             </Link>
                             <Link
                                 href="/logout"
@@ -280,14 +346,33 @@ export default function AppLayout({ children }) {
             </aside>
             <div className="workspace">
                 <div className="topbar">
-                    <span>
-                        {coach
-                            ? "YOUR COACHING WORKSPACE"
-                            : "YOUR PERSONAL TRAINING SPACE"}
-                    </span>
+                    {coach ? (
+                        <nav
+                            className="topbar-crumb"
+                            aria-label="Workspace location"
+                        >
+                            <Link href="/coach">Coaching</Link>
+                            <ChevronRight size={15} />
+                            <strong>{currentLabel}</strong>
+                        </nav>
+                    ) : (
+                        <span>YOUR PERSONAL TRAINING SPACE</span>
+                    )}
                     <div className="topbar-right">
-                        <span className="live-dot" />
-                        Make time for yourself
+                        {coach ? (
+                            <Link
+                                href={notifications}
+                                className="icon-btn"
+                                aria-label="Notification settings"
+                            >
+                                <Bell size={20} />
+                            </Link>
+                        ) : (
+                            <>
+                                <span className="live-dot" />
+                                Make time for yourself
+                            </>
+                        )}
                         <Link
                             href={settings}
                             className="avatar small"
@@ -313,6 +398,30 @@ export default function AppLayout({ children }) {
                     <TraineeNav />
                     {children}
                 </main>
+                {coach && (
+                    <nav
+                        className="coach-bottom-nav"
+                        aria-label="Mobile navigation"
+                    >
+                        {mobileNav.map(
+                            ({ href, label, icon: Icon, active }) => (
+                                <Link
+                                    key={href}
+                                    href={href}
+                                    className={active ? "active" : ""}
+                                    aria-current={active ? "page" : undefined}
+                                >
+                                    <Icon size={21} />
+                                    <span>
+                                        {label === "Coach Overview"
+                                            ? "Overview"
+                                            : label}
+                                    </span>
+                                </Link>
+                            ),
+                        )}
+                    </nav>
+                )}
                 <footer className="app-footer">
                     Training Planner <span>Plan. Train. Track.</span>
                 </footer>

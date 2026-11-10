@@ -63,7 +63,17 @@ class CoachController extends Controller
         $todaySessions = (clone $sessions)->whereDate('scheduled_date', today())->with('user:id,name')->orderBy('user_id')->orderBy('scheduled_time')->get();
         $recent = (clone $sessions)->whereIn('status', ['completed', 'skipped'])->with('user:id,name')->latest('updated_at')->limit(100)->get(['id', 'user_id', 'title', 'status', 'entry_type', 'scheduled_date', 'scheduled_time', 'updated_at', 'training_day_id', 'workout_snapshot', 'program_prescription']);
 
+        $weekStart = today()->startOfWeek();
+        $weekly = (clone $sessions)->where('entry_type', 'training')->whereBetween('scheduled_date', [$weekStart, $weekStart->copy()->endOfWeek()])->reorder()->selectRaw("DATE(scheduled_date) as day, COUNT(*) as scheduled, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed")->groupByRaw('DATE(scheduled_date)')->get()->keyBy('day');
+        $workload = collect(range(0, 6))->map(function ($offset) use ($weekStart, $weekly) {
+            $day = $weekStart->copy()->addDays($offset)->toDateString();
+
+            return ['date' => $day, 'scheduled' => (int) ($weekly[$day]->scheduled ?? 0), 'completed' => (int) ($weekly[$day]->completed ?? 0)];
+        });
+
         return Inertia::render('Coach/Overview', [
+            'workload' => $workload,
+            'momentum' => $summary->rows((clone $query)->where('status', 'active')->orderBy('id')->limit(100)->get()),
             'stats' => ['trainees' => array_sum($counts->except(['pending', 'ended'])->all()), 'today' => (clone $sessions)->whereDate('scheduled_date', today())->where('entry_type', 'training')->whereIn('status', ['planned', 'completed'])->distinct()->count('user_id'), 'completed' => (clone $sessions)->whereDate('scheduled_date', today())->where('entry_type', 'training')->where('status', 'completed')->count(), 'attention' => ($counts['attention'] ?? 0) + ($counts['setup'] ?? 0) + ($counts['paused'] ?? 0), 'pending' => $counts['pending'] ?? 0, 'upcoming' => (clone $sessions)->upcoming()->whereNull('started_at')->whereBetween('scheduled_date', [today()->addDay(), today()->addDays(7)])->count()],
             'attention' => $summary->rows((clone $query)->whereIn('display_state', ['attention', 'setup', 'paused'])->orderByRaw("CASE display_state WHEN 'attention' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END")->orderBy('id')->limit(100)->get()),
             'pending' => $summary->rows((clone $query)->where('status', 'pending')->orderByDesc('id')->limit(6)->get()),
@@ -75,7 +85,7 @@ class CoachController extends Controller
 
     public function trainees(Request $request, CoachWorkspaceSummary $summary)
     {
-        $data = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:active,pending,ended,all,setup,attention,paused']);
+        $data = $request->validate(['search' => 'nullable|string|max:100', 'status' => 'nullable|in:active,pending,ended,all,setup,attention,paused', 'sort' => 'nullable|in:newest,name', 'per_page' => 'nullable|in:10,25,50,100']);
         $status = $data['status'] ?? 'all';
         $query = $summary->query($request->user());
         $counts = (clone $query)->select('display_state')->selectRaw('COUNT(*) as total')->groupBy('display_state')->pluck('total', 'display_state');
@@ -83,12 +93,12 @@ class CoachController extends Controller
             $query->where('display_state', $status);
         }
         if (! empty($data['search'])) {
-            $query->whereIn('trainee_user_id', User::select('id')->where(fn ($q) => $q->where('name', 'like', '%'.$data['search'].'%')->orWhere('training_code', 'like', '%'.$data['search'].'%')))->where('status', 'active');
+            $query->where(fn ($q) => $q->whereIn('trainee_user_id', User::select('id')->where(fn ($u) => $u->where('name', 'like', '%'.$data['search'].'%')->orWhere('training_code', 'like', '%'.$data['search'].'%')))->orWhere('plan_name', 'like', '%'.$data['search'].'%'))->where('status', 'active');
         }
-        $relationships = $query->orderByDesc('id')->paginate(25)->withQueryString();
+        $relationships = $query->when(($data['sort'] ?? 'newest') === 'name', fn ($q) => $q->orderBy(User::select('name')->whereColumn('users.id', 'summaries.trainee_user_id')->limit(1)))->orderByDesc('id')->paginate((int) ($data['per_page'] ?? 25))->withQueryString();
         $relationships->setCollection(collect($summary->rows($relationships->items())));
 
-        return Inertia::render('Coach/Trainees', ['counts' => $counts, 'filters' => ['status' => $status, 'search' => $data['search'] ?? ''], 'relationships' => $relationships]);
+        return Inertia::render('Coach/Trainees', ['counts' => $counts, 'filters' => ['status' => $status, 'search' => $data['search'] ?? '', 'sort' => $data['sort'] ?? 'newest', 'per_page' => (int) ($data['per_page'] ?? 25)], 'relationships' => $relationships]);
     }
 
     public function trainee(TrainingContext $context, BodyWeightHistory $body, CoachAccess $access, ExerciseProgress $progress)

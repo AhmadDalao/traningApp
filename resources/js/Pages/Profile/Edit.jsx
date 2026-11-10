@@ -1,4 +1,4 @@
-import SettingsNav from "../../Components/SettingsNav";
+import SettingsLayout from "../../Components/SettingsLayout";
 import { Head, useForm, usePage } from "@inertiajs/react";
 import { PageHeader, Button, ButtonLink } from "../../Components/UI";
 import ProfileFields, { profileDefaults } from "../../Features/ProfileFields";
@@ -8,11 +8,12 @@ export default function Edit({ profile, options }) {
     const coach = trainingContext?.workspace === "coach";
     const form = useForm(profileDefaults(profile, auth.user.name));
     return (
-        <>
-            <SettingsNav section="account" />
+        <SettingsLayout section="account">
             <Head title="Edit profile" />
             <PageHeader
-                title="Edit profile"
+                title={
+                    coach ? "Training preferences & account" : "Edit profile"
+                }
                 description="Keep your details and training preferences up to date."
             />
             <form
@@ -65,6 +66,6 @@ export default function Edit({ profile, options }) {
                     </Button>
                 </div>
             </form>
-        </>
+        </SettingsLayout>
     );
 }

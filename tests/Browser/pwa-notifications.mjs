@@ -136,9 +136,9 @@ try {
             .isVisible(),
     );
     pass("Short-height settings actions remain reachable");
-    await page.getByRole("checkbox", { name: /Workout reminders/ }).check();
+    await page.getByRole("switch", { name: /Workout reminders/ }).check();
     await page.getByLabel("Remind me before my workout").selectOption("30");
-    await page.getByRole("checkbox", { name: /Coach updates/ }).check();
+    await page.getByRole("switch", { name: /Coach updates/ }).check();
     await page.getByRole("button", { name: "Save preferences" }).click();
     await page.getByText("Notification preferences saved.").waitFor();
     await page.reload();
@@ -151,7 +151,7 @@ try {
     );
     assert.ok(
         await page
-            .getByRole("checkbox", { name: /Workout reminders/ })
+            .getByRole("switch", { name: /Workout reminders/ })
             .isChecked(),
     );
     pass("Account preferences persist without enabling a device");
@@ -437,10 +437,8 @@ try {
             .isEnabled(),
     );
     pass("Unsupported push leaves preferences and core app usable");
-    await settings
-        .getByRole("checkbox", { name: /Workout reminders/ })
-        .uncheck();
-    await settings.getByRole("checkbox", { name: /Coach updates/ }).uncheck();
+    await settings.getByRole("switch", { name: /Workout reminders/ }).uncheck();
+    await settings.getByRole("switch", { name: /Coach updates/ }).uncheck();
     await settings.getByRole("button", { name: "Save preferences" }).click();
     await settings.getByText("Notification preferences saved.").waitFor();
     await settings.addInitScript(() =>

@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    /><title>Training Planner v2.6.0 — Coach Design Refresh</title
+    ><style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #f5f3fc;
+            color: #24203b;
+            font:
+                15px/1.7 system-ui,
+                sans-serif;
+        }
+        main {
+            max-width: 1120px;
+            margin: auto;
+            padding: 40px 24px;
+        }
+        header {
+            background: #292345;
+            color: white;
+            border-radius: 22px;
+            padding: 38px;
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+            margin: 12px 0;
+        }
+        h2 {
+            font-size: 21px;
+            margin-top: 0;
+        }
+        section {
+            padding: 28px;
+            background: white;
+            border: 1px solid #e5dff2;
+            border-radius: 17px;
+            margin: 20px 0;
+        }
+        a {
+            color: #6541df;
+        }
+        header a {
+            color: #ded3ff;
+        }
+        .status {
+            display: inline-block;
+            background: #f6dda1;
+            color: #69501d;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+        figure {
+            margin: 0;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #e5dff2;
+            border-radius: 12px;
+        }
+        figcaption {
+            font-size: 12px;
+            color: #716a85;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        td,
+        th {
+            text-align: left;
+            border-bottom: 1px solid #e7e2f0;
+            padding: 12px;
+        }
+        code {
+            overflow-wrap: anywhere;
+            font-size: 12px;
+        }
+        .screens figure {
+            margin-bottom: 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        @media (max-width: 650px) {
+            main {
+                padding: 18px 12px;
+            }
+            header,
+            section {
+                padding: 22px;
+            }
+            h1 {
+                font-size: 27px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            table {
+                font-size: 12px;
+            }
+            td,
+            th {
+                padding: 8px;
+            }
+        }
+    </style>
+    <main>
+        <header>
+            <small>TRAINING PLANNER · RELEASE v2.6.0 · 10 NOVEMBER 2026</small>
+            <h1>A clearer coaching workspace</h1>
+            <p>
+                The supplied violet and navy design, applied to the existing
+                application and its real data.
+            </p>
+            <span id="release-status" class="status"
+                >NOT READY — production verification pending</span
+            >
+        </header>
+        <section>
+            <h2>What changed</h2>
+            <ul>
+                <li>
+                    Dark navy Coach sidebar, violet actions, lavender surfaces,
+                    consistent cards and tables, breadcrumb navigation and a
+                    grouped workspace menu.
+                </li>
+                <li>
+                    Overview priority banner, bounded scrolling lists, larger
+                    workout thumbnails, seven-day workload chart and trainee
+                    momentum.
+                </li>
+                <li>
+                    Trainee roster with name sorting, name/ID/current-program
+                    search, page-size controls and separate coaching status and
+                    attention indicators.
+                </li>
+                <li>
+                    Programs default to a paginated list, with an optional grid,
+                    authored-workout readiness filters, thumbnails and existing
+                    assignment actions.
+                </li>
+                <li>
+                    Subscriptions and Coaching packages use distinct tabs.
+                    Periods keep separate start/end dates, status, time
+                    remaining, filters and independent pause/resume/end/renew
+                    controls.
+                </li>
+                <li>
+                    Settings uses a desktop section sidebar and mobile settings
+                    directory with focused pages and Back navigation. Coach
+                    profile bio is a multiline field with a character count.
+                </li>
+                <li>
+                    Notifications and App & devices are separate Coach settings
+                    sections. Mobile Coach navigation provides Overview,
+                    Trainees, Programs, Subscriptions and Settings.
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h2>Existing behavior preserved</h2>
+            <p>
+                Baseline: immutable v2.5.2 application
+                <code>d779a5cdf74973255d863dc650654e7379257681</code>, with
+                later deployment documentation at <code>46f1869</code>. The
+                update uses the existing Laravel / React / Inertia architecture,
+                authorization, independent program subscriptions, atomic
+                activation and scheduling services. No schema migration or new
+                dependency.
+            </p>
+            <p>
+                Personal Workspace retains its own theme. Workout logging,
+                History, Progress/PR, Anytime semantics, consent and Coach
+                ownership remain unchanged. Thumbnails still open full images.
+                New statistics and filters are read-only and use
+                Coach-authorized queries.
+            </p>
+            <p>
+                Workload counts scheduled training in the current
+                application-local week; completed workouts form a subset of each
+                bar. Momentum shows completed / all scheduled workouts for the
+                week, not due-only adherence. The roster’s “On track” filter
+                reflects operational state; subscription status is shown
+                separately.
+            </p>
+            <p>
+                “Workouts ready” means at least one training day has exercises
+                and no authored training day is empty. Existing activation still
+                validates program definition, dates and coverage. This is not a
+                new readiness or lifecycle engine.
+            </p>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gate</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Complete SQLite suite</td>
+                        <td>647 tests · 12,949 assertions passed</td>
+                    </tr>
+                    <tr>
+                        <td>Complete isolated MySQL suite</td>
+                        <td>647 tests · 12,949 assertions passed</td>
+                    </tr>
+                    <tr>
+                        <td>JavaScript</td>
+                        <td>38 tests passed</td>
+                    </tr>
+                    <tr>
+                        <td>Concurrency</td>
+                        <td>7 suites · 114 checks passed</td>
+                    </tr>
+                    <tr>
+                        <td>Chromium + WebKit</td>
+                        <td>
+                            155 checks across design, subscription directory and
+                            PWA smoke tests
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Responsive coverage</td>
+                        <td>
+                            320 × 480, 360, 375, 390, 430, 768, 1024, 1100,
+                            1280, 1440 and 1920 where applicable; no page
+                            overflow
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Build and checks</td>
+                        <td>
+                            Production Vite build, Pint, Prettier, Composer
+                            strict validation/audit/platform and diff checks
+                            passed
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Focused tests cover owned readiness counts, read-only previews,
+                weekly totals excluding personal training, settings workspace
+                identity, roster sorting/search and consent scope. Existing
+                27-trainee roster query-budget test passed (fewer than 18
+                queries; no performance-set loading). No additional write or
+                concurrency path was introduced.
+            </p>
+            <p>
+                Browser checks cover real saved profile/preferences,
+                subscription pause/resume, date filters and pagination, image
+                previews, workspace switching, mobile layouts, service-worker
+                control, public-only cache, offline fallback and CSRF rejection.
+                Chromium/WebKit are automated browser engines; no physical-phone
+                test or real push delivery is claimed.
+            </p>
+        </section>
+        <section>
+            <h2>Data integrity and limits</h2>
+            <p>
+                Local QA used 16 disposable accounts. All were removed, along
+                with 15 QA image copies. All 22 original domain table
+                fingerprints and 44 original media hashes matched after cleanup.
+            </p>
+            <p>
+                Push remains disabled under the approved configuration. No VAPID
+                credentials or scheduler changes are introduced. The design does
+                not add unsupported trainee-activity digests, product-news
+                toggles, avatar uploads, offline workout access or a device
+                inventory. Existing current-device enable/disable and
+                installation guidance remain available.
+            </p>
+            <p>
+                Overview attention and momentum lists show up to 100 trainees,
+                with the full paginated roster available. Programs retain
+                10/25/50/100 page sizes; the default is list view. No BLOCKER or
+                HIGH issue is known after the completed local gates.
+            </p>
+        </section>
+        <section id="deployment">
+            <h2>Production deployment</h2>
+            <p>
+                Pending immutable release commit/tag, fresh backups,
+                exact-release Hostinger deployment, live smoke tests and cleanup
+                verification. This section will be replaced with actual
+                deployment evidence.
+            </p>
+        </section>
+        <section>
+            <h2>Visual evidence</h2>
+            <p>
+                Local disposable QA data, using the implemented application.
+                Sample people and counts are not production data.
+            </p>
+            <div class="screens">
+                <figure>
+                    <a href="assets/v2.6.0/overview-1440.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/overview-1440.png"
+                            alt="overview at 1440 pixels"
+                    /></a>
+                    <figcaption>Overview · 1440px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/trainees-1440.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/trainees-1440.png"
+                            alt="trainees at 1440 pixels"
+                    /></a>
+                    <figcaption>Trainees · 1440px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/programs-grid-1440.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/programs-grid-1440.png"
+                            alt="programs-grid at 1440 pixels"
+                    /></a>
+                    <figcaption>Programs Grid · 1440px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/subscriptions-1440.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/subscriptions-1440.png"
+                            alt="subscriptions at 1440 pixels"
+                    /></a>
+                    <figcaption>Subscriptions · 1440px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/settings-1440.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/settings-1440.png"
+                            alt="settings at 1440 pixels"
+                    /></a>
+                    <figcaption>Settings · 1440px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/settings-390.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/settings-390.png"
+                            alt="settings at 390 pixels"
+                    /></a>
+                    <figcaption>Settings · 390px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/notifications-390.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/notifications-390.png"
+                            alt="notifications at 390 pixels"
+                    /></a>
+                    <figcaption>Notifications · 390px · Chromium</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v2.6.0/devices-390.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v2.6.0/devices-390.png"
+                            alt="devices at 390 pixels"
+                    /></a>
+                    <figcaption>Devices · 390px · Chromium</figcaption>
+                </figure>
+            </div>
+        </section>
+        <section>
+            <h2>Files changed</h2>
+            <ul>
+                <li><code>app/Http/Controllers/CoachController.php</code></li>
+                <li>
+                    <code>app/Http/Controllers/TrainingPlanController.php</code>
+                </li>
+                <li>
+                    <code>app/Http/Middleware/HandleInertiaRequests.php</code>
+                </li>
+                <li><code>resources/js/Components/AppLayout.jsx</code></li>
+                <li><code>resources/js/Features/CoachWorkspace.jsx</code></li>
+                <li><code>resources/js/Pages/Coach/Overview.jsx</code></li>
+                <li><code>resources/js/Pages/Coach/Subscriptions.jsx</code></li>
+                <li><code>resources/js/Pages/Coach/Trainees.jsx</code></li>
+                <li><code>resources/js/Pages/Coaching/Setup.jsx</code></li>
+                <li><code>resources/js/Pages/Notifications/Index.jsx</code></li>
+                <li><code>resources/js/Pages/Profile/Edit.jsx</code></li>
+                <li><code>resources/js/Pages/TrainingPlans/Index.jsx</code></li>
+                <li><code>resources/js/app.jsx</code></li>
+                <li><code>tests/Browser/pwa-notifications.mjs</code></li>
+                <li><code>tests/Feature/CoachWorkspaceTest.php</code></li>
+                <li><code>resources/css/coach-refresh.css</code></li>
+                <li><code>resources/js/Components/SettingsLayout.jsx</code></li>
+                <li><code>tests/Browser/coach-design-refresh.mjs</code></li>
+                <li><code>tests/Browser/pwa-smoke.mjs</code></li>
+            </ul>
+        </section>
+    </main>
+</html>

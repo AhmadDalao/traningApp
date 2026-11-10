@@ -298,4 +298,42 @@ class CoachWorkspaceTest extends TestCase
         ProgramRun::first()->update(['status' => 'paused', 'paused_from' => today()]);
         $this->get('/coach')->assertInertia(fn (Assert $p) => $p->has('upcoming', 0));
     }
+
+    public function test_refresh_library_readiness_filters_and_counts_are_owned_and_read_only(): void
+    {
+        $ready = $this->template();
+        $draft = $this->template(false);
+        $draft->trainingDays()->first()->exercises()->delete();
+        $foreign = User::factory()->create(['account_type' => 'coach']);
+        $foreign->trainingPlans()->create(['name' => 'Private program'])->forceFill(['workspace_type' => 'coach_template'])->save();
+        $this->get('/coach/training-plans?readiness=ready')->assertInertia(fn (Assert $p) => $p->where('libraryCounts.all', 2)->where('libraryCounts.ready', 1)->where('libraryCounts.draft', 1)->where('plans.total', 1)->where('plans.data.0.id', $ready->id));
+        $this->get('/coach/training-plans?readiness=draft')->assertInertia(fn (Assert $p) => $p->where('plans.total', 1)->where('plans.data.0.id', $draft->id));
+        $this->assertDatabaseCount('coach_subscriptions', 0);
+        $this->assertDatabaseCount('coach_plan_assignments', 0);
+    }
+
+    public function test_refresh_workload_and_settings_use_only_coach_owned_scheduled_training(): void
+    {
+        $copy = $this->assign();
+        $this->postJson($this->base.'/setup/activate', $this->preview($copy))->assertOk();
+        $entries = ScheduleEntry::whereBetween('scheduled_date', [today()->startOfWeek(), today()->endOfWeek()])->get();
+        $entries->first()->update(['status' => 'completed']);
+        $this->trainee->scheduleEntries()->create(['title' => 'Private personal workout', 'entry_type' => 'rest', 'scheduled_date' => today(), 'status' => 'completed']);
+        $this->get('/coach')->assertInertia(fn (Assert $p) => $p->has('workload', 7)->where('workload', fn ($days) => collect($days)->sum('scheduled') === $entries->count() && collect($days)->sum('completed') === 1)->where('momentum.0.trainee.id', $this->trainee->id));
+        $this->get('/coach/settings')->assertInertia(fn (Assert $p) => $p->where('settingsSummary.trainees', 1)->where('settingsSummary.programs', 1)->where('settingsSummary.workouts', 1)->where('trainingContext.workspace', 'coach'));
+        $this->get('/coach/settings/notifications?section=devices')->assertInertia(fn (Assert $p) => $p->where('settingsSummary.programs', 1)->where('trainingContext.workspace', 'coach'));
+        $this->get('/profile/edit')->assertInertia(fn (Assert $p) => $p->where('settingsSummary', null)->where('trainingContext.workspace', 'personal'));
+    }
+
+    public function test_refresh_roster_sort_search_and_page_size_preserve_consent_scope(): void
+    {
+        $copy = $this->assign();
+        $this->trainee->update(['name' => 'Zara']);
+        $anna = User::factory()->create(['name' => 'Anna']);
+        $this->connect($anna);
+        $this->get('/coach/trainees?sort=name&per_page=10')->assertInertia(fn (Assert $p) => $p->where('relationships.data.0.trainee.name', 'Anna')->where('relationships.per_page', 10));
+        $this->get('/coach/trainees?search=Strength')->assertInertia(fn (Assert $p) => $p->where('relationships.total', 1)->where('relationships.data.0.plan.id', $copy->id));
+        $this->relationship->update(['status' => 'ended']);
+        $this->get('/coach/trainees?search=Strength')->assertInertia(fn (Assert $p) => $p->where('relationships.total', 0));
+    }
 }

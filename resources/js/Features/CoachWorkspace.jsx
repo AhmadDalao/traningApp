@@ -197,6 +197,16 @@ export function TrainingRow({ plan, children }) {
         <article className="panel coach-training-row">
             <TrainingThumbnail item={plan} />
             <div className="coach-row-copy">
+                {ctx.templates && (
+                    <span
+                        className={`badge ${plan.workout_days_count > 0 && !plan.empty_workouts_count ? "completed" : "planned"}`}
+                    >
+                        {plan.workout_days_count > 0 &&
+                        !plan.empty_workouts_count
+                            ? "Workouts ready"
+                            : "Draft"}
+                    </span>
+                )}
                 <Link href={ctx.url(`/training-plans/${plan.id}`)}>
                     <h3>{plan.name}</h3>
                 </Link>

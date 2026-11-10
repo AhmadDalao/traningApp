@@ -25,11 +25,18 @@ class TrainingPlanController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->validate(['search' => 'nullable|string|max:100', 'type' => 'nullable|in:all,program,simple', 'per_page' => 'nullable|in:10,25,50,100']);
+        $filters = $request->validate(['search' => 'nullable|string|max:100', 'type' => 'nullable|in:all,program,simple', 'per_page' => 'nullable|in:10,25,50,100', 'readiness' => 'nullable|in:all,ready,draft']);
 
-        return Inertia::render('TrainingPlans/Index', ['currentTraining' => $this->context->currentTraining(), 'filters' => ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? 'all', 'per_page' => (int) ($filters['per_page'] ?? 10)], 'plans' => $this->context->plans()->when(! empty($filters['search']), fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))->when(($filters['type'] ?? 'all') !== 'all', fn ($q) => $q->where('structure_type', $filters['type']))->with(['assignment.relationship.coach.coachProfile', 'assignment.subscription', 'programRuns' => fn ($q) => $q->currentFirst(), 'trainingDays:id,training_plan_id,training_block_id,type,weekdays'])->withCount([
+        $library = $this->context->plans();
+        $ready = fn ($q) => $q->whereHas('trainingDays', fn ($d) => $d->where('type', 'training')->has('exercises'))->whereDoesntHave('trainingDays', fn ($d) => $d->where('type', 'training')->doesntHave('exercises'));
+        $all = $this->context->templates() ? (clone $library)->count() : 0;
+        $readyCount = $this->context->templates() ? (clone $library)->where($ready)->count() : 0;
+        $readiness = $this->context->templates() ? ($filters['readiness'] ?? 'all') : 'all';
+        $library->when($readiness === 'ready', fn ($q) => $q->where($ready))->when($readiness === 'draft', fn ($q) => $q->whereNot($ready));
+
+        return Inertia::render('TrainingPlans/Index', ['libraryCounts' => $this->context->templates() ? ['all' => $all, 'ready' => $readyCount, 'draft' => $all - $readyCount] : null, 'currentTraining' => $this->context->currentTraining(), 'filters' => ['readiness' => $readiness, 'search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? 'all', 'per_page' => (int) ($filters['per_page'] ?? 10)], 'plans' => $library->when(! empty($filters['search']), fn ($q) => $q->where('name', 'like', '%'.$filters['search'].'%'))->when(($filters['type'] ?? 'all') !== 'all', fn ($q) => $q->where('structure_type', $filters['type']))->with(['assignment.relationship.coach.coachProfile', 'assignment.subscription', 'programRuns' => fn ($q) => $q->currentFirst(), 'trainingDays:id,training_plan_id,training_block_id,type,weekdays'])->withCount([
             'templateAssignments as assigned_trainees_count' => fn ($q) => $q->select(DB::raw('count(distinct coach_trainee_relationship_id)'))->where('status', 'active')->whereHas('relationship', fn ($r) => $r->where('status', 'active')),
-            'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
+            'trainingDays as empty_workouts_count' => fn ($q) => $q->where('type', 'training')->doesntHave('exercises'), 'trainingDays', 'trainingDays as workout_days_count' => fn ($q) => $q->where('type', 'training'),
             'trainingDays as rest_days_count' => fn ($q) => $q->where('type', 'rest'),
         ])->withThumbnail()->latest()->paginate($this->context->templates() || $this->context->coaching() ? (int) ($filters['per_page'] ?? 10) : 12)->withQueryString()->through(fn ($plan) => $this->describe($plan))]);
     }

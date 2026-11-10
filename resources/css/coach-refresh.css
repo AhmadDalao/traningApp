@@ -1,0 +1,1199 @@
+/* v2.6: the Coach workspace uses the approved violet/navy visual language. */
+.coach-workspace {
+    --blue: #6541df;
+    --muted: #71758b;
+    --border: #e8e7f1;
+    --nav: #12182b;
+    --radius: 16px;
+    color: #1b2038;
+    background: #f6f5fc;
+}
+.coach-workspace .workspace {
+    background:
+        radial-gradient(ellipse at 75% 0, #f0edff80, transparent 65%), #f6f5fc;
+}
+.coach-workspace .sidebar {
+    background: var(--nav);
+    color: #b6b9d0;
+    border: 0;
+    padding-inline: 16px;
+    overflow: visible;
+}
+.coach-workspace .sidebar .brand {
+    color: white;
+}
+.coach-workspace .brand-mark {
+    background: #704bef;
+}
+.coach-workspace .brand-second,
+.coach-workspace .nav-label {
+    color: #969db8;
+}
+.coach-workspace .sidebar .nav-item {
+    color: #bbc0d6;
+    border-radius: 10px;
+    min-height: 46px;
+}
+.coach-workspace .sidebar .nav-item:hover {
+    background: #252c47;
+    color: white;
+}
+.coach-workspace .sidebar .nav-item.active {
+    background: #6c4ae5;
+    color: white;
+    box-shadow: 0 4px 16px #0002;
+}
+.coach-workspace .sidebar .nav-item.active svg {
+    color: white;
+}
+.coach-workspace .nav-dot {
+    background: #d6ccff;
+}
+.coach-workspace .sidebar-bottom {
+    position: relative;
+}
+.coach-workspace .sidebar-note {
+    display: block;
+    background: #222941;
+    padding: 16px;
+    border: 1px solid #323a56;
+    border-radius: 14px;
+    margin-bottom: 18px;
+}
+.coach-workspace .sidebar-note strong {
+    color: #e8e9f5;
+    font-size: 13px;
+}
+.coach-workspace .sidebar-note p {
+    line-height: 1.65;
+    font-size: 12px;
+    margin-top: 7px;
+    color: #a0a8c2;
+}
+.coach-workspace .user-block {
+    border-top: 1px solid #30374e;
+    padding-block: 16px 4px;
+}
+.coach-workspace .user-block strong {
+    color: white;
+}
+.coach-workspace .user-block .avatar {
+    color: #4b2bad;
+    background: #d9cdff;
+    border-radius: 14px;
+}
+.coach-workspace .user-menu {
+    position: absolute;
+    left: calc(100% + 28px);
+    bottom: 0;
+    width: 310px;
+    max-height: min(640px, 85dvh);
+    overflow-y: auto;
+    background: #fff;
+    color: #32374c;
+    padding: 12px;
+    border-radius: 18px;
+    box-shadow: 0 18px 65px #10182a30;
+    z-index: 60;
+}
+.coach-workspace .user-menu .nav-item {
+    color: #41475c;
+    font-size: 13px;
+}
+.coach-workspace .user-menu .nav-item:hover,
+.coach-workspace .user-menu .selected {
+    background: #f0ebff;
+    color: #6541df;
+}
+.coach-workspace .user-menu .selected > svg:last-child {
+    margin-left: auto;
+}
+.menu-heading {
+    display: block;
+    padding: 13px 12px 7px;
+    color: #8a90a5;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+.coach-workspace .sidebar-bottom > .logout {
+    display: none;
+}
+.coach-workspace .topbar {
+    background: #ffffffd9;
+    border-color: var(--border);
+}
+.topbar-crumb {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--muted);
+}
+.topbar-crumb strong {
+    color: #24283e;
+}
+.coach-workspace .avatar.small {
+    color: var(--blue);
+    background: #eee8ff;
+    border-radius: 12px;
+}
+.coach-workspace .workspace main {
+    max-width: 1760px;
+    padding: 32px 40px 48px;
+}
+.coach-workspace .page-header h1,
+.coach-workspace .settings-page-title h1 {
+    font-size: 29px;
+    letter-spacing: -1px;
+}
+.coach-workspace .eyebrow {
+    font-weight: 750;
+    color: #797e94;
+    letter-spacing: 1.3px;
+}
+.coach-workspace .page-header p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+.coach-workspace .panel {
+    border-radius: 16px;
+    box-shadow: 0 3px 10px #29214504;
+}
+.coach-workspace .btn {
+    border-radius: 10px;
+    min-height: 42px;
+}
+.coach-workspace .btn-primary {
+    background: linear-gradient(110deg, #7652ef, #5b32df);
+    border-color: #6541df;
+    box-shadow: 0 3px 8px #6541df18;
+    color: white;
+}
+.coach-workspace .btn-primary:hover {
+    background: #5630cc;
+}
+.coach-workspace .btn-secondary {
+    background: #fff;
+    color: #34374e;
+    border-color: #e3e2ed;
+    box-shadow: 0 1px 3px #25203e06;
+}
+.coach-workspace .btn-secondary:hover {
+    color: var(--blue);
+    border-color: #bfb0f0;
+}
+.coach-workspace input:focus,
+.coach-workspace textarea:focus,
+.coach-workspace select:focus {
+    border-color: #9879ed;
+    box-shadow: 0 0 0 3px #7850e714;
+}
+.coach-workspace input[type="checkbox"],
+.coach-workspace input[type="radio"] {
+    accent-color: var(--blue);
+}
+.coach-workspace .badge.planned,
+.coach-workspace .badge.active {
+    color: #6541c9;
+    background: #f0ebff;
+}
+.coach-workspace .badge.completed {
+    color: #197454;
+    background: #def8e9;
+}
+.coach-workspace .coach-card {
+    padding: 24px;
+}
+.coach-workspace .coach-card h2 {
+    color: #1b2038;
+    font-size: 17px;
+}
+.coach-workspace .coach-card-title a {
+    color: #6541c9;
+    font-weight: 650;
+}
+.coach-focus-banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background:
+        radial-gradient(ellipse at 100% -50%, #66529a, transparent 60%), #282346;
+    color: white;
+    border-radius: 16px;
+    margin-bottom: 22px;
+}
+.coach-focus-banner .focus-symbol {
+    padding: 13px;
+    background: #ffffff12;
+    border-radius: 14px;
+    display: flex;
+}
+.coach-focus-banner > div {
+    flex: 1;
+    min-width: 0;
+}
+.coach-focus-banner small {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+    color: #c9bde9;
+}
+.coach-focus-banner h2 {
+    font-size: 19px;
+    margin: 5px 0;
+}
+.coach-focus-banner p {
+    color: #d0cbe1;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.coach-focus-banner .btn {
+    flex-shrink: 0;
+}
+.coach-workspace .coach-stat {
+    padding: 22px;
+}
+.coach-workspace .coach-stat > strong {
+    font-size: 32px;
+    color: #20213c;
+}
+.coach-workspace .coach-stat > small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 3px;
+}
+.coach-workspace .stat-icon {
+    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+}
+.coach-workspace .stat-icon.purple {
+    background: #eee8ff;
+    color: #7652df;
+}
+.coach-workspace .coach-panel-scroll {
+    height: 340px;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+.coach-workspace .coach-session {
+    gap: 14px;
+    padding: 15px 0;
+}
+.coach-workspace .coach-session .training-thumbnail {
+    width: 64px;
+    height: 54px;
+    flex: 0 0 64px;
+    border-radius: 10px;
+}
+.coach-workspace .coach-session-copy > .thumbnail-identity {
+    margin: 6px 0;
+}
+.coach-workspace .coach-session-copy strong {
+    font-size: 14px;
+}
+.coach-workspace .person-avatar {
+    border-radius: 13px;
+}
+#priority-inbox {
+    scroll-margin-top: 20px;
+}
+.coach-insights > .panel {
+    min-height: 310px;
+}
+.coach-insights p {
+    color: var(--muted);
+    font-size: 12px;
+}
+.workload-chart {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 16px;
+    height: 190px;
+    margin-top: 20px;
+}
+.workload-day {
+    display: grid;
+    grid-template-rows: 20px 1fr 20px;
+    gap: 8px;
+    text-align: center;
+    font-size: 11px;
+    color: #626780;
+}
+.workload-track {
+    position: relative;
+    background: #f2effc;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.workload-scheduled {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(#8965fb, #6944e6);
+    border-radius: 10px 10px 0 0;
+}
+.workload-completed {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: #32bf9d;
+}
+.chart-key {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 20px;
+}
+.chart-key span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.chart-key i {
+    background: #7652ed;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+.chart-key span:last-child i {
+    background: #32bf9d;
+}
+.momentum-list {
+    height: 230px;
+    overflow: auto;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+    margin-top: 10px;
+}
+.momentum-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+}
+.momentum-row > div {
+    min-width: 0;
+    flex: 1;
+}
+.momentum-row > div > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+}
+.momentum-row span {
+    white-space: nowrap;
+}
+.momentum-row progress {
+    width: 100%;
+    height: 7px;
+    margin-top: 10px;
+    appearance: none;
+    border: 0;
+    border-radius: 9px;
+    background: #eeedf6;
+}
+.momentum-row progress::-webkit-progress-bar {
+    border-radius: 9px;
+    background: #eeedf6;
+}
+.momentum-row progress::-webkit-progress-value {
+    border-radius: 9px;
+    background: #32bf9d;
+}
+.momentum-row progress::-moz-progress-bar {
+    border-radius: 9px;
+    background: #32bf9d;
+}
+.roster-summary {
+    color: var(--muted);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0 0 22px;
+    font-size: 13px;
+}
+.roster-summary strong {
+    color: #282940;
+}
+.roster-summary > span {
+    height: 14px;
+    border-left: 1px solid #dcdbe9;
+    margin-inline: 12px;
+}
+.coach-workspace .trainee-filters,
+.coach-workspace .subscription-counts {
+    gap: 8px;
+    margin-bottom: 18px;
+}
+.coach-workspace .trainee-filters button,
+.coach-workspace .subscription-counts button {
+    background: #fff;
+    border: 1px solid #e3e2ef;
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 2px 5px #23213904;
+    color: #4c5069;
+}
+.coach-workspace .trainee-filters button[aria-pressed="true"],
+.coach-workspace .subscription-counts button.active {
+    background: #ece6fc;
+    color: #5935c5;
+    border-color: #d7caf8;
+}
+.coach-workspace .trainee-filters button span,
+.coach-workspace .subscription-counts button span {
+    background: transparent;
+    padding: 0 3px;
+}
+.coach-workspace .live-filter-bar {
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.coach-workspace .trainee-table table,
+.coach-workspace .subscription-table {
+    font-size: 13px;
+}
+.coach-workspace .trainee-table th,
+.coach-workspace .subscription-table th {
+    background: #faf9fd;
+}
+.coach-workspace .trainee-table tbody th {
+    background: #fff;
+}
+.coach-workspace .trainee-table td,
+.coach-workspace .trainee-table th {
+    padding: 16px;
+}
+.coach-workspace .roster-progress {
+    height: 7px;
+}
+.roster-states {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    flex-direction: column;
+}
+.roster-attention {
+    color: #a65f14;
+    background: #fff2de;
+    font-size: 10px;
+    padding: 4px 7px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+.library-view-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin: 22px 0 0;
+}
+.view-switch {
+    display: flex;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 4px;
+}
+.view-switch button {
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 36px;
+    color: var(--muted);
+    border-radius: 7px;
+}
+.view-switch button[aria-pressed="true"] {
+    color: var(--blue);
+    background: #eee8ff;
+}
+.coach-workspace .program-library {
+    gap: 16px;
+}
+.coach-workspace .program-library .coach-training-row {
+    margin: 0;
+    padding: 22px;
+}
+.coach-workspace .program-library .coach-training-row > .training-thumbnail {
+    width: 88px;
+    height: 78px;
+    flex-basis: 88px;
+    border-radius: 15px;
+}
+.coach-workspace .program-library .coach-row-copy > .badge {
+    margin-bottom: 8px;
+}
+.coach-workspace .program-library .coach-row-copy small {
+    color: #51596f;
+}
+.coach-workspace .program-library.grid-view {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.coach-workspace .program-library.grid-view .coach-training-row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+.coach-workspace .program-library.grid-view .coach-row-actions {
+    grid-column: 1/-1;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+}
+.library-pagination {
+    grid-column: 1/-1;
+}
+.library-guidance {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #6348a6;
+    font-size: 12px;
+    line-height: 1.7;
+    background: #eee9fc;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 18px;
+}
+.library-guidance svg {
+    flex-shrink: 0;
+}
+.directory-tabs {
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+.directory-tabs button {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 14px 2px;
+    font-weight: 700;
+    color: #65697c;
+}
+.directory-tabs button[aria-selected="true"] {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+}
+.coach-workspace .subscription-packages[hidden] {
+    display: none;
+}
+.coach-workspace .subscription-packages > h2 {
+    margin-bottom: 12px;
+}
+.coach-workspace .subscription-filters {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    gap: 16px;
+}
+.coach-workspace .subscription-table th {
+    border-color: var(--border);
+}
+.coach-workspace .subscription-table td {
+    padding-block: 15px;
+}
+.coach-workspace .subscription-table tbody tr:hover,
+.coach-workspace .trainee-table tbody tr:hover td {
+    background: #fcfbff;
+}
+.settings-page-title {
+    margin-bottom: 24px;
+}
+.settings-page-title p {
+    margin-top: 8px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+.settings-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px;
+    margin-bottom: 26px;
+}
+.settings-hero-identity {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-width: 0;
+}
+.settings-avatar {
+    width: 88px;
+    height: 88px;
+    flex: 0 0 88px;
+    background: #eee8ff;
+    color: #7653d8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: 750;
+    border-radius: 50%;
+}
+.settings-hero h2 {
+    font-size: 21px;
+    overflow-wrap: anywhere;
+}
+.settings-hero p {
+    color: var(--muted);
+    margin: 5px 0 10px;
+}
+.settings-hero-stats {
+    display: flex;
+}
+.settings-hero-stats > div {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 4px 12px;
+    padding-inline: 24px;
+    border-left: 1px solid var(--border);
+}
+.settings-hero-stats svg {
+    grid-row: span 2;
+    color: #79758d;
+}
+.settings-hero-stats strong {
+    font-size: 22px;
+}
+.settings-hero-stats span {
+    color: var(--muted);
+    font-size: 11px;
+}
+.settings-layout {
+    display: grid;
+    grid-template-columns: 255px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+.settings-section-nav {
+    padding: 16px;
+    position: sticky;
+    top: 20px;
+}
+.settings-section-nav h2 {
+    font-size: 16px;
+    margin: 10px 8px 4px;
+}
+.settings-section-nav > p {
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 0 8px 20px;
+}
+.settings-section-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 12px;
+    border-radius: 11px;
+}
+.settings-section-nav a > svg {
+    flex-shrink: 0;
+    color: #777b94;
+}
+.settings-section-nav a > svg:last-child {
+    display: none;
+}
+.settings-section-nav a.active {
+    background: #eee8ff;
+    color: #6440cf;
+}
+.settings-section-nav a.active svg {
+    color: #7654de;
+}
+.settings-section-nav a span {
+    min-width: 0;
+}
+.settings-section-nav small {
+    display: block;
+    font-size: 11px;
+    line-height: 1.6;
+    font-weight: 400;
+    margin-top: 4px;
+    color: var(--muted);
+}
+.settings-content {
+    min-width: 0;
+}
+.settings-content > .settings-back {
+    margin-bottom: 16px;
+}
+.settings-content .page-header {
+    margin-top: 0;
+}
+.settings-content .page-header h1 {
+    font-size: 22px;
+}
+.settings-content .coach-form,
+.settings-content .profile-edit {
+    max-width: none;
+    width: 100%;
+}
+.settings-profile-form {
+    padding: 26px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+.settings-profile-form > h2,
+.settings-profile-form > p,
+.settings-profile-form > .field:nth-of-type(3),
+.settings-profile-form .form-actions {
+    grid-column: 1/-1;
+}
+.settings-profile-form h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+}
+.settings-profile-form > p {
+    margin-top: -8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+.settings-profile-form textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+.bio-count {
+    text-align: right;
+}
+.settings-note {
+    padding: 16px;
+    background: #f0ebff;
+    border-radius: 12px;
+    color: #645487;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+.coach-workspace .settings-content .notification-grid {
+    display: block;
+}
+.settings-notifications .device-panel,
+.settings-notifications > .notification-panel,
+.settings-devices .preferences-panel {
+    display: none;
+}
+.coach-workspace .notification-toggle {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+}
+.coach-workspace .notification-toggle span {
+    flex: 1;
+}
+.coach-workspace .notification-toggle input {
+    appearance: none;
+    width: 42px;
+    height: 24px;
+    flex: 0 0 42px;
+    border-radius: 18px;
+    background: #d2d3de;
+    position: relative;
+    border: 0;
+    cursor: pointer;
+}
+.coach-workspace .notification-toggle input::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    left: 3px;
+    top: 3px;
+    box-shadow: 0 1px 3px #0002;
+}
+.coach-workspace .notification-toggle input:checked {
+    background: var(--blue);
+}
+.coach-workspace .notification-toggle input:checked::after {
+    left: 21px;
+}
+.coach-bottom-nav {
+    display: none;
+}
+@media (max-width: 1280px) {
+    .coach-workspace .workspace main {
+        padding: 28px;
+    }
+    .settings-layout {
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 18px;
+    }
+    .settings-hero {
+        flex-wrap: wrap;
+    }
+    .settings-hero-stats > div {
+        padding-inline: 20px;
+    }
+    .coach-focus-banner {
+        flex-wrap: wrap;
+    }
+    .coach-focus-banner .btn {
+        margin-left: auto;
+    }
+}
+@media (max-width: 1000px) {
+    .coach-workspace .program-library.grid-view {
+        grid-template-columns: 1fr;
+    }
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+    .settings-section-nav {
+        position: static;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .settings-section-nav h2,
+    .settings-section-nav > p {
+        display: none;
+    }
+    .settings-hero {
+        padding: 22px;
+    }
+}
+@media (max-width: 760px) {
+    .coach-workspace .mobile-top {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+    }
+    .coach-workspace .mobile-top .brand {
+        color: #24283e;
+    }
+    .coach-workspace .mobile-top .brand svg,
+    .coach-workspace .mobile-top .icon-btn {
+        color: var(--blue);
+    }
+    .coach-workspace .workspace main {
+        padding: 22px 18px 96px;
+    }
+    .coach-workspace .sidebar {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        bottom: 70px;
+    }
+    .coach-workspace .sidebar-note {
+        display: none;
+    }
+    .coach-workspace .user-menu {
+        position: static;
+        width: 100%;
+        margin-top: 12px;
+        max-height: none;
+        padding: 6px;
+    }
+    .coach-workspace .user-menu .nav-item {
+        font-size: 12px;
+    }
+    .coach-workspace .sidebar .user-block {
+        margin-top: 16px;
+    }
+    .coach-bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fffffff5;
+        backdrop-filter: blur(12px);
+        border-top: 1px solid var(--border);
+        padding: 7px 8px max(8px, env(safe-area-inset-bottom));
+        z-index: 25;
+    }
+    .coach-bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 2px;
+        border-radius: 10px;
+        font-size: 10px;
+        color: #787d93;
+        min-height: 50px;
+    }
+    .coach-bottom-nav a.active {
+        background: #eee8ff;
+        color: #6541df;
+        font-weight: 700;
+    }
+    .coach-workspace .page-header h1,
+    .coach-workspace .settings-page-title h1 {
+        font-size: 26px;
+    }
+    .coach-workspace .page-header p {
+        font-size: 13px;
+    }
+    .coach-focus-banner {
+        gap: 14px;
+        padding: 20px;
+    }
+    .coach-focus-banner .focus-symbol {
+        display: none;
+    }
+    .coach-focus-banner h2 {
+        font-size: 18px;
+        line-height: 1.5;
+    }
+    .coach-focus-banner .btn {
+        width: 100%;
+    }
+    .coach-workspace .coach-card {
+        padding: 19px;
+    }
+    .coach-workspace .coach-stat {
+        padding: 16px;
+    }
+    .coach-workspace .coach-stat > strong {
+        font-size: 28px;
+    }
+    .coach-workspace .coach-stat > small {
+        font-size: 11px;
+    }
+    .coach-workspace .stat-icon {
+        width: 30px;
+        height: 30px;
+    }
+    .coach-workspace .coach-panel-scroll {
+        height: 320px;
+    }
+    .coach-workspace .coach-session {
+        flex-wrap: wrap;
+    }
+    .coach-workspace .coach-session-copy {
+        flex: 1;
+        min-width: 120px;
+    }
+    .workload-chart {
+        gap: 8px;
+    }
+    .momentum-row > div > div {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .settings-hero {
+        padding: 20px;
+        gap: 24px;
+    }
+    .settings-hero-identity {
+        gap: 16px;
+    }
+    .settings-avatar {
+        width: 68px;
+        height: 68px;
+        flex-basis: 68px;
+        font-size: 28px;
+    }
+    .settings-hero h2 {
+        font-size: 18px;
+    }
+    .settings-hero-stats {
+        width: 100%;
+        padding-top: 18px;
+        border-top: 1px solid var(--border);
+    }
+    .settings-hero-stats > div {
+        flex: 1;
+        padding-inline: 8px;
+        gap: 8px;
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .settings-hero-stats > div:first-child {
+        border: 0;
+    }
+    .settings-hero-stats svg {
+        display: none;
+    }
+    .settings-hero-stats strong {
+        font-size: 23px;
+    }
+    .settings-section-nav {
+        grid-template-columns: 1fr;
+        padding: 8px;
+    }
+    .settings-section-nav a {
+        min-height: 76px;
+    }
+    .settings-section-nav a > svg:last-child {
+        display: block;
+        margin-left: auto;
+    }
+    .settings-landing .settings-content {
+        display: none;
+    }
+    .settings-detail .settings-section-nav,
+    .settings-detail .settings-hero,
+    .settings-detail .settings-page-title {
+        display: none;
+    }
+    .settings-profile-form {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    .settings-profile-form h2,
+    .settings-profile-form > p {
+        display: none;
+    }
+    .settings-content input,
+    .settings-content select,
+    .settings-content textarea {
+        font-size: 16px;
+    }
+    .settings-content .profile-panel {
+        padding: 20px;
+    }
+    .coach-workspace .app-footer {
+        padding-bottom: 90px;
+    }
+    .directory-tabs {
+        gap: 20px;
+    }
+    .directory-tabs button {
+        font-size: 13px;
+    }
+}
+@media (max-width: 430px) {
+    .coach-workspace .workspace main {
+        padding-inline: 12px;
+    }
+    .coach-workspace .coach-stats {
+        gap: 10px;
+    }
+    .coach-workspace .coach-stat .metric-label {
+        font-size: 11px;
+        gap: 6px;
+    }
+    .coach-workspace .program-library .coach-training-row {
+        padding: 17px;
+    }
+    .coach-workspace .program-library.grid-view .coach-training-row {
+        grid-template-columns: 66px minmax(0, 1fr);
+        gap: 12px;
+    }
+    .coach-workspace
+        .program-library
+        .coach-training-row
+        > .training-thumbnail {
+        width: 66px;
+        height: 62px;
+        flex-basis: 66px;
+    }
+    .coach-workspace .program-library .coach-row-copy h3 {
+        font-size: 16px;
+    }
+    .coach-workspace .coach-card-title {
+        flex-wrap: wrap;
+    }
+    .roster-summary > span {
+        margin-inline: 2px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .coach-workspace * {
+        scroll-behavior: auto;
+    }
+}
+
+/* Keep labels intact and compact without squeezing the roster. */
+.coach-workspace .trainee-table .coach-status {
+    white-space: nowrap;
+}
+.coach-workspace .trainee-table th:first-child {
+    width: 23%;
+}
+.coach-workspace .trainee-table th:nth-child(2) {
+    width: 24%;
+}
+.coach-workspace .trainee-table th:nth-child(3) {
+    width: 12%;
+}
+.coach-workspace .trainee-table th:nth-child(4) {
+    width: 17%;
+}
+.coach-workspace .trainee-table th:nth-child(5) {
+    width: 12%;
+}
+.coach-workspace .trainee-table td,
+.coach-workspace .trainee-table th {
+    padding-block: 14px;
+}
+.coach-workspace .roster-progress {
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    background: #edebf6;
+}
+.coach-workspace .roster-progress::-webkit-progress-bar {
+    background: #edebf6;
+    border-radius: 8px;
+}
+.coach-workspace .roster-progress::-webkit-progress-value,
+.coach-workspace .roster-progress::-moz-progress-bar {
+    background: #2bbd94;
+    border-radius: 8px;
+}
+.coach-workspace .notification-toggle input[role="switch"] {
+    min-height: 24px;
+    max-height: 24px;
+    align-self: flex-start;
+}
+.coach-workspace .trainee-more > summary {
+    list-style: none;
+}
+.coach-workspace .trainee-more > summary::-webkit-details-marker {
+    display: none;
+}
+@media (min-width: 761px) {
+    .settings-content > .settings-back {
+        display: none;
+    }
+    .settings-content .settings-profile-form {
+        margin-top: 0;
+    }
+    .settings-landing .settings-content > .page-header,
+    .settings-detail
+        .settings-content:has(.settings-profile-form)
+        > .page-header {
+        display: none;
+    }
+}
+@media (max-height: 740px) and (min-width: 761px) {
+    .coach-workspace .sidebar-note {
+        display: none;
+    }
+    .coach-workspace .sidebar > nav {
+        overflow-y: auto;
+        min-height: 0;
+        flex-shrink: 1;
+    }
+}

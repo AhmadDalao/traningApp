@@ -6,8 +6,12 @@ import {
     CheckCircle2,
     AlertTriangle,
     Clock,
+    Sparkles,
+    Plus,
+    ArrowRight,
+    TrendingUp,
 } from "lucide-react";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import { PageHeader, ButtonLink } from "../../Components/UI";
 import { CoachStatus } from "../../Features/CoachingUI";
 import { WorkoutDate } from "../../Features/CoachWorkspace";
@@ -91,28 +95,87 @@ export default function Overview({
     recent,
     attention = [],
     pending = [],
+    workload = [],
+    momentum = [],
 }) {
+    const { today } = usePage().props;
+    const peak = Math.max(1, ...workload.map((day) => day.scheduled));
     return (
         <div className="coach-dashboard">
             <Head title="Coach Overview" />
             <PageHeader
+                eyebrow={new Date(`${today}T12:00:00`).toLocaleDateString(
+                    "en-GB",
+                    {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                    },
+                )}
                 title="Coach Overview"
-                description="Your coaching day, at a glance."
+                description="Here’s what matters across your coaching workspace today."
             >
-                <ButtonLink href="/coach/trainees">Manage trainees</ButtonLink>
+                <ButtonLink href="/coach/trainees" variant="secondary">
+                    <Users size={17} />
+                    Manage trainees
+                </ButtonLink>
+                <ButtonLink href="/coach/training-plans/create">
+                    <Plus size={17} />
+                    New program
+                </ButtonLink>
             </PageHeader>
+            <section className="coach-focus-banner">
+                <span className="focus-symbol">
+                    <Sparkles size={27} />
+                </span>
+                <div>
+                    <small>YOUR FOCUS FOR TODAY</small>
+                    <h2>
+                        {stats.attention
+                            ? `${stats.attention} ${stats.attention === 1 ? "trainee could" : "trainees could"} use your attention.`
+                            : "Your trainees are on track."}
+                    </h2>
+                    <p>
+                        Review missed workouts, pauses and unfinished training
+                        setups.
+                    </p>
+                </div>
+                <a href="#priority-inbox" className="btn btn-secondary">
+                    Review priority inbox <ArrowRight size={17} />
+                </a>
+            </section>
             <div className="coach-stats coach-desktop-metrics">
                 {[
-                    ["Active trainees", stats.trainees, Users, "green"],
-                    ["Training today", stats.today, CalendarDays, "blue"],
-                    ["Completed today", stats.completed, CheckCircle2, "green"],
+                    [
+                        "Connected trainees",
+                        stats.trainees,
+                        Users,
+                        "purple",
+                        "Accepted coaching connections",
+                    ],
+                    [
+                        "Training today",
+                        stats.today,
+                        CalendarDays,
+                        "orange",
+                        "Trainees with planned or completed training",
+                    ],
+                    [
+                        "Completed today",
+                        stats.completed,
+                        CheckCircle2,
+                        "green",
+                        "Completed workouts scheduled today",
+                    ],
                     [
                         "Need attention",
                         stats.attention,
                         AlertTriangle,
                         "orange",
+                        "Issues to review, separate from coverage",
                     ],
-                ].map(([label, count, Icon, color]) => (
+                ].map(([label, count, Icon, color, hint]) => (
                     <div className="panel coach-stat" key={label}>
                         <span className="metric-label">
                             {label}
@@ -121,15 +184,16 @@ export default function Overview({
                             </span>
                         </span>
                         <strong>{count}</strong>
+                        <small>{hint}</small>
                     </div>
                 ))}
             </div>
             <div className="coach-overview-columns">
-                <section className="panel coach-card">
+                <section className="panel coach-card" id="priority-inbox">
                     <div className="coach-card-title">
                         <h2>
-                            <AlertTriangle size={19} aria-hidden="true" /> Needs
-                            attention
+                            <AlertTriangle size={19} aria-hidden="true" />{" "}
+                            Priority inbox
                         </h2>
                         <Link href="/coach/trainees?status=attention">
                             View trainees →
@@ -179,7 +243,8 @@ export default function Overview({
                 <section className="panel coach-card">
                     <div className="coach-card-title">
                         <h2>
-                            <CalendarDays size={19} aria-hidden="true" /> Today
+                            <CalendarDays size={19} aria-hidden="true" />{" "}
+                            Today’s training
                         </h2>
                         <span className="count-bubble">
                             {todaySessions.length}
@@ -191,6 +256,116 @@ export default function Overview({
                         aria-label="Today’s workouts"
                     >
                         <TodayList entries={todaySessions} />
+                    </div>
+                </section>
+            </div>
+            <div className="coach-overview-columns coach-insights">
+                <section className="panel coach-card">
+                    <div className="coach-card-title">
+                        <h2>
+                            <CalendarDays size={19} />
+                            Coaching workload
+                        </h2>
+                        <span className="badge planned">This week</span>
+                    </div>
+                    <p>Scheduled workouts and their completed portion.</p>
+                    <div
+                        className="workload-chart"
+                        role="img"
+                        aria-label={workload
+                            .map(
+                                (d) =>
+                                    `${d.date}: ${d.completed} completed of ${d.scheduled} scheduled`,
+                            )
+                            .join("; ")}
+                    >
+                        {workload.map((day) => (
+                            <div className="workload-day" key={day.date}>
+                                <strong>{day.scheduled}</strong>
+                                <div className="workload-track">
+                                    <div
+                                        className="workload-scheduled"
+                                        style={{
+                                            height: `${(day.scheduled / peak) * 100}%`,
+                                        }}
+                                    >
+                                        <div
+                                            className="workload-completed"
+                                            style={{
+                                                height: `${day.scheduled ? (day.completed / day.scheduled) * 100 : 0}%`,
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <span>
+                                    {new Date(
+                                        `${day.date}T12:00:00`,
+                                    ).toLocaleDateString("en-GB", {
+                                        weekday: "short",
+                                    })}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="chart-key">
+                        <span>
+                            <i />
+                            Scheduled
+                        </span>
+                        <span>
+                            <i />
+                            Completed
+                        </span>
+                    </div>
+                </section>
+                <section className="panel coach-card">
+                    <div className="coach-card-title">
+                        <h2>
+                            <TrendingUp size={19} />
+                            Trainee momentum
+                        </h2>
+                        <Link href="/coach/trainees">View roster →</Link>
+                    </div>
+                    <p>
+                        Completed / scheduled workouts this week, across your
+                        assignments.
+                    </p>
+                    <div
+                        className="momentum-list"
+                        tabIndex={0}
+                        aria-label="Weekly trainee progress"
+                    >
+                        {momentum.map((row) => (
+                            <Link
+                                className="momentum-row"
+                                href={`/coach/trainees/${row.trainee.id}`}
+                                key={row.id}
+                            >
+                                <PersonAvatar name={row.trainee.name} />
+                                <div>
+                                    <div>
+                                        <strong>{row.trainee.name}</strong>
+                                        <span>
+                                            {row.week.completed}/
+                                            {row.week.total} ·{" "}
+                                            {row.week.total
+                                                ? `${Math.round((row.week.completed / row.week.total) * 100)}%`
+                                                : "Not scheduled"}
+                                        </span>
+                                    </div>
+                                    <progress
+                                        max={row.week.total || 1}
+                                        value={row.week.completed}
+                                        aria-label={`${row.trainee.name} workouts completed this week`}
+                                    />
+                                </div>
+                            </Link>
+                        ))}
+                        {!momentum.length && (
+                            <p className="coach-quiet-empty">
+                                Your connected trainees will appear here.
+                            </p>
+                        )}
                     </div>
                 </section>
             </div>

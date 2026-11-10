@@ -3,7 +3,15 @@ import useLiveFilters from "../../Features/useLiveFilters";
 import { useTraining } from "../../Features/CoachingUI";
 import { useState } from "react";
 import { Head, Link, useForm, router } from "@inertiajs/react";
-import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
+import {
+    Plus,
+    Pencil,
+    Trash2,
+    ArrowRight,
+    LayoutGrid,
+    List,
+    ShieldCheck,
+} from "lucide-react";
 import PlanThumbnail from "../../Components/PlanThumbnail";
 import {
     PageHeader,
@@ -23,13 +31,16 @@ import { Copy } from "lucide-react";
 export default function Index({
     plans,
     currentTraining,
+    libraryCounts,
     filters = { search: "", type: "all" },
 }) {
     const { url, canManage, coaching, templates } = useTraining();
     const filter = useLiveFilters(url("/training-plans"), filters, [
         "plans",
         "filters",
+        "libraryCounts",
     ]);
+    const [view, setView] = useState("list");
     const [duplicating, setDuplicating] = useState(null);
     const [editing, setEditing] = useState(null);
     const [deleting, setDeleting] = useState(null);
@@ -53,7 +64,11 @@ export default function Index({
                 />
             )}
             <PageHeader
-                eyebrow="BUILD YOUR ROUTINE"
+                eyebrow={
+                    templates
+                        ? "REUSABLE TRAINING LIBRARY"
+                        : "BUILD YOUR ROUTINE"
+                }
                 title={
                     templates
                         ? "Programs"
@@ -63,7 +78,7 @@ export default function Index({
                 }
                 description={
                     templates
-                        ? "Create, manage and assign your reusable training programs."
+                        ? "Build once, refine confidently, and assign independently to each trainee."
                         : coaching
                           ? "Current training and previous assignments."
                           : "Your goals, broken down into days you can show up for."
@@ -95,6 +110,28 @@ export default function Index({
                     </Button>
                 )}
             </PageHeader>
+            {templates && (
+                <nav
+                    className="library-filters trainee-filters"
+                    aria-label="Program readiness"
+                >
+                    {[
+                        ["all", "All"],
+                        ["ready", "Workouts ready"],
+                        ["draft", "Draft"],
+                    ].map(([key, label]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            aria-pressed={filter.data.readiness === key}
+                            onClick={() => filter.setData("readiness", key)}
+                        >
+                            {label}
+                            <span>{libraryCounts?.[key] || 0}</span>
+                        </button>
+                    ))}
+                </nav>
+            )}
             {(templates || coaching) && (
                 <div
                     className="panel coach-card live-filter-bar"
@@ -143,13 +180,16 @@ export default function Index({
                             ? "Updating…"
                             : `${plans.total} plans found`}
                     </span>
-                    {(filter.data.search || filter.data.type !== "all") && (
+                    {(filter.data.search ||
+                        filter.data.type !== "all" ||
+                        filter.data.readiness !== "all") && (
                         <Button
                             variant="secondary"
                             onClick={() =>
                                 filter.setData({
                                     search: "",
                                     type: "all",
+                                    readiness: "all",
                                     per_page: 10,
                                 })
                             }
@@ -159,17 +199,57 @@ export default function Index({
                     )}
                 </div>
             )}
+            {templates && (
+                <div className="library-view-bar">
+                    <span>
+                        {plans.total} programs · showing {plans.from || 0}–
+                        {plans.to || 0}
+                    </span>
+                    <div
+                        className="view-switch"
+                        role="group"
+                        aria-label="Program layout"
+                    >
+                        <button
+                            aria-label="Grid view"
+                            aria-pressed={view === "grid"}
+                            onClick={() => setView("grid")}
+                        >
+                            <LayoutGrid size={19} />
+                        </button>
+                        <button
+                            aria-label="List view"
+                            aria-pressed={view === "list"}
+                            onClick={() => setView("list")}
+                        >
+                            <List size={19} />
+                        </button>
+                    </div>
+                </div>
+            )}
             {coaching && <CurrentTraining training={currentTraining} />}
             {(templates || coaching) && (
-                <div className="coach-training-library">
+                <div
+                    className={`coach-training-library ${templates ? `program-library ${view}-view` : ""}`}
+                >
                     {templates ? (
                         plans.data.map((plan) => (
                             <TrainingRow key={plan.id} plan={plan}>
-                                <ButtonLink
-                                    href={`/coach/training-plans/${plan.id}/assign`}
-                                >
-                                    Assign
-                                </ButtonLink>
+                                {plan.workout_days_count > 0 &&
+                                !plan.empty_workouts_count ? (
+                                    <ButtonLink
+                                        href={`/coach/training-plans/${plan.id}/assign`}
+                                    >
+                                        Assign <ArrowRight size={16} />
+                                    </ButtonLink>
+                                ) : (
+                                    <ButtonLink
+                                        variant="secondary"
+                                        href={`/coach/training-plans/${plan.id}/edit`}
+                                    >
+                                        Finish program
+                                    </ButtonLink>
+                                )}
                                 <ButtonLink
                                     href={url(`/training-plans/${plan.id}`)}
                                     variant="secondary"
@@ -297,7 +377,9 @@ export default function Index({
                             </Link>
                         </>
                     )}
-                    <Pagination links={plans.links} />
+                    <div className="library-pagination">
+                        <Pagination links={plans.links} />
+                    </div>
                     {templates && !plans.data.length && (
                         <section className="panel coach-card">
                             <h2>No programs found</h2>
@@ -305,6 +387,14 @@ export default function Index({
                         </section>
                     )}
                 </div>
+            )}
+            {templates && (
+                <p className="library-guidance">
+                    <ShieldCheck size={19} />
+                    Assignments create independent trainee copies. Workouts
+                    ready means training days have exercises; dates and coverage
+                    are checked during assignment.
+                </p>
             )}
             {!templates && !coaching && (
                 <>
@@ -461,7 +551,9 @@ export default function Index({
                                     </article>
                                 ))}
                             </div>
-                            <Pagination links={plans.links} />
+                            <div className="library-pagination">
+                                <Pagination links={plans.links} />
+                            </div>
                         </>
                     ) : (
                         <section className="panel">

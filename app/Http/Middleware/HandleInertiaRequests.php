@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\CoachTraineeRelationship;
+use App\Models\TrainingPlan;
 use App\Services\CoachAccess;
 use App\Services\CoachWorkspaceSummary;
 use App\Services\TrainingContext;
@@ -30,6 +32,12 @@ class HandleInertiaRequests extends Middleware
                 return ['workspace' => $request->attributes->get('coach_workspace') ? 'coach' : 'personal', 'prefix' => $context->prefix(), 'templates' => $context->templates(), 'coaching' => $coaching, 'canManage' => (bool) $manage, 'summary' => $coaching ? app(CoachWorkspaceSummary::class)->one($context->actor(), $context->owner()) : null, 'trainee' => $coaching ? $context->owner()->only('id', 'name', 'training_code') : null];
             },
             'flash' => ['success' => fn () => $request->session()->get('success'), 'schedule_review' => fn () => $request->session()->get('schedule_review')],
+            'settingsSummary' => fn () => $request->user()?->isCoach() && $request->is('coach/settings*') ? [
+                'profile' => $request->user()->coachProfile?->only('display_name', 'specialization'),
+                'trainees' => CoachTraineeRelationship::where('coach_user_id', $request->user()->id)->where('status', 'active')->count(),
+                'workouts' => app(CoachAccess::class)->sessions($request->user())->availableOnSchedule()->where('entry_type', 'training')->whereDate('scheduled_date', today())->count(),
+                'programs' => TrainingPlan::where('user_id', $request->user()->id)->where('workspace_type', 'coach_template')->count(),
+            ] : null,
             'today' => now()->toDateString(),
             'timezone' => config('app.timezone'),
         ];

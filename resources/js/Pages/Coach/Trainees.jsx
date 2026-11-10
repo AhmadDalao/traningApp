@@ -11,6 +11,7 @@ import {
     DateLabel,
 } from "../../Components/UI";
 import {
+    CoachStatus,
     EndRelationship,
     TraineeState,
     traineeStates,
@@ -45,6 +46,9 @@ function Program({ row }) {
                 {row.plan?.name || "Not assigned"}
             </span>
             <small>
+                {row.subscription?.package_name || "No coaching package"}
+            </small>
+            <small>
                 {row.plan?.current_week
                     ? `Week ${row.plan.current_week} of ${row.plan.duration_weeks}`
                     : row.plan?.run_status?.replaceAll("_", " ")}
@@ -65,6 +69,31 @@ function Next({ entry }) {
         </div>
     ) : (
         "Not scheduled"
+    );
+}
+function CoachingState({ row }) {
+    return (
+        <div className="roster-states">
+            {row.subscription ? (
+                <CoachStatus status={row.subscription.effective_status} />
+            ) : (
+                <TraineeState state={row.display_state} />
+            )}{" "}
+            {row.subscription &&
+                ["attention", "setup", "paused"].includes(
+                    row.display_state,
+                ) && (
+                    <span className="roster-attention" title={row.reason}>
+                        {row.display_state === "attention"
+                            ? "Needs attention"
+                            : row.display_state === "setup"
+                              ? "Needs setup"
+                              : row.subscription.effective_status !== "paused"
+                                ? "Program paused"
+                                : "Review pause"}
+                    </span>
+                )}
+        </div>
     );
 }
 function Actions({ row }) {
@@ -89,13 +118,22 @@ export default function Trainees({ relationships, filters, counts = {} }) {
         <>
             <Head title="Trainees" />
             <PageHeader
-                title="Trainees"
+                eyebrow="PEOPLE & PERFORMANCE"
+                title="Your trainees"
                 description="Your people, their training, and the next useful action."
             >
                 <Button onClick={() => setAdding(true)}>
                     <UserPlus size={17} aria-hidden="true" /> Add trainee
                 </Button>
             </PageHeader>
+            <p className="roster-summary">
+                <strong>
+                    {Object.values(counts).reduce((a, b) => a + Number(b), 0)}
+                </strong>{" "}
+                connections <span /> <strong>{counts.attention || 0}</strong>{" "}
+                need attention <span /> <strong>{counts.setup || 0}</strong>{" "}
+                need setup
+            </p>
             <div
                 className="panel coach-card live-filter-bar"
                 aria-busy={form.processing}
@@ -110,15 +148,45 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                             onChange={(e) =>
                                 form.setData("search", e.target.value)
                             }
-                            placeholder="Name or Training Planner ID"
+                            placeholder="Name, Training Planner ID or program"
                         />
                     </div>
                 </Field>
-                {(form.data.search || form.data.status !== "all") && (
+                <Field label="Sort trainees">
+                    <select
+                        value={form.data.sort}
+                        onChange={(e) => form.setData("sort", e.target.value)}
+                    >
+                        <option value="newest">Newest first</option>
+                        <option value="name">Name A–Z</option>
+                    </select>
+                </Field>
+                <Field label="Items per page">
+                    <select
+                        value={form.data.per_page}
+                        onChange={(e) =>
+                            form.setData("per_page", Number(e.target.value))
+                        }
+                    >
+                        {[10, 25, 50, 100].map((n) => (
+                            <option value={n} key={n}>
+                                {n}
+                            </option>
+                        ))}
+                    </select>
+                </Field>
+                {(form.data.search ||
+                    form.data.status !== "all" ||
+                    form.data.sort !== "newest") && (
                     <Button
                         variant="secondary"
                         onClick={() =>
-                            form.setData({ search: "", status: "all" })
+                            form.setData({
+                                search: "",
+                                status: "all",
+                                sort: "newest",
+                                per_page: 25,
+                            })
                         }
                     >
                         Clear all
@@ -138,7 +206,7 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                         aria-pressed={form.data.status === key}
                         onClick={() => form.setData("status", key)}
                     >
-                        {label}{" "}
+                        {key === "active" ? "On track" : label}{" "}
                         <span>
                             {key === "all"
                                 ? Object.values(counts).reduce(
@@ -161,7 +229,6 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                 <tr>
                                     {[
                                         "Trainee",
-                                        "Coaching",
                                         "Current Training",
                                         "This Week",
                                         "Next workout",
@@ -180,26 +247,6 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                         <th scope="row">
                                             <Identity row={row} />
                                         </th>
-                                        <td>
-                                            <div className="trainee-cell">
-                                                <span>
-                                                    {row.subscription
-                                                        ?.package_name ||
-                                                        "Not configured"}
-                                                </span>
-                                                <small>
-                                                    {
-                                                        row.subscription
-                                                            ?.effective_status
-                                                    }
-                                                    {row.subscription?.ends_on
-                                                        ? ` · Ends ${row.subscription.ends_on}`
-                                                        : row.subscription
-                                                          ? " · Ongoing"
-                                                          : ""}
-                                                </small>
-                                            </div>
-                                        </td>
                                         <td>
                                             <Program row={row} />
                                         </td>
@@ -220,9 +267,7 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                                             <Next entry={row.next_session} />
                                         </td>
                                         <td>
-                                            <TraineeState
-                                                state={row.display_state}
-                                            />
+                                            <CoachingState row={row} />
                                         </td>
                                         <td>
                                             <Actions row={row} />
@@ -237,7 +282,7 @@ export default function Trainees({ relationships, filters, counts = {} }) {
                             <article className="panel coach-card" key={row.id}>
                                 <div className="coach-card-title">
                                     <Identity row={row} />
-                                    <TraineeState state={row.display_state} />
+                                    <CoachingState row={row} />
                                 </div>
                                 <p>
                                     {row.subscription?.package_name ||
