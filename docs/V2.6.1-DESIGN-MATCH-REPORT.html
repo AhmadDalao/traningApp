@@ -7,8 +7,10 @@
     ><style>
         * {
             box-sizing: border-box;
+            min-width: 0;
         }
         body {
+            overflow-wrap: anywhere;
             margin: 0;
             background: #f6f5fc;
             color: #171b35;
@@ -60,6 +62,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
             font-size: 14px;
         }
         td,
@@ -140,7 +143,7 @@
                 flow.
             </p>
             <p id="release-status">
-                <strong>NOT READY — production verification pending</strong>
+                <strong>READY — DEPLOYED AND VERIFIED</strong>
             </p>
         </header>
         <section>
@@ -317,7 +320,9 @@
         <section>
             <h2>Implementation screenshots</h2>
             <p id="image-origin">
-                Local disposable QA data, using the implemented application.
+                Live disposable QA data, using the deployed application.
+                Workspace menu screenshots were captured locally with the same
+                immutable source.
             </p>
             <details>
                 <summary>Coach Overview</summary>
@@ -504,13 +509,99 @@
             </details>
         </section>
         <section id="deployment">
-            <h2>Production deployment</h2>
+            <h2>Production deployment — verified</h2>
             <p>
-                NOT READY — deployment and live verification are pending. Fresh
-                database, runtime, uploads and environment backups are required
-                before replacing release files. The final report will include
-                the immutable commit, live checks, cleanup and
-                original-data/media/environment comparison.
+                <strong>READY — DEPLOYED AND VERIFIED</strong> on
+                <a href="https://training.ahmaddalao.com/coach"
+                    >training.ahmaddalao.com</a
+                >. Immutable tag <code>v2.6.1</code>; commit
+                <code>f5829125d0255fc6a9937e8e0809952178e23127</code>, pushed to
+                origin/main. Earlier tags remain unchanged.
+            </p>
+            <p>
+                Preflight matched all 8,043 v2.6.0 source/runtime hashes. Fresh
+                database, runtime, uploads and environment backups were created
+                at <strong>2026-11-10T10:00:32+00:00</strong> and verified
+                before replacement. The existing Hostinger maintenance, backup,
+                stage, cache and verify procedure deployed only the immutable
+                release archive.
+            </p>
+            <table>
+                <tr>
+                    <th>Backup</th>
+                    <th>Bytes</th>
+                    <th>SHA-256</th>
+                </tr>
+                <tr>
+                    <td>Database gzip</td>
+                    <td>54,251</td>
+                    <td>
+                        <code
+                            >6001ae6b8543ea1f771445af59d264aa4bd09b0b3103357040d5ec0eb41cff57</code
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td>Runtime ZIP</td>
+                    <td>69,491,482</td>
+                    <td>
+                        <code
+                            >b4de60fb2a1f61e07c7e6f2a994acc2b93e5cdaa7346ac0e04cbcc9a09c432d1</code
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td>Uploads ZIP</td>
+                    <td>34,565,564</td>
+                    <td>
+                        <code
+                            >632b6215f125dbedc154e8137efb57a4d420804b05f4e6ece403feafe59ac653</code
+                        >
+                    </td>
+                </tr>
+            </table>
+            <p>
+                The environment was copied separately with restricted
+                permissions and its hash matched afterward. Backups remain in
+                private server storage outside public access.
+            </p>
+            <p>
+                Release artifact: 96 files, 491,688 bytes. Final verification
+                matched 8,124 runtime hashes. PHP 8.3.36; database
+                11.8.9-MariaDB-log. All 17 existing migrations remain unchanged.
+                No migration ran. Production is out of maintenance.
+            </p>
+            <p>
+                Live QA passed all <strong>155 browser checks</strong> across
+                Chromium and WebKit and 8 HTTP checks. This included
+                desktop/mobile screens, unified Settings save/reload/discard,
+                mobile Back navigation, live roster/program/subscription
+                filters, pause/resume isolation, workspace switching, full-image
+                preview and PWA. Public asset verification checked 1059 assets
+                (1055 exact hashes; 4 CDN PNG re-encodings with identical
+                decoded pixels) and five public endpoints.
+            </p>
+            <p>
+                Cleanup removed 16 QA accounts and their records. Row-by-row
+                diagnostics confirm
+                <strong>875 original rows across 22 tables</strong> and
+                <strong>567 original media files</strong> unchanged. No
+                missing/changed originals, added rows, extra media or QA users
+                remain. Environment fingerprints match.
+            </p>
+            <p>
+                Push delivery remains disabled; manifest, service worker,
+                offline fallback and existing device/preference infrastructure
+                remain available. No VAPID, cron or production configuration
+                change. Temporary deployment endpoint, release archive directory
+                and local credential ledgers were removed. No known BLOCKER or
+                HIGH issue remains.
+            </p>
+            <p>
+                <a href="v2.6.1/deployment.json">Deployment evidence</a> ·
+                <a href="v2.6.1/live-browser-checks.json"
+                    >Live browser checks</a
+                >
             </p>
         </section>
     </main>

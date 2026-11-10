@@ -1,0 +1,44 @@
+[
+  {
+    "script": "coach-design-refresh",
+    "engine": "chromium",
+    "exit_code": 0,
+    "seconds": 19.86,
+    "checks": 22
+  },
+  {
+    "script": "coach-design-refresh",
+    "engine": "webkit",
+    "exit_code": 0,
+    "seconds": 35.79,
+    "checks": 22
+  },
+  {
+    "script": "subscription-directory",
+    "engine": "chromium",
+    "exit_code": 0,
+    "seconds": 46.47,
+    "checks": 36
+  },
+  {
+    "script": "subscription-directory",
+    "engine": "webkit",
+    "exit_code": 0,
+    "seconds": 21.5,
+    "checks": 36
+  },
+  {
+    "script": "pwa-smoke",
+    "engine": "chromium",
+    "exit_code": 0,
+    "seconds": 34.22,
+    "checks": 20
+  },
+  {
+    "script": "pwa-smoke",
+    "engine": "webkit",
+    "exit_code": 0,
+    "seconds": 32.39,
+    "checks": 19
+  }
+]
