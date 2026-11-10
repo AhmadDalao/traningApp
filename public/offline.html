@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#152131" />
+        <meta name="theme-color" content="#12182b" />
         <title>Offline · Training Planner</title>
         <style>
             body {
@@ -12,8 +12,8 @@
                 min-height: 85vh;
                 display: grid;
                 place-items: center;
-                background: #f5f7fb;
-                color: #182637;
+                background: #f6f5fc;
+                color: #1b2038;
                 font:
                     16px/1.6 system-ui,
                     sans-serif;
@@ -22,7 +22,7 @@
                 max-width: 420px;
                 background: white;
                 padding: 32px;
-                border: 1px solid #e2e8f0;
+                border: 1px solid #e8e7f1;
                 border-radius: 20px;
             }
             img {
@@ -34,11 +34,11 @@
                 line-height: 1.2;
             }
             p {
-                color: #526176;
+                color: #71758b;
             }
             a {
                 display: inline-block;
-                background: #1763ef;
+                background: #6541df;
                 color: white;
                 text-decoration: none;
                 border-radius: 10px;
@@ -46,8 +46,16 @@
                 min-height: 24px;
             }
             a:focus-visible {
-                outline: 3px solid #152131;
+                outline: 3px solid #12182b;
                 outline-offset: 4px;
+            }
+            @media (max-width: 760px) {
+                a {
+                    background: #075bfa;
+                }
+                main {
+                    padding: 24px;
+                }
             }
         </style>
     </head>

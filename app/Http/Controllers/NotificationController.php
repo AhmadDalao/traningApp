@@ -10,28 +10,18 @@ use App\Models\WebPushSubscription;
 use App\Services\Notifications\PushDeliveries;
 use App\Services\Notifications\PushDevices;
 use App\Services\Notifications\PushTransport;
+use App\Services\SettingsPageData;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
 class NotificationController extends Controller
 {
     public function index(Request $request, PushDevices $devices, PushTransport $push)
     {
         $request->attributes->set('coach_workspace', ($request->is('coach/*') || (! $request->is('profile/*') && $request->session()->get('workspace', 'coach') === 'coach')) && $request->user()->isCoach());
-        $response = Inertia::render('Notifications/Index', [
-            'preferences' => NotificationPreference::settings($request->user()->id),
-            'deviceEnabled' => (bool) $devices->current($request),
-            'deviceCount' => WebPushSubscription::where('user_id', $request->user()->id)->count(),
-            'pushConfigured' => $push->configured(),
-            'publicKey' => $push->configured() ? config('webpush.vapid.publicKey') : null,
-        ])->toResponse($request);
-        if (! $devices->hash($request)) {
-            $response->withCookie(cookie(PushDevices::COOKIE, bin2hex(random_bytes(32)), 525600, '/', null, $request->isSecure(), true, false, 'lax'));
-        }
 
-        return $response->header('Cache-Control', 'private, no-store');
+        return app(SettingsPageData::class)->response($request, 'Notifications/Index');
     }
 
     public function preferences(Request $request)

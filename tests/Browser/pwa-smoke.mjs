@@ -41,6 +41,10 @@ try {
         .waitFor();
     assert.equal(await p.evaluate(() => window.__permissions), 0);
     pass("No permission prompt without user action");
+    await p.goto(base + "/profile?section=devices");
+    await p
+        .getByRole("button", { name: "Manage devices", exact: true })
+        .click();
     await p
         .getByText(
             "Push delivery is not configured on this server yet. You can save your preferences now.",
@@ -85,13 +89,15 @@ try {
         );
         pass(`Notification settings fit ${width}x${height}`);
     }
+    await p.goto(base + "/notifications");
     await p.getByRole("switch", { name: /Workout reminders/ }).check();
     await p.getByLabel("Remind me before my workout").selectOption("30");
     await p.getByRole("switch", { name: /Coach updates/ }).check();
     await p
-        .getByRole("button", { name: "Save preferences", exact: true })
+        .getByRole("button", { name: "Save changes", exact: true })
+        .filter({ visible: true })
         .click();
-    await p.getByText("Notification preferences saved.").waitFor();
+    await p.getByText("Profile updated.", { exact: true }).waitFor();
     await p.reload();
     assert.equal(
         await p.getByLabel("Remind me before my workout").inputValue(),
@@ -150,7 +156,8 @@ try {
     await p.getByText("You're offline", { exact: true }).waitFor();
     assert(
         await p
-            .getByRole("button", { name: "Save preferences", exact: true })
+            .getByRole("button", { name: "Save changes", exact: true })
+            .filter({ visible: true })
             .isDisabled(),
     );
     pass("Offline notification mutations are disabled");

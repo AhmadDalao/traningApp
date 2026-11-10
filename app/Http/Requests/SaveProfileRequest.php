@@ -16,6 +16,10 @@ class SaveProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'notifications' => 'sometimes|array:workout_reminders,coach_updates,reminder_minutes',
+            'notifications.workout_reminders' => 'required_with:notifications|boolean',
+            'notifications.coach_updates' => 'required_with:notifications|boolean',
+            'notifications.reminder_minutes' => 'required_with:notifications|integer|in:15,30,60,120',
             'name' => 'sometimes|required|string|max:100',
             'date_of_birth' => 'nullable|date_format:Y-m-d|before_or_equal:today|after_or_equal:'.today()->subYears(120)->toDateString(),
             'height_cm' => 'nullable|numeric|decimal:0,2|between:40,300',

@@ -1,10 +1,16 @@
+import SettingsPage from "../../Features/SettingsPage";
 import { useEffect, useState } from "react";
 import { Head, useForm, usePage, router } from "@inertiajs/react";
 import { Check } from "lucide-react";
 import { Button, ButtonLink } from "../../Components/UI";
 import ProfileFields, { profileDefaults } from "../../Features/ProfileFields";
 
-export default function Index({ profile, options, editing = false }) {
+export default function Index(props) {
+    if (props.editing)
+        return <SettingsPage {...props} initialSection="preferences" />;
+    return <Onboarding {...props} />;
+}
+function Onboarding({ profile, options, editing = false }) {
     const [step, setStep] = useState(0);
     const [skipping, setSkipping] = useState(false);
     const { today } = usePage().props;

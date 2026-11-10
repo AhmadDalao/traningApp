@@ -13,6 +13,7 @@ import "../css/journey.css";
 import "../css/coach-workspace.css";
 import "../css/coach-refresh.css";
 import "../css/personal-dashboard.css";
+import "../css/workspace-theme.css";
 import { startPwa } from "./Features/Notifications/pwa";
 import { createInertiaApp } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
@@ -32,5 +33,5 @@ createInertiaApp({
     setup({ el, App, props }) {
         createRoot(el).render(<App {...props} />);
     },
-    progress: { color: "#1763ef" },
+    progress: { color: "#6541df" },
 });

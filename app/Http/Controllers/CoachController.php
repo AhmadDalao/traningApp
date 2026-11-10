@@ -6,15 +6,13 @@ use App\Http\Requests\SaveProfileRequest;
 use App\Models\NotificationPreference;
 use App\Models\ProgramRun;
 use App\Models\User;
-use App\Models\UserProfile;
-use App\Models\WebPushSubscription;
 use App\Services\BodyWeightHistory;
 use App\Services\CoachAccess;
 use App\Services\CoachWorkspaceSummary;
 use App\Services\ExerciseProgress;
-use App\Services\Notifications\PushDevices;
-use App\Services\Notifications\PushTransport;
+use App\Services\ProfileSettings;
 use App\Services\ProgramLifecycle;
+use App\Services\SettingsPageData;
 use App\Services\TrainingContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,26 +24,9 @@ class CoachController extends Controller
     {
         abort_unless($request->user()->isCoach(), 403);
 
-        if (! $request->is('coach/settings')) {
-            return Inertia::render('Coaching/Setup', ['coachProfile' => $request->user()->coachProfile, 'settings' => false]);
-        }
-        $devices = app(PushDevices::class);
-        $push = app(PushTransport::class);
-        $response = Inertia::render('Coach/Settings', [
-            'coachProfile' => $request->user()->coachProfile,
-            'profile' => $request->user()->profile,
-            'options' => UserProfile::options(),
-            'preferences' => NotificationPreference::settings($request->user()->id),
-            'deviceEnabled' => (bool) $devices->current($request),
-            'deviceCount' => WebPushSubscription::where('user_id', $request->user()->id)->count(),
-            'pushConfigured' => $push->configured(),
-            'publicKey' => $push->configured() ? config('webpush.vapid.publicKey') : null,
-        ])->toResponse($request);
-        if (! $devices->hash($request)) {
-            $response->withCookie(cookie(PushDevices::COOKIE, bin2hex(random_bytes(32)), 525600, '/', null, $request->isSecure(), true, false, 'lax'));
-        }
+        $request->attributes->set('coach_workspace', true);
 
-        return $response->header('Cache-Control', 'private, no-store');
+        return app(SettingsPageData::class)->response($request, 'Coach/Settings');
     }
 
     public function updateProfile(Request $request)
@@ -59,6 +40,13 @@ class CoachController extends Controller
                 $rules['training_preferences.'.$key] = $rule;
             }
         }
+        $accountKeys = ['name', 'date_of_birth', 'height_cm', 'current_weight_kg'];
+        $rules['account'] = 'sometimes|array:'.implode(',', $accountKeys);
+        foreach ((new SaveProfileRequest)->rules() as $key => $rule) {
+            if (in_array($key, $accountKeys, true)) {
+                $rules['account.'.$key] = $rule;
+            }
+        }
         $rules['notifications'] = 'sometimes|array:workout_reminders,coach_updates,reminder_minutes';
         $rules['notifications.workout_reminders'] = 'required_with:notifications|boolean';
         $rules['notifications.coach_updates'] = 'required_with:notifications|boolean';
@@ -69,16 +57,10 @@ class CoachController extends Controller
             abort_unless($user->isCoach(), 403);
             $user->coachProfile()->firstOrFail()->update(collect($data)->only(['display_name', 'specialization', 'bio'])->all());
             if (isset($data['training_preferences'])) {
-                $preferences = $data['training_preferences'];
-                $profile = $user->profile()->firstOrCreate();
-                if (array_key_exists('training_goals', $preferences)) {
-                    $preferences['training_goals'] ??= [];
-                    $preferences['training_goal'] = $preferences['training_goals'][0] ?? null;
-                }
-                if (! in_array(array_key_exists('body_weight_goal', $preferences) ? $preferences['body_weight_goal'] : $profile->body_weight_goal, ['lose', 'gain'], true)) {
-                    $preferences['target_body_weight_kg'] = null;
-                }
-                $profile->update($preferences);
+                app(ProfileSettings::class)->save($user, $data['training_preferences']);
+            }
+            if (isset($data['account'])) {
+                app(ProfileSettings::class)->save($user, $data['account']);
             }
             if (isset($data['notifications'])) {
                 NotificationPreference::updateOrCreate(['user_id' => $user->id], $data['notifications']);
@@ -86,7 +68,7 @@ class CoachController extends Controller
         });
         $request->session()->put('workspace', 'coach');
 
-        return redirect($request->is('coach/settings') ? '/coach/settings' : '/coach')->with('success', isset($data['training_preferences']) || isset($data['notifications']) ? 'Settings saved.' : 'Coach profile updated.');
+        return redirect(app(SettingsPageData::class)->location($request, $request->is('coach/settings') ? '/coach/settings' : '/coach'))->with('success', isset($data['training_preferences']) || isset($data['notifications']) ? 'Settings saved.' : 'Coach profile updated.');
     }
 
     public function switch(Request $request)

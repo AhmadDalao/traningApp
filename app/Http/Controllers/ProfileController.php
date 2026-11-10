@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveProfileRequest;
+use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Services\BodyWeightHistory;
+use App\Services\ProfileSettings;
+use App\Services\SettingsPageData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -14,17 +17,17 @@ class ProfileController extends Controller
 {
     public function show(Request $request)
     {
-        return Inertia::render('Profile/Show', $this->props($request));
+        return app(SettingsPageData::class)->response($request, 'Profile/Show');
     }
 
     public function edit(Request $request)
     {
-        return Inertia::render('Profile/Edit', $this->props($request));
+        return app(SettingsPageData::class)->response($request, 'Profile/Edit');
     }
 
     public function preferences(Request $request)
     {
-        return Inertia::render('Onboarding/Index', [...$this->props($request), 'editing' => true]);
+        return app(SettingsPageData::class)->response($request, 'Onboarding/Index', ['editing' => true]);
     }
 
     public function updatePreferences(SaveProfileRequest $request, BodyWeightHistory $history)
@@ -50,7 +53,7 @@ class ProfileController extends Controller
     {
         $this->save($request, $history, false);
 
-        return redirect($request->is('coach/settings/account') ? '/coach/settings' : route('profile.show'))->with('success', 'Profile updated.');
+        return redirect(app(SettingsPageData::class)->location($request, $request->is('coach/settings/account') ? '/coach/settings' : route('profile.show')))->with('success', 'Profile updated.');
     }
 
     public function complete(SaveProfileRequest $request, BodyWeightHistory $history)
@@ -63,31 +66,14 @@ class ProfileController extends Controller
 
     private function save(SaveProfileRequest $request, BodyWeightHistory $history, bool $complete): void
     {
-        DB::transaction(function () use ($request, $history, $complete) {
+        DB::transaction(function () use ($request, $complete) {
             $user = User::lockForUpdate()->findOrFail($request->user()->id);
             $data = $request->validated();
-            if (array_key_exists('training_goals', $data)) {
-                $data['training_goals'] ??= [];
-                $data['training_goal'] = $data['training_goals'][0] ?? null;
-            } elseif (array_key_exists('training_goal', $data)) {
-                $data['training_goals'] = $data['training_goal'] ? [$data['training_goal']] : [];
-            }
-            if (isset($data['name'])) {
-                $user->update(['name' => $data['name']]);
-            }
-            $weight = $data['current_weight_kg'] ?? null;
-            unset($data['name'], $data['current_weight_kg']);
-            $profile = $user->profile()->firstOrCreate();
-            if (! in_array(array_key_exists('body_weight_goal', $data) ? $data['body_weight_goal'] : $profile->body_weight_goal, ['lose', 'gain'], true)) {
-                $data['target_body_weight_kg'] = null;
-            }
-            if ($complete) {
-                $data = [...$data, 'onboarding_completed_at' => now(), 'onboarding_skipped_at' => null];
-            }
-            $profile->update($data);
-            if ($weight !== null && ($profile->current_weight_kg === null || (float) $weight !== (float) $profile->current_weight_kg || ! $user->bodyWeightEntries()->exists())) {
-                $user->bodyWeightEntries()->create(['weight_kg' => $weight, 'recorded_date' => today()->toDateString()]);
-                $history->sync($user);
+            $notifications = $data['notifications'] ?? null;
+            unset($data['notifications']);
+            app(ProfileSettings::class)->save($user, $data, $complete);
+            if ($notifications !== null) {
+                NotificationPreference::updateOrCreate(['user_id' => $user->id], $notifications);
             }
         });
     }

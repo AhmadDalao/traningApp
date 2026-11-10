@@ -1,0 +1,211 @@
+/* Shared finish for every workspace, authentication screen and portalled dialog. */
+:root {
+    --blue: #6541df;
+    --border: #e8e7f1;
+    --muted: #71758b;
+    --radius: 16px;
+}
+.reference-workspace .page-header {
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.reference-workspace .page-header > div {
+    min-width: 0;
+}
+.reference-workspace .page-header h1 {
+    overflow-wrap: anywhere;
+}
+.reference-workspace
+    :is(
+        .profile-edit,
+        .coach-form,
+        .program-start,
+        .plan-schedule,
+        .schedule-form-page
+    ) {
+    max-width: none;
+}
+.reference-workspace :is(.panel-heading, .program-heading, .form-actions) {
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.reference-workspace .form-actions {
+    align-items: center;
+}
+.reference-workspace :is(.form-grid, .profile-columns, .progress-columns) > * {
+    min-width: 0;
+}
+.reference-workspace :is(.field input, .field select, .field textarea) {
+    border-radius: 9px;
+}
+.reference-workspace .pagination a {
+    border-radius: 8px;
+}
+.reference-workspace :is(.breadcrumbs, .topbar-crumb) {
+    flex-wrap: wrap;
+}
+.reference-workspace .training-code {
+    overflow-wrap: anywhere;
+}
+.settings-account-id {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 13px;
+}
+.settings-account-id code {
+    background: #f1edff;
+    color: var(--blue);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+.settings-account-id a {
+    font-weight: 650;
+}
+.reference-settings #settings-account .bmi-summary,
+.reference-settings #settings-profile .bmi-summary {
+    margin-top: 16px;
+}
+.reference-settings .settings-section {
+    scroll-margin-top: 24px;
+}
+.reference-settings .settings-hero-identity {
+    text-align: left;
+}
+.reference-settings .settings-hero-identity h2,
+.reference-settings .settings-hero-identity p {
+    overflow-wrap: anywhere;
+}
+.modal {
+    border-radius: 18px;
+    border-color: var(--border);
+}
+.modal :is(input, select, textarea) {
+    border-radius: 9px;
+}
+.modal .btn {
+    min-height: 42px;
+    border-radius: 10px;
+}
+.modal .btn-primary {
+    background: linear-gradient(110deg, #7652ef, #5b32df);
+    border-color: #6541df;
+}
+.modal .btn-secondary {
+    background: white;
+    border-color: var(--border);
+    color: #34374e;
+}
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+    border-color: #9879ed;
+    box-shadow: 0 0 0 3px #7850e714;
+}
+.reference-workspace.auth-page .auth-main {
+    background: #f6f5fc;
+}
+.reference-workspace.auth-page .auth-form {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    background: white;
+    box-shadow: 0 8px 30px #29214506;
+}
+.reference-workspace.auth-page .auth-shade {
+    background: linear-gradient(160deg, #20183b88, #16152aef);
+}
+.reference-workspace.auth-page .brand {
+    color: white;
+}
+/* Keep the full navigation reachable on short desktop screens. */
+@media (min-width: 761px) and (max-height: 800px) {
+    .reference-workspace .sidebar-note {
+        display: none;
+    }
+    .reference-workspace .sidebar > nav {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .reference-workspace .sidebar {
+        padding-top: 20px;
+    }
+}
+@media (max-width: 760px) {
+    :root {
+        --blue: #075bfa;
+    }
+    .modal .btn-primary {
+        background: #075bfa;
+        border-color: #075bfa;
+    }
+    .modal .btn {
+        min-height: 44px;
+    }
+    .reference-workspace :is(input, select, textarea) {
+        font-size: 16px;
+    }
+    .reference-workspace .page-header {
+        align-items: stretch;
+        gap: 14px;
+    }
+    .reference-workspace .page-header .header-actions {
+        flex-wrap: wrap;
+    }
+    .reference-workspace .topbar-crumb {
+        gap: 8px;
+    }
+    .reference-workspace.auth-page .auth-form {
+        padding: 24px 20px;
+    }
+    .reference-workspace.auth-page .auth-main {
+        padding: 24px 16px;
+    }
+    .reference-settings .settings-content .bmi-summary {
+        padding: 16px;
+    }
+    .reference-settings .settings-account-id a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    .reference-settings[data-section="account"]
+        .settings-section[data-section="account"] {
+        display: block;
+    }
+}
+
+.reference-settings .settings-mobile-back h1 {
+    font-size: 19px;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+.reference-settings .settings-mobile-back .icon-btn {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+}
+.reference-workspace .plan-card {
+    display: flex;
+    flex-direction: column;
+}
+.reference-workspace .plan-card .plan-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.reference-workspace .plan-card .plan-actions {
+    margin-top: auto;
+    padding-top: 16px;
+}
+
+@media (max-width: 760px) {
+    html {
+        scroll-padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    }
+    .reference-workspace main :is(input, select, textarea, button, .btn) {
+        scroll-margin-bottom: 90px;
+    }
+}

@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.6.3 · Unified workspace theme</title
+    ><style>
+        body {
+            font:
+                16px/1.65 system-ui,
+                sans-serif;
+            margin: 0;
+            background: #f6f5fc;
+            color: #1b2038;
+        }
+        main {
+            max-width: 1150px;
+            margin: auto;
+            padding: 40px 24px;
+        }
+        header {
+            background: #252044;
+            color: white;
+            padding: 36px;
+            border-radius: 20px;
+        }
+        h1 {
+            font-size: 34px;
+            line-height: 1.2;
+        }
+        h2 {
+            font-size: 23px;
+        }
+        section {
+            padding: 26px;
+            background: white;
+            border: 1px solid #e8e7f1;
+            border-radius: 16px;
+            margin: 22px 0;
+        }
+        .status {
+            display: inline-block;
+            background: #e8fff3;
+            color: #176b49;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td,
+        th {
+            text-align: left;
+            border-bottom: 1px solid #e8e7f1;
+            padding: 10px;
+        }
+        code {
+            overflow-wrap: anywhere;
+            font-size: 13px;
+        }
+        a {
+            color: #6541df;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+        figure {
+            margin: 0;
+        }
+        img {
+            width: 100%;
+            border: 1px solid #e8e7f1;
+            border-radius: 12px;
+        }
+        img.phone {
+            max-width: 280px;
+        }
+        figcaption {
+            font-size: 13px;
+            color: #71758b;
+        }
+        @media (max-width: 700px) {
+            main {
+                padding: 16px;
+            }
+            header,
+            section {
+                padding: 20px;
+            }
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <main>
+        <header>
+            <p>Training Planner · Release v2.6.3 · 10 November 2026</p>
+            <h1>One theme. Both workspaces.</h1>
+            <p>
+                The supplied visual style now applies across the application,
+                with one shared Settings experience.
+            </p>
+            <span class="status"
+                >NOT READY — production verification pending</span
+            >
+        </header>
+        <section>
+            <h2>1. Baseline and scope</h2>
+            <p>
+                Accepted production baseline: v2.6.2
+                (e7a3a986a511e4526f1121e3375ae7de91f2aa7e). Starting main
+                commit: 9ceed7b1a8ec606b353a93803023b498cce0868f. Existing
+                Laravel 12 / Inertia 2 / React 19 architecture retained. The
+                previous theme applied only to Coach and the Personal Dashboard;
+                other Personal pages and older Settings routes still used
+                earlier layouts.
+            </p>
+        </section>
+        <section>
+            <h2>2. Shared application theme</h2>
+            <p>
+                All authenticated pages now use the same workspace shell, navy
+                desktop navigation, purple desktop accents, pale background,
+                white rounded panels, consistent fields, buttons and
+                breadcrumbs. Mobile retains the supplied blue treatment and a
+                five-destination bottom navigation. Plans, programs, calendars,
+                workout logging, history, progress, coaching, subscriptions,
+                setup, account pages, authentication and the offline fallback
+                share the styling.
+            </p>
+            <p>
+                Personal navigation now correctly recognizes plan discovery,
+                program runs, schedules and Settings aliases. Page headings
+                wrap, forms use available width, short desktop navigation
+                scrolls, plan-card actions align, and mobile controls retain
+                16px input text with space above the bottom navigation.
+            </p>
+        </section>
+        <section>
+            <h2>3. One Settings experience</h2>
+            <p>
+                Profile, Edit Profile, Training Preferences, Notifications and
+                all Coach Settings aliases render the shared SettingsPage
+                component. Both workspaces use the same desktop section rail and
+                mobile directory/detail/back flow. Coach profile and account
+                details remain distinct fields within that shared design.
+                Personal profile, goals, body measurements, notifications,
+                installation and device controls are preserved.
+            </p>
+            <p>
+                Save stays in the current section. Invalid fields open the
+                relevant section. Saves are disabled offline. Mobile detail
+                screens have a visible semantic heading. Device and push
+                controls reuse the existing implementation without another
+                standalone Settings layout.
+            </p>
+        </section>
+        <section>
+            <h2>4. Data handling and authorization</h2>
+            <p>
+                Existing profile normalization and body-weight recording were
+                extracted into ProfileSettings and reused under the existing
+                locked-user transaction. Combined
+                profile/preferences/notification saves validate before writing.
+                Repeated unchanged weight saves do not create another entry.
+                Earlier weight history remains intact. SettingsPageData shares
+                response data, device-cookie handling and private no-store
+                headers.
+            </p>
+            <p>
+                Tests verify actor-only updates, rejected forged account
+                metadata, invalid-input rollback, existing Coach restrictions
+                and no trainee promotion. No subscription, assignment, workout,
+                schedule, history or PR domain algorithms changed. No schema
+                migration is needed.
+            </p>
+        </section>
+        <section>
+            <h2>5. Regression findings fixed</h2>
+            <ul>
+                <li>Theme scope restricted to Coach and one Personal page.</li>
+                <li>
+                    Different Profile, Notifications and Coach Settings layouts.
+                </li>
+                <li>
+                    Missing Settings navigation state on preference and legacy
+                    routes.
+                </li>
+                <li>Offline Settings save buttons remaining enabled.</li>
+                <li>Save leaving the selected section.</li>
+                <li>Mobile detail title lacking heading semantics.</li>
+                <li>
+                    Personal device section missing the shared layout class.
+                </li>
+                <li>
+                    Inconsistent dialog, authentication and offline-screen
+                    styling.
+                </li>
+                <li>
+                    Uneven plan-card action placement and mobile controls
+                    needing scroll clearance.
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h2>6. Release gates</h2>
+            <table>
+                <tr>
+                    <th>Gate</th>
+                    <th>Result</th>
+                </tr>
+                <tr>
+                    <td>Complete SQLite suite</td>
+                    <td>653 passed · 13,205 assertions</td>
+                </tr>
+                <tr>
+                    <td>Complete isolated MySQL suite</td>
+                    <td>653 passed · 13,205 assertions</td>
+                </tr>
+                <tr>
+                    <td>JavaScript</td>
+                    <td>38 passed</td>
+                </tr>
+                <tr>
+                    <td>Browser and PWA checks</td>
+                    <td>155 passed · Chromium and WebKit</td>
+                </tr>
+                <tr>
+                    <td>Responsive coverage</td>
+                    <td>
+                        51 authenticated views at 320×480, 390×844, 768×1024,
+                        1280×900 and 1920×1080; login/register at four sizes;
+                        image dialogs at 320px
+                    </td>
+                </tr>
+                <tr>
+                    <td>Formatting / build / dependencies</td>
+                    <td>
+                        Pint, Prettier, production build, Composer
+                        validation/audit/platform checks and git diff checks
+                        pass
+                    </td>
+                </tr>
+            </table>
+            <p>
+                Browser checks include page runtime errors, horizontal overflow,
+                nested interactive controls, mobile navigation, saved
+                notification preferences, reload/back behavior, disabled push,
+                image enlargement and focus restoration. Existing PWA checks
+                retain CSRF, cache privacy and offline/reconnection coverage.
+                WebKit focus verification waits for the existing animation-frame
+                focus restoration.
+            </p>
+        </section>
+        <section>
+            <h2>7. Visual evidence</h2>
+            <div class="gallery">
+                <figure>
+                    <a href="assets/v263/personal-plans.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v263/personal-plans.png"
+                            alt="Personal training plans"
+                    /></a>
+                    <figcaption>
+                        Personal training plans · disposable QA data
+                    </figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v263/personal-history.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v263/personal-history.png"
+                            alt="Training history"
+                    /></a>
+                    <figcaption>
+                        Training history · disposable QA data
+                    </figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v263/personal-progress.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v263/personal-progress.png"
+                            alt="Progress"
+                    /></a>
+                    <figcaption>Progress · disposable QA data</figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v263/personal-settings.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v263/personal-settings.png"
+                            alt="Unified Personal Settings"
+                    /></a>
+                    <figcaption>
+                        Unified Personal Settings · disposable QA data
+                    </figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v263/coach-settings.png"
+                        ><img
+                            loading="lazy"
+                            src="assets/v263/coach-settings.png"
+                            alt="Unified Coach Settings"
+                    /></a>
+                    <figcaption>
+                        Unified Coach Settings · disposable QA data
+                    </figcaption>
+                </figure>
+                <figure>
+                    <a href="assets/v263/settings-mobile.png"
+                        ><img
+                            class="phone"
+                            loading="lazy"
+                            src="assets/v263/settings-mobile.png"
+                            alt="Mobile Settings"
+                    /></a>
+                    <figcaption>
+                        Shared mobile Settings directory, with focused sections
+                        and Back navigation.
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+        <section>
+            <h2>8. Local cleanup and integrity</h2>
+            <p>
+                {&quot;original_data_and_media_unchanged&quot;: true,
+                &quot;tables&quot;: 22, &quot;original_media_files&quot;: 44,
+                &quot;qa_accounts_removed&quot;: 4, &quot;ledger_entries&quot;:
+                4, &quot;qa_images_removed&quot;: 24}
+            </p>
+            <p>
+                All fixtures used disposable QA accounts. The normal local
+                database was fingerprinted before fixture creation; no reset or
+                destructive seeding was used. Isolated test databases ran the
+                automated suites.
+            </p>
+        </section>
+        <section>
+            <h2>9. Production deployment and verification</h2>
+            <p>
+                Not deployed at report creation. Deployment is authorized and
+                follows the existing Hostinger release procedure after local
+                gates.
+            </p>
+        </section>
+        <section>
+            <h2>10. Source changes</h2>
+            <p>
+                Release tag: <code>v2.6.3</code>. Starting commit:
+                <code>9ceed7b1a8ec606b353a93803023b498cce0868f</code>.
+            </p>
+            <ul>
+                <li><code>app/Http/Controllers/CoachController.php</code></li>
+                <li>
+                    <code>app/Http/Controllers/NotificationController.php</code>
+                </li>
+                <li><code>app/Http/Controllers/ProfileController.php</code></li>
+                <li><code>app/Http/Requests/SaveProfileRequest.php</code></li>
+                <li><code>app/Services/ProfileSettings.php</code></li>
+                <li><code>app/Services/SettingsPageData.php</code></li>
+                <li><code>docs/V2.6.2-PERSONAL-DASHBOARD-REPORT.html</code></li>
+                <li><code>docs/v2.6.2/deployment.json</code></li>
+                <li><code>docs/v2.6.2/immutable-build.json</code></li>
+                <li><code>docs/v2.6.2/production-browser-runs.json</code></li>
+                <li>
+                    <code>docs/v2.6.2/production-dashboard-chromium.json</code>
+                </li>
+                <li>
+                    <code>docs/v2.6.2/production-dashboard-webkit.json</code>
+                </li>
+                <li><code>docs/v2.6.2/production-http-checks.json</code></li>
+                <li><code>docs/v2.6.2/production-pwa-chromium.json</code></li>
+                <li><code>docs/v2.6.2/production-pwa-webkit.json</code></li>
+                <li><code>public/offline.html</code></li>
+                <li><code>resources/css/workspace-theme.css</code></li>
+                <li><code>resources/js/Components/AppLayout.jsx</code></li>
+                <li><code>resources/js/Components/AuthLayout.jsx</code></li>
+                <li>
+                    <code
+                        >resources/js/Features/Notifications/DeviceSettings.jsx</code
+                    >
+                </li>
+                <li><code>resources/js/Features/SettingsPage.jsx</code></li>
+                <li><code>resources/js/Pages/Coach/Settings.jsx</code></li>
+                <li><code>resources/js/Pages/Coaching/Setup.jsx</code></li>
+                <li><code>resources/js/Pages/Notifications/Index.jsx</code></li>
+                <li><code>resources/js/Pages/Onboarding/Index.jsx</code></li>
+                <li><code>resources/js/Pages/Profile/Edit.jsx</code></li>
+                <li><code>resources/js/Pages/Profile/Show.jsx</code></li>
+                <li><code>resources/js/app.jsx</code></li>
+                <li><code>tests/Browser/personal-dashboard.mjs</code></li>
+                <li><code>tests/Browser/pwa-smoke.mjs</code></li>
+                <li><code>tests/Browser/workspace-theme.mjs</code></li>
+                <li><code>tests/Feature/UnifiedSettingsTest.php</code></li>
+            </ul>
+        </section>
+        <section>
+            <h2>11. Limits</h2>
+            <p>
+                Responsive browser emulation was used, not a physical phone.
+                Push delivery remains disabled by existing production
+                configuration. This release unifies presentation and Settings
+                orchestration; it does not redesign training or subscription
+                rules. No known blocking or high-severity defect remains in the
+                verified scope.
+            </p>
+        </section>
+        <section>
+            <h2>12. Final status</h2>
+            <p><strong>NOT READY — production verification pending</strong></p>
+        </section>
+    </main>
+</html>

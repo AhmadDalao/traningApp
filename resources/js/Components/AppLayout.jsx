@@ -55,7 +55,7 @@ export default function AppLayout({ children }) {
     }, [userOpen, open]);
     const coach = trainingContext?.workspace === "coach";
     const personalDashboard = !coach && url.split("?")[0] === "/dashboard";
-    const referenceStyle = coach || personalDashboard;
+    const referenceStyle = true;
     const home = coach ? "/coach" : "/dashboard";
     const settings = coach ? "/coach/settings" : "/profile";
     const notifications = coach
@@ -97,7 +97,9 @@ export default function AppLayout({ children }) {
                   icon: Layers,
                   active:
                       url.startsWith("/training-plans") ||
-                      url.startsWith("/training-days"),
+                      url.startsWith("/training-days") ||
+                      url.startsWith("/program-runs") ||
+                      url.startsWith("/recommendations"),
               },
               {
                   href: "/calendar",
@@ -128,11 +130,13 @@ export default function AppLayout({ children }) {
           ];
     const currentLabel =
         url.startsWith("/coach/settings") ||
-        url.startsWith("/coach/notifications")
+        url.startsWith("/coach/notifications") ||
+        /^\/(profile|notifications|training-preferences|onboarding)/.test(url)
             ? "Profile & Settings"
             : url.startsWith("/coach/subscriptions")
               ? "Subscriptions"
-              : nav.find((item) => item.active)?.label || "Coaching";
+              : nav.find((item) => item.active)?.label ||
+                (coach ? "Coaching" : "Training");
     const mobileNav = coach
         ? [
               ...nav,
@@ -156,12 +160,36 @@ export default function AppLayout({ children }) {
                   href: "/dashboard",
                   label: "Overview",
                   icon: LayoutDashboard,
-                  active: true,
+                  active: url.startsWith("/dashboard"),
               },
-              { href: "/training-plans", label: "Plans", icon: Layers },
-              { href: "/calendar", label: "Calendar", icon: CalendarDays },
-              { href: "/progress", label: "Progress", icon: TrendingUp },
-              { href: "/profile", label: "Settings", icon: Settings },
+              {
+                  href: "/training-plans",
+                  label: "Plans",
+                  icon: Layers,
+                  active: /^\/(training-plans|training-days|program-runs|recommendations)/.test(
+                      url,
+                  ),
+              },
+              {
+                  href: "/calendar",
+                  label: "Calendar",
+                  icon: CalendarDays,
+                  active: /^\/(calendar|schedule-entries)/.test(url),
+              },
+              {
+                  href: "/progress",
+                  label: "Progress",
+                  icon: TrendingUp,
+                  active: url.startsWith("/progress"),
+              },
+              {
+                  href: "/profile",
+                  label: "Settings",
+                  icon: Settings,
+                  active: /^\/(profile|notifications|training-preferences|onboarding)/.test(
+                      url,
+                  ),
+              },
           ];
     return (
         <div
@@ -237,11 +265,11 @@ export default function AppLayout({ children }) {
                     )}
                     <Link
                         href={settings}
-                        className={`nav-item ${url.startsWith(settings) || url === "/coach/notifications" || url === "/notifications" ? "active" : ""}`}
+                        className={`nav-item ${url.startsWith(settings) || url === "/coach/notifications" || /^\/(notifications|training-preferences|onboarding)/.test(url) ? "active" : ""}`}
                         onClick={closeNavigation}
                     >
-                        <Settings size={19} aria-hidden="true" />{" "}
-                        {coach ? "Profile & Settings" : "Profile & settings"}
+                        <Settings size={19} aria-hidden="true" /> Profile &
+                        Settings
                     </Link>
                 </nav>
                 <div className="sidebar-bottom">
@@ -400,7 +428,7 @@ export default function AppLayout({ children }) {
                                 {coach ? "Coaching" : "Personal"}
                             </Link>
                             <ChevronRight size={15} />
-                            <strong>{coach ? currentLabel : "Overview"}</strong>
+                            <strong>{currentLabel}</strong>
                         </nav>
                     ) : (
                         <span>YOUR PERSONAL TRAINING SPACE</span>

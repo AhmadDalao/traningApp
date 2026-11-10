@@ -1,7 +1,7 @@
 import { Dumbbell, ArrowUpRight } from "lucide-react";
 export default function AuthLayout({ children }) {
     return (
-        <div className="auth-page">
+        <div className="auth-page reference-workspace">
             <aside className="auth-visual">
                 <div className="auth-shade" />
                 <a className="brand" href="/login">
