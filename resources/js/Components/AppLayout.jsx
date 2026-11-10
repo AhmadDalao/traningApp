@@ -54,6 +54,8 @@ export default function AppLayout({ children }) {
         };
     }, [userOpen, open]);
     const coach = trainingContext?.workspace === "coach";
+    const personalDashboard = !coach && url.split("?")[0] === "/dashboard";
+    const referenceStyle = coach || personalDashboard;
     const home = coach ? "/coach" : "/dashboard";
     const settings = coach ? "/coach/settings" : "/profile";
     const notifications = coach
@@ -131,26 +133,39 @@ export default function AppLayout({ children }) {
             : url.startsWith("/coach/subscriptions")
               ? "Subscriptions"
               : nav.find((item) => item.active)?.label || "Coaching";
-    const mobileNav = [
-        ...nav,
-        {
-            href: "/coach/subscriptions",
-            label: "Subs",
-            icon: CreditCard,
-            active: url.startsWith("/coach/subscriptions"),
-        },
-        {
-            href: settings,
-            label: "Settings",
-            icon: Settings,
-            active:
-                url.startsWith(settings) ||
-                url.startsWith("/coach/notifications"),
-        },
-    ];
+    const mobileNav = coach
+        ? [
+              ...nav,
+              {
+                  href: "/coach/subscriptions",
+                  label: "Subs",
+                  icon: CreditCard,
+                  active: url.startsWith("/coach/subscriptions"),
+              },
+              {
+                  href: settings,
+                  label: "Settings",
+                  icon: Settings,
+                  active:
+                      url.startsWith(settings) ||
+                      url.startsWith("/coach/notifications"),
+              },
+          ]
+        : [
+              {
+                  href: "/dashboard",
+                  label: "Overview",
+                  icon: LayoutDashboard,
+                  active: true,
+              },
+              { href: "/training-plans", label: "Plans", icon: Layers },
+              { href: "/calendar", label: "Calendar", icon: CalendarDays },
+              { href: "/progress", label: "Progress", icon: TrendingUp },
+              { href: "/profile", label: "Settings", icon: Settings },
+          ];
     return (
         <div
-            className={`app journey-app ${coach ? "coach-workspace" : "personal-workspace"}`}
+            className={`app journey-app ${coach ? "coach-workspace" : "personal-workspace"} ${referenceStyle ? "reference-workspace" : ""} ${personalDashboard ? "personal-dashboard-workspace" : ""}`}
         >
             <a className="skip-link" href="#main">
                 Skip to content
@@ -172,7 +187,7 @@ export default function AppLayout({ children }) {
                         Training<span className="brand-second">Planner</span>
                     </span>
                 </Link>
-                {coach && (
+                {referenceStyle && (
                     <Link
                         className="icon-btn"
                         href={notifications}
@@ -271,9 +286,13 @@ export default function AppLayout({ children }) {
                                     closeNavigation();
                             }}
                         >
-                            {coach && (
+                            {referenceStyle && (
                                 <div className="mobile-switch-heading">
-                                    <strong>Switch workspace</strong>
+                                    <strong>
+                                        {auth.user.is_coach
+                                            ? "Switch workspace"
+                                            : "Your account"}
+                                    </strong>
                                     <button
                                         className="icon-btn"
                                         aria-label="Close workspace switcher"
@@ -372,14 +391,16 @@ export default function AppLayout({ children }) {
             </aside>
             <div className="workspace">
                 <div className="topbar">
-                    {coach ? (
+                    {referenceStyle ? (
                         <nav
                             className="topbar-crumb"
                             aria-label="Workspace location"
                         >
-                            <Link href="/coach">Coaching</Link>
+                            <Link href={home}>
+                                {coach ? "Coaching" : "Personal"}
+                            </Link>
                             <ChevronRight size={15} />
-                            <strong>{currentLabel}</strong>
+                            <strong>{coach ? currentLabel : "Overview"}</strong>
                         </nav>
                     ) : (
                         <span>YOUR PERSONAL TRAINING SPACE</span>
@@ -402,7 +423,7 @@ export default function AppLayout({ children }) {
                                 </Link>
                             </>
                         )}
-                        {coach ? (
+                        {referenceStyle ? (
                             <Link
                                 href={notifications}
                                 className="icon-btn"
@@ -441,9 +462,11 @@ export default function AppLayout({ children }) {
                     <TraineeNav />
                     {children}
                 </main>
-                {coach && (
+                {referenceStyle && (
                     <nav
-                        className="coach-bottom-nav"
+                        className={
+                            coach ? "coach-bottom-nav" : "personal-bottom-nav"
+                        }
                         aria-label="Mobile navigation"
                     >
                         {mobileNav.map(

@@ -1,0 +1,7 @@
+{
+  "sessions": 100,
+  "actual_http_created_rows": true,
+  "checks": [
+    "100 actual disposable sessions remain available on dashboard"
+  ]
+}

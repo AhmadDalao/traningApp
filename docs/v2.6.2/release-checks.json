@@ -1,0 +1,52 @@
+[
+  {
+    "check": "pint",
+    "exit_code": 0,
+    "seconds": 0.14
+  },
+  {
+    "check": "prettier",
+    "exit_code": 0,
+    "seconds": 0.26
+  },
+  {
+    "check": "sqlite",
+    "exit_code": 0,
+    "seconds": 14.41
+  },
+  {
+    "check": "mysql",
+    "exit_code": 0,
+    "seconds": 37.83
+  },
+  {
+    "check": "javascript",
+    "exit_code": 0,
+    "seconds": 0.3
+  },
+  {
+    "check": "build",
+    "exit_code": 0,
+    "seconds": 1.74
+  },
+  {
+    "check": "composer-validate",
+    "exit_code": 0,
+    "seconds": 0.16
+  },
+  {
+    "check": "composer-audit",
+    "exit_code": 0,
+    "seconds": 1.16
+  },
+  {
+    "check": "composer-platform",
+    "exit_code": 0,
+    "seconds": 0.12
+  },
+  {
+    "check": "diff",
+    "exit_code": 0,
+    "seconds": 0.01
+  }
+]

@@ -1,0 +1,446 @@
+/* Personal Dashboard uses the shared reference shell; training rules stay unchanged. */
+.personal-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+.personal-dashboard-card,
+.personal-current-training > .program-journey-card {
+    height: 390px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    margin: 0;
+    overflow: hidden;
+}
+.personal-card-heading,
+.personal-current-training .program-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+.personal-card-heading h2,
+.personal-current-training .program-heading h2 {
+    font-size: 19px;
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+.personal-card-heading p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 3px 0 0;
+}
+.personal-card-heading > a,
+.personal-card-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+}
+.personal-card-heading > a {
+    white-space: nowrap;
+    padding-top: 5px;
+}
+.personal-card-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: 6px;
+}
+.personal-card-scroll:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+.personal-card-footer {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 13px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+}
+.personal-session-row {
+    display: grid;
+    grid-template-columns: 66px 48px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+}
+.personal-session-row:last-child,
+.personal-upcoming-row:last-child,
+.personal-plan-row:last-child {
+    border-bottom: 0;
+}
+.personal-session-time {
+    font-size: 11px;
+    font-weight: 700;
+    color: #47536c;
+}
+.personal-dashboard .training-thumbnail,
+.personal-dashboard .day-icon {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 13px;
+}
+.personal-session-copy {
+    min-width: 0;
+}
+.personal-session-copy strong,
+.personal-plan-row strong {
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    display: block;
+}
+.personal-session-copy small,
+.personal-plan-row small {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-top: 3px;
+    line-height: 1.5;
+}
+.personal-session-actions {
+    grid-column: 2/-1;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.personal-session-actions .status-actions {
+    margin: 0;
+    flex-wrap: wrap;
+}
+.personal-session-actions .btn,
+.personal-session-actions select {
+    min-height: 34px;
+    font-size: 11px;
+    padding: 7px 10px;
+}
+.personal-dashboard-card .badge {
+    font-size: 10px;
+    padding: 5px 8px;
+    white-space: nowrap;
+}
+.personal-upcoming-row {
+    display: grid;
+    grid-template-columns: 40px 48px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+.personal-date-tile {
+    text-align: center;
+    background: #f1edff;
+    color: var(--blue);
+    border-radius: 10px;
+    padding: 7px 2px;
+}
+.personal-date-tile span {
+    display: block;
+    font-size: 10px;
+}
+.personal-date-tile strong {
+    display: block;
+    font-size: 17px;
+    line-height: 1.4;
+}
+.personal-plan-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+.personal-plan-row > div:not(.training-thumbnail) {
+    flex: 1;
+    min-width: 0;
+}
+.personal-plan-row > a {
+    padding: 10px;
+    color: var(--blue);
+}
+.personal-current-training {
+    min-width: 0;
+}
+.personal-current-training .program-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: 5px;
+}
+.personal-current-training .program-run-summary {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: 16px;
+    background: #f7f5ff;
+    margin: 0;
+    flex-shrink: 0;
+}
+.personal-current-training .plan-thumbnail {
+    width: 64px;
+    height: 64px;
+    border-radius: 13px;
+}
+.personal-current-training .program-run-copy {
+    min-width: 0;
+}
+.personal-current-training .program-run-copy strong {
+    font-size: 14px;
+}
+.personal-current-training .program-view {
+    grid-column: 2;
+    justify-self: start;
+    font-size: 12px;
+}
+.personal-current-training .program-mini-progress {
+    max-width: none;
+}
+.personal-current-training .program-heading .btn {
+    font-size: 11px;
+    min-height: 34px;
+}
+.personal-recent-workout {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+    padding: 12px 0 22px;
+}
+.personal-recent-workout .training-thumbnail {
+    width: 132px;
+    height: 132px;
+    flex-basis: 132px;
+    border-radius: 18px;
+}
+.personal-recent-workout > div {
+    min-width: 0;
+}
+.personal-recent-workout h3 {
+    font-size: 19px;
+    margin: 12px 0 4px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+.personal-recent-workout p {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 15px;
+}
+.personal-progress-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f2eeff;
+    color: var(--blue);
+}
+.personal-progress-link > span {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.personal-progress-link svg {
+    flex-shrink: 0;
+}
+.personal-progress-link strong {
+    display: block;
+    font-size: 13px;
+}
+.personal-progress-link small {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+}
+.personal-reminders {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+}
+.personal-check-in,
+.personal-profile-prompt {
+    padding: 22px 24px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    margin: 0;
+}
+.personal-check-in > svg,
+.personal-profile-prompt > svg {
+    color: var(--blue);
+    flex-shrink: 0;
+}
+.personal-check-in > div:first-of-type,
+.personal-profile-prompt > div {
+    flex: 1;
+}
+.personal-reminders h2 {
+    font-size: 17px;
+    margin: 0 0 4px;
+}
+.personal-reminders p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+}
+.personal-focus .status-actions {
+    flex: 0 0 auto;
+    margin: 0;
+    flex-shrink: 0;
+    max-width: 100%;
+}
+.personal-focus > div:first-of-type {
+    min-width: 0;
+}
+.personal-focus h2 {
+    overflow-wrap: anywhere;
+}
+.personal-focus .status-actions .field-error {
+    background: white;
+    padding: 8px;
+    border-radius: 6px;
+}
+@media (max-width: 1200px) {
+    .personal-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .personal-recent-workout .training-thumbnail {
+        width: 120px;
+        height: 120px;
+        flex-basis: 120px;
+    }
+}
+@media (max-width: 760px) {
+    .personal-dashboard-card,
+    .personal-current-training > .program-journey-card {
+        padding: 18px;
+        height: 390px;
+    }
+    .personal-card-heading {
+        gap: 8px;
+    }
+    .personal-card-heading h2,
+    .personal-current-training .program-heading h2 {
+        font-size: 18px;
+    }
+    .personal-card-heading > a {
+        font-size: 11px;
+        white-space: normal;
+        text-align: right;
+    }
+    .personal-card-heading > a svg {
+        display: none;
+    }
+    .personal-session-row {
+        grid-template-columns: 40px minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+    .personal-session-time {
+        grid-column: 1/-1;
+    }
+    .personal-dashboard .training-thumbnail,
+    .personal-dashboard .day-icon {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+    .personal-session-actions {
+        grid-column: 1/-1;
+    }
+    .personal-session-actions .btn,
+    .personal-session-actions select {
+        min-height: 44px;
+    }
+    .personal-upcoming-row {
+        grid-template-columns: 36px 40px minmax(0, 1fr);
+        gap: 10px;
+    }
+    .personal-upcoming-row > .badge {
+        grid-column: 3;
+        justify-self: start;
+    }
+    .personal-recent-workout {
+        gap: 16px;
+    }
+    .personal-recent-workout .training-thumbnail {
+        width: 88px;
+        height: 88px;
+        flex-basis: 88px;
+    }
+    .personal-recent-workout h3 {
+        font-size: 16px;
+    }
+    .personal-check-in,
+    .personal-profile-prompt {
+        flex-wrap: wrap;
+        padding: 18px;
+    }
+    .personal-check-in > div:first-of-type,
+    .personal-profile-prompt > div {
+        flex-basis: 75%;
+    }
+    .personal-check-in .check-in-actions,
+    .personal-profile-prompt > .btn {
+        width: 100%;
+    }
+    .personal-check-in .check-in-actions {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .personal-check-in .check-in-actions .btn {
+        flex: 1;
+        min-height: 44px;
+    }
+    .personal-focus > div:first-of-type {
+        flex-basis: 100%;
+    }
+    .personal-focus .status-actions {
+        flex-basis: 100%;
+        width: 100%;
+    }
+    .personal-focus .status-actions .btn {
+        width: 100%;
+    }
+    .personal-current-training .program-heading {
+        flex-wrap: wrap;
+    }
+    .personal-current-training .program-run-summary {
+        grid-template-columns: 48px minmax(0, 1fr);
+        padding: 12px;
+    }
+    .personal-current-training .plan-thumbnail {
+        width: 48px;
+        height: 48px;
+    }
+    .personal-current-training .program-view {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}

@@ -1,5 +1,5 @@
 /* Coach workspace: the supplied desktop and mobile reference layouts. */
-.coach-workspace {
+.reference-workspace {
     --blue: #6541df;
     --muted: #71758b;
     --border: #e8e7f1;
@@ -8,51 +8,51 @@
     color: #1b2038;
     background: #f6f5fc;
 }
-.coach-workspace .workspace {
+.reference-workspace .workspace {
     background:
         radial-gradient(ellipse at 75% 0, #f0edff80, transparent 65%), #f6f5fc;
 }
-.coach-workspace .sidebar {
+.reference-workspace .sidebar {
     background: var(--nav);
     color: #b6b9d0;
     border: 0;
     padding-inline: 16px;
     overflow: visible;
 }
-.coach-workspace .sidebar .brand {
+.reference-workspace .sidebar .brand {
     color: white;
 }
-.coach-workspace .brand-mark {
+.reference-workspace .brand-mark {
     background: #704bef;
 }
-.coach-workspace .brand-second,
-.coach-workspace .nav-label {
+.reference-workspace .brand-second,
+.reference-workspace .nav-label {
     color: #969db8;
 }
-.coach-workspace .sidebar .nav-item {
+.reference-workspace .sidebar .nav-item {
     color: #bbc0d6;
     border-radius: 10px;
     min-height: 46px;
 }
-.coach-workspace .sidebar .nav-item:hover {
+.reference-workspace .sidebar .nav-item:hover {
     background: #252c47;
     color: white;
 }
-.coach-workspace .sidebar .nav-item.active {
+.reference-workspace .sidebar .nav-item.active {
     background: #6c4ae5;
     color: white;
     box-shadow: 0 4px 16px #0002;
 }
-.coach-workspace .sidebar .nav-item.active svg {
+.reference-workspace .sidebar .nav-item.active svg {
     color: white;
 }
-.coach-workspace .nav-dot {
+.reference-workspace .nav-dot {
     background: #d6ccff;
 }
-.coach-workspace .sidebar-bottom {
+.reference-workspace .sidebar-bottom {
     position: relative;
 }
-.coach-workspace .sidebar-note {
+.reference-workspace .sidebar-note {
     display: block;
     background: #222941;
     padding: 16px;
@@ -60,29 +60,29 @@
     border-radius: 14px;
     margin-bottom: 18px;
 }
-.coach-workspace .sidebar-note strong {
+.reference-workspace .sidebar-note strong {
     color: #e8e9f5;
     font-size: 13px;
 }
-.coach-workspace .sidebar-note p {
+.reference-workspace .sidebar-note p {
     line-height: 1.65;
     font-size: 12px;
     margin-top: 7px;
     color: #a0a8c2;
 }
-.coach-workspace .user-block {
+.reference-workspace .user-block {
     border-top: 1px solid #30374e;
     padding-block: 16px 4px;
 }
-.coach-workspace .user-block strong {
+.reference-workspace .user-block strong {
     color: white;
 }
-.coach-workspace .user-block .avatar {
+.reference-workspace .user-block .avatar {
     color: #4b2bad;
     background: #d9cdff;
     border-radius: 14px;
 }
-.coach-workspace .user-menu {
+.reference-workspace .user-menu {
     position: absolute;
     left: calc(100% + 28px);
     bottom: 0;
@@ -96,16 +96,16 @@
     box-shadow: 0 18px 65px #10182a30;
     z-index: 60;
 }
-.coach-workspace .user-menu .nav-item {
+.reference-workspace .user-menu .nav-item {
     color: #41475c;
     font-size: 13px;
 }
-.coach-workspace .user-menu .nav-item:hover,
-.coach-workspace .user-menu .selected {
+.reference-workspace .user-menu .nav-item:hover,
+.reference-workspace .user-menu .selected {
     background: #f0ebff;
     color: #6541df;
 }
-.coach-workspace .user-menu .selected > svg:last-child {
+.reference-workspace .user-menu .selected > svg:last-child {
     margin-left: auto;
 }
 .menu-heading {
@@ -117,10 +117,10 @@
     letter-spacing: 1.5px;
     text-transform: uppercase;
 }
-.coach-workspace .sidebar-bottom > .logout {
+.reference-workspace .sidebar-bottom > .logout {
     display: none;
 }
-.coach-workspace .topbar {
+.reference-workspace .topbar {
     background: #ffffffd9;
     border-color: var(--border);
 }
@@ -134,84 +134,84 @@
 .topbar-crumb strong {
     color: #24283e;
 }
-.coach-workspace .avatar.small {
+.reference-workspace .avatar.small {
     color: var(--blue);
     background: #eee8ff;
     border-radius: 12px;
 }
-.coach-workspace .workspace main {
+.reference-workspace .workspace main {
     max-width: 1760px;
     padding: 32px 40px 48px;
 }
-.coach-workspace .page-header h1,
-.coach-workspace .settings-page-title h1 {
+.reference-workspace .page-header h1,
+.reference-workspace .settings-page-title h1 {
     font-size: 29px;
     letter-spacing: -1px;
 }
-.coach-workspace .eyebrow {
+.reference-workspace .eyebrow {
     font-weight: 750;
     color: #797e94;
     letter-spacing: 1.3px;
 }
-.coach-workspace .page-header p {
+.reference-workspace .page-header p {
     font-size: 14px;
     color: var(--muted);
     line-height: 1.6;
 }
-.coach-workspace .panel {
+.reference-workspace .panel {
     border-radius: 16px;
     box-shadow: 0 3px 10px #29214504;
 }
-.coach-workspace .btn {
+.reference-workspace .btn {
     border-radius: 10px;
     min-height: 42px;
 }
-.coach-workspace .btn-primary {
+.reference-workspace .btn-primary {
     background: linear-gradient(110deg, #7652ef, #5b32df);
     border-color: #6541df;
     box-shadow: 0 3px 8px #6541df18;
     color: white;
 }
-.coach-workspace .btn-primary:hover {
+.reference-workspace .btn-primary:hover {
     background: #5630cc;
 }
-.coach-workspace .btn-secondary {
+.reference-workspace .btn-secondary {
     background: #fff;
     color: #34374e;
     border-color: #e3e2ed;
     box-shadow: 0 1px 3px #25203e06;
 }
-.coach-workspace .btn-secondary:hover {
+.reference-workspace .btn-secondary:hover {
     color: var(--blue);
     border-color: #bfb0f0;
 }
-.coach-workspace input:focus,
-.coach-workspace textarea:focus,
-.coach-workspace select:focus {
+.reference-workspace input:focus,
+.reference-workspace textarea:focus,
+.reference-workspace select:focus {
     border-color: #9879ed;
     box-shadow: 0 0 0 3px #7850e714;
 }
-.coach-workspace input[type="checkbox"],
-.coach-workspace input[type="radio"] {
+.reference-workspace input[type="checkbox"],
+.reference-workspace input[type="radio"] {
     accent-color: var(--blue);
 }
-.coach-workspace .badge.planned,
-.coach-workspace .badge.active {
+.reference-workspace .badge.planned,
+.reference-workspace .badge.active {
     color: #6541c9;
     background: #f0ebff;
 }
-.coach-workspace .badge.completed {
+.reference-workspace .badge.completed {
     color: #197454;
     background: #def8e9;
 }
-.coach-workspace .coach-card {
+.reference-workspace .coach-card {
     padding: 24px;
 }
-.coach-workspace .coach-card h2 {
+.reference-workspace .coach-card h2 {
     color: #1b2038;
     font-size: 17px;
 }
-.coach-workspace .coach-card-title a {
+.reference-workspace .coach-card-title a {
     color: #6541c9;
     font-weight: 650;
 }
@@ -254,51 +254,51 @@
 .coach-focus-banner .btn {
     flex-shrink: 0;
 }
-.coach-workspace .coach-stat {
+.reference-workspace .coach-stat {
     padding: 22px;
 }
-.coach-workspace .coach-stat > strong {
+.reference-workspace .coach-stat > strong {
     font-size: 32px;
     color: #20213c;
 }
-.coach-workspace .coach-stat > small {
+.reference-workspace .coach-stat > small {
     display: block;
     color: var(--muted);
     font-size: 12px;
     line-height: 1.5;
     margin-top: 3px;
 }
-.coach-workspace .stat-icon {
+.reference-workspace .stat-icon {
     border-radius: 12px;
     width: 42px;
     height: 42px;
 }
-.coach-workspace .stat-icon.purple {
+.reference-workspace .stat-icon.purple {
     background: #eee8ff;
     color: #7652df;
 }
-.coach-workspace .coach-panel-scroll {
+.reference-workspace .coach-panel-scroll {
     height: 340px;
     overscroll-behavior: contain;
     scrollbar-width: thin;
 }
-.coach-workspace .coach-session {
+.reference-workspace .coach-session {
     gap: 14px;
     padding: 15px 0;
 }
-.coach-workspace .coach-session .training-thumbnail {
+.reference-workspace .coach-session .training-thumbnail {
     width: 64px;
     height: 54px;
     flex: 0 0 64px;
     border-radius: 10px;
 }
-.coach-workspace .coach-session-copy > .thumbnail-identity {
+.reference-workspace .coach-session-copy > .thumbnail-identity {
     margin: 6px 0;
 }
-.coach-workspace .coach-session-copy strong {
+.reference-workspace .coach-session-copy strong {
     font-size: 14px;
 }
-.coach-workspace .person-avatar {
+.reference-workspace .person-avatar {
     border-radius: 13px;
 }
 #priority-inbox {
@@ -430,13 +430,13 @@
     border-left: 1px solid #dcdbe9;
     margin-inline: 12px;
 }
-.coach-workspace .trainee-filters,
-.coach-workspace .subscription-counts {
+.reference-workspace .trainee-filters,
+.reference-workspace .subscription-counts {
     gap: 8px;
     margin-bottom: 18px;
 }
-.coach-workspace .trainee-filters button,
-.coach-workspace .subscription-counts button {
+.reference-workspace .trainee-filters button,
+.reference-workspace .subscription-counts button {
     background: #fff;
     border: 1px solid #e3e2ef;
     border-radius: 10px;
@@ -444,18 +444,18 @@
     box-shadow: 0 2px 5px #23213904;
     color: #4c5069;
 }
-.coach-workspace .trainee-filters button[aria-pressed="true"],
-.coach-workspace .subscription-counts button.active {
+.reference-workspace .trainee-filters button[aria-pressed="true"],
+.reference-workspace .subscription-counts button.active {
     background: #ece6fc;
     color: #5935c5;
     border-color: #d7caf8;
 }
-.coach-workspace .trainee-filters button span,
-.coach-workspace .subscription-counts button span {
+.reference-workspace .trainee-filters button span,
+.reference-workspace .subscription-counts button span {
     background: transparent;
     padding: 0 3px;
 }
-.coach-workspace .live-filter-bar {
+.reference-workspace .live-filter-bar {
     background: transparent;
     box-shadow: none;
     border: 0;
@@ -463,22 +463,22 @@
     gap: 16px;
     margin-bottom: 18px;
 }
-.coach-workspace .trainee-table table,
-.coach-workspace .subscription-table {
+.reference-workspace .trainee-table table,
+.reference-workspace .subscription-table {
     font-size: 13px;
 }
-.coach-workspace .trainee-table th,
-.coach-workspace .subscription-table th {
+.reference-workspace .trainee-table th,
+.reference-workspace .subscription-table th {
     background: #faf9fd;
 }
-.coach-workspace .trainee-table tbody th {
+.reference-workspace .trainee-table tbody th {
     background: #fff;
 }
-.coach-workspace .trainee-table td,
-.coach-workspace .trainee-table th {
+.reference-workspace .trainee-table td,
+.reference-workspace .trainee-table th {
     padding: 16px;
 }
-.coach-workspace .roster-progress {
+.reference-workspace .roster-progress {
     height: 7px;
 }
 .roster-states {
@@ -526,35 +526,38 @@
     color: var(--blue);
     background: #eee8ff;
 }
-.coach-workspace .program-library {
+.reference-workspace .program-library {
     gap: 16px;
 }
-.coach-workspace .program-library .coach-training-row {
+.reference-workspace .program-library .coach-training-row {
     margin: 0;
     padding: 22px;
 }
-.coach-workspace .program-library .coach-training-row > .training-thumbnail {
+.reference-workspace
+    .program-library
+    .coach-training-row
+    > .training-thumbnail {
     width: 88px;
     height: 78px;
     flex-basis: 88px;
     border-radius: 15px;
 }
-.coach-workspace .program-library .coach-row-copy > .badge {
+.reference-workspace .program-library .coach-row-copy > .badge {
     margin-bottom: 8px;
 }
-.coach-workspace .program-library .coach-row-copy small {
+.reference-workspace .program-library .coach-row-copy small {
     color: #51596f;
 }
-.coach-workspace .program-library.grid-view {
+.reference-workspace .program-library.grid-view {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.coach-workspace .program-library.grid-view .coach-training-row {
+.reference-workspace .program-library.grid-view .coach-training-row {
     display: grid;
     grid-template-columns: 88px minmax(0, 1fr);
     gap: 16px;
     align-items: start;
 }
-.coach-workspace .program-library.grid-view .coach-row-actions {
+.reference-workspace .program-library.grid-view .coach-row-actions {
     grid-column: 1/-1;
     justify-content: flex-end;
     border-top: 1px solid var(--border);
@@ -596,27 +599,27 @@
     color: var(--blue);
     border-bottom-color: var(--blue);
 }
-.coach-workspace .subscription-packages[hidden] {
+.reference-workspace .subscription-packages[hidden] {
     display: none;
 }
-.coach-workspace .subscription-packages > h2 {
+.reference-workspace .subscription-packages > h2 {
     margin-bottom: 12px;
 }
-.coach-workspace .subscription-filters {
+.reference-workspace .subscription-filters {
     background: transparent;
     border: 0;
     box-shadow: none;
     padding: 0;
     gap: 16px;
 }
-.coach-workspace .subscription-table th {
+.reference-workspace .subscription-table th {
     border-color: var(--border);
 }
-.coach-workspace .subscription-table td {
+.reference-workspace .subscription-table td {
     padding-block: 15px;
 }
-.coach-workspace .subscription-table tbody tr:hover,
-.coach-workspace .trainee-table tbody tr:hover td {
+.reference-workspace .subscription-table tbody tr:hover,
+.reference-workspace .trainee-table tbody tr:hover td {
     background: #fcfbff;
 }
 .settings-page-title {
@@ -791,7 +794,7 @@
     line-height: 1.7;
     margin-bottom: 20px;
 }
-.coach-workspace .settings-content .notification-grid {
+.reference-workspace .settings-content .notification-grid {
     display: block;
 }
 .settings-notifications .device-panel,
@@ -799,16 +802,16 @@
 .settings-devices .preferences-panel {
     display: none;
 }
-.coach-workspace .notification-toggle {
+.reference-workspace .notification-toggle {
     flex-direction: row-reverse;
     justify-content: space-between;
     padding: 20px 0;
     border-bottom: 1px solid var(--border);
 }
-.coach-workspace .notification-toggle span {
+.reference-workspace .notification-toggle span {
     flex: 1;
 }
-.coach-workspace .notification-toggle input {
+.reference-workspace .notification-toggle input {
     appearance: none;
     width: 42px;
     height: 24px;
@@ -819,7 +822,7 @@
     border: 0;
     cursor: pointer;
 }
-.coach-workspace .notification-toggle input::after {
+.reference-workspace .notification-toggle input::after {
     content: "";
     position: absolute;
     width: 18px;
@@ -830,17 +833,17 @@
     top: 3px;
     box-shadow: 0 1px 3px #0002;
 }
-.coach-workspace .notification-toggle input:checked {
+.reference-workspace .notification-toggle input:checked {
     background: var(--blue);
 }
-.coach-workspace .notification-toggle input:checked::after {
+.reference-workspace .notification-toggle input:checked::after {
     left: 21px;
 }
-.coach-bottom-nav {
+:is(.coach-bottom-nav, .personal-bottom-nav) {
     display: none;
 }
 @media (max-width: 1280px) {
-    .coach-workspace .workspace main {
+    .reference-workspace .workspace main {
         padding: 28px;
     }
     .settings-layout {
@@ -861,7 +864,7 @@
     }
 }
 @media (max-width: 1000px) {
-    .coach-workspace .program-library.grid-view {
+    .reference-workspace .program-library.grid-view {
         grid-template-columns: 1fr;
     }
     .settings-layout {
@@ -881,42 +884,42 @@
     }
 }
 @media (max-width: 760px) {
-    .coach-workspace .mobile-top {
+    .reference-workspace .mobile-top {
         background: #fff;
         border-bottom: 1px solid var(--border);
     }
-    .coach-workspace .mobile-top .brand {
+    .reference-workspace .mobile-top .brand {
         color: #24283e;
     }
-    .coach-workspace .mobile-top .brand svg,
-    .coach-workspace .mobile-top .icon-btn {
+    .reference-workspace .mobile-top .brand svg,
+    .reference-workspace .mobile-top .icon-btn {
         color: var(--blue);
     }
-    .coach-workspace .workspace main {
+    .reference-workspace .workspace main {
         padding: 22px 18px 96px;
     }
-    .coach-workspace .sidebar {
+    .reference-workspace .sidebar {
         overflow-y: auto;
         overscroll-behavior: contain;
         bottom: 70px;
     }
-    .coach-workspace .sidebar-note {
+    .reference-workspace .sidebar-note {
         display: none;
     }
-    .coach-workspace .user-menu {
+    .reference-workspace .user-menu {
         position: static;
         width: 100%;
         margin-top: 12px;
         max-height: none;
         padding: 6px;
     }
-    .coach-workspace .user-menu .nav-item {
+    .reference-workspace .user-menu .nav-item {
         font-size: 12px;
     }
-    .coach-workspace .sidebar .user-block {
+    .reference-workspace .sidebar .user-block {
         margin-top: 16px;
     }
-    .coach-bottom-nav {
+    :is(.coach-bottom-nav, .personal-bottom-nav) {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
         position: fixed;
@@ -929,7 +932,7 @@
         padding: 7px 8px max(8px, env(safe-area-inset-bottom));
         z-index: 25;
     }
-    .coach-bottom-nav a {
+    :is(.coach-bottom-nav, .personal-bottom-nav) a {
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -941,16 +944,16 @@
         color: #787d93;
         min-height: 50px;
     }
-    .coach-bottom-nav a.active {
+    :is(.coach-bottom-nav, .personal-bottom-nav) a.active {
         background: #eee8ff;
         color: #6541df;
         font-weight: 700;
     }
-    .coach-workspace .page-header h1,
-    .coach-workspace .settings-page-title h1 {
+    .reference-workspace .page-header h1,
+    .reference-workspace .settings-page-title h1 {
         font-size: 26px;
     }
-    .coach-workspace .page-header p {
+    .reference-workspace .page-header p {
         font-size: 13px;
     }
     .coach-focus-banner {
@@ -967,29 +970,29 @@
     .coach-focus-banner .btn {
         width: 100%;
     }
-    .coach-workspace .coach-card {
+    .reference-workspace .coach-card {
         padding: 19px;
     }
-    .coach-workspace .coach-stat {
+    .reference-workspace .coach-stat {
         padding: 16px;
     }
-    .coach-workspace .coach-stat > strong {
+    .reference-workspace .coach-stat > strong {
         font-size: 28px;
     }
-    .coach-workspace .coach-stat > small {
+    .reference-workspace .coach-stat > small {
         font-size: 11px;
     }
-    .coach-workspace .stat-icon {
+    .reference-workspace .stat-icon {
         width: 30px;
         height: 30px;
     }
-    .coach-workspace .coach-panel-scroll {
+    .reference-workspace .coach-panel-scroll {
         height: 320px;
     }
-    .coach-workspace .coach-session {
+    .reference-workspace .coach-session {
         flex-wrap: wrap;
     }
-    .coach-workspace .coach-session-copy {
+    .reference-workspace .coach-session-copy {
         flex: 1;
         min-width: 120px;
     }
@@ -1072,7 +1075,7 @@
     .settings-content .profile-panel {
         padding: 20px;
     }
-    .coach-workspace .app-footer {
+    .reference-workspace .app-footer {
         padding-bottom: 90px;
     }
     .directory-tabs {
@@ -1083,24 +1086,24 @@
     }
 }
 @media (max-width: 430px) {
-    .coach-workspace .workspace main {
+    .reference-workspace .workspace main {
         padding-inline: 12px;
     }
-    .coach-workspace .coach-stats {
+    .reference-workspace .coach-stats {
         gap: 10px;
     }
-    .coach-workspace .coach-stat .metric-label {
+    .reference-workspace .coach-stat .metric-label {
         font-size: 11px;
         gap: 6px;
     }
-    .coach-workspace .program-library .coach-training-row {
+    .reference-workspace .program-library .coach-training-row {
         padding: 17px;
     }
-    .coach-workspace .program-library.grid-view .coach-training-row {
+    .reference-workspace .program-library.grid-view .coach-training-row {
         grid-template-columns: 66px minmax(0, 1fr);
         gap: 12px;
     }
-    .coach-workspace
+    .reference-workspace
         .program-library
         .coach-training-row
         > .training-thumbnail {
@@ -1108,10 +1111,10 @@
         height: 62px;
         flex-basis: 66px;
     }
-    .coach-workspace .program-library .coach-row-copy h3 {
+    .reference-workspace .program-library .coach-row-copy h3 {
         font-size: 16px;
     }
-    .coach-workspace .coach-card-title {
+    .reference-workspace .coach-card-title {
         flex-wrap: wrap;
     }
     .roster-summary > span {
@@ -1119,58 +1122,58 @@
     }
 }
 @media (prefers-reduced-motion: reduce) {
-    .coach-workspace * {
+    .reference-workspace * {
         scroll-behavior: auto;
     }
 }
 
 /* Keep labels intact and compact without squeezing the roster. */
-.coach-workspace .trainee-table .coach-status {
+.reference-workspace .trainee-table .coach-status {
     white-space: nowrap;
 }
-.coach-workspace .trainee-table th:first-child {
+.reference-workspace .trainee-table th:first-child {
     width: 23%;
 }
-.coach-workspace .trainee-table th:nth-child(2) {
+.reference-workspace .trainee-table th:nth-child(2) {
     width: 24%;
 }
-.coach-workspace .trainee-table th:nth-child(3) {
+.reference-workspace .trainee-table th:nth-child(3) {
     width: 12%;
 }
-.coach-workspace .trainee-table th:nth-child(4) {
+.reference-workspace .trainee-table th:nth-child(4) {
     width: 17%;
 }
-.coach-workspace .trainee-table th:nth-child(5) {
+.reference-workspace .trainee-table th:nth-child(5) {
     width: 12%;
 }
-.coach-workspace .trainee-table td,
-.coach-workspace .trainee-table th {
+.reference-workspace .trainee-table td,
+.reference-workspace .trainee-table th {
     padding-block: 14px;
 }
-.coach-workspace .roster-progress {
+.reference-workspace .roster-progress {
     appearance: none;
     border: 0;
     border-radius: 8px;
     background: #edebf6;
 }
-.coach-workspace .roster-progress::-webkit-progress-bar {
+.reference-workspace .roster-progress::-webkit-progress-bar {
     background: #edebf6;
     border-radius: 8px;
 }
-.coach-workspace .roster-progress::-webkit-progress-value,
-.coach-workspace .roster-progress::-moz-progress-bar {
+.reference-workspace .roster-progress::-webkit-progress-value,
+.reference-workspace .roster-progress::-moz-progress-bar {
     background: #2bbd94;
     border-radius: 8px;
 }
-.coach-workspace .notification-toggle input[role="switch"] {
+.reference-workspace .notification-toggle input[role="switch"] {
     min-height: 24px;
     max-height: 24px;
     align-self: flex-start;
 }
-.coach-workspace .trainee-more > summary {
+.reference-workspace .trainee-more > summary {
     list-style: none;
 }
-.coach-workspace .trainee-more > summary::-webkit-details-marker {
+.reference-workspace .trainee-more > summary::-webkit-details-marker {
     display: none;
 }
 @media (min-width: 761px) {
@@ -1188,10 +1191,10 @@
     }
 }
 @media (max-height: 740px) and (min-width: 761px) {
-    .coach-workspace .sidebar-note {
+    .reference-workspace .sidebar-note {
         display: none;
     }
-    .coach-workspace .sidebar > nav {
+    .reference-workspace .sidebar > nav {
         overflow-y: auto;
         min-height: 0;
         flex-shrink: 1;
@@ -1199,46 +1202,46 @@
 }
 
 /* Reference composition: compact, deliberate rows instead of oversized legacy cards. */
-.coach-workspace {
+.reference-workspace {
     --blue: #623deb;
     --muted: #757b8c;
     --border: #e5e6ef;
     color: #172035;
 }
-.coach-workspace .workspace {
+.reference-workspace .workspace {
     background: #f5f6fc;
 }
-.coach-workspace .workspace main {
+.reference-workspace .workspace main {
     padding: 30px 36px 40px;
 }
-.coach-workspace .page-header h1 {
+.reference-workspace .page-header h1 {
     font-size: 32px;
     font-weight: 800;
     letter-spacing: -1.2px;
 }
-.coach-workspace .page-header {
+.reference-workspace .page-header {
     margin-bottom: 20px;
 }
-.coach-workspace .page-header p {
+.reference-workspace .page-header p {
     margin-top: 5px;
 }
-.coach-workspace .eyebrow {
+.reference-workspace .eyebrow {
     font-size: 11px;
     letter-spacing: 0.85px;
 }
-.coach-workspace .btn {
+.reference-workspace .btn {
     font-size: 13px;
     font-weight: 750;
     min-height: 42px;
 }
-.coach-workspace .btn-primary {
+.reference-workspace .btn-primary {
     background: linear-gradient(110deg, #7550f5, #5932ed);
     border: 1px solid #6842ee;
 }
-.coach-workspace .panel {
+.reference-workspace .panel {
     box-shadow: 0 3px 9px #25335c05;
 }
-.coach-workspace main > .breadcrumbs {
+.reference-workspace main > .breadcrumbs {
     display: none;
 }
 .topbar-team {
@@ -1253,22 +1256,22 @@
     font-weight: 700;
     color: #30374b;
 }
-.coach-workspace .topbar {
+.reference-workspace .topbar {
     height: 62px;
     padding-inline: 32px;
 }
-.coach-workspace .topbar-right {
+.reference-workspace .topbar-right {
     gap: 22px;
 }
 .mobile-switch-heading {
     display: none;
 }
-.coach-workspace .user-menu {
+.reference-workspace .user-menu {
     width: 340px;
     padding: 18px;
     border-radius: 24px;
 }
-.coach-workspace .user-menu:before {
+.reference-workspace .user-menu:before {
     content: "";
     position: absolute;
     left: -11px;
@@ -1277,17 +1280,17 @@
     border-top: 12px solid transparent;
     border-bottom: 12px solid transparent;
 }
-.coach-workspace .user-menu .nav-item {
+.reference-workspace .user-menu .nav-item {
     font-size: 14px;
     padding: 14px 12px;
     gap: 15px;
 }
-.coach-workspace .user-menu .menu-heading:not(:first-child) {
+.reference-workspace .user-menu .menu-heading:not(:first-child) {
     border-top: 1px solid var(--border);
     margin-top: 10px;
     padding-top: 20px;
 }
-.coach-workspace .user-menu .nav-item:last-child {
+.reference-workspace .user-menu .nav-item:last-child {
     color: #da5878;
 }
 .reference-overview .greeting-mark {
@@ -1581,48 +1584,48 @@
 }
 
 /* Search and filter rows match the reference; optional controls remain reachable. */
-.coach-workspace .roster-search-bar,
-.coach-workspace .program-search-bar,
-.coach-workspace .reference-subscription-filters {
+.reference-workspace .roster-search-bar,
+.reference-workspace .program-search-bar,
+.reference-workspace .reference-subscription-filters {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     margin: 12px 0 16px;
 }
-.coach-workspace .roster-search-bar > .field:first-child,
-.coach-workspace .reference-subscription-filters > .field:first-child {
+.reference-workspace .roster-search-bar > .field:first-child,
+.reference-workspace .reference-subscription-filters > .field:first-child {
     flex: 1;
     max-width: 550px;
     min-width: 220px;
     margin-right: auto;
 }
-.coach-workspace .program-search-bar > .field:first-child {
+.reference-workspace .program-search-bar > .field:first-child {
     flex: 1;
     max-width: 700px;
     margin-right: auto;
     min-width: 220px;
 }
-.coach-workspace .roster-search-bar > .field:nth-child(2) {
+.reference-workspace .roster-search-bar > .field:nth-child(2) {
     flex: 0 1 190px;
 }
-.coach-workspace .roster-search-bar > .field > .field-label,
-.coach-workspace .program-search-bar > .field > .field-label,
-.coach-workspace .reference-subscription-filters > .field > .field-label {
+.reference-workspace .roster-search-bar > .field > .field-label,
+.reference-workspace .program-search-bar > .field > .field-label,
+.reference-workspace .reference-subscription-filters > .field > .field-label {
     position: absolute;
     width: 1px;
     height: 1px;
     overflow: hidden;
     clip-path: inset(50%);
 }
-.coach-workspace .search-input {
+.reference-workspace .search-input {
     width: 100%;
 }
-.coach-workspace .search-input input {
+.reference-workspace .search-input input {
     height: 44px;
     padding-left: 42px;
 }
-.coach-workspace .directory-advanced-filters {
+.reference-workspace .directory-advanced-filters {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
@@ -1633,66 +1636,66 @@
     border-radius: 12px;
     align-items: end;
 }
-.coach-workspace .directory-advanced-filters[hidden] {
+.reference-workspace .directory-advanced-filters[hidden] {
     display: none;
 }
 .directory-advanced-filters .field {
     flex: 1;
     min-width: 150px;
 }
-.coach-workspace .library-view-bar {
+.reference-workspace .library-view-bar {
     margin: 0 0 12px;
     font-size: 11px;
 }
-.coach-workspace .trainee-filters button,
-.coach-workspace .subscription-counts button {
+.reference-workspace .trainee-filters button,
+.reference-workspace .subscription-counts button {
     padding: 9px 14px;
     font-size: 12px;
     font-weight: 750;
     min-height: 38px;
 }
-.coach-workspace .trainee-filters,
-.coach-workspace .subscription-counts {
+.reference-workspace .trainee-filters,
+.reference-workspace .subscription-counts {
     margin-bottom: 12px;
 }
-.coach-workspace .trainee-table table {
+.reference-workspace .trainee-table table {
     table-layout: auto;
 }
-.coach-workspace .trainee-table th,
-.coach-workspace .trainee-table td {
+.reference-workspace .trainee-table th,
+.reference-workspace .trainee-table td {
     padding: 13px 18px;
 }
-.coach-workspace .trainee-table thead th {
+.reference-workspace .trainee-table thead th {
     font-size: 11px;
     color: #747b8e;
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
-.coach-workspace .trainee-table .trainee-cell {
+.reference-workspace .trainee-table .trainee-cell {
     gap: 3px;
 }
-.coach-workspace .trainee-table .trainee-cell > span:first-child {
+.reference-workspace .trainee-table .trainee-cell > span:first-child {
     font-weight: 750;
     font-size: 13px;
 }
-.coach-workspace .trainee-table .trainee-cell small {
+.reference-workspace .trainee-table .trainee-cell small {
     font-size: 12px;
 }
-.coach-workspace .trainee-table .btn {
+.reference-workspace .trainee-table .btn {
     min-height: 34px;
     font-size: 12px;
     padding: 5px 14px;
 }
-.coach-workspace .trainee-table th:first-child {
+.reference-workspace .trainee-table th:first-child {
     width: 21%;
 }
-.coach-workspace .trainee-table th:nth-child(2) {
+.reference-workspace .trainee-table th:nth-child(2) {
     width: 23%;
 }
-.coach-workspace .trainee-table th:nth-child(3) {
+.reference-workspace .trainee-table th:nth-child(3) {
     width: 15%;
 }
-.coach-workspace .trainee-table th:nth-child(4) {
+.reference-workspace .trainee-table th:nth-child(4) {
     width: 20%;
 }
 .roster-week {
@@ -1703,7 +1706,7 @@
     gap: 12px;
     align-items: center;
 }
-.coach-workspace .roster-week progress {
+.reference-workspace .roster-week progress {
     flex: 1;
     width: 78px;
     margin: 0;
@@ -1727,20 +1730,20 @@
     color: var(--muted);
     font-size: 12px;
 }
-.coach-workspace .person-avatar {
+.reference-workspace .person-avatar {
     border-radius: 13px;
 }
-.coach-workspace .roster-attention {
+.reference-workspace .roster-attention {
     padding: 3px 7px;
     line-height: 1.2;
 }
-.coach-workspace .coach-status {
+.reference-workspace .coach-status {
     border-radius: 7px;
 }
 
 /* Two-column library cards with a single, aligned statistics/action footer. */
-.coach-workspace .program-library.grid-view .reference-program-card,
-.coach-workspace .program-library.list-view .reference-program-card {
+.reference-workspace .program-library.grid-view .reference-program-card,
+.reference-workspace .program-library.list-view .reference-program-card {
     display: flex;
     flex-direction: column;
     padding: 18px 20px 12px;
@@ -1801,12 +1804,12 @@
     background: #fff0cf;
     color: #9f7219;
 }
-.coach-workspace .reference-program-card .coach-row-copy h3 {
+.reference-workspace .reference-program-card .coach-row-copy h3 {
     font-size: 15px;
     margin: 0 0 5px;
     line-height: 1.35;
 }
-.coach-workspace .reference-program-card .coach-row-description {
+.reference-workspace .reference-program-card .coach-row-description {
     font-size: 12px;
     margin: 0;
     color: var(--muted);
@@ -1839,13 +1842,13 @@
     font-weight: 800;
     color: #293149;
 }
-.coach-workspace .program-library.grid-view .coach-row-actions {
+.reference-workspace .program-library.grid-view .coach-row-actions {
     border: 0;
     padding: 0;
     display: flex;
     gap: 7px;
 }
-.coach-workspace .program-library .reference-program-card .btn {
+.reference-workspace .program-library .reference-program-card .btn {
     min-height: 34px;
     padding: 6px 12px;
     font-size: 12px;
@@ -1856,14 +1859,14 @@
 .reference-program-card .trainee-more summary {
     padding: 6px 0;
 }
-.coach-workspace .program-library {
+.reference-workspace .program-library {
     margin-top: 0;
 }
-.coach-workspace .program-library.list-view .program-card-main {
+.reference-workspace .program-library.list-view .program-card-main {
     flex: 1;
 }
 @media (min-width: 1200px) {
-    .coach-workspace .program-library.list-view .reference-program-card {
+    .reference-workspace .program-library.list-view .reference-program-card {
         flex-direction: row;
         align-items: center;
         gap: 24px;
@@ -1874,45 +1877,48 @@
         margin: 0;
     }
 }
-.coach-workspace .subscription-table {
+.reference-workspace .subscription-table {
     min-width: 0;
     table-layout: auto;
 }
-.coach-workspace .subscription-table thead th {
+.reference-workspace .subscription-table thead th {
     font-size: 11px;
     color: #737b8d;
     letter-spacing: 0.4px;
 }
-.coach-workspace .subscription-table td {
+.reference-workspace .subscription-table td {
     padding: 13px 18px;
     font-size: 13px;
 }
-.coach-workspace .subscription-table .thumbnail-identity .training-thumbnail {
+.reference-workspace
+    .subscription-table
+    .thumbnail-identity
+    .training-thumbnail {
     display: none;
 }
-.coach-workspace .subscription-table .thumbnail-identity > a {
+.reference-workspace .subscription-table .thumbnail-identity > a {
     display: block;
     font-weight: 750;
 }
-.coach-workspace .subscription-table .thumbnail-identity > a > svg {
+.reference-workspace .subscription-table .thumbnail-identity > a > svg {
     display: none;
 }
-.coach-workspace .subscription-table small {
+.reference-workspace .subscription-table small {
     font-weight: 400;
     font-size: 11px;
     color: var(--muted);
 }
-.coach-workspace .subscription-table .coverage-start .subscription-date {
+.reference-workspace .subscription-table .coverage-start .subscription-date {
     display: inline;
     font-weight: 400;
     font-size: 11px;
 }
-.coach-workspace .subscription-actions {
+.reference-workspace .subscription-actions {
     flex-wrap: nowrap;
     gap: 6px;
     align-items: center;
 }
-.coach-workspace .subscription-actions .btn {
+.reference-workspace .subscription-actions .btn {
     min-height: 35px;
     padding: 7px 12px;
     font-size: 12px;
@@ -1924,10 +1930,10 @@
     overflow: hidden;
     clip-path: inset(50%);
 }
-.coach-workspace .subscription-table-wrap {
+.reference-workspace .subscription-table-wrap {
     overflow: visible;
 }
-.coach-workspace .subscription-results-footer {
+.reference-workspace .subscription-results-footer {
     padding: 14px 20px;
     margin-top: -1px;
     border: 1px solid var(--border);
@@ -2363,77 +2369,77 @@
     }
 }
 @media (max-width: 760px) {
-    .coach-workspace {
+    .reference-workspace {
         --blue: #0961f7;
     }
-    .coach-workspace .workspace main {
+    .reference-workspace .workspace main {
         padding: 22px 18px 95px;
     }
-    .coach-workspace .btn-primary {
+    .reference-workspace .btn-primary {
         background: #0961f7;
         border-color: #0961f7;
     }
-    .coach-workspace .mobile-top {
+    .reference-workspace .mobile-top {
         gap: 16px;
         padding: 14px 18px;
         justify-content: space-between;
     }
-    .coach-workspace .mobile-top .brand {
+    .reference-workspace .mobile-top .brand {
         gap: 10px;
         font-size: 16px;
         line-height: 1.2;
         margin: auto;
     }
-    .coach-workspace .mobile-top .brand-second {
+    .reference-workspace .mobile-top .brand-second {
         font-size: 13px;
         color: #34435c;
     }
-    .coach-workspace .mobile-top .brand svg {
+    .reference-workspace .mobile-top .brand svg {
         color: white;
     }
-    .coach-workspace .brand-mark {
+    .reference-workspace .brand-mark {
         background: #0961f7;
         width: 40px;
         height: 40px;
         border-radius: 11px;
     }
-    .coach-workspace .mobile-top .icon-btn {
+    .reference-workspace .mobile-top .icon-btn {
         color: #26354e;
     }
-    .coach-workspace .sidebar {
+    .reference-workspace .sidebar {
         background: white;
         color: #24334c;
         border-right: 1px solid var(--border);
         bottom: 0;
         z-index: 45;
     }
-    .coach-workspace .sidebar .brand,
-    .coach-workspace .sidebar .user-block strong {
+    .reference-workspace .sidebar .brand,
+    .reference-workspace .sidebar .user-block strong {
         color: #17243e;
     }
-    .coach-workspace .sidebar .nav-item {
+    .reference-workspace .sidebar .nav-item {
         color: #26354b;
     }
-    .coach-workspace .sidebar .nav-item.active {
+    .reference-workspace .sidebar .nav-item.active {
         background: #e6eeff;
         color: #0961f7;
         box-shadow: none;
     }
-    .coach-workspace .sidebar .nav-item.active svg {
+    .reference-workspace .sidebar .nav-item.active svg {
         color: #0961f7;
     }
-    .coach-workspace .user-block {
+    .reference-workspace .user-block {
         border-color: var(--border);
     }
-    .coach-workspace .user-block .avatar {
+    .reference-workspace .user-block .avatar {
         background: #e7eeff;
         color: #0961f7;
     }
-    .coach-bottom-nav a.active {
+    :is(.coach-bottom-nav, .personal-bottom-nav) a.active {
         background: #e7eeff;
         color: #0961f7;
     }
-    .coach-workspace .user-menu {
+    .reference-workspace .user-menu {
         position: fixed;
         left: 0;
         right: 0;
@@ -2446,7 +2452,7 @@
         margin: 0;
         box-shadow: 0 -20px 100px #0c152866;
     }
-    .coach-workspace .user-menu:before {
+    .reference-workspace .user-menu:before {
         display: none;
     }
     .mobile-switch-heading {
@@ -2455,18 +2461,18 @@
         align-items: center;
         margin-bottom: 15px;
     }
-    .coach-workspace .user-menu > .menu-heading:first-of-type {
+    .reference-workspace .user-menu > .menu-heading:first-of-type {
         display: none;
     }
-    .coach-workspace .user-menu .nav-item {
+    .reference-workspace .user-menu .nav-item {
         font-size: 14px;
         min-height: 52px;
     }
-    .coach-workspace .user-menu .nav-item.selected {
+    .reference-workspace .user-menu .nav-item.selected {
         background: #eaf1ff;
         color: #0961f7;
     }
-    .coach-workspace .page-header h1 {
+    .reference-workspace .page-header h1 {
         font-size: 27px;
     }
     .reference-overview .coach-focus-banner {
@@ -2559,26 +2565,26 @@
     .reference-overview .coach-insights .coach-card {
         min-height: 0;
     }
-    .coach-workspace .roster-search-bar > .field:first-child,
-    .coach-workspace .program-search-bar > .field:first-child,
-    .coach-workspace .reference-subscription-filters > .field:first-child {
+    .reference-workspace .roster-search-bar > .field:first-child,
+    .reference-workspace .program-search-bar > .field:first-child,
+    .reference-workspace .reference-subscription-filters > .field:first-child {
         flex-basis: 100%;
         max-width: none;
     }
-    .coach-workspace .roster-search-bar > .field:nth-child(2) {
+    .reference-workspace .roster-search-bar > .field:nth-child(2) {
         flex: 1;
     }
-    .coach-workspace .directory-advanced-filters {
+    .reference-workspace .directory-advanced-filters {
         padding: 12px;
     }
-    .coach-workspace .directory-advanced-filters .field {
+    .reference-workspace .directory-advanced-filters .field {
         min-width: 100%;
     }
-    .coach-workspace .library-view-bar {
+    .reference-workspace .library-view-bar {
         margin-top: 0;
     }
-    .coach-workspace .program-library.grid-view .reference-program-card,
-    .coach-workspace .program-library.list-view .reference-program-card {
+    .reference-workspace .program-library.grid-view .reference-program-card,
+    .reference-workspace .program-library.list-view .reference-program-card {
         padding: 17px 15px 12px;
     }
     .program-card-main {
@@ -2601,7 +2607,7 @@
         gap: 15px;
         font-size: 10px;
     }
-    .coach-workspace
+    .reference-workspace
         .program-library
         .reference-program-card
         .coach-row-copy
@@ -2612,7 +2618,7 @@
         width: 100%;
         justify-content: flex-end;
     }
-    .coach-workspace .subscription-actions {
+    .reference-workspace .subscription-actions {
         flex-wrap: wrap;
     }
     .subscription-action-label {
@@ -2622,18 +2628,18 @@
         overflow: visible;
         clip-path: none;
     }
-    .coach-workspace .subscription-table td {
+    .reference-workspace .subscription-table td {
         padding: 10px 14px;
     }
-    .coach-workspace .subscription-table-wrap {
+    .reference-workspace .subscription-table-wrap {
         background: none;
         border: 0;
     }
-    .coach-workspace .subscription-results-footer {
+    .reference-workspace .subscription-results-footer {
         border-radius: 12px;
         margin-top: 10px;
     }
-    .coach-workspace
+    .reference-workspace
         .subscription-table
         .thumbnail-identity
         .training-thumbnail {
@@ -2884,7 +2890,7 @@
     }
 }
 @media (max-width: 360px) {
-    .coach-workspace .workspace main {
+    .reference-workspace .workspace main {
         padding-inline: 12px;
     }
     .reference-settings .settings-hero {
@@ -2927,14 +2933,14 @@
 .reference-overview .stat-icon.red svg {
     color: #e37650;
 }
-.coach-workspace .program-library .reference-program-card {
+.reference-workspace .program-library .reference-program-card {
     align-items: stretch;
 }
 .program-card-main,
 .program-card-footer {
     width: 100%;
 }
-.coach-workspace .reference-settings .settings-devices {
+.reference-workspace .reference-settings .settings-devices {
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
@@ -3064,7 +3070,7 @@
     }
 }
 @media (max-width: 760px) {
-    .coach-workspace .reference-settings .settings-devices {
+    .reference-workspace .reference-settings .settings-devices {
         display: flex;
         flex-direction: column-reverse;
     }
@@ -3099,7 +3105,7 @@
     }
 }
 
-.coach-workspace .subscription-table-wrap {
+.reference-workspace .subscription-table-wrap {
     margin-bottom: 0;
 }
 .subscription-table thead th:first-child {

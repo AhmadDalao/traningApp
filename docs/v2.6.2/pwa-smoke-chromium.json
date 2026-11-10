@@ -1,0 +1,28 @@
+{
+  "checks": [
+    "No permission prompt without user action",
+    "Push remains safely disabled and clearly explained",
+    "Real service worker installs and controls the app",
+    "Notification settings fit 320x480",
+    "Notification settings fit 360x800",
+    "Notification settings fit 375x812",
+    "Notification settings fit 390x844",
+    "Notification settings fit 430x900",
+    "Notification settings fit 768x1024",
+    "Notification settings fit 1280x900",
+    "Account preferences persist without enabling delivery",
+    "Preference writes reject missing CSRF tokens",
+    "Cache stores only public assets, never authenticated pages or uploads",
+    "Install manifest is available",
+    "Service worker scope and no-store headers are correct",
+    "Offline notification mutations are disabled",
+    "Offline navigation shows the generic fallback without private data",
+    "Reconnection restores normal authenticated navigation",
+    "Authenticated settings retain private no-store responses",
+    "No browser runtime errors"
+  ],
+  "count": 20,
+  "issues": [],
+  "real_push_delivery": false,
+  "physical_device_tested": false
+}

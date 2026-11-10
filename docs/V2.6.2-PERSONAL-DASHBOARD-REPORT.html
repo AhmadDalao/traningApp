@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Training Planner v2.6.2 — Personal Dashboard</title
+    ><style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #f6f5fc;
+            color: #20213c;
+            font:
+                16px/1.65 system-ui,
+                sans-serif;
+        }
+        main {
+            max-width: 1160px;
+            margin: auto;
+            padding: 40px 24px;
+        }
+        header {
+            background: #29254f;
+            color: #fff;
+            padding: 36px;
+            border-radius: 22px;
+        }
+        h1 {
+            font-size: 36px;
+            line-height: 1.2;
+        }
+        h2 {
+            font-size: 24px;
+            margin-top: 0;
+        }
+        section {
+            background: white;
+            border: 1px solid #e4e3f1;
+            border-radius: 18px;
+            padding: 28px;
+            margin-top: 22px;
+        }
+        a {
+            color: #6243de;
+        }
+        header a {
+            color: #dfd5ff;
+        }
+        .badge {
+            background: #f2e8ff;
+            color: #5932ac;
+            border-radius: 7px;
+            padding: 5px 10px;
+            display: inline-block;
+            font-weight: 700;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e4e3f1;
+            border-radius: 12px;
+        }
+        .mobile {
+            max-width: 390px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td,
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #e4e3f1;
+        }
+        code {
+            overflow-wrap: anywhere;
+        }
+        .scroll {
+            overflow: auto;
+        }
+        @media (max-width: 600px) {
+            main {
+                padding: 20px 12px;
+            }
+            header,
+            section {
+                padding: 22px;
+            }
+            h1 {
+                font-size: 29px;
+            }
+        }
+    </style>
+    <main>
+        <header>
+            <span class="badge" id="release-status"
+                >NOT READY — production verification pending</span
+            >
+            <h1>Personal Dashboard<br />Reference design · v2.6.2</h1>
+            <p>
+                The same navy focus banner, violet desktop accents, blue mobile
+                controls, rounded panels and clear hierarchy as the approved
+                Coach Workspace design.
+            </p>
+            <p>
+                Baseline: v2.6.1 · Scope: Personal Dashboard and its navigation
+                shell.
+            </p>
+        </header>
+        <section>
+            <h2>What changed</h2>
+            <ul>
+                <li>
+                    A personal greeting, date, Create plan and Schedule session
+                    actions.
+                </li>
+                <li>
+                    A prominent workout banner that starts the next session or
+                    resumes the existing active workout.
+                </li>
+                <li>
+                    Four factual metrics: completed training this week, planned
+                    training this week, today’s sessions, and the next seven
+                    days.
+                </li>
+                <li>
+                    Today and Upcoming panels with clear dates, Anytime labels,
+                    status, clickable image previews and existing workout
+                    controls.
+                </li>
+                <li>
+                    Current program cards from the existing lifecycle renderer,
+                    or personal plans when there is no current run.
+                </li>
+                <li>
+                    A larger recent-workout image, History and Progress links,
+                    weekly body-weight check-in and profile completion.
+                </li>
+                <li>
+                    Personal mobile navigation for Overview, Plans, Calendar,
+                    Progress and Settings; the account retains Personal
+                    Workspace identity.
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h2>Design and behavior</h2>
+            <p>
+                Desktop uses a two-column grid; phones use a single column with
+                the same content hierarchy. List panels stay at 390px and scroll
+                internally. The stress check used 100 actual disposable
+                sessions; every item remains reachable. Empty accounts show zero
+                values and useful next actions.
+            </p>
+            <p>
+                The shared reference theme now has a common CSS scope used by
+                Coach Workspace and Personal Dashboard. Other Personal pages
+                retain their current layouts. No routes, database schema,
+                authorization, subscription rules, scheduling rules or workout
+                calculations changed.
+            </p>
+            <p>
+                Today’s count includes training and recovery; weekly
+                completed/planned metrics count training sessions. Program
+                completion uses the existing resolved-week calculation. No
+                invented chart data, new scoring system or fabricated reminder
+                times.
+            </p>
+        </section>
+        <section>
+            <h2>Desktop</h2>
+            <p>
+                Disposable QA data, including a deliberately large schedule for
+                scroll verification.
+            </p>
+            <a href="assets/v2.6.2/chromium-personal-dashboard-1440.png"
+                ><img
+                    src="assets/v2.6.2/chromium-personal-dashboard-1440.png"
+                    alt="Personal dashboard desktop"
+            /></a>
+        </section>
+        <section>
+            <h2>Mobile</h2>
+            <p>Responsive browser testing; no physical-device claim.</p>
+            <a href="assets/v2.6.2/chromium-personal-dashboard-390.png"
+                ><img
+                    class="mobile"
+                    src="assets/v2.6.2/chromium-personal-dashboard-390.png"
+                    alt="Personal dashboard mobile"
+            /></a>
+        </section>
+        <section>
+            <h2>Verification</h2>
+            <div class="scroll">
+                <table>
+                    <tr>
+                        <th>Gate</th>
+                        <th>Result</th>
+                    </tr>
+                    <tr>
+                        <td>Full SQLite suite</td>
+                        <td>650 passed · 13,022 assertions</td>
+                    </tr>
+                    <tr>
+                        <td>Full isolated MySQL suite</td>
+                        <td>650 passed · 13,022 assertions</td>
+                    </tr>
+                    <tr>
+                        <td>JavaScript</td>
+                        <td>38 passed</td>
+                    </tr>
+                    <tr>
+                        <td>Chromium + WebKit</td>
+                        <td>
+                            109 checks passed across dashboard and PWA suites
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Responsive sizes</td>
+                        <td>
+                            320×480, 360, 375, 390, 430, 768, 1024, 1280, 1440
+                            and 1920
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Build and formatting</td>
+                        <td>
+                            Production build, Pint, Prettier, Composer
+                            validation/audit/platform checks and git diff check
+                            passed
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Local cleanup</td>
+                        <td>
+                            4 QA accounts and 30 copied images removed; all 22
+                            original table fingerprints and 44 original media
+                            hashes unchanged
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <p>
+                Browser checks covered Start/Resume, Mark completed, Create
+                plan, Schedule session, body-weight saving, profile completion,
+                image preview, History/Progress navigation, empty states, long
+                lists, mobile navigation and Coach context regression. PWA
+                coverage includes cache privacy, disabled push, preferences,
+                CSRF, offline behavior and reconnect.
+            </p>
+            <p>
+                Existing domain concurrency suites were not rerun for this
+                presentation-only change; no domain implementation changed. Full
+                SQLite and MySQL regression suites passed.
+            </p>
+            <p>
+                Evidence:
+                <a href="v2.6.2/release-checks.json">release gates</a> ·
+                <a href="v2.6.2/browser-commands.json">browser runs</a> ·
+                <a href="v2.6.2/workflow-verification.json">HTTP checks</a> ·
+                <a href="v2.6.2/scale-check.json">100-session check</a> ·
+                <a href="v2.6.2/integrity.json">local integrity</a>.
+            </p>
+        </section>
+        <section>
+            <h2>Release files</h2>
+            <ul>
+                <li>resources/js/Pages/Dashboard.jsx</li>
+                <li>resources/js/Components/AppLayout.jsx</li>
+                <li>resources/js/app.jsx</li>
+                <li>resources/css/coach-refresh.css</li>
+                <li>resources/css/personal-dashboard.css</li>
+                <li>tests/Browser/personal-dashboard.mjs</li>
+            </ul>
+            <p>
+                Immutable tag: <code>v2.6.2</code>. Commit and deployment
+                evidence will be recorded after verification; earlier tags
+                remain unchanged.
+            </p>
+        </section>
+        <section id="deployment">
+            <h2>Production deployment</h2>
+            <p>
+                Pending. The existing Hostinger procedure will verify the live
+                baseline, take fresh database/runtime/uploads/environment
+                backups, deploy the immutable release, exercise disposable live
+                data, clean it, and compare original data/media/environment
+                fingerprints.
+            </p>
+            <p>
+                No migration is required. Existing push configuration will be
+                preserved.
+            </p>
+        </section>
+        <section>
+            <h2>Known limits</h2>
+            <p>
+                The Personal Dashboard is the scope of this update. Full
+                Personal Workspace restyling is not claimed. This release adds
+                no new metrics, billing, notification delivery or offline
+                workout editing. No known blocker or high-severity issue remains
+                in local testing.
+            </p>
+        </section>
+    </main>
+</html>

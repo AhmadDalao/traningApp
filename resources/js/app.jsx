@@ -12,6 +12,7 @@ import "../css/polish.css";
 import "../css/journey.css";
 import "../css/coach-workspace.css";
 import "../css/coach-refresh.css";
+import "../css/personal-dashboard.css";
 import { startPwa } from "./Features/Notifications/pwa";
 import { createInertiaApp } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
