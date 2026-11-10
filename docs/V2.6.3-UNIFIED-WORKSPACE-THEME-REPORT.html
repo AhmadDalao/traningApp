@@ -104,9 +104,7 @@
                 The supplied visual style now applies across the application,
                 with one shared Settings experience.
             </p>
-            <span class="status"
-                >NOT READY — production verification pending</span
-            >
+            <span class="status">READY — DEPLOYED AND VERIFIED</span>
         </header>
         <section>
             <h2>1. Baseline and scope</h2>
@@ -253,7 +251,10 @@
                 image enlargement and focus restoration. Existing PWA checks
                 retain CSRF, cache privacy and offline/reconnection coverage.
                 WebKit focus verification waits for the existing animation-frame
-                focus restoration.
+                focus restoration. Live authentication-page checks wait for
+                React hydration before measuring the layout; that test
+                synchronization change is recorded in the deployment evidence
+                commit, with the application release tag unchanged.
             </p>
         </section>
         <section>
@@ -345,16 +346,58 @@
         <section>
             <h2>9. Production deployment and verification</h2>
             <p>
-                Not deployed at report creation. Deployment is authorized and
-                follows the existing Hostinger release procedure after local
-                gates.
+                Production moved directly from immutable v2.6.2 to v2.6.3.
+                Release commit
+                <code>77a2308b5469f09f51878f1ef8bcd4065e7dcbbf</code>. Main and
+                tag pushed without altering earlier tags.
+            </p>
+            <p>
+                Preflight verified 8,207 baseline runtime hashes, PHP 8.3.36,
+                database 11.8.9-MariaDB-log, and 17 existing migrations. This
+                release adds no migration.
+            </p>
+            <p>
+                Fresh private database, runtime, uploads and environment backups
+                were created and archive integrity checked before writes. Backup
+                time UTC: 2026-11-10T11:44:55+00:00. Runtime archive: 70,374,893
+                bytes; database archive: 54,259 bytes; uploads archive:
+                34,565,564 bytes. Original upload count: 567.
+            </p>
+            <p>
+                Immutable source was built separately with production Composer
+                dependencies and npm ci. The staged archive used verified FTPS
+                and a short-lived authenticated deployment helper; maintenance
+                mode covered the controlled runtime update. Source hashes,
+                public assets and health checks passed.
+            </p>
+            <p>
+                Live browser evidence: 225 checks across Chromium and WebKit,
+                including all audited Personal/Coach pages, real Settings
+                preference saves, active workout start/resume, plan creation,
+                scheduling, body-weight recording, full-image dialogs, mobile
+                navigation, CSRF rejection, service worker, offline fallback and
+                private-cache rules.
+            </p>
+            <p>
+                After disposable QA cleanup: 875 original rows across 22 tables,
+                567 original media files, and the environment remained
+                unchanged. Zero QA accounts, changed/missing original rows,
+                added rows or extra media remain. Runtime hash verification:
+                8,289 files; 1,218 public assets verified by exact hashes or
+                identical CDN-reencoded PNG pixels. Temporary helper/archive
+                removal and public protection checks passed.
+            </p>
+            <p>
+                Push remains disabled; no VAPID credentials, cron or delivery
+                configuration changed. No real push delivery or physical-device
+                testing is claimed.
             </p>
         </section>
         <section>
             <h2>10. Source changes</h2>
             <p>
-                Release tag: <code>v2.6.3</code>. Starting commit:
-                <code>9ceed7b1a8ec606b353a93803023b498cce0868f</code>.
+                Release tag: <code>v2.6.3</code>. Release commit:
+                <code>77a2308b5469f09f51878f1ef8bcd4065e7dcbbf</code>.
             </p>
             <ul>
                 <li><code>app/Http/Controllers/CoachController.php</code></li>
@@ -366,6 +409,9 @@
                 <li><code>app/Services/ProfileSettings.php</code></li>
                 <li><code>app/Services/SettingsPageData.php</code></li>
                 <li><code>docs/V2.6.2-PERSONAL-DASHBOARD-REPORT.html</code></li>
+                <li>
+                    <code>docs/V2.6.3-UNIFIED-WORKSPACE-THEME-REPORT.html</code>
+                </li>
                 <li><code>docs/v2.6.2/deployment.json</code></li>
                 <li><code>docs/v2.6.2/immutable-build.json</code></li>
                 <li><code>docs/v2.6.2/production-browser-runs.json</code></li>
@@ -414,7 +460,7 @@
         </section>
         <section>
             <h2>12. Final status</h2>
-            <p><strong>NOT READY — production verification pending</strong></p>
+            <p><strong>READY — DEPLOYED AND VERIFIED</strong></p>
         </section>
     </main>
 </html>

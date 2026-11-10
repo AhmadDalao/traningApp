@@ -24,6 +24,7 @@ try {
     page.on("pageerror", (e) => errors.push(e.message));
     for (const route of ["/login", "/register"]) {
         await page.goto(base + route);
+        await page.locator(".reference-workspace").waitFor();
         for (const [width, height] of [
             [320, 480],
             [390, 844],
